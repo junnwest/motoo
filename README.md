@@ -9,6 +9,17 @@ and [`design-handoff/`](./design-handoff/) for the visual system.
 > returns, no securities. See §2 of the product doc. A CI-style check
 > (`pnpm check:vocab`) guards against banned investment vocabulary in user-facing copy.
 
+## 📍 Where things stand
+
+- **[docs/PROGRESS.md](./docs/PROGRESS.md)** — living status tracker (what's done, in progress, next)
+- **[docs/DECISIONS.md](./docs/DECISIONS.md)** — decision log with rationale
+- **[docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md)** — deploy runbook + infra state (Vercel + Supabase Seoul)
+
+**Current direction:** Phase 1 (below) is built and verified. Next is a **pivot to a
+mochi-marketplace** — creators issue their own mochi, users buy it and spend it in each
+creator's marketplace. The Trust Report thesis is shelved for the demo (schema kept).
+See PROGRESS.md for the Phase 2 plan.
+
 ## What's built (Phase 1 — landing + core backing flow)
 
 | Route | Page |
