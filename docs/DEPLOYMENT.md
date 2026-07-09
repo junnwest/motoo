@@ -14,8 +14,8 @@ Auto-deploy on push to `main`, preview deploys per PR.
 | --- | --- |
 | Prisma `directUrl` + `vercel.json` (icn1) | ✅ done |
 | Supabase project (Seoul, Data API off) | ✅ created — ref `nrfhwhefabahsfzuyxqu` |
+| Push code to GitHub `junnwest/motoo` | ✅ done (main, via HTTPS remote) |
 | Schema push + seed to Supabase | ⏳ blocked — need DB password |
-| Push code to GitHub `junnwest/motoo` | ⏳ blocked — session git uses a read-only deploy key |
 | Vercel project + env vars + deploy | ⏳ pending |
 | Verify deployed site | ⏳ pending |
 

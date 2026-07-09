@@ -39,8 +39,8 @@ Living status of the build. Update the checkboxes as work lands. See
 - [x] `vercel.json` region `icn1` (co-located with Supabase Seoul)
 - [x] `.env.example` documents Supabase pooled/direct strings
 - [x] Supabase project created (Seoul, Data API off) — ref `nrfhwhefabahsfzuyxqu`
+- [x] Code pushed to GitHub `junnwest/motoo` (main)
 - [ ] Schema pushed + seeded to Supabase _(blocked: need DB password)_
-- [ ] Code pushed to GitHub `junnwest/motoo` _(blocked: session git uses a read-only deploy key — push from local terminal)_
 - [ ] Vercel project imported + env vars set + first deploy
 - [ ] Verify deployed site (landing/explore/profile render, DB connected)
 
