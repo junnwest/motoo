@@ -1,0 +1,334 @@
+{
+  "common": {
+    "brand": "motoo",
+    "login": "로그인",
+    "signup": "회원가입",
+    "search": "검색",
+    "seeAll": "전체 둘러보기",
+    "backThisStreamer": "응원하기",
+    "sendMochi": "모찌 보내기",
+    "loading": "불러오는 중…",
+    "grade": {
+      "Emerging": "성장 중",
+      "Strong": "탄탄함",
+      "Excellent": "뛰어남"
+    }
+  },
+  "nav": {
+    "features": "기능",
+    "trustReport": "트러스트 리포트",
+    "fees": "수수료",
+    "explore": "둘러보기",
+    "whatIsMochi": "모찌란?",
+    "forCreators": "크리에이터용",
+    "forFans": "후원자용",
+    "applyAsCreator": "크리에이터 신청"
+  },
+  "footer": {
+    "fanTagline": "좋아하는 크리에이터를 응원하는 가장 따뜻한 방법.",
+    "creatorTagline": "팬의 응원을 스폰서에게 보여줄 증거로. 크리에이터를 위한 신뢰 플랫폼.",
+    "colProduct": "제품",
+    "colCompany": "회사",
+    "colExplore": "둘러보기",
+    "colSupport": "지원",
+    "colTerms": "약관",
+    "product": {
+      "trustReport": "트러스트 리포트",
+      "creatorDashboard": "크리에이터 대시보드",
+      "mochi": "모찌"
+    },
+    "company": {
+      "about": "소개",
+      "help": "고객센터",
+      "notice": "공지사항"
+    },
+    "explore": {
+      "creators": "크리에이터",
+      "categories": "카테고리",
+      "whatIsMochi": "모찌란?"
+    },
+    "support": {
+      "help": "고객센터",
+      "faq": "자주 묻는 질문",
+      "safety": "안전·신뢰"
+    },
+    "terms": {
+      "tos": "이용약관",
+      "privacy": "개인정보처리방침",
+      "refund": "환불·청약철회"
+    },
+    "businessInfo": "(주)모투 · 통신판매중개업자 · 결제는 각 크리에이터(판매자)와 직접 이루어지며 플랫폼은 자금을 보유하지 않습니다.",
+    "fanDisclosure": "모찌는 응원이며 투자·환급·재판매·수익이 없습니다 · 결제는 각 크리에이터(판매자)와 직접 이루어집니다."
+  },
+  "stub": {
+    "loginTitle": "로그인",
+    "loginBody": "로그인은 곧 제공될 예정이에요. 지금은 데모 후원자로 응원 흐름을 체험할 수 있어요.",
+    "signupTitle": "회원가입",
+    "signupBody": "회원가입은 곧 제공될 예정이에요. 네이버·카카오·구글 로그인이 준비되고 있어요.",
+    "applyTitle": "크리에이터 신청",
+    "applyBody": "크리에이터 신청 폼은 곧 제공될 예정이에요. 심사 후 서브 가맹점 설정과 함께 페이지가 열려요.",
+    "reportTitle": "트러스트 리포트",
+    "reportBody": "공개용 트러스트 리포트 문서는 곧 제공될 예정이에요. 지금은 프로필의 리포트 요약을 확인해 보세요."
+  },
+  "safety": {
+    "ageCheck": "연령 확인 · 성인 인증",
+    "refundPolicy": "환불 · 청약철회 정책",
+    "directPg": "라이선스 PG 직접 결제 · 자금 미보유"
+  },
+  "fanLanding": {
+    "eyebrow": "motoo for fans",
+    "heroTitle": "좋아하는 크리에이터를,",
+    "heroTitleAccent": "모찌",
+    "heroTitleTail": "로 응원하세요.",
+    "heroSubtitle": "마음을 전하고, 단골 팬만의 혜택과 파운딩 배지를 받으세요. 응원할수록 크리에이터와 더 가까워져요.",
+    "searchPlaceholder": "크리에이터·카테고리 검색",
+    "categories": {
+      "all": "전체",
+      "game": "게임",
+      "daily": "일상",
+      "music": "음악",
+      "virtual": "버추얼",
+      "study": "공부"
+    },
+    "trendingEyebrow": "discover",
+    "trendingTitle": "지금 뜨는 크리에이터",
+    "howEyebrow": "how mochi works",
+    "howTitle": "모찌로 응원하는 법",
+    "how": {
+      "step1Title": "크리에이터 찾기",
+      "step1Body": "둘러보기·검색으로 응원하고 싶은 크리에이터를 발견하세요.",
+      "step2Title": "모찌 보내기",
+      "step2Body": "원하는 만큼 모찌를 보내요. 결제는 크리에이터에게 직접 전달됩니다.",
+      "step3Title": "혜택·배지 받기",
+      "step3Body": "백커 월·퍼크·파운딩 배지로 단골 팬이 되어요."
+    },
+    "benefitsTitle": "응원하면 이런 게 좋아요",
+    "benefits": {
+      "messageTitle": "마음을 전해요",
+      "messageBody": "응원 메시지와 함께 모찌를 보내 크리에이터에게 직접 닿아요.",
+      "perksTitle": "단골 혜택을 받아요",
+      "perksBody": "디스코드 채널·추첨·손편지 등 서포터만의 퍼크를 누려요.",
+      "badgeTitle": "파운딩 배지로 인정받아요",
+      "badgeBody": "먼저 응원한 팬일수록 백커 월·리더보드에서 특별한 상태를 가져요.",
+      "dashboardTitle": "내 응원을 한눈에",
+      "dashboardBody": "내 대시보드에서 후원 내역·팔로잉·예정된 퍼크를 모아 봐요."
+    },
+    "spotlightEyebrow": "이주의 크리에이터",
+    "spotlightBackers": "백커",
+    "spotlightMochi": "받은 모찌",
+    "spotlightTrust": "신뢰도",
+    "mochiExplainerTitle": "모찌는 <accent>응원</accent>이에요 — 투자가 아니에요.",
+    "mochiExplainerBody": "환급·재판매·수익이 없어요. 받는 건 크리에이터의 감사, 단골 혜택, 그리고 팬으로서의 상태(배지·순위)예요. 잔액이나 가치로 표시되지 않아요.",
+    "creatorPromptTitle": "크리에이터이신가요?",
+    "creatorPromptBody": "팬의 응원을 스폰서에게 보여줄 트러스트 리포트로 만들어 보세요.",
+    "creatorPromptCta": "크리에이터 페이지로 →",
+    "finalCtaTitle": "오늘, 첫 응원을 보내보세요.",
+    "finalCtaBody": "좋아하는 크리에이터에게 마음을 전하는 가장 따뜻한 방법.",
+    "finalCtaPrimary": "크리에이터 둘러보기 →"
+  },
+  "creatorLanding": {
+    "eyebrow": "motoo for creators",
+    "heroTitle1": "팬의 응원을,",
+    "heroTitle2": "스폰서에게 보여줄",
+    "heroAccent": "증거",
+    "heroTitleTail": "로.",
+    "heroSubtitle": "모찌로 받은 팬들의 응원을 매달 한 장의 <b>트러스트 리포트</b>로. 브랜드·스폰서·MCN에게 진짜 팬덤을 증명하세요.",
+    "ctaApply": "크리에이터로 신청하기",
+    "ctaSample": "샘플 리포트 보기",
+    "trustDirect": "라이선스 PG 직접 결제",
+    "trustNoFunds": "플랫폼은 자금을 보유하지 않음",
+    "proofStrip": "함께하는 크리에이터",
+    "insightEyebrow": "왜 motoo 인가",
+    "insightTitle1": "스폰서는 조회수보다",
+    "insightAccent": "진짜 팬덤",
+    "insightTitle2": "을 봅니다.",
+    "insightBody": "중소 규모 크리에이터일수록 “충성도 높은 팬”이 강점이지만, 그걸 증명할 방법이 없었습니다. motoo는 응원·충성도·실행력을 검증 가능한 리포트로 만들어 드립니다.",
+    "insight": {
+      "card1Title": "숫자는 많지만",
+      "card1Body": "조회수·팔로워만으로는 “이 팬덤이 진짜인지”를 보여주기 어렵습니다.",
+      "card2Title": "후원은 흩어져 있고",
+      "card2Body": "여러 플랫폼에 흩어진 응원 기록은 한눈에 정리되지 않습니다.",
+      "card3Title": "스폰서는 검증을 원합니다",
+      "card3Body": "브랜드·MCN은 협업 전에 신뢰할 수 있는 데이터를 요구합니다."
+    },
+    "howEyebrow": "how it works",
+    "howTitle": "응원이 증거가 되기까지, 세 단계",
+    "how": {
+      "step1Title": "팬이 모찌로 응원해요",
+      "step1Body": "결제는 라이선스 PG를 통해 크리에이터에게 직접. 플랫폼은 자금을 보유하지 않습니다.",
+      "step2Title": "핵심 팬에게 보상해요",
+      "step2Body": "백커 월·파운딩 배지·퍼크로 단골 팬을 챙기면 충성도가 쌓입니다.",
+      "step3Title": "트러스트 리포트로 증명해요",
+      "step3Body": "매달 자동 집계된 신뢰도 리포트를 스폰서에게 공유하세요."
+    },
+    "reportEyebrow": "the trust report",
+    "reportTitle": "한 장으로 끝내는 신뢰 증명",
+    "reportBody": "5개 영역을 매달 자동 집계해 <b>스폰서 준비도</b>로 보여줍니다. 비공개 대시보드로 깊게 관리하고, 공개용으로 깔끔하게 공유하세요.",
+    "reportBullet1": "팬 서포트 · 충성도 · 실행력 · 성장",
+    "reportBullet2": "Emerging / Strong / Excellent 등급",
+    "reportBullet3": "공개·비공개 두 가지 뷰 · 브랜더블",
+    "reportCta": "샘플 리포트 전체 보기 →",
+    "mochiExplainerTitle": "모찌는 <accent>응원</accent>입니다 — 투자가 아닙니다.",
+    "mochiExplainerBody": "환급·재판매·수익이 없습니다. 받는 건 팬의 마음과 신뢰, 그리고 데이터입니다. 결제는 라이선스 PG를 통해 크리에이터에게 직접 전달됩니다.",
+    "featuresTitle": "크리에이터를 위한 모든 도구",
+    "features": {
+      "crmTitle": "팬 CRM",
+      "crmBody": "세그먼트·메모·DM으로 단골 관리",
+      "perkTitle": "퍼크 트래커",
+      "perkBody": "약속한 퍼크의 이행을 체크",
+      "payoutTitle": "정산·출금",
+      "payoutBody": "PG 정산 현황을 투명하게",
+      "analyticsTitle": "분석",
+      "analyticsBody": "성장·유입·시청자 인사이트",
+      "reportTitle": "공유용 리포트",
+      "reportBody": "링크·임베드로 스폰서에게"
+    },
+    "testimonial": "“시청자 수는 작아도 우리 팬덤이 얼마나 단단한지 보여줄 수 있게 됐어요. 트러스트 리포트 덕분에 첫 브랜드 협업을 따냈습니다.”",
+    "testimonialName": "@크리에이터A",
+    "testimonialMeta": "버추얼 · 평균 시청자 120명",
+    "finalCtaTitle": "지금, 당신의 팬덤을 증명하세요.",
+    "finalCtaBody": "신청은 5분, 첫 리포트는 다음 달부터.",
+    "finalCtaFans": "후원자이신가요? ↗"
+  },
+  "explore": {
+    "eyebrow": "discover",
+    "title": "크리에이터 둘러보기",
+    "subtitle": "응원·충성도·실행력으로 정렬됩니다. 모금액 순위는 없습니다.",
+    "searchPlaceholder": "크리에이터·카테고리 검색",
+    "filterCategory": "카테고리",
+    "filterBackers": "백커 수",
+    "filterReadiness": "스폰서 준비도",
+    "sortLabel": "정렬",
+    "sort": {
+      "readiness": "스폰서 준비도순",
+      "backers": "백커 수순",
+      "recurring": "재후원율순",
+      "newest": "최신순"
+    },
+    "backerCountRanges": {
+      "all": "전체",
+      "under50": "50명 미만",
+      "50to200": "50–200명",
+      "over200": "200명 이상"
+    },
+    "readinessNote": "트러스트 신호로 정렬 · 모금액 순위 없음",
+    "cardBackers": "백커",
+    "cardFulfillment": "퍼크 이행",
+    "cardRecurring": "재후원",
+    "empty": {
+      "title": "조건에 맞는 크리에이터가 없어요",
+      "body": "필터를 조정하거나 다른 카테고리를 둘러보세요.",
+      "cta": "필터 초기화"
+    },
+    "resultCount": "{count}명의 크리에이터"
+  },
+  "profile": {
+    "backers": "백커",
+    "recurringRate": "재후원율",
+    "fulfillment": "퍼크 이행",
+    "coreFans": "핵심 팬",
+    "tiersTitle": "응원 티어",
+    "tierPerks": "퍼크",
+    "tierBackers": "{count}명 응원 중",
+    "tierLimit": "{remaining}자리 남음",
+    "tierBackButton": "이 티어로 응원하기",
+    "backerWallTitle": "백커 월",
+    "backerWallSubtitle": "먼저 응원해 준 팬들",
+    "backerWallEmpty": "아직 첫 백커를 기다리고 있어요. 첫 파운딩 배지의 주인공이 되어보세요.",
+    "anonymousBacker": "익명의 후원자",
+    "foundingLabel": "파운딩",
+    "updatesTitle": "최근 소식",
+    "updatesEmpty": "아직 소식이 없어요.",
+    "backerOnly": "백커 전용 소식",
+    "backerOnlyBody": "이 크리에이터를 응원하면 볼 수 있어요.",
+    "reportSummaryTitle": "트러스트 리포트",
+    "reportSummarySubtitle": "스폰서에게 공유되는 신뢰 요약",
+    "viewFullReport": "리포트 전체 보기 →",
+    "noReport": "아직 공개된 트러스트 리포트가 없어요.",
+    "notFoundTitle": "크리에이터를 찾을 수 없어요",
+    "notFoundBody": "주소가 정확한지 확인하거나 둘러보기에서 다시 찾아보세요.",
+    "backToExplore": "둘러보기로 →",
+    "sponsorReadiness": "스폰서 준비도"
+  },
+  "backing": {
+    "title": "{name} 응원하기",
+    "step": "{current} / {total} 단계",
+    "steps": {
+      "age": "연령 확인",
+      "tier": "티어 선택",
+      "display": "표시 방법",
+      "message": "응원 메시지",
+      "pay": "결제"
+    },
+    "ageGate": {
+      "title": "먼저 연령을 확인할게요",
+      "body": "모찌 구매 전 연령 확인이 필요해요. 만 19세 미만은 보호자 동의가 필요하며 결제 한도가 있어요.",
+      "adultLabel": "만 19세 이상입니다",
+      "minorLabel": "만 19세 미만이며, 보호자 동의를 받았습니다",
+      "birthdate": "생년월일",
+      "verify": "확인하고 계속",
+      "minorCapNote": "미성년자는 월 결제 한도가 적용돼요.",
+      "verifiedTitle": "연령 확인 완료",
+      "guardianRequired": "보호자 동의가 확인되지 않았어요. 보호자 동의 후 다시 시도해 주세요."
+    },
+    "tier": {
+      "title": "응원 티어를 선택하세요",
+      "select": "선택",
+      "selected": "선택됨"
+    },
+    "display": {
+      "title": "백커 월에 어떻게 표시할까요?",
+      "public": "실명(닉네임) 공개",
+      "publicNote": "백커 월에 내 닉네임이 보여요.",
+      "nickname": "다른 이름으로",
+      "nicknameNote": "원하는 표시 이름을 직접 정해요.",
+      "nicknamePlaceholder": "표시할 이름",
+      "anonymous": "익명",
+      "anonymousNote": "‘익명의 후원자’로 표시돼요. 파운딩 번호는 그대로 받아요."
+    },
+    "message": {
+      "title": "응원 메시지를 남겨보세요 (선택)",
+      "placeholder": "크리에이터에게 전할 한마디",
+      "skip": "메시지 없이 계속"
+    },
+    "founding": {
+      "previewLabel": "이번에 받게 될 파운딩 번호",
+      "previewNote": "이 번호는 처음 응원한 순서예요. 한 번 정해지면 바뀌지 않아요 — 당신이 받는 진짜 증표입니다.",
+      "existingNote": "이미 파운딩 번호 {number} 를 가지고 있어요. 번호는 그대로 유지돼요."
+    },
+    "wallet": {
+      "balance": "내 모찌 잔액",
+      "need": "이 티어에 필요한 모찌",
+      "short": "{amount} 모찌가 부족해요",
+      "buyMore": "모찌 충전하기",
+      "packTitle": "모찌 충전",
+      "packBonus": "+{bonus} 보너스",
+      "buy": "충전하기",
+      "buying": "충전 중…"
+    },
+    "disclosure": {
+      "title": "결제 전 꼭 확인해 주세요",
+      "line1": "이 응원은 <b>후원이며 투자가 아닙니다.</b>",
+      "line2": "받는 것은 위에 안내된 퍼크와 파운딩 배지이며, <b>어떠한 금전적 보상·환급·수익도 없습니다.</b>",
+      "line3": "결제는 라이선스 PG를 통해 크리에이터에게 직접 전달되며, 모찌는 별도로 명시된 경우를 제외하고 환불되지 않습니다.",
+      "agree": "위 내용을 확인했으며 동의합니다."
+    },
+    "payButton": "{amount} 모찌로 응원하기",
+    "processing": "응원을 기록하는 중…",
+    "success": {
+      "eyebrow": "응원 완료",
+      "title": "당신은 이제 {name}의 파운딩 백커예요",
+      "foundingLabel": "당신의 파운딩 번호",
+      "body": "백커 월에 기록되었어요. 이 번호는 영원히 당신의 것입니다.",
+      "viewWall": "백커 월에서 확인하기 →",
+      "backToProfile": "프로필로 돌아가기"
+    },
+    "errors": {
+      "ageRequired": "먼저 연령 확인을 완료해 주세요.",
+      "tierRequired": "응원할 티어를 선택해 주세요.",
+      "disclosureRequired": "결제 전 안내에 동의해 주세요.",
+      "insufficientMochi": "모찌 잔액이 부족해요. 먼저 충전해 주세요.",
+      "generic": "응원을 기록하지 못했어요. 잠시 후 다시 시도해 주세요."
+    }
+  }
+}

@@ -1,0 +1,350 @@
+import { PrismaClient, BackingDisplay } from "@prisma/client";
+import { computeGrades, type TrustMetrics } from "../src/lib/grades";
+import { hashPassword } from "../src/lib/password";
+import { MOCHI_TO_KRW } from "../src/lib/payments/types";
+
+const prisma = new PrismaClient();
+
+/** Deterministic pseudo-random so seeds are stable across runs. */
+function mulberry32(seed: number) {
+  return function () {
+    seed |= 0;
+    seed = (seed + 0x6d2b79f5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+const rand = mulberry32(42);
+const pick = <T>(arr: T[]) => arr[Math.floor(rand() * arr.length)];
+
+const NICKNAMES = [
+  "달빛토끼", "코딩하는곰", "야옹이팬", "첫줄러", "모찌사랑", "새벽감성",
+  "라이브고정", "응원단장", "조용한후원", "단골1호", "치즈맛", "밤샘시청",
+  "포근포근", "하트뿅", "겜생겜사", "노래좋아", "버추얼덕후", "공부방지기",
+  "커피한잔", "별헤는밤",
+];
+
+const CATEGORIES = ["game", "music", "virtual", "daily", "study"];
+
+interface StreamerSeed {
+  handle: string;
+  displayName: string;
+  category: string;
+  bio: string;
+  avgViewers: number;
+  followerCount: number;
+  backers: number; // how many distinct backers to generate
+  recurringRate: number; // fraction who back more than once
+  fulfillment: number; // perk fulfillment 0..1
+  publish: boolean; // publish a trust report
+}
+
+const STREAMERS: StreamerSeed[] = [
+  { handle: "creatorA", displayName: "크리에이터A", category: "virtual", bio: "매주 화·목·토 라이브. 따뜻한 버추얼 방송을 해요.", avgViewers: 120, followerCount: 8400, backers: 42, recurringRate: 0.41, fulfillment: 0.94, publish: true },
+  { handle: "creatorC", displayName: "크리에이터C", category: "music", bio: "매주 화·목·토 라이브 음악 방송. 따뜻한 커뮤니티예요.", avgViewers: 240, followerCount: 15200, backers: 55, recurringRate: 0.38, fulfillment: 0.9, publish: true },
+  { handle: "creatorE", displayName: "크리에이터E", category: "virtual", bio: "버추얼 게임 방송. 같이 웃고 떠들어요.", avgViewers: 300, followerCount: 21000, backers: 38, recurringRate: 0.33, fulfillment: 0.86, publish: false },
+  { handle: "creatorB", displayName: "크리에이터B", category: "daily", bio: "잔잔한 일상 브이로그와 수다 방송.", avgViewers: 80, followerCount: 3200, backers: 21, recurringRate: 0.29, fulfillment: 0.78, publish: false },
+  { handle: "creatorD", displayName: "크리에이터D", category: "game", bio: "FPS·공포게임 위주. 리액션 맛집.", avgViewers: 180, followerCount: 9800, backers: 33, recurringRate: 0.35, fulfillment: 0.88, publish: true },
+  { handle: "creatorF", displayName: "크리에이터F", category: "study", bio: "함께 공부하는 스터디윗미 방송.", avgViewers: 60, followerCount: 2100, backers: 14, recurringRate: 0.22, fulfillment: 0.7, publish: false },
+  { handle: "creatorG", displayName: "크리에이터G", category: "music", bio: "어쿠스틱 커버와 자작곡 라이브.", avgViewers: 140, followerCount: 6700, backers: 27, recurringRate: 0.31, fulfillment: 0.82, publish: false },
+  { handle: "creatorH", displayName: "크리에이터H", category: "game", bio: "인디게임 탐험가. 숨은 명작 발굴.", avgViewers: 95, followerCount: 4100, backers: 19, recurringRate: 0.26, fulfillment: 0.75, publish: false },
+];
+
+const TIER_TEMPLATES = [
+  { name: "새싹 응원", priceKrw: 3000, description: "가볍게 마음을 전하는 첫 응원", perks: ["백커 월 등록", "파운딩 배지"] },
+  { name: "단골 서포터", priceKrw: 6000, description: "단골 팬만의 혜택을 누려요", perks: ["백커 전용 소식", "디스코드 서포터 역할", "월간 추첨 참여"] },
+  { name: "핵심 팬", priceKrw: 12000, description: "가장 가까이에서 함께하는 핵심 팬", perks: ["Q&A 우선 참여", "손편지·굿즈 우선권", "비공개 라이브 초대"] },
+];
+
+async function main() {
+  console.log("Resetting data…");
+  await prisma.perkDelivery.deleteMany();
+  await prisma.foundingMembership.deleteMany();
+  await prisma.backing.deleteMany();
+  await prisma.perk.deleteMany();
+  await prisma.update.deleteMany();
+  await prisma.trustReport.deleteMany();
+  await prisma.tier.deleteMany();
+  await prisma.streamer.deleteMany();
+  await prisma.backer.deleteMany();
+
+  // A pool of backers reused across streamers (so "core fans" can back several).
+  console.log("Creating backers…");
+  const devHash = hashPassword("motoo");
+  const backers = [];
+  for (let i = 0; i < 60; i++) {
+    const nickname = `${pick(NICKNAMES)}${i}`;
+    backers.push(
+      await prisma.backer.create({
+        data: {
+          email: `fan${i}@motoo.dev`,
+          nickname,
+          currencyBalance: 200 + Math.floor(rand() * 400),
+          ageVerified: true,
+          passwordHash: devHash,
+        },
+      }),
+    );
+  }
+  // A known dev login: demo@motoo.dev / motoo
+  const demo = await prisma.backer.create({
+    data: {
+      email: "demo@motoo.dev",
+      nickname: "데모후원자",
+      currencyBalance: 500,
+      ageVerified: true,
+      passwordHash: devHash,
+      role: "backer",
+    },
+  });
+  backers.push(demo);
+  // Admin account
+  await prisma.backer.create({
+    data: {
+      email: "admin@motoo.dev",
+      nickname: "관리자",
+      ageVerified: true,
+      passwordHash: devHash,
+      role: "admin",
+    },
+  });
+
+  for (const s of STREAMERS) {
+    console.log(`Creating streamer @${s.handle}…`);
+    const streamer = await prisma.streamer.create({
+      data: {
+        handle: s.handle,
+        displayName: s.displayName,
+        bio: s.bio,
+        category: s.category,
+        status: "approved",
+        avgViewers: s.avgViewers,
+        followerCount: s.followerCount,
+        approvedAt: new Date("2026-01-15"),
+        subMerchantId: `sub_${s.handle}`,
+        chzzk: `https://chzzk.naver.com/${s.handle}`,
+        discordUrl: `https://discord.gg/${s.handle}`,
+      },
+    });
+
+    // Tiers
+    const tiers = [];
+    for (let t = 0; t < TIER_TEMPLATES.length; t++) {
+      const tpl = TIER_TEMPLATES[t];
+      tiers.push(
+        await prisma.tier.create({
+          data: {
+            streamerId: streamer.id,
+            name: tpl.name,
+            priceKrw: tpl.priceKrw,
+            description: tpl.description,
+            sortOrder: t,
+          },
+        }),
+      );
+    }
+
+    // Perks (one per tier), with due dates spread around now.
+    const perks = [];
+    for (let t = 0; t < tiers.length; t++) {
+      const perk = await prisma.perk.create({
+        data: {
+          tierId: tiers[t].id,
+          streamerId: streamer.id,
+          title: TIER_TEMPLATES[t].perks[0],
+          description: `${tiers[t].name} 백커에게 제공되는 퍼크`,
+          promisedBy: new Date(2026, 5 + t, 20),
+          status: t === 0 ? "delivered" : t === 1 ? "in_progress" : "promised",
+          backersOwed: 0,
+        },
+      });
+      perks.push(perk);
+    }
+
+    // Backings — assign founding numbers sequentially per streamer.
+    let foundingCounter = 0;
+    const backerFounding = new Map<string, number>();
+    const tierBackerCounts = [0, 0, 0];
+    let totalKrw = 0;
+    let deliveredCount = 0;
+    let owedCount = 0;
+
+    // choose a subset of the backer pool for this streamer
+    const shuffled = [...backers].sort(() => rand() - 0.5).slice(0, s.backers);
+    for (const backer of shuffled) {
+      const timesToBack = rand() < s.recurringRate ? 1 + Math.floor(rand() * 3) : 1;
+      for (let b = 0; b < timesToBack; b++) {
+        const tierIndex =
+          rand() < 0.5 ? 0 : rand() < 0.75 ? 1 : 2;
+        const tier = tiers[tierIndex];
+        tierBackerCounts[tierIndex]++;
+
+        // founding number: assigned once per (streamer, backer)
+        let founding = backerFounding.get(backer.id);
+        if (founding === undefined) {
+          founding = ++foundingCounter;
+          backerFounding.set(backer.id, founding);
+          await prisma.foundingMembership.create({
+            data: {
+              streamerId: streamer.id,
+              backerId: backer.id,
+              foundingNumber: founding,
+            },
+          });
+        }
+
+        const display = pick([
+          BackingDisplay.public,
+          BackingDisplay.public,
+          BackingDisplay.nickname,
+          BackingDisplay.anonymous,
+        ]);
+        const hasMessage = rand() < 0.4;
+        const mochi = tier.priceKrw / MOCHI_TO_KRW;
+        totalKrw += tier.priceKrw;
+
+        const backing = await prisma.backing.create({
+          data: {
+            streamerId: streamer.id,
+            backerId: backer.id,
+            tierId: tier.id,
+            amountKrw: tier.priceKrw,
+            currencyUnitsSpent: mochi,
+            foundingNumber: founding,
+            display,
+            displayName:
+              display === BackingDisplay.nickname
+                ? `${backer.nickname}💛`
+                : null,
+            message: hasMessage
+              ? pick([
+                  "항상 응원해요! 오래오래 방송해주세요 🙌",
+                  "덕분에 하루가 즐거워요.",
+                  "첫 방송부터 지금까지 쭉 함께했어요.",
+                  "다음 콘텐츠도 기대할게요!",
+                  "힘내세요, 우리가 있잖아요 💪",
+                ])
+              : null,
+            status: "paid",
+            createdAt: new Date(
+              2026,
+              1 + Math.floor(rand() * 5),
+              1 + Math.floor(rand() * 27),
+            ),
+          },
+        });
+
+        // Perk delivery — only for the delivered (tier 0) perk, at the fulfillment rate.
+        if (tierIndex === 0) {
+          owedCount++;
+          if (rand() < s.fulfillment) {
+            deliveredCount++;
+            await prisma.perkDelivery.create({
+              data: {
+                perkId: perks[0].id,
+                backingId: backing.id,
+                confirmedByBacker: rand() < 0.7,
+              },
+            });
+          }
+        }
+      }
+    }
+
+    // Update tier backer counts + perk owed counts
+    for (let t = 0; t < tiers.length; t++) {
+      await prisma.tier.update({
+        where: { id: tiers[t].id },
+        data: { backerCount: tierBackerCounts[t] },
+      });
+    }
+    await prisma.perk.update({
+      where: { id: perks[0].id },
+      data: { backersOwed: owedCount, deliveredAt: new Date(2026, 5, 18) },
+    });
+
+    // Updates
+    await prisma.update.createMany({
+      data: [
+        {
+          streamerId: streamer.id,
+          title: "이번 달 목표 달성 감사합니다!",
+          body: "여러분 덕분에 이번 달 목표를 달성했어요. 다음 달엔 더 좋은 콘텐츠로 찾아올게요.",
+          visibility: "public",
+          publishedAt: new Date(2026, 5, 25),
+          viewCount: 1200,
+          reactionCount: 210,
+        },
+        {
+          streamerId: streamer.id,
+          title: "[백커 전용] 다음 오프라인 모임 안내",
+          body: "핵심 팬 여러분을 위한 오프라인 모임을 준비 중이에요. 곧 자세히 안내드릴게요!",
+          visibility: "backers",
+          publishedAt: new Date(2026, 5, 28),
+          viewCount: 320,
+          reactionCount: 88,
+        },
+      ],
+    });
+
+    // Trust report (published for some)
+    const totalBackers = backerFounding.size;
+    const totalBackings = tierBackerCounts.reduce((a, b) => a + b, 0);
+    const recurringRate =
+      totalBackers > 0 ? (totalBackings - totalBackers) / totalBackings : 0;
+    const coreFanCount = Math.round(totalBackers * 0.15);
+    const perkFulfillmentRate = owedCount > 0 ? deliveredCount / owedCount : 1;
+
+    const metrics: TrustMetrics = {
+      fanSupport: {
+        totalBackers,
+        averageBackingKrw:
+          totalBackings > 0 ? Math.round(totalKrw / totalBackings) : 0,
+        recurringRate,
+      },
+      fanLoyalty: {
+        coreFanCount,
+        publicBackerRatio: 0.55 + rand() * 0.2,
+        messageRate: 0.3 + rand() * 0.2,
+        updateResponseRate: 0.4 + rand() * 0.3,
+      },
+      execution: {
+        perkFulfillmentRate,
+        updateFrequencyPerMonth: 4,
+        overduePerkCount: s.fulfillment < 0.8 ? 1 : 0,
+      },
+      growth: {
+        followerGrowth: 0.05 + rand() * 0.15,
+        avgViewerGrowth: 0.03 + rand() * 0.12,
+        communityGrowth: 0.06 + rand() * 0.14,
+      },
+    };
+    const grades = computeGrades(metrics);
+
+    await prisma.trustReport.create({
+      data: {
+        streamerId: streamer.id,
+        reportNumber: 1,
+        periodStart: new Date(2026, 5, 1),
+        periodEnd: new Date(2026, 5, 30),
+        metrics: metrics as unknown as object,
+        grades: grades as unknown as object,
+        status: s.publish ? "published" : "draft",
+        publishedAt: s.publish ? new Date(2026, 6, 1) : null,
+        generatedAt: new Date(2026, 6, 1),
+      },
+    });
+  }
+
+  console.log("Seed complete ✅  (dev login: demo@motoo.dev / motoo)");
+}
+
+main()
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });

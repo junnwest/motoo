@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *{ box-sizing:border-box; }
+  body{ margin:0; }
+  .wm{ font-family:'Pretendard',sans-serif; font-weight:800; letter-spacing:-.055em; color:#211C18; }
+  /* THE MARK — C5 body (soft tilt, dimensional) + V1 cross-section, no face */
+  .mark{ position:relative; display:inline-block; flex:none; transform:rotate(-4deg); }
+  .mark > i{ position:absolute; inset:0; background:linear-gradient(158deg,#F3B49B,#E2855F); border-radius:47% 47% 49% 49%/57% 57% 43% 43%; box-shadow:inset 0 4px 6px rgba(255,255,255,.5), inset 0 -5px 9px rgba(168,90,64,.32); }
+  .mark > b{ position:absolute; left:50%; bottom:13%; transform:translateX(-50%); width:52%; height:44%; background:radial-gradient(circle at 50% 34%,#FFFDF8,#F3E1CF); border-radius:50%; box-shadow:inset 0 1px 3px rgba(168,90,64,.22); }
+  /* flat single-tone version of the mark */
+  .mark-flat{ position:relative; display:inline-block; flex:none; transform:rotate(-4deg); }
+  .mark-flat > i{ position:absolute; inset:0; background:currentColor; border-radius:47% 47% 49% 49%/57% 57% 43% 43%; }
+  .mark-flat > b{ position:absolute; left:50%; bottom:14%; transform:translateX(-50%); width:50%; height:42%; border-radius:50%; }
+</style>
+</helmet>
+
+<div style="position:absolute;left:80px;top:26px;width:1500px;font-family:'Pretendard',sans-serif">
+  <div style="font-size:26px;font-weight:800;letter-spacing:-.03em;color:#211C18">Motoo — 브랜드 키트</div>
+  <div style="font-size:14px;line-height:1.55;color:#74695F;margin-top:6px">선택: <b style="color:#211C18">C5 형태(표정 없음) + V1 단면</b>. 부드럽게 기울인 모찌에 중앙 하단 단면 하나. 아래는 정식 락업·아이콘·컬러·토큰 세트입니다.</div>
+</div>
+
+<!-- primary lockup (hero) -->
+<div style="position:absolute;left:80px;top:130px;width:940px">
+  <div data-drags-parent="1" style="position:absolute;top:-23px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#8a7d6c">기본 가로 락업</div>
+  <div style="background:#FBF6EF;border:1px solid #ECE1D2;border-radius:20px;box-shadow:0 10px 30px rgba(33,28,24,.08);height:280px;display:flex;align-items:center;justify-content:center;gap:26px">
+    <span class="mark" style="width:104px;height:88px"><i></i><b></b></span>
+    <span class="wm" style="font-size:78px">motoo</span>
+  </div>
+</div>
+
+<!-- stacked lockup -->
+<div style="position:absolute;left:1060px;top:130px;width:400px">
+  <div data-drags-parent="1" style="position:absolute;top:-23px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#8a7d6c">세로 락업</div>
+  <div style="background:#FBF6EF;border:1px solid #ECE1D2;border-radius:20px;box-shadow:0 10px 30px rgba(33,28,24,.08);height:280px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px">
+    <span class="mark" style="width:92px;height:78px"><i></i><b></b></span>
+    <span class="wm" style="font-size:46px">motoo</span>
+  </div>
+</div>
+
+<!-- app icons -->
+<div style="position:absolute;left:80px;top:470px;width:660px">
+  <div data-drags-parent="1" style="position:absolute;top:-23px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#8a7d6c">앱 아이콘 · 심볼</div>
+  <div style="background:#fff;border:1px solid #ECE1D2;border-radius:20px;box-shadow:0 10px 30px rgba(33,28,24,.08);padding:28px;display:flex;align-items:center;gap:26px">
+    <div style="text-align:center"><div style="width:104px;height:104px;border-radius:26px;background:#211C18;display:flex;align-items:center;justify-content:center"><span class="mark" style="width:58px;height:49px"><i></i><b></b></span></div><div style="font-size:12px;color:#9b8d7c;margin-top:9px">잉크 배경</div></div>
+    <div style="text-align:center"><div style="width:104px;height:104px;border-radius:26px;background:#FBF6EF;border:1px solid #EEE3D5;display:flex;align-items:center;justify-content:center"><span class="mark" style="width:58px;height:49px"><i></i><b></b></span></div><div style="font-size:12px;color:#9b8d7c;margin-top:9px">크림 배경</div></div>
+    <div style="text-align:center"><div style="width:104px;height:104px;border-radius:26px;background:linear-gradient(155deg,#EE9D82,#DB7A58);display:flex;align-items:center;justify-content:center"><span class="mark-flat" style="width:58px;height:49px;color:#FBF6EF"><i></i><b style="background:#E08A6F"></b></span></div><div style="font-size:12px;color:#9b8d7c;margin-top:9px">코랄 (단색)</div></div>
+    <div style="text-align:center"><div style="width:104px;height:104px;border-radius:50%;background:#FBF6EF;border:1px solid #EEE3D5;display:flex;align-items:center;justify-content:center"><span class="mark" style="width:56px;height:47px"><i></i><b></b></span></div><div style="font-size:12px;color:#9b8d7c;margin-top:9px">원형</div></div>
+  </div>
+</div>
+
+<!-- monochrome / reversed -->
+<div style="position:absolute;left:770px;top:470px;width:690px">
+  <div data-drags-parent="1" style="position:absolute;top:-23px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#8a7d6c">단색 · 반전</div>
+  <div style="display:flex;gap:16px">
+    <div style="flex:1;background:#211C18;border-radius:20px;box-shadow:0 10px 30px rgba(33,28,24,.08);height:172px;display:flex;align-items:center;justify-content:center;gap:16px"><span class="mark-flat" style="width:56px;height:47px;color:#FBF6EF"><i></i><b style="background:#211C18"></b></span><span class="wm" style="font-size:44px;color:#FBF6EF">motoo</span></div>
+    <div style="flex:1;background:#fff;border:1px solid #ECE1D2;border-radius:20px;box-shadow:0 10px 30px rgba(33,28,24,.08);height:172px;display:flex;align-items:center;justify-content:center;gap:16px"><span class="mark-flat" style="width:56px;height:47px;color:#211C18"><i></i><b style="background:#fff"></b></span><span class="wm" style="font-size:44px">motoo</span></div>
+  </div>
+  <div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#9b8d7c;margin-top:12px;line-height:1.5">단색 버전은 속살을 배경색으로 ‘도려낸’ 네거티브로 처리 — 1도 인쇄·각인·워터마크에서 또렷.</div>
+</div>
+
+<!-- size behavior -->
+<div style="position:absolute;left:80px;top:790px;width:660px">
+  <div data-drags-parent="1" style="position:absolute;top:-23px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#8a7d6c">사이즈 거동 (파비콘 → 헤더)</div>
+  <div style="background:#fff;border:1px solid #ECE1D2;border-radius:20px;box-shadow:0 10px 30px rgba(33,28,24,.08);height:172px;display:flex;align-items:flex-end;justify-content:center;gap:30px;padding:0 28px 34px">
+    <div style="text-align:center"><span class="mark" style="width:16px;height:14px"><i></i><b></b></span><div style="font-size:11px;color:#9b8d7c;margin-top:8px">16</div></div>
+    <div style="text-align:center"><span class="mark" style="width:24px;height:20px"><i></i><b></b></span><div style="font-size:11px;color:#9b8d7c;margin-top:8px">24</div></div>
+    <div style="text-align:center"><span class="mark" style="width:32px;height:27px"><i></i><b></b></span><div style="font-size:11px;color:#9b8d7c;margin-top:8px">32</div></div>
+    <div style="text-align:center"><span class="mark" style="width:48px;height:40px"><i></i><b></b></span><div style="font-size:11px;color:#9b8d7c;margin-top:8px">48</div></div>
+    <div style="text-align:center;display:flex;align-items:center;gap:9px"><span class="mark" style="width:30px;height:25px"><i></i><b></b></span><span class="wm" style="font-size:24px">motoo</span></div>
+  </div>
+</div>
+
+<!-- color palette -->
+<div style="position:absolute;left:770px;top:790px;width:690px">
+  <div data-drags-parent="1" style="position:absolute;top:-23px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#8a7d6c">컬러</div>
+  <div style="background:#fff;border:1px solid #ECE1D2;border-radius:20px;box-shadow:0 10px 30px rgba(33,28,24,.08);padding:22px;display:flex;gap:12px">
+    <div style="flex:1"><div style="height:64px;border-radius:12px;background:#E08A6F"></div><div style="font-size:12px;font-weight:700;margin-top:8px">모찌 코랄</div><div style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:#9b8d7c">#E08A6F</div></div>
+    <div style="flex:1"><div style="height:64px;border-radius:12px;background:#211C18"></div><div style="font-size:12px;font-weight:700;margin-top:8px">잉크</div><div style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:#9b8d7c">#211C18</div></div>
+    <div style="flex:1"><div style="height:64px;border-radius:12px;background:#FBF6EF;border:1px solid #EEE3D5"></div><div style="font-size:12px;font-weight:700;margin-top:8px">크림</div><div style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:#9b8d7c">#FBF6EF</div></div>
+    <div style="flex:1"><div style="height:64px;border-radius:12px;background:#FFFDF8;border:1px solid #EEE3D5"></div><div style="font-size:12px;font-weight:700;margin-top:8px">속살</div><div style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:#9b8d7c">#FFFDF8</div></div>
+    <div style="flex:1"><div style="height:64px;border-radius:12px;background:#7E9B82"></div><div style="font-size:12px;font-weight:700;margin-top:8px">세이지</div><div style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:#9b8d7c">#7E9B82</div></div>
+  </div>
+</div>
+
+<!-- token set -->
+<div style="position:absolute;left:80px;top:1110px;display:flex;align-items:center;gap:12px;font-family:'Pretendard',sans-serif"><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.16em;color:#fff;background:#E08A6F;padding:4px 10px;border-radius:6px">MOCHI ASSET</span><span style="font-size:16px;font-weight:700;color:#211C18">모찌 토큰 (V1) — 응원 화폐 · 인앱</span></div>
+
+<!-- token base + tiers -->
+<div style="position:absolute;left:80px;top:1152px;width:660px">
+  <div style="background:#fff;border:1px solid #ECE1D2;border-radius:20px;box-shadow:0 10px 30px rgba(33,28,24,.08);padding:26px;display:flex;align-items:center;justify-content:space-around;background-image:radial-gradient(circle at 50% 40%,#FCEFE4,#fff)">
+    <div style="text-align:center"><span class="mark" style="width:46px;height:39px;transform:rotate(0deg)"><i></i><b></b></span><div style="font-weight:800;font-size:14px;margin-top:12px">한 입</div><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#9b8d7c">₩1,000</div></div>
+    <div style="text-align:center"><span style="display:inline-flex;gap:5px"><span class="mark" style="width:42px;height:36px;transform:rotate(-5deg)"><i></i><b></b></span><span class="mark" style="width:42px;height:36px;transform:rotate(4deg)"><i></i><b></b></span></span><div style="font-weight:800;font-size:14px;margin-top:12px">한 접시</div><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#9b8d7c">₩5,000</div></div>
+    <div style="text-align:center"><span style="display:inline-flex;gap:4px;align-items:flex-end"><span class="mark" style="width:34px;height:29px;transform:rotate(-6deg)"><i></i><b></b></span><span class="mark" style="width:44px;height:37px;transform:rotate(0deg)"><i></i><b></b></span><span class="mark" style="width:34px;height:29px;transform:rotate(6deg)"><i></i><b></b></span></span><div style="font-weight:800;font-size:14px;margin-top:12px">한 상자</div><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#9b8d7c">₩20,000</div></div>
+  </div>
+</div>
+
+<!-- token in-product -->
+<div style="position:absolute;left:770px;top:1152px;width:690px">
+  <div style="background:#fff;border:1px solid #ECE1D2;border-radius:20px;box-shadow:0 10px 30px rgba(33,28,24,.08);padding:26px;display:flex;flex-direction:column;align-items:center;gap:16px;background-image:radial-gradient(circle at 50% 30%,#FCEFE4,#fff)">
+    <div style="display:flex;gap:12px">
+      <span style="display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid #EEE3D5;border-radius:999px;padding:9px 16px;font-weight:800;font-size:15px;color:#211C18;box-shadow:0 2px 5px rgba(33,28,24,.06)"><span class="mark" style="width:20px;height:17px;transform:rotate(0deg)"><i></i><b></b></span>3.1k 모찌</span>
+      <span style="display:inline-flex;align-items:center;gap:8px;background:#211C18;border-radius:999px;padding:9px 16px;font-weight:700;font-size:14px;color:#FBF6EF"><span class="mark" style="width:18px;height:15px;transform:rotate(0deg)"><i></i><b></b></span>보낸 모찌 14</span>
+    </div>
+    <span style="display:inline-flex;align-items:center;gap:9px;background:#E08A6F;border-radius:14px;padding:13px 26px;font-weight:700;font-size:16px;color:#fff;box-shadow:0 8px 18px rgba(224,138,111,.3)"><span class="mark" style="width:22px;height:19px;transform:rotate(0deg)"><i></i><b></b></span>모찌 보내기</span>
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:#9b8d7c;text-align:center;line-height:1.5">칩·버튼에서는 기울기 0°로 안정감 있게 · 항상 숫자/맥락과 함께 (가치·잔액 표기 없음)</div>
+  </div>
+</div>
+
+<!-- usage note -->
+<div style="position:absolute;left:80px;top:1420px;width:1380px;background:#211C18;color:#F2E9DD;border-radius:18px;padding:24px 28px;font-family:'Pretendard',sans-serif;display:flex;gap:36px">
+  <div style="flex:1"><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;color:#8BB08F;margin-bottom:10px">✓ DO</div><div style="font-size:14.5px;line-height:1.6;color:#E8DED0">기울인 마크는 브랜드/딜라이트 상황에, 기울기 0° 마크는 UI 칩·버튼에. 최소 여백은 단면 지름만큼. 작게 쓸 땐 단색 마크.</div></div>
+  <div style="flex:1"><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;color:#E9A488;margin-bottom:10px">✕ DON’T</div><div style="font-size:14.5px;line-height:1.6;color:#E8DED0">토큰을 단독 브랜드 마크로 쓰지 않기. 단면을 상단/좌측으로 옮기지 않기(항상 중앙 하단). 코인·금액·수익 뉘앙스로 쓰지 않기.</div></div>
+</div>
+</x-dc>
+</body>
+</html>

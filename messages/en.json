@@ -1,0 +1,334 @@
+{
+  "common": {
+    "brand": "motoo",
+    "login": "Log in",
+    "signup": "Sign up",
+    "search": "Search",
+    "seeAll": "Explore all",
+    "backThisStreamer": "Back",
+    "sendMochi": "Send mochi",
+    "loading": "Loading…",
+    "grade": {
+      "Emerging": "Emerging",
+      "Strong": "Strong",
+      "Excellent": "Excellent"
+    }
+  },
+  "nav": {
+    "features": "Features",
+    "trustReport": "Trust Report",
+    "fees": "Fees",
+    "explore": "Explore",
+    "whatIsMochi": "What is mochi?",
+    "forCreators": "For creators",
+    "forFans": "For fans",
+    "applyAsCreator": "Apply as creator"
+  },
+  "footer": {
+    "fanTagline": "The warmest way to back a creator you love.",
+    "creatorTagline": "Turn your fans' support into proof for sponsors. A trust platform for creators.",
+    "colProduct": "Product",
+    "colCompany": "Company",
+    "colExplore": "Explore",
+    "colSupport": "Support",
+    "colTerms": "Legal",
+    "product": {
+      "trustReport": "Trust Report",
+      "creatorDashboard": "Creator dashboard",
+      "mochi": "Mochi"
+    },
+    "company": {
+      "about": "About",
+      "help": "Help center",
+      "notice": "Notices"
+    },
+    "explore": {
+      "creators": "Creators",
+      "categories": "Categories",
+      "whatIsMochi": "What is mochi?"
+    },
+    "support": {
+      "help": "Help center",
+      "faq": "FAQ",
+      "safety": "Safety & trust"
+    },
+    "terms": {
+      "tos": "Terms of service",
+      "privacy": "Privacy policy",
+      "refund": "Refund & cancellation"
+    },
+    "businessInfo": "motoo Inc. · Telecom sales intermediary · Payment is made directly with each creator (seller); the platform does not hold funds.",
+    "fanDisclosure": "Mochi is support — no investment, refund of value, resale, or financial return · Payment is made directly with each creator (seller)."
+  },
+  "stub": {
+    "loginTitle": "Log in",
+    "loginBody": "Login is coming soon. For now you can try the backing flow as the demo backer.",
+    "signupTitle": "Sign up",
+    "signupBody": "Sign up is coming soon. Naver, Kakao, and Google login are on the way.",
+    "applyTitle": "Apply as a creator",
+    "applyBody": "The creator application form is coming soon. After review, your page opens along with sub-merchant setup.",
+    "reportTitle": "Trust Report",
+    "reportBody": "The public Trust Report document is coming soon. For now, see the report summary on the profile."
+  },
+  "safety": {
+    "ageCheck": "Age & adult verification",
+    "refundPolicy": "Refund & cancellation policy",
+    "directPg": "Licensed PG direct payment · no funds held"
+  },
+  "fanLanding": {
+    "eyebrow": "motoo for fans",
+    "heroTitle": "Back the creators you love,",
+    "heroTitleAccent": "with mochi",
+    "heroTitleTail": ".",
+    "heroSubtitle": "Share your heart and earn supporter-only perks and a founding badge. The more you back, the closer you get.",
+    "searchPlaceholder": "Search creators or categories",
+    "categories": {
+      "all": "All",
+      "game": "Gaming",
+      "daily": "Life",
+      "music": "Music",
+      "virtual": "Virtual",
+      "study": "Study"
+    },
+    "trendingEyebrow": "discover",
+    "trendingTitle": "Trending creators",
+    "howEyebrow": "how mochi works",
+    "howTitle": "How to back with mochi",
+    "how": {
+      "step1Title": "Find a creator",
+      "step1Body": "Discover creators to back by browsing or searching.",
+      "step2Title": "Send mochi",
+      "step2Body": "Send as much mochi as you like. Payment goes directly to the creator.",
+      "step3Title": "Get perks & badges",
+      "step3Body": "Become a regular with the Backer Wall, perks, and a founding badge."
+    },
+    "benefitsTitle": "Why backing feels good",
+    "benefits": {
+      "messageTitle": "Share your heart",
+      "messageBody": "Send mochi with a message and reach the creator directly.",
+      "perksTitle": "Get supporter perks",
+      "perksBody": "Enjoy supporter-only perks — Discord channels, raffles, handwritten notes.",
+      "badgeTitle": "Earn a founding badge",
+      "badgeBody": "The earlier you back, the more special your status on the Backer Wall and leaderboard.",
+      "dashboardTitle": "See your support at a glance",
+      "dashboardBody": "Track your backings, following, and upcoming perks in your dashboard."
+    },
+    "spotlightEyebrow": "creator of the week",
+    "spotlightBackers": "backers",
+    "spotlightMochi": "mochi received",
+    "spotlightTrust": "trust",
+    "mochiExplainerTitle": "Mochi is <accent>support</accent> — not an investment.",
+    "mochiExplainerBody": "There is no refund of value, resale, or financial return. What you receive is the creator's gratitude, supporter perks, and your status as a fan (badges and ranking). It is never shown as a balance or a value.",
+    "creatorPromptTitle": "Are you a creator?",
+    "creatorPromptBody": "Turn your fans' support into a Trust Report you can show to sponsors.",
+    "creatorPromptCta": "Go to the creator page →",
+    "finalCtaTitle": "Send your first cheer today.",
+    "finalCtaBody": "The warmest way to reach a creator you love.",
+    "finalCtaPrimary": "Explore creators →"
+  },
+  "creatorLanding": {
+    "eyebrow": "motoo for creators",
+    "heroTitle1": "Turn your fans' support",
+    "heroTitle2": "into proof",
+    "heroAccent": "for sponsors",
+    "heroTitleTail": ".",
+    "heroSubtitle": "Turn the support your fans send as mochi into one <b>Trust Report</b> each month. Prove a real fandom to brands, sponsors, and MCNs.",
+    "ctaApply": "Apply as a creator",
+    "ctaSample": "View a sample report",
+    "trustDirect": "Licensed PG direct payment",
+    "trustNoFunds": "The platform holds no funds",
+    "proofStrip": "Creators with us",
+    "insightEyebrow": "why motoo",
+    "insightTitle1": "Sponsors look past view counts to",
+    "insightAccent": "a real fandom",
+    "insightTitle2": ".",
+    "insightBody": "Smaller creators are strongest in loyal fans — but there was no way to prove it. motoo turns support, loyalty, and execution into a verifiable report.",
+    "insight": {
+      "card1Title": "Big numbers, but",
+      "card1Body": "Views and followers alone can't show whether a fandom is real.",
+      "card2Title": "Support is scattered",
+      "card2Body": "Support records spread across platforms are never organized in one view.",
+      "card3Title": "Sponsors want proof",
+      "card3Body": "Brands and MCNs demand trustworthy data before a collaboration."
+    },
+    "howEyebrow": "how it works",
+    "howTitle": "Three steps from support to proof",
+    "how": {
+      "step1Title": "Fans back you with mochi",
+      "step1Body": "Payment goes directly to the creator via a licensed PG. The platform holds no funds.",
+      "step2Title": "Reward your core fans",
+      "step2Body": "Care for regulars with the Backer Wall, founding badges, and perks — loyalty builds.",
+      "step3Title": "Prove it with the Trust Report",
+      "step3Body": "Share your monthly auto-compiled trust report with sponsors."
+    },
+    "reportEyebrow": "the trust report",
+    "reportTitle": "One page of trust, proven",
+    "reportBody": "Five areas auto-compiled each month, shown as <b>sponsor readiness</b>. Manage deeply in a private dashboard, share cleanly in a public view.",
+    "reportBullet1": "Fan support · loyalty · execution · growth",
+    "reportBullet2": "Emerging / Strong / Excellent grades",
+    "reportBullet3": "Public & private views · brandable",
+    "reportCta": "See the full sample report →",
+    "mochiExplainerTitle": "Mochi is <accent>support</accent> — not an investment.",
+    "mochiExplainerBody": "There is no refund of value, resale, or financial return. What you receive is your fans' heart and trust, and the data. Payment is delivered directly to the creator via a licensed PG.",
+    "featuresTitle": "Every tool a creator needs",
+    "features": {
+      "crmTitle": "Fan CRM",
+      "crmBody": "Manage regulars with segments, notes, DMs",
+      "perkTitle": "Perk tracker",
+      "perkBody": "Check off fulfillment of promised perks",
+      "payoutTitle": "Settlement & payout",
+      "payoutBody": "PG settlement status, transparently",
+      "analyticsTitle": "Analytics",
+      "analyticsBody": "Growth, traffic, and viewer insights",
+      "reportTitle": "Shareable report",
+      "reportBody": "To sponsors via link or embed"
+    },
+    "testimonial": "\"Even with a small audience, I can now show how solid our fandom is. The Trust Report landed me my first brand deal.\"",
+    "testimonialName": "@CreatorA",
+    "testimonialMeta": "Virtual · 120 avg. viewers",
+    "finalCtaTitle": "Prove your fandom, now.",
+    "finalCtaBody": "Apply in 5 minutes; your first report arrives next month.",
+    "finalCtaFans": "Are you a fan? ↗"
+  },
+  "explore": {
+    "eyebrow": "discover",
+    "title": "Explore creators",
+    "subtitle": "Ranked by support, loyalty, and execution. Never by money raised.",
+    "searchPlaceholder": "Search creators or categories",
+    "filterCategory": "Category",
+    "filterBackers": "Backers",
+    "filterReadiness": "Sponsor readiness",
+    "sortLabel": "Sort",
+    "sort": {
+      "readiness": "Sponsor readiness",
+      "backers": "Backer count",
+      "recurring": "Recurring rate",
+      "newest": "Newest"
+    },
+    "backerCountRanges": {
+      "all": "All",
+      "under50": "Under 50",
+      "50to200": "50–200",
+      "over200": "200+"
+    },
+    "readinessNote": "Ranked by trust signals · no money-raised leaderboard",
+    "cardBackers": "backers",
+    "cardFulfillment": "perk fulfillment",
+    "cardRecurring": "recurring",
+    "empty": {
+      "title": "No creators match your filters",
+      "body": "Adjust your filters or explore another category.",
+      "cta": "Reset filters"
+    },
+    "resultCount": "{count} creators"
+  },
+  "profile": {
+    "backers": "backers",
+    "recurringRate": "recurring rate",
+    "fulfillment": "perk fulfillment",
+    "coreFans": "core fans",
+    "tiersTitle": "Backing tiers",
+    "tierPerks": "Perks",
+    "tierBackers": "{count} backing",
+    "tierLimit": "{remaining} spots left",
+    "tierBackButton": "Back this tier",
+    "backerWallTitle": "Backer Wall",
+    "backerWallSubtitle": "The fans who backed first",
+    "backerWallEmpty": "Still waiting for the first backer. Be the one to claim the first founding badge.",
+    "anonymousBacker": "Anonymous backer",
+    "foundingLabel": "Founding",
+    "updatesTitle": "Recent updates",
+    "updatesEmpty": "No updates yet.",
+    "backerOnly": "Backer-only update",
+    "backerOnlyBody": "Back this creator to see it.",
+    "reportSummaryTitle": "Trust Report",
+    "reportSummarySubtitle": "The trust summary shared with sponsors",
+    "viewFullReport": "View full report →",
+    "noReport": "No published Trust Report yet.",
+    "notFoundTitle": "Creator not found",
+    "notFoundBody": "Check the address or find them again from Explore.",
+    "backToExplore": "To Explore →",
+    "sponsorReadiness": "Sponsor readiness"
+  },
+  "backing": {
+    "title": "Back {name}",
+    "step": "Step {current} / {total}",
+    "steps": {
+      "age": "Age check",
+      "tier": "Choose tier",
+      "display": "Display",
+      "message": "Message",
+      "pay": "Pay"
+    },
+    "ageGate": {
+      "title": "Let's verify your age first",
+      "body": "Age verification is required before buying mochi. Under 19 requires guardian consent and has a spending cap.",
+      "adultLabel": "I am 19 or older",
+      "minorLabel": "I am under 19 and have guardian consent",
+      "birthdate": "Date of birth",
+      "verify": "Verify and continue",
+      "minorCapNote": "A monthly spending cap applies to minors.",
+      "verifiedTitle": "Age verified",
+      "guardianRequired": "Guardian consent was not confirmed. Please try again after obtaining consent."
+    },
+    "tier": {
+      "title": "Choose a backing tier",
+      "select": "Select",
+      "selected": "Selected"
+    },
+    "display": {
+      "title": "How should you appear on the Backer Wall?",
+      "public": "Show my nickname",
+      "publicNote": "Your nickname appears on the Backer Wall.",
+      "nickname": "A different name",
+      "nicknameNote": "Set your own display name.",
+      "nicknamePlaceholder": "Display name",
+      "anonymous": "Anonymous",
+      "anonymousNote": "Shown as 'Anonymous backer'. You still receive your founding number."
+    },
+    "message": {
+      "title": "Leave a message (optional)",
+      "placeholder": "A few words for the creator",
+      "skip": "Continue without a message"
+    },
+    "founding": {
+      "previewLabel": "The founding number you'll receive",
+      "previewNote": "This number is the order in which you first backed. Once set it never changes — it's the real token you receive.",
+      "existingNote": "You already hold founding number {number}. Your number stays the same."
+    },
+    "wallet": {
+      "balance": "My mochi balance",
+      "need": "Mochi needed for this tier",
+      "short": "You're short {amount} mochi",
+      "buyMore": "Top up mochi",
+      "packTitle": "Top up mochi",
+      "packBonus": "+{bonus} bonus",
+      "buy": "Top up",
+      "buying": "Topping up…"
+    },
+    "disclosure": {
+      "title": "Please confirm before paying",
+      "line1": "This backing is <b>support, not an investment.</b>",
+      "line2": "What you receive is the perks and founding badge listed above, with <b>no financial return, refund of value, or profit.</b>",
+      "line3": "Payment is delivered directly to the creator via a licensed PG, and mochi is non-refundable once spent unless stated otherwise.",
+      "agree": "I have read and agree to the above."
+    },
+    "payButton": "Back with {amount} mochi",
+    "processing": "Recording your support…",
+    "success": {
+      "eyebrow": "Backed",
+      "title": "You're now a founding backer of {name}",
+      "foundingLabel": "Your founding number",
+      "body": "You're recorded on the Backer Wall. This number is yours forever.",
+      "viewWall": "See it on the Backer Wall →",
+      "backToProfile": "Back to profile"
+    },
+    "errors": {
+      "ageRequired": "Please complete age verification first.",
+      "tierRequired": "Please select a tier to back.",
+      "disclosureRequired": "Please agree to the notice before paying.",
+      "insufficientMochi": "Not enough mochi. Please top up first.",
+      "generic": "We couldn't record your support. Please try again shortly."
+    }
+  }
+}

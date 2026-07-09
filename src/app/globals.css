@@ -1,0 +1,117 @@
+/* Pretendard must be imported before Tailwind so @layer ordering stays correct */
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css");
+@import "tailwindcss";
+
+/*
+  motoo design tokens — extracted verbatim from design-handoff.
+  Do not invent new brand colors; derive from these.
+*/
+@theme {
+  /* surfaces */
+  --color-cream: #fbf6ef; /* page background */
+  --color-cream-warm: #f6e8dc; /* warm section band */
+  --color-cream-warm-2: #f6ecdf; /* proof strip */
+  --color-sand: #f1e4d4; /* chips / image-slot bg */
+  --color-panel: #fbf6ef; /* inset panels on cards */
+  --color-card: #ffffff;
+
+  /* ink / text */
+  --color-ink: #211c18; /* primary text + dark sections */
+  --color-ink-2: #2c2620; /* dark section card */
+  --color-body: #74695f; /* body copy on light */
+  --color-muted: #9b8d7c; /* captions, mono labels */
+  --color-muted-2: #5c5246;
+  --color-muted-3: #6f6356;
+
+  /* coral (primary brand) */
+  --color-coral: #e08a6f; /* primary button / accent */
+  --color-coral-deep: #c9694c; /* eyebrows, links, emphasis */
+  --color-coral-soft: #f2b5a0; /* underlines, highlights */
+  --color-coral-tint: #e9a488; /* on dark */
+  --color-coral-chip: #fbe3d6; /* soft chip background */
+
+  /* sage (trust / success) */
+  --color-sage: #7e9b82;
+  --color-sage-bg: #eaf0ea;
+  --color-sage-border: #cfe0d2;
+  --color-sage-text: #4f6b53;
+
+  /* borders */
+  --color-line: #ece1d2; /* section dividers */
+  --color-line-2: #eee3d5; /* card borders */
+  --color-line-3: #e4d8c8; /* inputs / strong borders */
+  --color-line-4: #e3d6c6; /* progress track */
+
+  /* dark-section support */
+  --color-dark-line: #3a322a;
+  --color-dark-text: #f2e9dd;
+  --color-dark-text-2: #c9bcad;
+  --color-dark-text-3: #a99c8d;
+  --color-dark-mono: #7d7164;
+
+  /* status */
+  --color-live: #e0584c;
+
+  /* typography */
+  --font-sans: "Pretendard", "Pretendard Variable", -apple-system, system-ui,
+    sans-serif;
+  --font-mono: var(--font-ibm-plex-mono), "IBM Plex Mono", ui-monospace,
+    monospace;
+
+  /* radii */
+  --radius-btn: 12px;
+  --radius-card: 20px;
+  --radius-card-lg: 24px;
+
+  /* shadows */
+  --shadow-soft: 0 2px 4px rgba(33, 28, 24, 0.04);
+  --shadow-card: 0 8px 24px rgba(33, 28, 24, 0.06);
+  --shadow-float: 0 30px 80px rgba(33, 28, 24, 0.14);
+  --shadow-coral: 0 6px 16px rgba(224, 138, 111, 0.3);
+  --shadow-coral-lg: 0 10px 24px rgba(224, 138, 111, 0.34);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-cream);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Visible keyboard focus — quality floor requirement */
+:focus-visible {
+  outline: 2px solid var(--color-coral-deep);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Respect reduced motion — quality floor requirement */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/*
+  The mochi (모찌) blob — motoo's core brand motif.
+  Ported verbatim from the design handoff .mochi class.
+*/
+@keyframes floaty {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-9px);
+  }
+}

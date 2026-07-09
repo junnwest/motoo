@@ -1,0 +1,16 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: motoo-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: motoo
+      POSTGRES_PASSWORD: motoo
+      POSTGRES_DB: motoo
+    ports:
+      - "5433:5432"
+    volumes:
+      - motoo-db-data:/var/lib/postgresql/data
+
+volumes:
+  motoo-db-data:
