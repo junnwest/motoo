@@ -10,8 +10,18 @@ import type { Role } from "@prisma/client";
  * The `authorized` callback is the onboarding gate: a signed-in fan who hasn't
  * completed onboarding is redirected to /onboarding for every page except
  * onboarding itself and the pages it links to.
+ *
+ * /login and /signup are allowed so a broken/stale session (e.g. a cookie left
+ * over after a DB reseed points at a deleted user) can escape to re-auth instead
+ * of bouncing /onboarding ↔ /login forever.
  */
-const ONBOARDING_ALLOW = ["/onboarding", "/terms", "/privacy"];
+const ONBOARDING_ALLOW = [
+  "/onboarding",
+  "/terms",
+  "/privacy",
+  "/login",
+  "/signup",
+];
 
 export const authConfig = {
   session: { strategy: "jwt" },
