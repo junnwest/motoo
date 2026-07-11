@@ -3,10 +3,12 @@ import { getTranslations } from "next-intl/server";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 import { Mochi } from "@/components/Mochi";
+import { getEnabledOAuthProviders } from "@/lib/auth-providers";
 import { LoginForm } from "./LoginForm";
 
 export default async function LoginPage() {
   const t = await getTranslations("auth");
+  const providers = getEnabledOAuthProviders();
 
   return (
     <>
@@ -23,7 +25,7 @@ export default async function LoginPage() {
             </p>
           </div>
 
-          <LoginForm />
+          <LoginForm providers={providers} />
         </div>
 
         <p className="mt-6 text-center text-[14px] text-muted">
