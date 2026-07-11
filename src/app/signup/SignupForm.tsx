@@ -12,7 +12,13 @@ const labelClass = "mb-1.5 block text-[13px] font-semibold text-muted-2";
 const inputClass =
   "w-full rounded-[12px] border border-line-3 bg-white px-4 py-3 text-[15px] outline-none transition focus:border-coral/60";
 
-export function SignupForm({ providers }: { providers: EnabledProviders }) {
+export function SignupForm({
+  providers,
+  creatorMode = false,
+}: {
+  providers: EnabledProviders;
+  creatorMode?: boolean;
+}) {
   const t = useTranslations("auth");
   const [pending, startTransition] = useTransition();
   const [nickname, setNickname] = useState("");
@@ -110,13 +116,24 @@ export function SignupForm({ providers }: { providers: EnabledProviders }) {
         </Link>
       </p>
       <p className="mt-2 text-center text-[14px] text-muted">
-        {t("creatorPrompt")}{" "}
-        <Link
-          href="/api/become-creator"
-          className="font-semibold text-coral-deep hover:underline"
-        >
-          {t("goOnboarding")}
-        </Link>
+        {creatorMode ? (
+          <Link
+            href="/api/become-creator?clear=1"
+            className="font-semibold text-coral-deep hover:underline"
+          >
+            {t("plainSignupLink")}
+          </Link>
+        ) : (
+          <>
+            {t("creatorPrompt")}{" "}
+            <Link
+              href="/api/become-creator"
+              className="font-semibold text-coral-deep hover:underline"
+            >
+              {t("goOnboarding")}
+            </Link>
+          </>
+        )}
       </p>
     </div>
   );

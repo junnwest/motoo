@@ -8,8 +8,17 @@ import { auth } from "@/auth";
  * onboarding → creator setup — continues automatically to the creator step.
  */
 export async function GET(req: Request) {
-  const session = await auth();
+  const url = new URL(req.url);
   const to = (path: string) => NextResponse.redirect(new URL(path, req.url));
+
+  // ?clear=1 — drop the intent and go back to a plain signup.
+  if (url.searchParams.get("clear") === "1") {
+    const res = to("/signup");
+    res.cookies.delete("creatorIntent");
+    return res;
+  }
+
+  const session = await auth();
   const remember = (res: NextResponse) => {
     res.cookies.set("creatorIntent", "1", {
       httpOnly: true,

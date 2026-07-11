@@ -1,4 +1,5 @@
 import { getTranslations } from "next-intl/server";
+import { cookies } from "next/headers";
 import { Nav } from "@/components/Nav";
 import { Mochi } from "@/components/Mochi";
 import { getEnabledOAuthProviders } from "@/lib/auth-providers";
@@ -7,6 +8,9 @@ import { SignupForm } from "./SignupForm";
 export default async function SignupPage() {
   const t = await getTranslations("auth");
   const providers = getEnabledOAuthProviders();
+  // Set by the "become a creator" entry: signing up now continues to Studio setup.
+  const creatorMode =
+    (await cookies()).get("creatorIntent")?.value === "1";
   const benefits = [
     t("signupBenefit1"),
     t("signupBenefit2"),
@@ -62,15 +66,22 @@ export default async function SignupPage() {
         {/* Right: sign-up form */}
         <div className="flex items-center justify-center lg:px-4">
           <div className="w-full max-w-[400px]">
+            {creatorMode && (
+              <div className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-coral-chip px-3 py-1 text-[12.5px] font-semibold text-coral-deep">
+                <Mochi width={14} height={11} /> {t("creatorSignupBadge")}
+              </div>
+            )}
             <div className="mb-6">
               <h1 className="text-[27px] font-extrabold tracking-[-0.02em] text-ink">
-                {t("signupTitle")}
+                {creatorMode ? t("creatorSignupTitle") : t("signupTitle")}
               </h1>
               <p className="mt-1.5 text-[15px] text-body">
-                {t("signupSubtitle")}
+                {creatorMode
+                  ? t("creatorSignupSubtitle")
+                  : t("signupSubtitle")}
               </p>
             </div>
-            <SignupForm providers={providers} />
+            <SignupForm providers={providers} creatorMode={creatorMode} />
           </div>
         </div>
       </section>
