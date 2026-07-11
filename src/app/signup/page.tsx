@@ -1,136 +1,79 @@
-"use client";
-
-import { useState, useTransition } from "react";
-import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import { Nav } from "@/components/Nav";
-import { Footer } from "@/components/Footer";
 import { Mochi } from "@/components/Mochi";
-import { Button } from "@/components/ui/Button";
-import { signupUser } from "./actions";
+import { getEnabledOAuthProviders } from "@/lib/auth-providers";
+import { SignupForm } from "./SignupForm";
 
-const labelClass = "mb-1.5 block text-[13px] font-semibold text-muted-2";
-const inputClass =
-  "w-full rounded-[12px] border border-line-3 bg-white px-4 py-3 text-[15px] outline-none focus:border-coral/60";
-
-export default function SignupPage() {
-  const t = useTranslations("auth");
-  const [pending, startTransition] = useTransition();
-  const [nickname, setNickname] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
-
-  function submit(e: React.FormEvent) {
-    e.preventDefault();
-    setError(null);
-    startTransition(async () => {
-      // On success signupUser throws NEXT_REDIRECT (handled by the framework);
-      // it only ever returns on failure.
-      const res = await signupUser({ nickname, email, password });
-      if (res && !res.ok) setError(res.error);
-    });
-  }
+export default async function SignupPage() {
+  const t = await getTranslations("auth");
+  const providers = getEnabledOAuthProviders();
+  const benefits = [
+    t("signupBenefit1"),
+    t("signupBenefit2"),
+    t("signupBenefit3"),
+  ];
 
   return (
     <>
       <Nav variant="fan" />
-      <section className="mx-auto flex w-full max-w-[420px] flex-1 flex-col justify-center px-6 py-20">
-        <div className="rounded-[20px] border border-line-2 bg-card p-8 shadow-[0_10px_40px_rgba(0,0,0,.04)]">
-          <div className="mb-6 flex flex-col items-center text-center">
-            <Mochi width={40} height={33} float />
-            <h1 className="mt-4 text-[24px] font-extrabold tracking-[-0.02em]">
-              {t("signupTitle")}
-            </h1>
-            <p className="mt-2 text-[15px] leading-[1.6] text-body">
-              {t("signupSubtitle")}
+      <section className="mx-auto grid w-full max-w-[1080px] flex-1 grid-cols-1 items-center gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[1.05fr_1fr] lg:gap-12 lg:py-14">
+        {/* Left: warm value-prop hero */}
+        <div className="relative overflow-hidden rounded-[28px] bg-[linear-gradient(155deg,#f7eadd_0%,#f2b5a0_100%)] px-8 py-12 sm:px-12 sm:py-16">
+          {/* decorative floating mochi */}
+          <Mochi
+            width={130}
+            height={106}
+            float
+            className="pointer-events-none absolute -right-6 -top-8 opacity-60"
+          />
+          <Mochi
+            width={70}
+            height={57}
+            float
+            floatDelay={1.6}
+            className="pointer-events-none absolute -bottom-4 right-20 opacity-45"
+          />
+          <div className="relative">
+            <span className="inline-flex">
+              <Mochi width={46} height={38} float />
+            </span>
+            <h2 className="mt-6 max-w-[400px] text-[30px] font-extrabold leading-[1.25] tracking-[-0.02em] text-ink sm:text-[37px]">
+              {t("signupHeroTitle")}
+            </h2>
+            <p className="mt-4 max-w-[380px] text-[16px] leading-[1.6] text-ink/70">
+              {t("signupHeroSubtitle")}
             </p>
+            <ul className="mt-9 flex flex-col gap-3.5">
+              {benefits.map((b) => (
+                <li
+                  key={b}
+                  className="flex items-center gap-3 text-[15px] font-medium text-ink"
+                >
+                  <span className="flex h-6 w-6 flex-none items-center justify-center rounded-full bg-white/75 text-[13px] font-bold text-coral-deep">
+                    ✓
+                  </span>
+                  {b}
+                </li>
+              ))}
+            </ul>
           </div>
-
-          <form onSubmit={submit} className="flex flex-col gap-4">
-            <div>
-              <label htmlFor="nickname" className={labelClass}>
-                {t("nickname")}
-              </label>
-              <input
-                id="nickname"
-                type="text"
-                autoComplete="nickname"
-                value={nickname}
-                onChange={(e) => setNickname(e.target.value)}
-                placeholder={t("nicknamePlaceholder")}
-                required
-                className={inputClass}
-              />
-            </div>
-
-            <div>
-              <label htmlFor="email" className={labelClass}>
-                {t("email")}
-              </label>
-              <input
-                id="email"
-                type="email"
-                autoComplete="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className={inputClass}
-              />
-            </div>
-
-            <div>
-              <label htmlFor="password" className={labelClass}>
-                {t("password")}
-              </label>
-              <input
-                id="password"
-                type="password"
-                autoComplete="new-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={4}
-                className={inputClass}
-              />
-            </div>
-
-            {error && (
-              <p className="text-[13px] font-medium text-live">{t(error)}</p>
-            )}
-
-            <Button
-              type="submit"
-              variant="primary"
-              size="lg"
-              disabled={pending}
-              className="mt-1 w-full"
-            >
-              {pending ? t("signingUp") : t("signupButton")}
-            </Button>
-          </form>
         </div>
 
-        <p className="mt-6 text-center text-[14px] text-muted">
-          {t("haveAccount")}{" "}
-          <Link
-            href="/login"
-            className="font-semibold text-coral-deep hover:underline"
-          >
-            {t("goLogin")}
-          </Link>
-        </p>
-        <p className="mt-2 text-center text-[14px] text-muted">
-          {t("creatorPrompt")}{" "}
-          <Link
-            href="/creator/onboarding"
-            className="font-semibold text-coral-deep hover:underline"
-          >
-            {t("goOnboarding")}
-          </Link>
-        </p>
+        {/* Right: sign-up form */}
+        <div className="flex items-center justify-center lg:px-4">
+          <div className="w-full max-w-[400px]">
+            <div className="mb-6">
+              <h1 className="text-[27px] font-extrabold tracking-[-0.02em] text-ink">
+                {t("signupTitle")}
+              </h1>
+              <p className="mt-1.5 text-[15px] text-body">
+                {t("signupSubtitle")}
+              </p>
+            </div>
+            <SignupForm providers={providers} />
+          </div>
+        </div>
       </section>
-      <Footer variant="fan" />
     </>
   );
 }

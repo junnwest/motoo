@@ -354,7 +354,17 @@
     "goSignup": "Sign up →",
     "emailTaken": "That email is already in use.",
     "signupGeneric": "We couldn't sign you up. Please try again shortly.",
-    "creatorPrompt": "Want to start as a creator?"
+    "creatorPrompt": "Want to start as a creator?",
+    "orDivider": "or",
+    "kakaoContinue": "Continue with Kakao",
+    "naverContinue": "Continue with Naver",
+    "googleContinue": "Continue with Google",
+    "socialComingSoon": "Social login is coming soon. You can start with email for now.",
+    "signupHeroTitle": "The warmest way to support the creators you love",
+    "signupHeroSubtitle": "Buy mochi and spend it in your creators' markets.",
+    "signupBenefit1": "Buy a creator's mochi",
+    "signupBenefit2": "Redeem the items you want in their market",
+    "signupBenefit3": "Manage every creator you support in one place"
   },
   "creatorOnboarding": {
     "eyebrow": "Start as a creator",
