@@ -7,7 +7,10 @@ import { OnboardingForm } from "./OnboardingForm";
 
 export default async function OnboardingPage() {
   const backer = await getCurrentBacker();
-  if (!backer) redirect("/login");
+  // A present session but no Backer means a stale/dead session (e.g. the account
+  // was removed by a dev reseed). Clear it instead of bouncing to /login, which
+  // the middleware would send right back here → redirect loop.
+  if (!backer) redirect("/api/session-reset");
   if (backer.onboardedAt) redirect("/");
 
   const t = await getTranslations("onboarding");
