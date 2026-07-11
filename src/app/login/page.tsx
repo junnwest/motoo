@@ -96,6 +96,15 @@ export default function LoginPage() {
         </div>
 
         <p className="mt-6 text-center text-[14px] text-muted">
+          {t("signupNoLoginPrompt")}{" "}
+          <Link
+            href="/signup"
+            className="font-semibold text-coral-deep hover:underline"
+          >
+            {t("goSignup")}
+          </Link>
+        </p>
+        <p className="mt-2 text-center text-[14px] text-muted">
           {t("noAccount")}{" "}
           <Link
             href="/creator/onboarding"

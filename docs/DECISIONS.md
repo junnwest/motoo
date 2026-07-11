@@ -3,6 +3,19 @@
 Why the project is the way it is. Newest first. Keep entries short: decision,
 rationale, and any constraint it creates.
 
+## 2026-07-10 — Phase 3 follow-ups: order history, self-signup, tests
+Built the buildable, verifiable slice of the Phase 3 backlog.
+- **Order history** on `/me/mochi` (`getOrdersForBacker`) — users see redeemed
+  items with status; **self-signup** (`/signup`, role=backer) + role-aware login
+  redirect (creators land on the dashboard).
+- **Tests**: `pnpm test` runs money-logic integration tests via Node's built-in
+  runner + tsx (no new deps) against the docker Postgres, with isolated fixtures.
+  Covers buy/redeem/cancel invariants and the two concurrency guards.
+- **Real PG deliberately NOT built**: a faithful Toss/NICE adapter needs merchant
+  credentials AND a redirect+confirm flow (an architectural change), so it's
+  documented in PROGRESS.md rather than shipped as unverifiable code. Added a
+  `voidCharge` compensation hook to the interface (mock no-op) for when it lands.
+
 ## 2026-07-10 — Phase 2 build: retire backing, per-creator holdings, creator auth
 Built the mochi-marketplace. Key choices (user-approved):
 - **Retire the Phase-1 backing flow** (tiers, `Backing`, `FoundingMembership`) from the

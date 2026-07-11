@@ -109,48 +109,37 @@ function ItemCard({
 
   return (
     <div className="rounded-[16px] border border-line-2 bg-card p-5">
-      {/*
-        The card body is the edit trigger — clicking it expands the inline edit
-        form. Its accessible name is the item title (user data), so no "edit" UI
-        string is needed (the messages catalog has no dedicated edit key). Delete
-        is a separate sibling button, so the two controls never nest.
-      */}
-      <button
-        type="button"
-        onClick={onEdit}
-        className="block w-full rounded-[12px] text-left transition-colors hover:bg-black/[.02]"
-      >
-        <div className="flex flex-wrap items-center gap-2">
-          <h3 className="text-[17px] font-extrabold tracking-[-0.02em] text-ink">
-            {item.title}
-          </h3>
-          <span className="rounded-full bg-panel px-2.5 py-0.5 text-[12px] font-semibold text-muted-2">
-            {t(`items.types.${item.itemType}`)}
+      <div className="flex flex-wrap items-center gap-2">
+        <h3 className="text-[17px] font-extrabold tracking-[-0.02em] text-ink">
+          {item.title}
+        </h3>
+        <span className="rounded-full bg-panel px-2.5 py-0.5 text-[12px] font-semibold text-muted-2">
+          {t(`items.types.${item.itemType}`)}
+        </span>
+        {!item.active ? (
+          <span className="rounded-full bg-panel px-2.5 py-0.5 text-[12px] font-semibold text-muted">
+            {t("mochi.activeOff")}
           </span>
-          {!item.active ? (
-            <span className="rounded-full bg-panel px-2.5 py-0.5 text-[12px] font-semibold text-muted">
-              {t("mochi.activeOff")}
-            </span>
-          ) : null}
-        </div>
-        {item.description ? (
-          <p className="mt-1.5 text-[14px] text-muted">{item.description}</p>
         ) : null}
-        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px] text-muted">
-          <span className="flex items-center gap-1.5 font-semibold text-body">
-            <Mochi width={16} height={12} />
-            {formatCount(item.priceMochi)}
-          </span>
-          <span>{t("items.redeemed", { count: item.redeemedCount })}</span>
-          {remaining !== null ? (
-            <span>
-              {t("items.stock")}: {formatCount(remaining)}
-            </span>
-          ) : null}
-        </div>
-      </button>
+      </div>
+      {item.description ? (
+        <p className="mt-1.5 text-[14px] text-muted">{item.description}</p>
+      ) : null}
+      <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px] text-muted">
+        <span className="flex items-center gap-1.5 font-semibold text-body">
+          <Mochi width={16} height={12} />
+          {formatCount(item.priceMochi)}
+        </span>
+        <span>{t("items.redeemed", { count: item.redeemedCount })}</span>
+        {remaining !== null ? (
+          <span>{t("items.stockLeft", { count: remaining })}</span>
+        ) : null}
+      </div>
 
       <div className="mt-4 flex gap-2">
+        <Button type="button" variant="secondary" onClick={onEdit} disabled={isPending}>
+          {t("items.edit")}
+        </Button>
         <Button
           type="button"
           variant="ghost"

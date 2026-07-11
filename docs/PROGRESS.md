@@ -83,10 +83,26 @@ data; the buy → redeem → cancel-refund invariants hold end-to-end against Po
 - [x] Real credentials login form (`/login`) replacing the stub; creator onboarding creates the account + signs in
 - Dev logins: fan `demo@motoo.dev / motoo`, **creator `creator@motoo.dev / motoo`** (owns flagship `@creatorA`)
 
-### Not yet done (Phase 2 follow-ups)
-- [ ] Redemption/purchase history for users (only current holdings shown today)
-- [ ] User self-signup form (`/signup` still a stub; dev fallback covers the demo)
+### Phase 3 follow-ups
+- [x] User order/redemption history — a "주문 내역" section on `/me/mochi` (`getOrdersForBacker`)
+- [x] User self-signup — real `/signup` form + action (role=backer); role-aware login redirect (creators → dashboard)
+- [x] Automated tests — `pnpm test` runs 10 money-logic integration tests (node:test via tsx) incl. the two concurrency guards
+- [ ] Real Korean PG (Toss/NICE) — needs credentials **and** a redirect-based flow (see "Real payments" below); mock only today
 - [ ] On-platform fulfillment for access passes / digital perks
+- [ ] Real age verification / guardian consent; admin console; enable OAuth (Naver/Kakao/Google scaffolded, off)
+
+## Real payments — what a live PG needs (not built)
+
+The current `PaymentProvider` is synchronous (`purchaseMochi` charges inline in a
+server action) and only the **mock** adapter exists. A real Toss/NICE integration
+is not a drop-in adapter — it needs:
+1. **Merchant credentials** (secret key / sub-merchant onboarding) in env, not repo.
+2. **A redirect-based flow**: create a payment → redirect the buyer to the PG →
+   handle the success/fail callback → **server-side confirm** → then credit mochi.
+   This replaces the current "charge inline, credit in the same request" shape.
+3. **Webhook + reconciliation** for async settlement and refunds/voids (the
+   `voidCharge` compensation hook exists but is a mock no-op today).
+Until then, `PAYMENT_PROVIDER=mock` grants mochi without moving real money.
 
 ### Marketplace item guidelines (all optional, off-platform fulfillment for v1)
 - Digital/experiential (Q&A slot, shout-out, song/topic request, priority chat)

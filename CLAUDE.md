@@ -15,6 +15,9 @@ schema kept.)
 - **Not a financial product.** No investment/return vocabulary in user-facing copy (spec §2).
   Run `pnpm check:vocab` after touching copy. Mochi = prepaid marketplace credit:
   non-transferable, unspent-refundable, no resale/return.
+- **Money logic is tested.** Run `pnpm test` (node:test via tsx, needs `pnpm db:up`)
+  after touching `src/lib/mochi.ts` — it asserts the buy/redeem/cancel invariants
+  and the concurrency guards (no oversell, no negative balance).
 - Money is **integer KRW**, never floats.
 - Korean-first, **no hardcoded strings** — all copy in `messages/*.json` (next-intl).
 

@@ -341,7 +341,20 @@
     "noAccount": "크리에이터로 시작하고 싶으신가요?",
     "goOnboarding": "크리에이터 시작하기 →",
     "invalid": "이메일 또는 비밀번호가 올바르지 않아요.",
-    "logout": "로그아웃"
+    "logout": "로그아웃",
+    "signupTitle": "회원가입",
+    "signupSubtitle": "이메일로 간편하게 시작하세요.",
+    "nickname": "닉네임",
+    "nicknamePlaceholder": "다른 팬들에게 보일 이름",
+    "signupButton": "회원가입",
+    "signingUp": "가입 중…",
+    "haveAccount": "이미 계정이 있으신가요?",
+    "goLogin": "로그인 →",
+    "signupNoLoginPrompt": "계정이 없으신가요?",
+    "goSignup": "회원가입 →",
+    "emailTaken": "이미 사용 중인 이메일이에요.",
+    "signupGeneric": "가입하지 못했어요. 잠시 후 다시 시도해 주세요.",
+    "creatorPrompt": "크리에이터로 시작하고 싶으신가요?"
   },
   "creatorOnboarding": {
     "eyebrow": "크리에이터 시작하기",
@@ -430,8 +443,10 @@
       "stock": "수량 (비우면 무제한)",
       "active": "판매 중",
       "redeemed": "{count}회 사용됨",
+      "stockLeft": "재고 {count}개",
       "add": "추가",
       "save": "저장",
+      "edit": "수정",
       "delete": "삭제",
       "cancel": "취소"
     },
@@ -498,6 +513,16 @@
     "empty": "아직 보유한 모찌가 없어요.",
     "exploreCta": "크리에이터 둘러보기 →",
     "balance": "{count} 모찌",
-    "visit": "마켓 가기 →"
+    "visit": "마켓 가기 →",
+    "holdingsTitle": "보유 모찌",
+    "historyTitle": "주문 내역",
+    "historySubtitle": "모찌로 이용한 아이템 내역이에요.",
+    "historyEmpty": "아직 주문 내역이 없어요.",
+    "spent": "{count} 모찌 사용",
+    "orderStatus": {
+      "pending": "준비 중",
+      "fulfilled": "완료",
+      "cancelled": "취소·환불"
+    }
   }
 }

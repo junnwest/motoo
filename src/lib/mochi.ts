@@ -294,4 +294,16 @@ export async function getHoldingsForBacker(backerId: string) {
   });
 }
 
+/** A user's order/redemption history across creators, newest first. */
+export async function getOrdersForBacker(backerId: string) {
+  return prisma.order.findMany({
+    where: { backerId },
+    orderBy: { createdAt: "desc" },
+    include: {
+      item: { select: { title: true } },
+      streamer: { select: { handle: true, displayName: true, avatarUrl: true } },
+    },
+  });
+}
+
 export { Prisma };

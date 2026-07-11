@@ -5,7 +5,24 @@ import { ButtonLink } from "@/components/ui/Button";
 import { Mochi } from "@/components/Mochi";
 import { Avatar } from "@/components/ui/Placeholder";
 import { getCurrentBacker } from "@/lib/session";
-import { getHoldingsForBacker } from "@/lib/mochi";
+import { getHoldingsForBacker, getOrdersForBacker } from "@/lib/mochi";
+
+const ORDER_STATUS_CHIP: Record<string, string> = {
+  pending: "bg-coral-chip text-coral-deep",
+  fulfilled: "bg-sage-bg text-sage",
+  cancelled: "bg-panel text-muted",
+};
+
+function formatKstDate(date: Date): string {
+  const parts = new Intl.DateTimeFormat("ko-KR", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(date);
+  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? "";
+  return `${get("year")}.${get("month")}.${get("day")}`;
+}
 
 /**
  * "My mochi" — a user's mochi holdings across creators (per-creator balances).
@@ -38,7 +55,10 @@ export default async function MyMochiPage() {
     );
   }
 
-  const holdings = await getHoldingsForBacker(backer.id);
+  const [holdings, orders] = await Promise.all([
+    getHoldingsForBacker(backer.id),
+    getOrdersForBacker(backer.id),
+  ]);
 
   return (
     <>
@@ -50,8 +70,11 @@ export default async function MyMochiPage() {
         </h1>
         <p className="mt-2 text-[16px] text-body">{t("subtitle")}</p>
 
+        <h2 className="mt-10 text-[20px] font-extrabold tracking-[-0.02em] text-ink">
+          {t("holdingsTitle")}
+        </h2>
         {holdings.length === 0 ? (
-          <div className="mt-10 flex flex-col items-center rounded-[24px] border border-dashed border-line-3 bg-cream-warm/50 px-6 py-20 text-center">
+          <div className="mt-4 flex flex-col items-center rounded-[24px] border border-dashed border-line-3 bg-cream-warm/50 px-6 py-16 text-center">
             <div className="mb-3 text-[40px]">🍡</div>
             <p className="max-w-[360px] text-[15px] text-body">{t("empty")}</p>
             <ButtonLink
@@ -64,7 +87,7 @@ export default async function MyMochiPage() {
             </ButtonLink>
           </div>
         ) : (
-          <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
             {holdings.map((h) => (
               <div
                 key={h.id}
@@ -104,6 +127,52 @@ export default async function MyMochiPage() {
               </div>
             ))}
           </div>
+        )}
+
+        {/* Order / redemption history */}
+        <h2 className="mt-14 text-[20px] font-extrabold tracking-[-0.02em] text-ink">
+          {t("historyTitle")}
+        </h2>
+        <p className="mt-1 text-[14px] text-muted">{t("historySubtitle")}</p>
+
+        {orders.length === 0 ? (
+          <div className="mt-4 rounded-[20px] border border-dashed border-line-3 bg-cream-warm/50 px-6 py-12 text-center text-[15px] text-muted">
+            {t("historyEmpty")}
+          </div>
+        ) : (
+          <ul className="mt-4 flex flex-col gap-3">
+            {orders.map((o) => (
+              <li
+                key={o.id}
+                className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-[16px] border border-line-2 bg-card p-4"
+              >
+                <Avatar
+                  name={o.streamer.displayName}
+                  src={o.streamer.avatarUrl}
+                  size={36}
+                />
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-[15px] font-bold text-ink">
+                    {o.item.title}
+                  </div>
+                  <div className="truncate text-[13px] text-muted">
+                    {o.streamer.displayName} · {formatKstDate(o.createdAt)}
+                  </div>
+                </div>
+                <span className="flex items-center gap-1.5 text-[14px] font-extrabold text-ink">
+                  <Mochi width={15} height={11} />
+                  {t("spent", { count: o.mochiSpent })}
+                </span>
+                <span
+                  className={`rounded-full px-2.5 py-1 text-[12px] font-semibold ${
+                    ORDER_STATUS_CHIP[o.status] ?? "bg-panel text-muted"
+                  }`}
+                >
+                  {t(`orderStatus.${o.status}`)}
+                </span>
+              </li>
+            ))}
+          </ul>
         )}
       </section>
 

@@ -341,7 +341,20 @@
     "noAccount": "Want to start as a creator?",
     "goOnboarding": "Start as a creator →",
     "invalid": "Email or password is incorrect.",
-    "logout": "Log out"
+    "logout": "Log out",
+    "signupTitle": "Sign up",
+    "signupSubtitle": "Get started in seconds with your email.",
+    "nickname": "Nickname",
+    "nicknamePlaceholder": "The name other fans will see",
+    "signupButton": "Sign up",
+    "signingUp": "Signing up…",
+    "haveAccount": "Already have an account?",
+    "goLogin": "Log in →",
+    "signupNoLoginPrompt": "No account yet?",
+    "goSignup": "Sign up →",
+    "emailTaken": "That email is already in use.",
+    "signupGeneric": "We couldn't sign you up. Please try again shortly.",
+    "creatorPrompt": "Want to start as a creator?"
   },
   "creatorOnboarding": {
     "eyebrow": "Start as a creator",
@@ -430,8 +443,10 @@
       "stock": "Stock (leave blank for unlimited)",
       "active": "On sale",
       "redeemed": "{count} redeemed",
+      "stockLeft": "{count} in stock",
       "add": "Add",
       "save": "Save",
+      "edit": "Edit",
       "delete": "Delete",
       "cancel": "Cancel"
     },
@@ -498,6 +513,16 @@
     "empty": "You don't hold any mochi yet.",
     "exploreCta": "Explore creators →",
     "balance": "{count} mochi",
-    "visit": "Go to market →"
+    "visit": "Go to market →",
+    "holdingsTitle": "Holdings",
+    "historyTitle": "Order history",
+    "historySubtitle": "Items you've used your mochi on.",
+    "historyEmpty": "No orders yet.",
+    "spent": "{count} mochi spent",
+    "orderStatus": {
+      "pending": "In progress",
+      "fulfilled": "Done",
+      "cancelled": "Cancelled & refunded"
+    }
   }
 }
