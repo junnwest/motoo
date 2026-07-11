@@ -22,7 +22,10 @@
     "whatIsMochi": "What is mochi?",
     "forCreators": "For creators",
     "forFans": "For fans",
-    "applyAsCreator": "Apply as creator"
+    "applyAsCreator": "Apply as creator",
+    "dashboard": "Dashboard",
+    "logout": "Log out",
+    "greeting": "{name}"
   },
   "footer": {
     "fanTagline": "The warmest way to back a creator you love.",
@@ -360,6 +363,7 @@
     "naverContinue": "Continue with Naver",
     "googleContinue": "Continue with Google",
     "socialComingSoon": "Social login is coming soon. You can start with email for now.",
+    "comingSoonBadge": "Soon",
     "signupHeroTitle": "The warmest way to support the creators you love",
     "signupHeroSubtitle": "Buy mochi and spend it in your creators' markets.",
     "signupBenefit1": "Buy a creator's mochi",

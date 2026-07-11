@@ -1,18 +1,29 @@
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
+import { auth } from "@/auth";
+import { logoutAction } from "@/app/auth-actions";
 import { BrandLogo } from "./BrandLogo";
-import { ButtonLink } from "./ui/Button";
+import { Button, ButtonLink } from "./ui/Button";
 
 /**
  * Top navigation. Two variants:
  *  - "fan" (default landing) links to Explore + the creator page ("크리에이터용 ↗")
  *  - "creator" (the page we send to creators) links back to the fan side
  * Middle links collapse on mobile; brand + primary CTA always remain.
+ *
+ * Auth-aware (server component): reads the session on every page render, so it's
+ * always fresh after a sign-in/out redirect. When signed in, the login/signup
+ * cluster becomes the user's name + a log-out button (via a server action), plus
+ * a dashboard link for creators.
  */
-export function Nav({ variant = "fan" }: { variant?: "fan" | "creator" }) {
-  const t = useTranslations("nav");
-  const tc = useTranslations("common");
-  const tm = useTranslations("myMochi");
+export async function Nav({ variant = "fan" }: { variant?: "fan" | "creator" }) {
+  const t = await getTranslations("nav");
+  const tc = await getTranslations("common");
+  const tm = await getTranslations("myMochi");
+  const session = await auth();
+  const authed = !!session?.user;
+  const isCreator = session?.user?.role === "streamer";
+  const name = session?.user?.nickname ?? session?.user?.name ?? "";
 
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-cream/90 backdrop-blur">
@@ -31,10 +42,7 @@ export function Nav({ variant = "fan" }: { variant?: "fan" | "creator" }) {
               >
                 {t("whatIsMochi")}
               </Link>
-              <Link
-                href="/me/mochi"
-                className="hidden hover:text-ink sm:inline"
-              >
+              <Link href="/me/mochi" className="hidden hover:text-ink sm:inline">
                 {tm("title")}
               </Link>
               <Link
@@ -43,12 +51,6 @@ export function Nav({ variant = "fan" }: { variant?: "fan" | "creator" }) {
               >
                 {t("forCreators")} <span className="text-[12px]">↗</span>
               </Link>
-              <Link href="/login" className="font-semibold text-ink">
-                {tc("login")}
-              </Link>
-              <ButtonLink href="/signup" variant="primary" size="md">
-                {tc("signup")}
-              </ButtonLink>
             </>
           ) : (
             <>
@@ -70,12 +72,49 @@ export function Nav({ variant = "fan" }: { variant?: "fan" | "creator" }) {
               >
                 {t("forFans")} <span className="text-[12px]">↗</span>
               </Link>
+            </>
+          )}
+
+          {/* Auth cluster */}
+          {authed ? (
+            <>
+              {isCreator && (
+                <Link
+                  href="/creator/dashboard"
+                  className="hidden font-semibold text-ink hover:text-coral-deep sm:inline"
+                >
+                  {t("dashboard")}
+                </Link>
+              )}
+              {name && (
+                <span className="hidden text-[14px] font-semibold text-ink sm:inline">
+                  {t("greeting", { name })}
+                </span>
+              )}
+              <form action={logoutAction}>
+                <Button type="submit" variant="secondary" size="md">
+                  {t("logout")}
+                </Button>
+              </form>
+            </>
+          ) : (
+            <>
               <Link href="/login" className="font-semibold text-ink">
                 {tc("login")}
               </Link>
-              <ButtonLink href="/creator/onboarding" variant="primary" size="md">
-                {t("applyAsCreator")}
-              </ButtonLink>
+              {variant === "fan" ? (
+                <ButtonLink href="/signup" variant="primary" size="md">
+                  {tc("signup")}
+                </ButtonLink>
+              ) : (
+                <ButtonLink
+                  href="/creator/onboarding"
+                  variant="primary"
+                  size="md"
+                >
+                  {t("applyAsCreator")}
+                </ButtonLink>
+              )}
             </>
           )}
         </div>

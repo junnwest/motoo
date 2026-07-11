@@ -22,7 +22,10 @@
     "whatIsMochi": "모찌란?",
     "forCreators": "크리에이터용",
     "forFans": "후원자용",
-    "applyAsCreator": "크리에이터 신청"
+    "applyAsCreator": "크리에이터 신청",
+    "dashboard": "대시보드",
+    "logout": "로그아웃",
+    "greeting": "{name}님"
   },
   "footer": {
     "fanTagline": "좋아하는 크리에이터를 응원하는 가장 따뜻한 방법.",
@@ -360,6 +363,7 @@
     "naverContinue": "네이버로 시작하기",
     "googleContinue": "Google로 계속하기",
     "socialComingSoon": "소셜 로그인은 곧 제공될 예정이에요. 지금은 이메일로 시작할 수 있어요.",
+    "comingSoonBadge": "준비 중",
     "signupHeroTitle": "좋아하는 크리에이터를 응원하는 가장 따뜻한 방법",
     "signupHeroSubtitle": "모찌를 구매해 크리에이터의 마켓에서 사용하세요.",
     "signupBenefit1": "크리에이터의 모찌를 구매해요",

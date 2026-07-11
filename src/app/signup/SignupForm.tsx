@@ -77,6 +77,11 @@ export function SignupForm({ providers }: { providers: EnabledProviders }) {
             <KakaoMark />
           </span>
           {t("kakaoContinue")}
+          {!providers.kakao && (
+            <span className="absolute right-3 rounded-full bg-black/10 px-2 py-0.5 text-[11px] font-semibold text-[#191600]">
+              {t("comingSoonBadge")}
+            </span>
+          )}
         </button>
         <button
           type="button"
@@ -86,6 +91,11 @@ export function SignupForm({ providers }: { providers: EnabledProviders }) {
         >
           <span className="absolute left-[18px] text-[16px] font-black">N</span>
           {t("naverContinue")}
+          {!providers.naver && (
+            <span className="absolute right-3 rounded-full bg-white/25 px-2 py-0.5 text-[11px] font-semibold text-white">
+              {t("comingSoonBadge")}
+            </span>
+          )}
         </button>
         <button
           type="button"
@@ -97,6 +107,11 @@ export function SignupForm({ providers }: { providers: EnabledProviders }) {
             G
           </span>
           {t("googleContinue")}
+          {!providers.google && (
+            <span className="absolute right-3 rounded-full bg-panel px-2 py-0.5 text-[11px] font-semibold text-muted">
+              {t("comingSoonBadge")}
+            </span>
+          )}
         </button>
       </div>
 
