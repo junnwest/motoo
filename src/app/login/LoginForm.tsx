@@ -31,7 +31,6 @@ export function LoginForm({ providers }: { providers: EnabledProviders }) {
 
   return (
     <div>
-      <SocialButtons providers={providers} />
       <form onSubmit={submit} className="flex flex-col gap-4">
         <div>
         <label htmlFor="email" className={labelClass}>
@@ -77,6 +76,7 @@ export function LoginForm({ providers }: { providers: EnabledProviders }) {
         {pending ? t("loggingIn") : t("loginButton")}
       </Button>
       </form>
+      <SocialButtons providers={providers} />
     </div>
   );
 }

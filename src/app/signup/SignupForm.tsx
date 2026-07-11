@@ -33,8 +33,6 @@ export function SignupForm({ providers }: { providers: EnabledProviders }) {
 
   return (
     <div>
-      <SocialButtons providers={providers} />
-
       {/* Email / password */}
       <form onSubmit={submit} className="flex flex-col gap-4">
         <div>
@@ -98,6 +96,8 @@ export function SignupForm({ providers }: { providers: EnabledProviders }) {
           {pending ? t("signingUp") : t("signupButton")}
         </Button>
       </form>
+
+      <SocialButtons providers={providers} />
 
       {/* Secondary links */}
       <p className="mt-6 text-center text-[14px] text-muted">
