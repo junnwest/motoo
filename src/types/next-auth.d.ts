@@ -7,6 +7,7 @@ declare module "next-auth" {
       id: string;
       role: Role;
       nickname: string;
+      onboarded: boolean;
     } & DefaultSession["user"];
   }
 
@@ -20,5 +21,6 @@ declare module "next-auth/jwt" {
     backerId?: string;
     role?: Role;
     nickname?: string;
+    onboarded?: boolean;
   }
 }

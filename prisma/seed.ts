@@ -96,6 +96,16 @@ async function main() {
   // A pool of backers reused across streamers (so "core fans" can back several).
   console.log("Creating backers…");
   const devHash = hashPassword("motoo");
+  // Seeded accounts are grandfathered as already-onboarded + verified, so the
+  // onboarding middleware doesn't force them through /onboarding.
+  const grandfathered = {
+    onboardedAt: new Date("2026-06-01"),
+    termsAgreedAt: new Date("2026-06-01"),
+    verifiedAt: new Date("2026-06-01"),
+    verifiedName: "홍길동",
+    birthYear: 1997,
+    ageVerified: true,
+  };
   const backers = [];
   for (let i = 0; i < 60; i++) {
     const nickname = `${pick(NICKNAMES)}${i}`;
@@ -105,8 +115,9 @@ async function main() {
           email: `fan${i}@motoo.dev`,
           nickname,
           currencyBalance: 200 + Math.floor(rand() * 400),
-          ageVerified: true,
           passwordHash: devHash,
+          ...grandfathered,
+          gender: pick(["female", "male", "other", "undisclosed"] as const),
         },
       }),
     );
@@ -116,10 +127,12 @@ async function main() {
     data: {
       email: "demo@motoo.dev",
       nickname: "데모후원자",
+      handle: "demo_fan",
       currencyBalance: 500,
-      ageVerified: true,
       passwordHash: devHash,
       role: "backer",
+      ...grandfathered,
+      gender: "female",
     },
   });
   backers.push(demo);
@@ -128,9 +141,9 @@ async function main() {
     data: {
       email: "admin@motoo.dev",
       nickname: "관리자",
-      ageVerified: true,
       passwordHash: devHash,
       role: "admin",
+      ...grandfathered,
     },
   });
 
@@ -140,9 +153,10 @@ async function main() {
     data: {
       email: "creator@motoo.dev",
       nickname: "크리에이터A",
-      ageVerified: true,
       passwordHash: devHash,
       role: "streamer",
+      ...grandfathered,
+      gender: "female",
     },
   });
 

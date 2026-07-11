@@ -38,7 +38,7 @@ export async function signupUser(
         nickname,
         passwordHash: hashPassword(password),
         role: "backer",
-        ageVerified: true,
+        // Not onboarded/verified yet — the middleware routes them to /onboarding.
       },
     });
   } catch (e) {

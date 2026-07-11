@@ -1,11 +1,11 @@
-import NextAuth, { type NextAuthConfig } from "next-auth";
+import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Naver from "next-auth/providers/naver";
 import Kakao from "next-auth/providers/kakao";
 import Google from "next-auth/providers/google";
 import { prisma } from "@/lib/db";
 import { verifyPassword } from "@/lib/password";
-import type { Role } from "@prisma/client";
+import { authConfig } from "./auth.config";
 
 /** Only enable an OAuth provider when its credentials are present (spec §9). */
 const oauthProviders = [];
@@ -34,9 +34,8 @@ if (process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET) {
   );
 }
 
-export const authConfig: NextAuthConfig = {
-  session: { strategy: "jwt" },
-  trustHost: true,
+export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
+  ...authConfig,
   providers: [
     // Dev-only email + password login against the Backer table.
     Credentials({
@@ -63,6 +62,7 @@ export const authConfig: NextAuthConfig = {
     ...oauthProviders,
   ],
   callbacks: {
+    ...authConfig.callbacks,
     async jwt({ token, user }) {
       // On sign-in, ensure a Backer exists (OAuth users are provisioned lazily).
       if (user?.email) {
@@ -79,18 +79,20 @@ export const authConfig: NextAuthConfig = {
         token.backerId = backer.id;
         token.role = backer.role;
         token.nickname = backer.nickname;
+        token.onboarded = !!backer.onboardedAt;
+      }
+      // Refresh the onboarded flag while it's still false (cheap: the query stops
+      // once true). This flips the token after /onboarding completes — the
+      // completeOnboarding action calls unstable_update() to trigger it.
+      if (token.backerId && !token.onboarded) {
+        const b = await prisma.backer.findUnique({
+          where: { id: token.backerId as string },
+          select: { onboardedAt: true, nickname: true },
+        });
+        token.onboarded = !!b?.onboardedAt;
+        if (b?.nickname) token.nickname = b.nickname;
       }
       return token;
     },
-    async session({ session, token }) {
-      if (token.backerId) {
-        session.user.id = token.backerId as string;
-        session.user.role = token.role as Role;
-        session.user.nickname = token.nickname as string;
-      }
-      return session;
-    },
   },
-};
-
-export const { handlers, auth, signIn, signOut } = NextAuth(authConfig);
+});

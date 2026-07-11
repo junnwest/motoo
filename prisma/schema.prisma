@@ -166,13 +166,27 @@ model Backer {
   id              String   @id @default(cuid())
   email           String   @unique
   nickname        String
+  handle          String?  @unique // public fan @handle, chosen at onboarding
   avatarUrl       String?
   currencyBalance Int      @default(0) // legacy Phase-1 global mochi; dormant — Phase 2 uses per-creator MochiHolding
-  ageVerified     Boolean  @default(false)
-  guardianConsent Boolean?
   role            Role     @default(backer)
   passwordHash    String? // dev credentials login only
   createdAt       DateTime @default(now())
+
+  // Onboarding — every new user completes this once (creators use /creator/onboarding).
+  // Middleware redirects a signed-in, non-onboarded fan to /onboarding.
+  onboardedAt      DateTime?
+  termsAgreedAt    DateTime? // 필수 약관(이용약관·개인정보) 동의 시각
+  marketingConsent Boolean   @default(false) // 선택 마케팅 수신 동의
+
+  // Identity verification (본인인증) — populated by a VerificationProvider (mock in
+  // dev; NICE/PASS in prod). Real age gate for payments; not self-reported.
+  verifiedAt      DateTime?
+  verifiedName    String?
+  birthYear       Int?
+  gender          Gender?
+  ageVerified     Boolean   @default(false)
+  guardianConsent Boolean? // true once a minor's guardian consent is recorded
 
   backings            Backing[]
   foundingMemberships FoundingMembership[]

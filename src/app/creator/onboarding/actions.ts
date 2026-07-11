@@ -57,6 +57,10 @@ export async function onboardCreator(
           passwordHash: hashPassword(password),
           role: "streamer",
           ageVerified: true,
+          // Creators complete their own onboarding here, so they never hit the
+          // fan /onboarding flow.
+          onboardedAt: new Date(),
+          termsAgreedAt: new Date(),
         },
       });
 

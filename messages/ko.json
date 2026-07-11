@@ -538,5 +538,45 @@
       "fulfilled": "완료",
       "cancelled": "취소·환불"
     }
+  },
+  "onboarding": {
+    "eyebrow": "환영해요",
+    "title": "시작하기 전에 프로필을 완성해주세요",
+    "subtitle": "모찌를 구매하고 마켓을 이용하려면 몇 가지만 확인할게요.",
+    "sectionProfile": "프로필",
+    "nickname": "닉네임",
+    "nicknamePlaceholder": "다른 팬들에게 보일 이름",
+    "handle": "아이디",
+    "handleHint": "공개 프로필 주소로 쓰여요 · 영문 소문자·숫자·밑줄",
+    "handlePlaceholder": "myhandle",
+    "handleChecking": "확인 중…",
+    "handleAvailable": "사용할 수 있어요",
+    "handleTaken": "이미 사용 중이에요",
+    "handleInvalid": "영문 소문자·숫자·밑줄 2~20자로 입력해주세요",
+    "sectionVerify": "본인인증",
+    "verifySubtitle": "결제와 연령 확인을 위해 본인인증이 필요해요.",
+    "verifyButton": "휴대폰으로 본인인증",
+    "verifying": "인증 중…",
+    "verifiedLabel": "본인인증 완료",
+    "verifiedAdult": "성인 인증 완료",
+    "verifyDemoNote": "데모: 실제 서비스에서는 NICE·PASS 등 본인확인기관을 통해 인증해요.",
+    "sectionTerms": "약관 동의",
+    "termsRequired": "(필수) <a>이용약관</a> 및 <b>개인정보처리방침</b>에 동의합니다",
+    "marketingOptional": "(선택) 이벤트·혜택 마케팅 정보 수신에 동의합니다",
+    "submit": "시작하기",
+    "submitting": "완료하는 중…",
+    "errors": {
+      "nicknameRequired": "닉네임을 입력해주세요.",
+      "handleRequired": "사용할 수 있는 아이디를 입력해주세요.",
+      "verifyRequired": "본인인증을 완료해주세요.",
+      "termsRequired": "필수 약관에 동의해주세요.",
+      "generic": "완료하지 못했어요. 잠시 후 다시 시도해주세요."
+    }
+  },
+  "legal": {
+    "termsTitle": "이용약관",
+    "privacyTitle": "개인정보처리방침",
+    "placeholder": "데모용 자리표시 문서예요. 정식 약관은 추후 제공됩니다.",
+    "back": "돌아가기"
   }
 }

@@ -538,5 +538,45 @@
       "fulfilled": "Done",
       "cancelled": "Cancelled & refunded"
     }
+  },
+  "onboarding": {
+    "eyebrow": "Welcome",
+    "title": "Finish your profile to get started",
+    "subtitle": "Just a couple of checks before you can buy mochi and use the market.",
+    "sectionProfile": "Profile",
+    "nickname": "Nickname",
+    "nicknamePlaceholder": "The name other fans will see",
+    "handle": "Handle",
+    "handleHint": "Your public profile address · lowercase letters, numbers, underscore",
+    "handlePlaceholder": "myhandle",
+    "handleChecking": "Checking…",
+    "handleAvailable": "Available",
+    "handleTaken": "Already taken",
+    "handleInvalid": "Use 2–20 lowercase letters, numbers, or underscores",
+    "sectionVerify": "Identity verification",
+    "verifySubtitle": "Verification is required for payments and age checks.",
+    "verifyButton": "Verify with your phone",
+    "verifying": "Verifying…",
+    "verifiedLabel": "Verified",
+    "verifiedAdult": "Adult verified",
+    "verifyDemoNote": "Demo: production verifies via a licensed provider (NICE / PASS).",
+    "sectionTerms": "Agreements",
+    "termsRequired": "(Required) I agree to the <a>Terms of Service</a> and <b>Privacy Policy</b>",
+    "marketingOptional": "(Optional) I agree to receive marketing about events and perks",
+    "submit": "Get started",
+    "submitting": "Finishing…",
+    "errors": {
+      "nicknameRequired": "Please enter a nickname.",
+      "handleRequired": "Please pick an available handle.",
+      "verifyRequired": "Please complete identity verification.",
+      "termsRequired": "Please agree to the required terms.",
+      "generic": "We couldn't finish. Please try again shortly."
+    }
+  },
+  "legal": {
+    "termsTitle": "Terms of Service",
+    "privacyTitle": "Privacy Policy",
+    "placeholder": "Placeholder document for the demo. Full terms to come.",
+    "back": "Back"
   }
 }

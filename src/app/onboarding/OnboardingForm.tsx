@@ -1,0 +1,226 @@
+"use client";
+
+import { useEffect, useState, useTransition } from "react";
+import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { Button } from "@/components/ui/Button";
+import { Eyebrow } from "@/components/ui/Eyebrow";
+import { checkHandle, verifyIdentity, completeOnboarding } from "./actions";
+
+const labelClass = "mb-1.5 block text-[13px] font-semibold text-muted-2";
+const inputClass =
+  "w-full rounded-[12px] border border-line-3 bg-white px-4 py-3 text-[15px] outline-none transition focus:border-coral/60";
+
+type HandleState = "idle" | "checking" | "available" | "taken" | "invalid";
+
+export function OnboardingForm({
+  defaultNickname,
+  alreadyVerified,
+}: {
+  defaultNickname: string;
+  alreadyVerified: boolean;
+}) {
+  const t = useTranslations("onboarding");
+  const [nickname, setNickname] = useState(defaultNickname);
+  const [handle, setHandle] = useState("");
+  const [handleState, setHandleState] = useState<HandleState>("idle");
+  const [verified, setVerified] = useState(alreadyVerified);
+  const [verifyPending, startVerify] = useTransition();
+  const [agreedTerms, setAgreedTerms] = useState(false);
+  const [marketing, setMarketing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [submitPending, startSubmit] = useTransition();
+
+  // Debounced handle availability check.
+  useEffect(() => {
+    const h = handle.trim().toLowerCase();
+    if (!h) return setHandleState("idle");
+    if (!/^[a-z0-9_]{2,20}$/.test(h)) return setHandleState("invalid");
+    setHandleState("checking");
+    const timer = setTimeout(async () => {
+      const res = await checkHandle(h);
+      setHandleState(
+        res.available ? "available" : res.reason === "taken" ? "taken" : "invalid",
+      );
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [handle]);
+
+  function verify() {
+    setError(null);
+    startVerify(async () => {
+      const res = await verifyIdentity();
+      if (res.ok) setVerified(true);
+      else setError("generic");
+    });
+  }
+
+  function submit(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    if (!nickname.trim()) return setError("nicknameRequired");
+    if (handleState !== "available") return setError("handleRequired");
+    if (!verified) return setError("verifyRequired");
+    if (!agreedTerms) return setError("termsRequired");
+    startSubmit(async () => {
+      const res = await completeOnboarding({
+        nickname: nickname.trim(),
+        handle: handle.trim().toLowerCase(),
+        marketingConsent: marketing,
+        agreedTerms,
+      });
+      if (res && !res.ok) setError(res.error);
+      // on success the action redirects server-side
+    });
+  }
+
+  const canSubmit =
+    !!nickname.trim() &&
+    handleState === "available" &&
+    verified &&
+    agreedTerms &&
+    !submitPending;
+
+  return (
+    <form
+      onSubmit={submit}
+      className="flex flex-col gap-7 rounded-[24px] border border-line-2 bg-card p-7 sm:p-8"
+    >
+      {/* Profile */}
+      <section className="flex flex-col gap-4">
+        <Eyebrow>{t("sectionProfile")}</Eyebrow>
+        <div>
+          <label htmlFor="ob-nickname" className={labelClass}>
+            {t("nickname")}
+          </label>
+          <input
+            id="ob-nickname"
+            type="text"
+            value={nickname}
+            onChange={(e) => setNickname(e.target.value)}
+            placeholder={t("nicknamePlaceholder")}
+            maxLength={40}
+            className={inputClass}
+          />
+        </div>
+        <div>
+          <label htmlFor="ob-handle" className={labelClass}>
+            {t("handle")}
+          </label>
+          <div className="flex items-center rounded-[12px] border border-line-3 bg-white pl-3 transition focus-within:border-coral/60">
+            <span className="text-[15px] text-muted">@</span>
+            <input
+              id="ob-handle"
+              type="text"
+              value={handle}
+              onChange={(e) => setHandle(e.target.value.toLowerCase())}
+              placeholder={t("handlePlaceholder")}
+              maxLength={20}
+              autoCapitalize="none"
+              className="w-full bg-transparent px-2 py-3 text-[15px] outline-none"
+            />
+          </div>
+          <p
+            className={`mt-1.5 text-[13px] ${
+              handleState === "available"
+                ? "text-sage"
+                : handleState === "taken" || handleState === "invalid"
+                  ? "text-live"
+                  : "text-muted"
+            }`}
+          >
+            {handleState === "checking"
+              ? t("handleChecking")
+              : handleState === "available"
+                ? `✓ ${t("handleAvailable")}`
+                : handleState === "taken"
+                  ? t("handleTaken")
+                  : handleState === "invalid"
+                    ? t("handleInvalid")
+                    : t("handleHint")}
+          </p>
+        </div>
+      </section>
+
+      {/* Identity verification */}
+      <section className="flex flex-col gap-3">
+        <Eyebrow>{t("sectionVerify")}</Eyebrow>
+        {verified ? (
+          <div className="flex items-center gap-2 rounded-[14px] bg-sage-bg px-4 py-3 text-[14px] font-semibold text-sage">
+            <span>✓</span>
+            {t("verifiedLabel")} · {t("verifiedAdult")}
+          </div>
+        ) : (
+          <>
+            <p className="text-[14px] text-body">{t("verifySubtitle")}</p>
+            <Button
+              type="button"
+              variant="dark"
+              size="md"
+              disabled={verifyPending}
+              onClick={verify}
+              className="w-full"
+            >
+              {verifyPending ? t("verifying") : t("verifyButton")}
+            </Button>
+            <p className="text-[12px] leading-[1.5] text-muted">
+              {t("verifyDemoNote")}
+            </p>
+          </>
+        )}
+      </section>
+
+      {/* Terms */}
+      <section className="flex flex-col gap-3">
+        <Eyebrow>{t("sectionTerms")}</Eyebrow>
+        <label className="flex cursor-pointer items-start gap-2.5 text-[14px] text-ink">
+          <input
+            type="checkbox"
+            checked={agreedTerms}
+            onChange={(e) => setAgreedTerms(e.target.checked)}
+            className="mt-0.5 h-5 w-5 shrink-0 rounded-[6px] border border-line-3 accent-coral"
+          />
+          <span>
+            {t.rich("termsRequired", {
+              a: (c) => (
+                <Link href="/terms" className="font-semibold text-coral-deep underline">
+                  {c}
+                </Link>
+              ),
+              b: (c) => (
+                <Link href="/privacy" className="font-semibold text-coral-deep underline">
+                  {c}
+                </Link>
+              ),
+            })}
+          </span>
+        </label>
+        <label className="flex cursor-pointer items-start gap-2.5 text-[14px] text-body">
+          <input
+            type="checkbox"
+            checked={marketing}
+            onChange={(e) => setMarketing(e.target.checked)}
+            className="mt-0.5 h-5 w-5 shrink-0 rounded-[6px] border border-line-3 accent-coral"
+          />
+          <span>{t("marketingOptional")}</span>
+        </label>
+      </section>
+
+      {error && (
+        <p className="text-[13px] font-semibold text-live">
+          {t(`errors.${error}`)}
+        </p>
+      )}
+
+      <Button
+        type="submit"
+        variant="primary"
+        size="lg"
+        disabled={!canSubmit}
+        className="w-full"
+      >
+        {submitPending ? t("submitting") : t("submit")}
+      </Button>
+    </form>
+  );
+}
