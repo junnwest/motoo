@@ -112,7 +112,7 @@ export function SignupForm({ providers }: { providers: EnabledProviders }) {
       <p className="mt-2 text-center text-[14px] text-muted">
         {t("creatorPrompt")}{" "}
         <Link
-          href="/creator/onboarding"
+          href="/api/become-creator"
           className="font-semibold text-coral-deep hover:underline"
         >
           {t("goOnboarding")}

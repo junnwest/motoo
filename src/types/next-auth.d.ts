@@ -8,6 +8,9 @@ declare module "next-auth" {
       role: Role;
       nickname: string;
       onboarded: boolean;
+      // Additive creator capability: the handle of the Studio (Streamer) this
+      // account owns, or null. Everyone is a user; creators also own a Studio.
+      creator: string | null;
     } & DefaultSession["user"];
   }
 
@@ -22,5 +25,6 @@ declare module "next-auth/jwt" {
     role?: Role;
     nickname?: string;
     onboarded?: boolean;
+    creator?: string | null;
   }
 }

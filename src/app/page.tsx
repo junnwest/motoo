@@ -15,11 +15,11 @@ import { getExploreStreamers, type StreamerCard as CardData } from "@/lib/stream
 import { formatCount } from "@/lib/format";
 
 export default async function FanLandingPage() {
-  // "/" is the public marketing landing for logged-OUT visitors only. Signed-in
-  // users go straight to their app home: creators → dashboard, fans → explore.
-  // (Non-onboarded fans are caught by the onboarding middleware before this.)
+  // "/" is the public marketing landing for logged-OUT visitors only. Everyone
+  // signed in — fan or creator — goes to the consumer home (/explore); creators
+  // reach their Studio via a nav link (one identity, not a separate mode).
+  // (Non-onboarded users are caught by the onboarding middleware before this.)
   const session = await auth();
-  if (session?.user?.role === "streamer") redirect("/creator/dashboard");
   if (session?.user) redirect("/explore");
 
   const t = await getTranslations("fanLanding");

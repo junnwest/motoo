@@ -40,7 +40,7 @@ export default async function LoginPage() {
         <p className="mt-2 text-center text-[14px] text-muted">
           {t("noAccount")}{" "}
           <Link
-            href="/creator/onboarding"
+            href="/api/become-creator"
             className="font-semibold text-coral-deep hover:underline"
           >
             {t("goOnboarding")}

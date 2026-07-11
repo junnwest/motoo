@@ -14,10 +14,10 @@ export function DashboardNav({ labels }: { labels: Labels }) {
   const pathname = usePathname();
 
   const links = [
-    { href: "/creator/dashboard", label: labels.home },
-    { href: "/creator/dashboard/mochi", label: labels.mochi },
-    { href: "/creator/dashboard/items", label: labels.items },
-    { href: "/creator/dashboard/orders", label: labels.orders },
+    { href: "/studio", label: labels.home },
+    { href: "/studio/mochi", label: labels.mochi },
+    { href: "/studio/items", label: labels.items },
+    { href: "/studio/orders", label: labels.orders },
   ];
 
   return (
@@ -25,7 +25,7 @@ export function DashboardNav({ labels }: { labels: Labels }) {
       {links.map((link) => {
         // Home matches exactly; sub-pages match on prefix.
         const active =
-          link.href === "/creator/dashboard"
+          link.href === "/studio"
             ? pathname === link.href
             : pathname.startsWith(link.href);
         return (

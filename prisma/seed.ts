@@ -147,14 +147,14 @@ async function main() {
     },
   });
 
-  // Demo CREATOR account (role=streamer). Owns the flagship @creatorA profile so
-  // the creator dashboard is demoable: creator@motoo.dev / motoo
+  // Demo creator account. In the additive model this is just a USER who owns a
+  // Studio (the flagship @creatorA), so it can browse/buy as a fan AND open the
+  // Studio. Login: creator@motoo.dev / motoo
   const creatorAccount = await prisma.backer.create({
     data: {
       email: "creator@motoo.dev",
       nickname: "크리에이터A",
       passwordHash: devHash,
-      role: "streamer",
       ...grandfathered,
       gender: "female",
     },

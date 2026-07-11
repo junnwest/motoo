@@ -34,6 +34,7 @@ export const authConfig = {
         session.user.role = token.role as Role;
         session.user.nickname = token.nickname as string;
         session.user.onboarded = !!token.onboarded;
+        session.user.creator = (token.creator as string | null) ?? null;
       }
       return session;
     },
@@ -41,8 +42,7 @@ export const authConfig = {
       const user = auth?.user;
       if (!user) return true; // not signed in — onboarding isn't forced
       if (user.onboarded) return true;
-      // Creators onboard via /creator/onboarding; admins are staff.
-      if (user.role === "streamer" || user.role === "admin") return true;
+      if (user.role === "admin") return true; // staff
 
       const { pathname } = request.nextUrl;
       const allowed = ONBOARDING_ALLOW.some(

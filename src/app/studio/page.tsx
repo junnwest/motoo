@@ -80,7 +80,7 @@ export default async function CreatorDashboardHome() {
         <div className="mt-6 rounded-[16px] border border-line-2 bg-card p-6">
           <p className="text-[15px] text-body">{t("notOnboarded")}</p>
           <Link
-            href="/creator/dashboard/mochi"
+            href="/studio/mochi"
             className="mt-3 inline-block text-[15px] font-semibold text-coral-deep hover:underline"
           >
             {t("setupMochi")}

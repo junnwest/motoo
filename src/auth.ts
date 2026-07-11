@@ -63,7 +63,7 @@ export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
   ],
   callbacks: {
     ...authConfig.callbacks,
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger }) {
       // On sign-in, ensure a Backer exists (OAuth users are provisioned lazily).
       if (user?.email) {
         const email = user.email.toLowerCase();
@@ -80,6 +80,12 @@ export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
         token.role = backer.role;
         token.nickname = backer.nickname;
         token.onboarded = !!backer.onboardedAt;
+        // Additive creator capability = does this account own a Studio (Streamer)?
+        const studio = await prisma.streamer.findUnique({
+          where: { ownerId: backer.id },
+          select: { handle: true },
+        });
+        token.creator = studio?.handle ?? null;
       }
       // Refresh the onboarded flag while it's still false (cheap: the query stops
       // once true). This flips the token after /onboarding completes — the
@@ -91,6 +97,15 @@ export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
         });
         token.onboarded = !!b?.onboardedAt;
         if (b?.nickname) token.nickname = b.nickname;
+      }
+      // Re-check creator status on explicit refresh — the become-a-creator action
+      // calls unstable_update() so the new Studio shows up without re-login.
+      if (trigger === "update" && token.backerId) {
+        const studio = await prisma.streamer.findUnique({
+          where: { ownerId: token.backerId as string },
+          select: { handle: true },
+        });
+        token.creator = studio?.handle ?? null;
       }
       return token;
     },

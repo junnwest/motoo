@@ -37,7 +37,7 @@ export default async function CreatorLandingPage() {
               })}
             </p>
             <div className="mt-[34px] flex flex-wrap items-center gap-[14px]">
-              <ButtonLink href="/creator/onboarding" size="lg">
+              <ButtonLink href="/api/become-creator" size="lg">
                 {t("ctaApply")} <span>→</span>
               </ButtonLink>
               <ButtonLink href="/s/creatorA/report" variant="secondary" size="lg">
@@ -269,7 +269,7 @@ export default async function CreatorLandingPage() {
             {t("finalCtaBody")}
           </p>
           <div className="flex flex-col items-center justify-center gap-[14px] sm:flex-row">
-            <ButtonLink href="/creator/onboarding" variant="dark" size="lg">
+            <ButtonLink href="/api/become-creator" variant="dark" size="lg">
               {t("ctaApply")} →
             </ButtonLink>
             <ButtonLink href="/" variant="onCoral" size="lg">

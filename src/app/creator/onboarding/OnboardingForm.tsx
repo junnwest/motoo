@@ -4,29 +4,29 @@ import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { Button } from "@/components/ui/Button";
-import { onboardCreator } from "./actions";
+import { createStudio } from "./actions";
 
 const CATEGORIES = ["game", "music", "virtual", "daily", "study"] as const;
-const GENDERS = ["female", "male", "other", "undisclosed"] as const;
 
 const inputClass =
   "w-full rounded-[12px] border border-line-3 bg-white px-4 py-3 text-[15px] outline-none focus:border-coral/60";
 const labelClass = "mb-1.5 block text-[13px] font-semibold text-muted-2";
 
-export function OnboardingForm() {
+/**
+ * Creator setup — the add-on that turns a signed-in user into a creator by
+ * opening their Studio. Collects only creator-specific info (public profile +
+ * mochi issuance); account + identity were done at user signup/onboarding.
+ */
+export function CreatorSetupForm({ defaultName }: { defaultName: string }) {
   const t = useTranslations("creatorOnboarding");
   const tcat = useTranslations("fanLanding.categories");
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [displayName, setDisplayName] = useState("");
+  const [displayName, setDisplayName] = useState(defaultName);
   const [handle, setHandle] = useState("");
   const [category, setCategory] = useState<(typeof CATEGORIES)[number]>("game");
   const [creatorType, setCreatorType] = useState("");
-  const [gender, setGender] = useState<(typeof GENDERS)[number]>("undisclosed");
-  const [age, setAge] = useState("");
   const [bio, setBio] = useState("");
   const [mochiPriceKrw, setMochiPriceKrw] = useState("");
   const [mochiGoal, setMochiGoal] = useState("");
@@ -39,16 +39,12 @@ export function OnboardingForm() {
     e.preventDefault();
     setError(null);
     startTransition(async () => {
-      // onboardCreator throws NEXT_REDIRECT on success; it only returns on failure.
-      const res = await onboardCreator({
-        email,
-        password,
+      // createStudio throws NEXT_REDIRECT on success; it only returns on failure.
+      const res = await createStudio({
         displayName,
         handle,
         category,
         creatorType,
-        gender,
-        age,
         bio,
         mochiPriceKrw,
         mochiGoal,
@@ -59,41 +55,6 @@ export function OnboardingForm() {
 
   return (
     <form onSubmit={submit} className="flex flex-col gap-6">
-      {/* 계정 */}
-      <section className="rounded-[20px] border border-line-2 bg-card p-6 sm:p-7">
-        <Eyebrow className="mb-4">{t("sectionAccount")}</Eyebrow>
-        <div className="flex flex-col gap-4">
-          <div>
-            <label htmlFor="email" className={labelClass}>
-              {t("email")}
-            </label>
-            <input
-              id="email"
-              type="email"
-              autoComplete="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className={inputClass}
-            />
-          </div>
-          <div>
-            <label htmlFor="password" className={labelClass}>
-              {t("password")}
-            </label>
-            <input
-              id="password"
-              type="password"
-              autoComplete="new-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className={inputClass}
-            />
-          </div>
-        </div>
-      </section>
-
       {/* 크리에이터 프로필 */}
       <section className="rounded-[20px] border border-line-2 bg-card p-6 sm:p-7">
         <Eyebrow className="mb-4">{t("sectionProfile")}</Eyebrow>
@@ -160,44 +121,6 @@ export function OnboardingForm() {
                 value={creatorType}
                 onChange={(e) => setCreatorType(e.target.value)}
                 placeholder={t("creatorTypePlaceholder")}
-                className={inputClass}
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <label htmlFor="gender" className={labelClass}>
-                {t("gender")}
-              </label>
-              <select
-                id="gender"
-                value={gender}
-                onChange={(e) =>
-                  setGender(e.target.value as (typeof GENDERS)[number])
-                }
-                className={inputClass}
-              >
-                {GENDERS.map((g) => (
-                  <option key={g} value={g}>
-                    {t(`genderOptions.${g}`)}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label htmlFor="age" className={labelClass}>
-                {t("age")}
-              </label>
-              <input
-                id="age"
-                type="number"
-                min={1}
-                inputMode="numeric"
-                value={age}
-                onChange={(e) => setAge(e.target.value)}
-                required
                 className={inputClass}
               />
             </div>

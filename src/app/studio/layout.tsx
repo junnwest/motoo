@@ -10,8 +10,10 @@ export default async function CreatorDashboardLayout({
 }: {
   children: ReactNode;
 }) {
+  // Studio is for accounts that own a Studio (Streamer). A signed-in user who
+  // isn't a creator yet is routed into the become-a-creator flow.
   const creator = await getCurrentCreator();
-  if (!creator) redirect("/creator/onboarding");
+  if (!creator) redirect("/api/become-creator");
 
   const t = await getTranslations("creatorDashboard");
 

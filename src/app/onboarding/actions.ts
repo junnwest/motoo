@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { Prisma } from "@prisma/client";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { prisma } from "@/lib/db";
 import { getCurrentBacker } from "@/lib/session";
 import { getVerificationProvider } from "@/lib/verification";
@@ -111,5 +112,13 @@ export async function completeOnboarding(
 
   // Flip the onboarded flag in the JWT so middleware stops forcing /onboarding.
   await unstable_update({});
+
+  // Combined "become a creator" flow: if the user set out to create a Studio,
+  // continue to creator setup instead of the home page.
+  const jar = await cookies();
+  if (jar.get("creatorIntent")?.value === "1") {
+    jar.delete("creatorIntent");
+    redirect("/creator/onboarding");
+  }
   redirect("/");
 }

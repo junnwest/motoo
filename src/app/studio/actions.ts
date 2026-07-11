@@ -17,7 +17,7 @@ import { fulfillOrder, cancelOrder } from "@/lib/mochi";
 
 type ActionResult = { ok: true } | { ok: false; error: string };
 
-const DASHBOARD = "/creator/dashboard";
+const DASHBOARD = "/studio";
 
 const positiveInt = z.number().int().positive();
 

@@ -22,7 +22,7 @@ export async function Nav({ variant = "fan" }: { variant?: "fan" | "creator" }) 
   const tm = await getTranslations("myMochi");
   const session = await auth();
   const authed = !!session?.user;
-  const isCreator = session?.user?.role === "streamer";
+  const isCreator = !!session?.user?.creator; // owns a Studio
   const name = session?.user?.nickname ?? session?.user?.name ?? "";
 
   return (
@@ -97,12 +97,19 @@ export async function Nav({ variant = "fan" }: { variant?: "fan" | "creator" }) 
           {/* Auth cluster */}
           {authed ? (
             <>
-              {isCreator && (
+              {isCreator ? (
                 <Link
-                  href="/creator/dashboard"
+                  href="/studio"
                   className="hidden font-semibold text-ink hover:text-coral-deep sm:inline"
                 >
-                  {t("dashboard")}
+                  {t("studio")}
+                </Link>
+              ) : (
+                <Link
+                  href="/api/become-creator"
+                  className="hidden text-muted hover:text-ink sm:inline"
+                >
+                  {t("becomeCreator")}
                 </Link>
               )}
               {name && (
@@ -127,7 +134,7 @@ export async function Nav({ variant = "fan" }: { variant?: "fan" | "creator" }) 
                 </ButtonLink>
               ) : (
                 <ButtonLink
-                  href="/creator/onboarding"
+                  href="/api/become-creator"
                   variant="primary"
                   size="md"
                 >
