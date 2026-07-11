@@ -32,26 +32,45 @@ export async function Nav({ variant = "fan" }: { variant?: "fan" | "creator" }) 
 
         <div className="flex items-center gap-4 text-[15px] font-medium text-muted-2 md:gap-[30px]">
           {variant === "fan" ? (
-            <>
-              <Link href="/explore" className="hidden hover:text-ink sm:inline">
-                {t("explore")}
-              </Link>
-              <Link
-                href="/#what-is-mochi"
-                className="hidden hover:text-ink md:inline"
-              >
-                {t("whatIsMochi")}
-              </Link>
-              <Link href="/me/mochi" className="hidden hover:text-ink sm:inline">
-                {tm("title")}
-              </Link>
-              <Link
-                href="/creators"
-                className="hidden items-center gap-[5px] text-muted hover:text-ink sm:flex"
-              >
-                {t("forCreators")} <span className="text-[12px]">↗</span>
-              </Link>
-            </>
+            authed ? (
+              // Signed-in fan: app links only (marketing stays for logged-out).
+              <>
+                <Link
+                  href="/explore"
+                  className="hidden hover:text-ink sm:inline"
+                >
+                  {t("explore")}
+                </Link>
+                <Link
+                  href="/me/mochi"
+                  className="hidden hover:text-ink sm:inline"
+                >
+                  {tm("title")}
+                </Link>
+              </>
+            ) : (
+              // Logged-out visitor: marketing links (incl. the creator pitch).
+              <>
+                <Link
+                  href="/explore"
+                  className="hidden hover:text-ink sm:inline"
+                >
+                  {t("explore")}
+                </Link>
+                <Link
+                  href="/#what-is-mochi"
+                  className="hidden hover:text-ink md:inline"
+                >
+                  {t("whatIsMochi")}
+                </Link>
+                <Link
+                  href="/creators"
+                  className="hidden items-center gap-[5px] text-muted hover:text-ink sm:flex"
+                >
+                  {t("forCreators")} <span className="text-[12px]">↗</span>
+                </Link>
+              </>
+            )
           ) : (
             <>
               <Link
