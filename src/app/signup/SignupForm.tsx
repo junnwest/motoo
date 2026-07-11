@@ -24,11 +24,23 @@ export function SignupForm({
   const [nickname, setNickname] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
   const [error, setError] = useState<string | null>(null);
+
+  // Password policy (mirrors the server): 8+ chars incl. a letter and a number.
+  const reqLength = password.length >= 8;
+  const reqLetter = /[A-Za-z]/.test(password);
+  const reqNumber = /\d/.test(password);
+  const passwordValid = reqLength && reqLetter && reqNumber;
+  const mismatch = confirm.length > 0 && confirm !== password;
+  const canSubmit =
+    !!nickname.trim() && !!email && passwordValid && !mismatch && confirm === password && !pending;
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    if (!passwordValid) return setError("weakPassword");
+    if (password !== confirm) return setError("passwordMismatch");
     startTransition(async () => {
       // On success signupUser throws NEXT_REDIRECT (handled by the framework);
       // it only ever returns on failure.
@@ -36,6 +48,12 @@ export function SignupForm({
       if (res && !res.ok) setError(res.error);
     });
   }
+
+  const reqs: [boolean, string][] = [
+    [reqLength, t("passwordReqLength")],
+    [reqLetter, t("passwordReqLetter")],
+    [reqNumber, t("passwordReqNumber")],
+  ];
 
   return (
     <div>
@@ -82,10 +100,46 @@ export function SignupForm({
             autoComplete="new-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            placeholder={t("passwordPlaceholder")}
             required
-            minLength={4}
             className={inputClass}
           />
+          <div className="mt-2 flex flex-wrap gap-x-3.5 gap-y-1 text-[12px]">
+            {reqs.map(([ok, label]) => (
+              <span
+                key={label}
+                className={`flex items-center gap-1 ${
+                  ok ? "text-sage" : "text-muted"
+                }`}
+              >
+                <span className="text-[11px]">{ok ? "✓" : "○"}</span>
+                {label}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <label htmlFor="confirm" className={labelClass}>
+            {t("passwordConfirm")}
+          </label>
+          <input
+            id="confirm"
+            type="password"
+            autoComplete="new-password"
+            value={confirm}
+            onChange={(e) => setConfirm(e.target.value)}
+            placeholder={t("passwordConfirmPlaceholder")}
+            required
+            className={`${inputClass} ${
+              mismatch ? "border-live focus:border-live" : ""
+            }`}
+          />
+          {mismatch && (
+            <p className="mt-1.5 text-[12.5px] font-medium text-live">
+              {t("passwordMismatch")}
+            </p>
+          )}
         </div>
 
         {error && (
@@ -96,7 +150,7 @@ export function SignupForm({
           type="submit"
           variant="primary"
           size="lg"
-          disabled={pending}
+          disabled={!canSubmit}
           className="mt-1 w-full"
         >
           {pending ? t("signingUp") : t("signupButton")}

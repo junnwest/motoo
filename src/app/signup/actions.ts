@@ -7,9 +7,13 @@ import { hashPassword } from "@/lib/password";
 import { signIn } from "@/auth";
 import { AuthError } from "next-auth";
 
+// Password policy: 8+ chars including at least one letter and one number.
+// Enforced here too, so a client bypass can't create a weak password.
+const PASSWORD_RE = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/;
+
 const signupSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(4),
+  password: z.string().regex(PASSWORD_RE),
   nickname: z.string().trim().min(1).max(40),
 });
 
@@ -26,7 +30,12 @@ export async function signupUser(
   input: SignupInput,
 ): Promise<{ ok: false; error: string } | never> {
   const parsed = signupSchema.safeParse(input);
-  if (!parsed.success) return { ok: false, error: "signupGeneric" };
+  if (!parsed.success) {
+    if (!PASSWORD_RE.test(String(input?.password ?? ""))) {
+      return { ok: false, error: "weakPassword" };
+    }
+    return { ok: false, error: "signupGeneric" };
+  }
 
   const email = parsed.data.email.toLowerCase();
   const { password, nickname } = parsed.data;
