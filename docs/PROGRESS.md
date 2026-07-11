@@ -1,6 +1,6 @@
 # motoo — Progress Tracker
 
-_Last updated: 2026-07-09_
+_Last updated: 2026-07-10_
 
 Living status of the build. Update the checkboxes as work lands. See
 [`DECISIONS.md`](./DECISIONS.md) for why things are the way they are and
@@ -8,8 +8,9 @@ Living status of the build. Update the checkboxes as work lands. See
 
 ## Current focus
 
-1. **Deployment pipeline** (in progress) — Supabase (Seoul) + Vercel (icn1), auto-deploy on push.
-2. **Phase 2 pivot** (next) — mochi-marketplace: creator issuance + per-creator dashboard + marketplace + user pipeline.
+1. **Phase 2 mochi-marketplace** ✅ — creator onboarding + dashboard + user buy/spend built and verified locally.
+2. **Deployment pipeline** (blocked) — Supabase (Seoul) + Vercel (icn1); needs the Supabase DB password to push schema + import to Vercel.
+3. **Frontend polish** (next) — copy/design passes on the new Phase 2 surfaces.
 
 ---
 
@@ -48,31 +49,44 @@ See [`DEPLOYMENT.md`](./DEPLOYMENT.md) for the exact steps and env-var list.
 
 ---
 
-## Phase 2 — Mochi-marketplace pivot 🧭 (planned)
+## Phase 2 — Mochi-marketplace pivot ✅ (built, verified locally)
 
 The product for the demo: a creator issues their own mochi, users buy it and spend
 it in that creator's marketplace. Mochi = prepaid marketplace credit, **capped as a
 soft goal**, non-transferable, unspent-refundable, no resale/return (see DECISIONS).
 
+Verified: `pnpm db:push` + `db:seed` succeed; all Phase 2 routes render 200 with real
+data; the buy → redeem → cancel-refund invariants hold end-to-end against Postgres
+(buy credits, redeem debits, cancel refunds, KRW = qty × price); `tsc` clean, vocab passes.
+
 ### Creator side
-- [ ] Creator signup + onboarding (name, age, gender, creator type, platform links)
-- [ ] Per-creator dashboard (their own home)
-- [ ] Mochi issuance controls: quantity + price (soft-goal target, e.g. 100 × ₩200 = ₩20,000)
-- [ ] Marketplace setup: create/manage items (title, price in mochi, type, stock)
-- [ ] Order/redemption view + mark-fulfilled (fulfillment off-platform in v1)
+- [x] Creator signup + onboarding (email/pw + name, age, gender, creator type, handle, mochi price/goal) → `/creator/onboarding`
+- [x] Per-creator dashboard shell + guard → `/creator/dashboard`
+- [x] Mochi issuance controls: price + soft-goal quantity + pause → `/creator/dashboard/mochi`
+- [x] Marketplace item CRUD (title, price in mochi, type, stock, active) → `/creator/dashboard/items`
+- [x] Order view + mark-fulfilled / cancel-refund (fulfillment off-platform) → `/creator/dashboard/orders`
 
 ### User side
-- [ ] Search / discover creators
-- [ ] Buy a creator's mochi (per-creator balance)
-- [ ] Spend mochi in a creator's marketplace (redeem items)
-- [ ] "My mochi" per-creator holdings + redemption history
+- [x] Discover creators (existing `/explore`)
+- [x] Buy a creator's mochi (per-creator balance) — buy module on the profile
+- [x] Spend mochi in a creator's marketplace (redeem items) — marketplace section on the profile
+- [x] "My mochi" per-creator holdings → `/me/mochi`
 
-### Data model changes (from Phase 1)
-- [ ] Creator: add gender, age, creatorType; creator auth path
-- [ ] Mochi: global balance → per-creator holdings (`MochiHolding`)
-- [ ] Mochi issuance config per creator (total, price, sold)
-- [ ] `MarketplaceItem` + `Order`/`Redemption` models
-- [ ] Decide fate of Phase-1 tiers/backing/founding-number (fold in vs retire)
+### Data model changes (from Phase 1) — all landed
+- [x] Creator: added gender, age, creatorType; `ownerId` links a creator account (Backer role=streamer) to its Streamer
+- [x] Mochi: per-creator holdings (`MochiHolding`, unique [streamer, backer]); Phase-1 global `currencyBalance` left dormant
+- [x] Mochi issuance config per creator (`MochiIssuance`: price, goal, sold)
+- [x] `MarketplaceItem` + `Order` models (+ `MarketplaceItemType`, `OrderStatus`, `Gender` enums)
+- [x] Phase-1 backing/tiers/founding-number **retired from the UI** (routes/schema kept dormant); founding number dropped from the new flow
+
+### Auth
+- [x] Real credentials login form (`/login`) replacing the stub; creator onboarding creates the account + signs in
+- Dev logins: fan `demo@motoo.dev / motoo`, **creator `creator@motoo.dev / motoo`** (owns flagship `@creatorA`)
+
+### Not yet done (Phase 2 follow-ups)
+- [ ] Redemption/purchase history for users (only current holdings shown today)
+- [ ] User self-signup form (`/signup` still a stub; dev fallback covers the demo)
+- [ ] On-platform fulfillment for access passes / digital perks
 
 ### Marketplace item guidelines (all optional, off-platform fulfillment for v1)
 - Digital/experiential (Q&A slot, shout-out, song/topic request, priority chat)

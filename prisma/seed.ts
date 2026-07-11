@@ -1,4 +1,8 @@
-import { PrismaClient, BackingDisplay } from "@prisma/client";
+import {
+  PrismaClient,
+  BackingDisplay,
+  MarketplaceItemType,
+} from "@prisma/client";
 import { computeGrades, type TrustMetrics } from "../src/lib/grades";
 import { hashPassword } from "../src/lib/password";
 import { MOCHI_TO_KRW } from "../src/lib/payments/types";
@@ -57,8 +61,28 @@ const TIER_TEMPLATES = [
   { name: "핵심 팬", priceKrw: 12000, description: "가장 가까이에서 함께하는 핵심 팬", perks: ["Q&A 우선 참여", "손편지·굿즈 우선권", "비공개 라이브 초대"] },
 ];
 
+// Phase 2: each creator's marketplace items, priced in that creator's mochi.
+const ITEM_TEMPLATES: {
+  title: string;
+  description: string;
+  priceMochi: number;
+  itemType: MarketplaceItemType;
+  stock: number | null;
+}[] = [
+  { title: "실시간 샤라웃", description: "방송 중에 닉네임을 불러드려요.", priceMochi: 3, itemType: "digital", stock: null },
+  { title: "노래 신청", description: "다음 라이브에서 원하는 곡을 불러드려요.", priceMochi: 5, itemType: "digital", stock: null },
+  { title: "멤버 전용 포스트", description: "비공개 소식과 사진을 받아보세요.", priceMochi: 10, itemType: "access", stock: null },
+  { title: "손편지", description: "정성껏 쓴 손편지를 보내드려요.", priceMochi: 30, itemType: "physical", stock: 20 },
+  { title: "1:1 통화 5분", description: "짧은 통화로 가깝게 인사해요.", priceMochi: 50, itemType: "session", stock: 5 },
+];
+
 async function main() {
   console.log("Resetting data…");
+  // Phase 2 tables first (FKs point at streamer/backer/item).
+  await prisma.order.deleteMany();
+  await prisma.marketplaceItem.deleteMany();
+  await prisma.mochiHolding.deleteMany();
+  await prisma.mochiIssuance.deleteMany();
   await prisma.perkDelivery.deleteMany();
   await prisma.foundingMembership.deleteMany();
   await prisma.backing.deleteMany();
@@ -110,14 +134,34 @@ async function main() {
     },
   });
 
+  // Demo CREATOR account (role=streamer). Owns the flagship @creatorA profile so
+  // the creator dashboard is demoable: creator@motoo.dev / motoo
+  const creatorAccount = await prisma.backer.create({
+    data: {
+      email: "creator@motoo.dev",
+      nickname: "크리에이터A",
+      ageVerified: true,
+      passwordHash: devHash,
+      role: "streamer",
+    },
+  });
+
+  // Captured for post-loop holdings/orders so the flagship demo looks alive.
+  let flagship: {
+    streamerId: string;
+    items: { id: string; priceMochi: number }[];
+  } | null = null;
+
   for (const s of STREAMERS) {
     console.log(`Creating streamer @${s.handle}…`);
+    const isFlagship = s.handle === "creatorA";
     const streamer = await prisma.streamer.create({
       data: {
         handle: s.handle,
         displayName: s.displayName,
         bio: s.bio,
         category: s.category,
+        creatorType: pick(["버추얼 스트리머", "게임 스트리머", "음악", "일상"]),
         status: "approved",
         avgViewers: s.avgViewers,
         followerCount: s.followerCount,
@@ -125,8 +169,49 @@ async function main() {
         subMerchantId: `sub_${s.handle}`,
         chzzk: `https://chzzk.naver.com/${s.handle}`,
         discordUrl: `https://discord.gg/${s.handle}`,
+        ownerId: isFlagship ? creatorAccount.id : null,
       },
     });
+
+    // Phase 2: mochi issuance + marketplace items for this creator.
+    const pricePerMochiKrw = pick([100, 150, 200, 300]);
+    const goalQuantity = pick([100, 150, 200, 300]);
+    const itemCount = 3 + Math.floor(rand() * 3); // 3–5 items
+    const items = [];
+    for (let i = 0; i < itemCount; i++) {
+      const tpl = ITEM_TEMPLATES[i];
+      const redeemedCount = Math.floor(rand() * 4);
+      const item = await prisma.marketplaceItem.create({
+        data: {
+          streamerId: streamer.id,
+          title: tpl.title,
+          description: tpl.description,
+          priceMochi: tpl.priceMochi,
+          itemType: tpl.itemType,
+          stock: tpl.stock,
+          redeemedCount,
+          sortOrder: i,
+        },
+      });
+      items.push(item);
+    }
+    // soldQuantity: seed some progress toward the soft goal.
+    const soldQuantity = Math.round(goalQuantity * (0.2 + rand() * 0.5));
+    await prisma.mochiIssuance.create({
+      data: {
+        streamerId: streamer.id,
+        pricePerMochiKrw,
+        goalQuantity,
+        soldQuantity,
+        active: true,
+      },
+    });
+    if (isFlagship) {
+      flagship = {
+        streamerId: streamer.id,
+        items: items.map((it) => ({ id: it.id, priceMochi: it.priceMochi })),
+      };
+    }
 
     // Tiers
     const tiers = [];
@@ -337,7 +422,64 @@ async function main() {
     });
   }
 
-  console.log("Seed complete ✅  (dev login: demo@motoo.dev / motoo)");
+  // ── Phase 2: populate the flagship creator's holdings + orders ──────────────
+  if (flagship) {
+    console.log("Seeding flagship mochi holdings + orders…");
+    // Demo backer holds mochi for the flagship (so "My mochi" isn't empty).
+    await prisma.mochiHolding.create({
+      data: {
+        streamerId: flagship.streamerId,
+        backerId: demo.id,
+        balance: 42,
+        purchasedTotal: 60,
+      },
+    });
+
+    // A handful of pool fans hold mochi too (so the dashboard shows real holders).
+    const holders = backers.filter((b) => b.id !== demo.id).slice(0, 9);
+    for (const b of holders) {
+      const purchased = 10 + Math.floor(rand() * 40);
+      await prisma.mochiHolding.create({
+        data: {
+          streamerId: flagship.streamerId,
+          backerId: b.id,
+          balance: Math.floor(purchased * (0.3 + rand() * 0.6)),
+          purchasedTotal: purchased,
+        },
+      });
+    }
+
+    // A few orders across statuses so the orders view is populated.
+    const orderBuyers = [demo, ...holders.slice(0, 4)];
+    const notes = [
+      "다음 방송에서 불러주세요!",
+      "생일 축하 샤라웃 부탁드려요 🎂",
+      null,
+      "응원합니다, 오래오래 방송해주세요.",
+      null,
+    ];
+    for (let i = 0; i < orderBuyers.length; i++) {
+      const item = pick(flagship.items);
+      const status = i === 0 ? "pending" : i < 3 ? "fulfilled" : "pending";
+      await prisma.order.create({
+        data: {
+          streamerId: flagship.streamerId,
+          backerId: orderBuyers[i].id,
+          itemId: item.id,
+          mochiSpent: item.priceMochi,
+          quantity: 1,
+          note: notes[i],
+          status: status as "pending" | "fulfilled",
+          fulfilledAt: status === "fulfilled" ? new Date(2026, 6, 5 + i) : null,
+          createdAt: new Date(2026, 6, 2 + i),
+        },
+      });
+    }
+  }
+
+  console.log(
+    "Seed complete ✅  (fan login: demo@motoo.dev / motoo · creator login: creator@motoo.dev / motoo)",
+  );
 }
 
 main()

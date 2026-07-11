@@ -1,13 +1,15 @@
 # motoo
 
-A two-sided Korean platform where fans back mid-small streamers, and that backing
-becomes a creator's verifiable **Streamer Trust Report**. See
-[`motoo-product-description.md`](./motoo-product-description.md) for the full product spec
-and [`design-handoff/`](./design-handoff/) for the visual system.
+A two-sided Korean creator-support platform. **Current direction: a mochi-marketplace** —
+each creator issues their own **mochi** (prepaid marketplace credit, capped as a soft
+goal), users buy it and spend it in that creator's marketplace. See
+[`motoo-product-description.md`](./motoo-product-description.md) for the original product
+spec and [`design-handoff/`](./design-handoff/) for the visual system.
 
-> **motoo is not a financial product.** Backing is support, not an investment — no
-> returns, no securities. See §2 of the product doc. A CI-style check
-> (`pnpm check:vocab`) guards against banned investment vocabulary in user-facing copy.
+> **motoo is not a financial product.** Mochi is prepaid support credit, not an
+> investment — non-transferable, unspent-refundable, no resale/return, no securities. See
+> §2 of the product doc. A CI-style check (`pnpm check:vocab`) guards against banned
+> investment vocabulary in user-facing copy.
 
 ## 📍 Where things stand
 
@@ -15,12 +17,13 @@ and [`design-handoff/`](./design-handoff/) for the visual system.
 - **[docs/DECISIONS.md](./docs/DECISIONS.md)** — decision log with rationale
 - **[docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md)** — deploy runbook + infra state (Vercel + Supabase Seoul)
 
-**Current direction:** Phase 1 (below) is built and verified. Next is a **pivot to a
-mochi-marketplace** — creators issue their own mochi, users buy it and spend it in each
-creator's marketplace. The Trust Report thesis is shelved for the demo (schema kept).
-See PROGRESS.md for the Phase 2 plan.
+**Current direction:** the **mochi-marketplace pivot** (Phase 2) is the product for the
+demo — creators issue their own mochi, users buy it and spend it in each creator's
+marketplace. It's **planned, not yet built** — see PROGRESS.md for the plan. The original
+**Streamer Trust Report** thesis is shelved for the demo; its schema and components stay
+in the tree. What's live today is the Phase 1 foundation below.
 
-## What's built (Phase 1 — landing + core backing flow)
+## What's built so far (Phase 1 — landing + core backing flow)
 
 | Route | Page |
 | --- | --- |

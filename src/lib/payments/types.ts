@@ -24,6 +24,22 @@ export interface PurchaseRequest {
   idempotencyKey: string;
 }
 
+/**
+ * Phase 2: buy a creator's mochi. Unlike fixed cookie packs, the buyer chooses a
+ * quantity and the price is the creator's per-mochi rate (MochiIssuance). The PG
+ * charges `amountKrw` to the buyer; mochi is credited to a per-creator holding.
+ */
+export interface MochiPurchaseRequest {
+  backerId: string;
+  streamerId: string;
+  /** mochi units being bought */
+  quantity: number;
+  /** integer KRW total charged to the buyer (quantity × pricePerMochiKrw) */
+  amountKrw: number;
+  /** idempotency key so a retried request never double-charges */
+  idempotencyKey: string;
+}
+
 export interface PurchaseResult {
   ok: boolean;
   transactionId: string;
@@ -49,11 +65,30 @@ export interface SettlementResult {
   error?: string;
 }
 
+/**
+ * Compensating void/refund of a mochi purchase charge, keyed by the same
+ * idempotencyKey used to charge. Used when the DB failed to credit mochi after
+ * a successful charge — the buyer must not be left charged with nothing.
+ */
+export interface VoidChargeRequest {
+  idempotencyKey: string;
+  amountKrw: number;
+}
+
+export interface VoidChargeResult {
+  ok: boolean;
+  error?: string;
+}
+
 export interface PaymentProvider {
   readonly name: string;
   /** Buy a cookie pack (real PG charge in production; simulated in mock). */
   purchaseCookies(req: PurchaseRequest): Promise<PurchaseResult>;
-  /** Route a backing's KRW to the streamer sub-merchant. */
+  /** Phase 2: buy a creator's mochi at their per-mochi rate (real PG charge; mock simulates). */
+  purchaseMochi(req: MochiPurchaseRequest): Promise<PurchaseResult>;
+  /** Compensating void/refund of a mochi charge when crediting mochi fails afterward. */
+  voidCharge(req: VoidChargeRequest): Promise<VoidChargeResult>;
+  /** Route a backing's/purchase's KRW to the streamer sub-merchant. */
   settleToStreamer(req: SettlementRequest): Promise<SettlementResult>;
 }
 

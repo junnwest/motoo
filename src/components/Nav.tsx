@@ -12,6 +12,7 @@ import { ButtonLink } from "./ui/Button";
 export function Nav({ variant = "fan" }: { variant?: "fan" | "creator" }) {
   const t = useTranslations("nav");
   const tc = useTranslations("common");
+  const tm = useTranslations("myMochi");
 
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-cream/90 backdrop-blur">
@@ -29,6 +30,12 @@ export function Nav({ variant = "fan" }: { variant?: "fan" | "creator" }) {
                 className="hidden hover:text-ink md:inline"
               >
                 {t("whatIsMochi")}
+              </Link>
+              <Link
+                href="/me/mochi"
+                className="hidden hover:text-ink sm:inline"
+              >
+                {tm("title")}
               </Link>
               <Link
                 href="/creators"
@@ -66,7 +73,7 @@ export function Nav({ variant = "fan" }: { variant?: "fan" | "creator" }) {
               <Link href="/login" className="font-semibold text-ink">
                 {tc("login")}
               </Link>
-              <ButtonLink href="/apply" variant="primary" size="md">
+              <ButtonLink href="/creator/onboarding" variant="primary" size="md">
                 {t("applyAsCreator")}
               </ButtonLink>
             </>

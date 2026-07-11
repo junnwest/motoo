@@ -68,91 +68,139 @@ enum Grade {
   Excellent
 }
 
-model Streamer {
-  id           String         @id @default(cuid())
-  handle       String         @unique
-  displayName  String
-  avatarUrl    String?
-  bio          String?
-  category     String
-  // platformLinks
-  chzzk        String?
-  soop         String?
-  youtube      String?
-  twitch       String?
-  discordUrl   String?
-  fanCafeUrl   String?
-  status       StreamerStatus @default(pending)
-  subMerchantId String?
-  avgViewers   Int            @default(0)
-  followerCount Int           @default(0)
-  createdAt    DateTime       @default(now())
-  approvedAt   DateTime?
+// ── Phase 2: mochi-marketplace pivot ─────────────────────────────────────────
+// A creator issues their own mochi (prepaid marketplace credit, capped as a soft
+// goal); users buy it and spend it in that creator's marketplace. Mochi is
+// non-transferable, unspent-refundable, no resale/return (see docs/DECISIONS.md).
+// Not a financial product — no investment vocabulary in user-facing copy (spec §2).
 
-  tiers        Tier[]
-  backings     Backing[]
-  perks        Perk[]
-  updates      Update[]
-  reports      TrustReport[]
+enum Gender {
+  female
+  male
+  other
+  undisclosed
+}
+
+enum MarketplaceItemType {
+  digital // Q&A slot, shout-out, song/topic request, priority chat
+  access // members-only posts/streams, early access, event tickets
+  physical // merch, signed items, letters (needs off-platform fulfillment)
+  session // 1:1 time slots (short call / DM)
+}
+
+enum OrderStatus {
+  pending // placed, awaiting creator fulfillment (off-platform in v1)
+  fulfilled // creator marked done
+  cancelled // creator cancelled; mochi refunded to the buyer's holding
+}
+
+model Streamer {
+  id            String         @id @default(cuid())
+  handle        String         @unique
+  displayName   String
+  avatarUrl     String?
+  bio           String?
+  category      String
+  // Phase 2 creator onboarding fields
+  creatorType   String? // what kind of creator (게임/버추얼/음악/아트…); free-form for v1
+  gender        Gender?
+  age           Int?
+  // The account (Backer, role=streamer) that owns/operates this creator profile.
+  // Null for legacy Phase-1 seeds with no login. One account owns at most one profile.
+  ownerId       String?        @unique
+  owner         Backer?        @relation("CreatorOwner", fields: [ownerId], references: [id])
+  // platformLinks
+  chzzk         String?
+  soop          String?
+  youtube       String?
+  twitch        String?
+  discordUrl    String?
+  fanCafeUrl    String?
+  status        StreamerStatus @default(pending)
+  subMerchantId String?
+  avgViewers    Int            @default(0)
+  followerCount Int            @default(0)
+  createdAt     DateTime       @default(now())
+  approvedAt    DateTime?
+
+  tiers               Tier[]
+  backings            Backing[]
+  perks               Perk[]
+  updates             Update[]
+  reports             TrustReport[]
   foundingMemberships FoundingMembership[]
+
+  // Phase 2 relations
+  mochiIssuance    MochiIssuance?
+  mochiHoldings    MochiHolding[]
+  marketplaceItems MarketplaceItem[]
+  orders           Order[]
 
   @@index([status])
   @@index([category])
 }
 
 model Tier {
-  id          String    @id @default(cuid())
+  id          String   @id @default(cuid())
   streamerId  String
-  streamer    Streamer  @relation(fields: [streamerId], references: [id], onDelete: Cascade)
+  streamer    Streamer @relation(fields: [streamerId], references: [id], onDelete: Cascade)
   name        String
   priceKrw    Int // integer KRW
   description String?
-  backerCount Int       @default(0)
+  backerCount Int      @default(0)
   limit       Int?
-  active      Boolean   @default(true)
-  sortOrder   Int       @default(0)
+  active      Boolean  @default(true)
+  sortOrder   Int      @default(0)
 
-  perks       Perk[]
-  backings    Backing[]
-  updates     Update[]
+  perks    Perk[]
+  backings Backing[]
+  updates  Update[]
 
   @@index([streamerId])
 }
 
+// The universal account record. A plain user has role=backer; a creator account
+// has role=streamer and owns a Streamer profile via Streamer.owner. (Named "Backer"
+// for Phase-1 continuity; treat it as the account/user table.)
 model Backer {
-  id             String    @id @default(cuid())
-  email          String    @unique
-  nickname       String
-  avatarUrl      String?
-  currencyBalance Int      @default(0) // unspent mochi ("cookies"), integer units
-  ageVerified    Boolean   @default(false)
+  id              String   @id @default(cuid())
+  email           String   @unique
+  nickname        String
+  avatarUrl       String?
+  currencyBalance Int      @default(0) // legacy Phase-1 global mochi; dormant — Phase 2 uses per-creator MochiHolding
+  ageVerified     Boolean  @default(false)
   guardianConsent Boolean?
-  role           Role      @default(backer)
-  passwordHash   String? // dev credentials login only
-  createdAt      DateTime  @default(now())
+  role            Role     @default(backer)
+  passwordHash    String? // dev credentials login only
+  createdAt       DateTime @default(now())
 
-  backings       Backing[]
+  backings            Backing[]
   foundingMemberships FoundingMembership[]
+
+  // Phase 2 relations
+  ownedStreamer Streamer?      @relation("CreatorOwner")
+  mochiHoldings MochiHolding[]
+  orders        Order[]
 }
 
 model Backing {
-  id                  String         @id @default(cuid())
-  streamerId          String
-  streamer            Streamer       @relation(fields: [streamerId], references: [id], onDelete: Cascade)
-  backerId            String
-  backer              Backer         @relation(fields: [backerId], references: [id], onDelete: Cascade)
-  tierId              String
-  tier                Tier           @relation(fields: [tierId], references: [id])
-  amountKrw           Int // integer KRW
-  currencyUnitsSpent  Int // mochi spent
-  foundingNumber      Int // per (streamer, backer), assigned once — see invariants
-  display             BackingDisplay @default(public)
-  displayName         String?
-  message             String?
-  status              BackingStatus  @default(paid)
-  createdAt           DateTime       @default(now())
+  id                 String         @id @default(cuid())
+  streamerId         String
+  streamer           Streamer       @relation(fields: [streamerId], references: [id], onDelete: Cascade)
+  backerId           String
+  backer             Backer         @relation(fields: [backerId], references: [id], onDelete: Cascade)
+  tierId             String
+  tier               Tier           @relation(fields: [tierId], references: [id])
+  amountKrw          Int // integer KRW
+  currencyUnitsSpent Int // mochi spent
+  foundingNumber     Int // per (streamer, backer), assigned once — see invariants
+  display            BackingDisplay @default(public)
+  displayName        String?
+  message            String?
+  status             BackingStatus  @default(paid)
+  createdAt          DateTime       @default(now())
 
-  deliveries          PerkDelivery[]
+  deliveries PerkDelivery[]
 
   // foundingNumber here is a denormalized display copy. The authoritative,
   // once-per-(streamer,backer) assignment lives in FoundingMembership.
@@ -191,7 +239,7 @@ model Perk {
   deliveredAt DateTime?
   backersOwed Int        @default(0)
 
-  deliveries  PerkDelivery[]
+  deliveries PerkDelivery[]
 
   @@index([streamerId])
   @@index([tierId])
@@ -245,4 +293,83 @@ model TrustReport {
 
   @@unique([streamerId, reportNumber])
   @@index([streamerId])
+}
+
+// ── Phase 2 models ───────────────────────────────────────────────────────────
+
+// Per-creator mochi issuance config. The creator sets quantity × price as a SOFT
+// GOAL/target (e.g. 100 × ₩200 = ₩20,000) — a framing device, not a scarce security
+// (see docs/DECISIONS.md). soldQuantity tracks progress toward the goal.
+model MochiIssuance {
+  id               String   @id @default(cuid())
+  streamerId       String   @unique
+  streamer         Streamer @relation(fields: [streamerId], references: [id], onDelete: Cascade)
+  pricePerMochiKrw Int // integer KRW price of one mochi unit
+  goalQuantity     Int // soft-goal target: how many mochi the creator hopes to sell
+  soldQuantity     Int      @default(0) // mochi units sold so far
+  active           Boolean  @default(true) // creator can pause sales
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+// A user's unspent mochi balance FOR ONE creator. Mochi is non-transferable and
+// scoped to the issuing creator's marketplace. purchasedTotal is lifetime bought
+// (for "supporter" display); balance is what remains spendable.
+model MochiHolding {
+  id             String   @id @default(cuid())
+  streamerId     String
+  streamer       Streamer @relation(fields: [streamerId], references: [id], onDelete: Cascade)
+  backerId       String
+  backer         Backer   @relation(fields: [backerId], references: [id], onDelete: Cascade)
+  balance        Int      @default(0) // unspent mochi units held for this creator
+  purchasedTotal Int      @default(0) // lifetime mochi purchased from this creator
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([streamerId, backerId])
+  @@index([streamerId])
+  @@index([backerId])
+}
+
+// An item in a creator's marketplace, priced in that creator's mochi. Fulfillment
+// is off-platform in v1 (creator marks orders fulfilled). stock null = unlimited.
+model MarketplaceItem {
+  id            String              @id @default(cuid())
+  streamerId    String
+  streamer      Streamer            @relation(fields: [streamerId], references: [id], onDelete: Cascade)
+  title         String
+  description   String?
+  priceMochi    Int // price in mochi units
+  itemType      MarketplaceItemType
+  stock         Int? // null = unlimited; otherwise remaining stock is stock - redeemedCount
+  redeemedCount Int                 @default(0)
+  active        Boolean             @default(true)
+  sortOrder     Int                 @default(0)
+  createdAt     DateTime            @default(now())
+
+  orders Order[]
+
+  @@index([streamerId])
+}
+
+// A redemption: a user spends mochi on a marketplace item. Records the order;
+// the creator fulfills off-platform and marks status. Cancelling refunds mochi.
+model Order {
+  id          String          @id @default(cuid())
+  streamerId  String
+  streamer    Streamer        @relation(fields: [streamerId], references: [id], onDelete: Cascade)
+  backerId    String
+  backer      Backer          @relation(fields: [backerId], references: [id], onDelete: Cascade)
+  itemId      String
+  item        MarketplaceItem @relation(fields: [itemId], references: [id])
+  mochiSpent  Int // mochi debited for this order (quantity × item price at time of order)
+  quantity    Int             @default(1)
+  note        String? // buyer note (song title, shout-out text, delivery ref, …)
+  status      OrderStatus     @default(pending)
+  createdAt   DateTime        @default(now())
+  fulfilledAt DateTime?
+
+  @@index([streamerId])
+  @@index([backerId])
+  @@index([itemId])
 }

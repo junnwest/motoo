@@ -128,6 +128,13 @@ export async function getStreamerProfile(handle: string) {
         orderBy: { reportNumber: "desc" },
         take: 1,
       },
+      // Phase 2: mochi issuance + active marketplace items, so the profile page
+      // renders the buy/spend modules from ONE streamer query (no second fetch).
+      mochiIssuance: true,
+      marketplaceItems: {
+        where: { active: true },
+        orderBy: { sortOrder: "asc" },
+      },
     },
   });
   if (!streamer || streamer.status !== "approved") return null;
@@ -183,6 +190,46 @@ export async function getStreamerForBacking(handle: string) {
         orderBy: { sortOrder: "asc" },
         include: { perks: true },
       },
+    },
+  });
+}
+
+// ── Phase 2: mochi-marketplace reads ─────────────────────────────────────────
+
+/**
+ * Public marketplace view for a creator: profile + mochi issuance + active items.
+ * Used by the buy-mochi module and the marketplace section on the profile page.
+ */
+export async function getStreamerMarketplace(handle: string) {
+  const streamer = await prisma.streamer.findUnique({
+    where: { handle },
+    include: {
+      mochiIssuance: true,
+      marketplaceItems: {
+        where: { active: true },
+        orderBy: { sortOrder: "asc" },
+      },
+    },
+  });
+  if (!streamer || streamer.status !== "approved") return null;
+  return streamer;
+}
+
+/** Everything the creator dashboard needs: profile, issuance, items, orders. */
+export async function getCreatorDashboard(streamerId: string) {
+  return prisma.streamer.findUnique({
+    where: { id: streamerId },
+    include: {
+      mochiIssuance: true,
+      marketplaceItems: { orderBy: { sortOrder: "asc" } },
+      orders: {
+        orderBy: { createdAt: "desc" },
+        include: {
+          item: { select: { title: true } },
+          backer: { select: { nickname: true } },
+        },
+      },
+      _count: { select: { mochiHoldings: true } },
     },
   });
 }

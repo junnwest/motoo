@@ -229,7 +229,7 @@ export default async function FanLandingPage() {
                   </div>
                 </div>
               </div>
-              <ButtonLink href={`/s/${spotlight.handle}/back`} size="lg">
+              <ButtonLink href={`/s/${spotlight.handle}#buy-mochi`} size="lg">
                 <Mochi width={18} height={14} /> {tc("sendMochi")}
               </ButtonLink>
             </div>

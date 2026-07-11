@@ -8,8 +8,12 @@ import { Mochi } from "@/components/Mochi";
 import { Avatar } from "@/components/ui/Placeholder";
 import { GradeBadge } from "@/components/GradeBadge";
 import { BackerWall } from "@/components/BackerWall";
+import { BuyMochi } from "@/components/BuyMochi";
+import { MarketplaceSection } from "@/components/MarketplaceSection";
 import { getStreamerProfile } from "@/lib/streamers";
-import { formatKrw, formatPercent } from "@/lib/format";
+import { getCurrentBacker } from "@/lib/session";
+import { getHolding } from "@/lib/mochi";
+import { formatPercent } from "@/lib/format";
 import type { Grade } from "@/lib/grades";
 
 export default async function StreamerProfilePage({
@@ -20,7 +24,12 @@ export default async function StreamerProfilePage({
   const { handle } = await params;
   const t = await getTranslations("profile");
   const tc = await getTranslations("common");
-  const data = await getStreamerProfile(handle);
+  // Independent reads run concurrently (the viewer's account doesn't depend on
+  // the profile). Issuance + items are folded into the profile query itself.
+  const [data, backer] = await Promise.all([
+    getStreamerProfile(handle),
+    getCurrentBacker(),
+  ]);
 
   if (!data) {
     return (
@@ -42,9 +51,31 @@ export default async function StreamerProfilePage({
     );
   }
 
-  const { streamer, tiers, updates, backerWall, report, backerCount } = data;
+  const { streamer, updates, backerWall, report, backerCount } = data;
   const metrics = report?.metrics;
   const grades = report?.grades;
+
+  // Phase 2: mochi issuance + marketplace (from the profile query) + the
+  // viewer's holding balance (depends on both the streamer and the account).
+  const holding = backer ? await getHolding(streamer.id, backer.id) : null;
+  const balance = holding?.balance ?? 0;
+  const issuance = streamer.mochiIssuance
+    ? {
+        pricePerMochiKrw: streamer.mochiIssuance.pricePerMochiKrw,
+        goalQuantity: streamer.mochiIssuance.goalQuantity,
+        soldQuantity: streamer.mochiIssuance.soldQuantity,
+        active: streamer.mochiIssuance.active,
+      }
+    : null;
+  const items = streamer.marketplaceItems.map((i) => ({
+    id: i.id,
+    title: i.title,
+    description: i.description,
+    priceMochi: i.priceMochi,
+    itemType: i.itemType,
+    stock: i.stock,
+    redeemedCount: i.redeemedCount,
+  }));
 
   const platformLinks = [
     { label: "CHZZK", href: streamer.chzzk },
@@ -104,8 +135,8 @@ export default async function StreamerProfilePage({
               ))}
             </div>
           </div>
-          <ButtonLink href={`/s/${streamer.handle}/back`} size="lg">
-            <Mochi width={18} height={14} /> {tc("backThisStreamer")}
+          <ButtonLink href="#buy-mochi" size="lg">
+            <Mochi width={18} height={14} /> {tc("sendMochi")}
           </ButtonLink>
         </div>
 
@@ -126,63 +157,15 @@ export default async function StreamerProfilePage({
       </section>
 
       <div className="mx-auto grid max-w-[1100px] gap-12 px-6 py-14 sm:px-14 lg:grid-cols-[1.3fr_1fr]">
-        {/* Left: tiers + backer wall */}
+        {/* Left: marketplace + backer wall */}
         <div className="flex flex-col gap-14">
-          {/* Tiers */}
-          <div>
-            <h2 className="mb-5 text-[24px] font-extrabold tracking-[-0.02em]">
-              {t("tiersTitle")}
-            </h2>
-            <div className="flex flex-col gap-4">
-              {tiers.map((tier) => (
-                <div
-                  key={tier.id}
-                  className="rounded-[20px] border border-line-2 bg-card p-6"
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <div className="text-[19px] font-extrabold">{tier.name}</div>
-                      {tier.description && (
-                        <p className="mt-1 text-[14px] text-body">
-                          {tier.description}
-                        </p>
-                      )}
-                    </div>
-                    <div className="text-right">
-                      <div className="text-[20px] font-extrabold text-coral-deep">
-                        {formatKrw(tier.priceKrw)}
-                      </div>
-                      <div className="text-[12px] text-muted">
-                        {t("tierBackers", { count: tier.backerCount })}
-                      </div>
-                    </div>
-                  </div>
-                  {tier.perks.length > 0 && (
-                    <ul className="mt-4 flex flex-col gap-2">
-                      {tier.perks.map((p) => (
-                        <li
-                          key={p.id}
-                          className="flex items-center gap-2 text-[14px] text-ink"
-                        >
-                          <span className="flex h-5 w-5 items-center justify-center rounded-[6px] bg-sage-bg text-[11px] text-sage">
-                            ✓
-                          </span>
-                          {p.title}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                  <ButtonLink
-                    href={`/s/${streamer.handle}/back?tier=${tier.id}`}
-                    variant="secondary"
-                    className="mt-5 w-full"
-                  >
-                    {t("tierBackButton")}
-                  </ButtonLink>
-                </div>
-              ))}
-            </div>
-          </div>
+          {/* Marketplace (spend mochi) */}
+          <MarketplaceSection
+            handle={streamer.handle}
+            balance={balance}
+            loggedIn={!!backer}
+            items={items}
+          />
 
           {/* Backer Wall */}
           <div>
@@ -200,8 +183,20 @@ export default async function StreamerProfilePage({
           </div>
         </div>
 
-        {/* Right: report summary + updates */}
+        {/* Right: buy mochi + report summary + updates */}
         <aside className="flex flex-col gap-10">
+          {/* Buy mochi */}
+          <div id="buy-mochi" className="scroll-mt-24">
+            <BuyMochi
+              handle={streamer.handle}
+              streamerId={streamer.id}
+              creatorName={streamer.displayName}
+              issuance={issuance}
+              balance={balance}
+              loggedIn={!!backer}
+            />
+          </div>
+
           {/* Trust Report summary */}
           <div className="rounded-[20px] border border-line-2 bg-card p-6">
             <Eyebrow className="mb-2">{t("reportSummaryTitle")}</Eyebrow>

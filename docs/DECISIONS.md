@@ -3,6 +3,22 @@
 Why the project is the way it is. Newest first. Keep entries short: decision,
 rationale, and any constraint it creates.
 
+## 2026-07-10 — Phase 2 build: retire backing, per-creator holdings, creator auth
+Built the mochi-marketplace. Key choices (user-approved):
+- **Retire the Phase-1 backing flow** (tiers, `Backing`, `FoundingMembership`) from the
+  UI — one clean spend path: buy a creator's mochi → redeem marketplace items. The
+  models/routes stay in the tree but dormant. **Founding number dropped** from the new flow.
+- **Per-creator mochi** via `MochiHolding` (unique [streamer, backer]); the Phase-1 global
+  `Backer.currencyBalance` is left dormant. `MochiIssuance` holds price + soft-goal + sold.
+- **Creator auth without a rename**: a creator is a `Backer` account (role=streamer) that
+  **owns** a `Streamer` via `Streamer.ownerId`. Onboarding creates account + profile +
+  issuance in one transaction and signs the creator in. `getCurrentCreator()` resolves the
+  owned profile (dev-fallback `creator@motoo.dev` mirrors the fan dev-fallback).
+- **Soft goal is not a cap**: buying past `goalQuantity` is allowed; the bar just shows
+  >100%. Keeps mochi a consumable, not a scarce security (spec §2/§8).
+- Constraint: fulfillment stays **off-platform** in v1 (orders record + creator marks
+  done/cancels; cancel refunds the exact mochi and frees stock).
+
 ## 2026-07-09 — Pivot to the mochi-marketplace model
 The demo's product is now: **a creator issues their own mochi; users buy it and
 spend it in that creator's marketplace.** The Trust Report thesis from the original

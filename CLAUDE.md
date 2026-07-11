@@ -24,8 +24,9 @@ pnpm install
 pnpm db:up && pnpm db:push && pnpm db:seed   # Postgres via docker (host port 5433)
 pnpm dev                                       # http://localhost:3000
 ```
-Dev login: `demo@motoo.dev` / `motoo`. In dev, the backing flow falls back to this demo
-backer when nobody's signed in (`src/lib/session.ts`).
+Dev logins: fan `demo@motoo.dev` / `motoo`; **creator `creator@motoo.dev` / `motoo`**
+(owns flagship `@creatorA`). In dev, `src/lib/session.ts` falls back to the demo fan
+(`getCurrentBacker`) and demo creator (`getCurrentCreator`) when nobody's signed in.
 
 ## Deploy
 Vercel (region `icn1`) + Supabase Pro Postgres (Seoul, project `nrfhwhefabahsfzuyxqu`).

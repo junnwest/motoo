@@ -1,9 +1,12 @@
 import type {
+  MochiPurchaseRequest,
   PaymentProvider,
   PurchaseRequest,
   PurchaseResult,
   SettlementRequest,
   SettlementResult,
+  VoidChargeRequest,
+  VoidChargeResult,
 } from "./types";
 
 /**
@@ -23,6 +26,23 @@ export class MockPaymentProvider implements PaymentProvider {
       mochiGranted: req.pack.mochi,
       receiptId: `mock_receipt_${req.idempotencyKey}`,
     };
+  }
+
+  async purchaseMochi(req: MochiPurchaseRequest): Promise<PurchaseResult> {
+    await delay(120);
+    return {
+      ok: true,
+      transactionId: `mock_tx_${req.idempotencyKey}`,
+      mochiGranted: req.quantity,
+      receiptId: `mock_receipt_${req.idempotencyKey}`,
+    };
+  }
+
+  async voidCharge(req: VoidChargeRequest): Promise<VoidChargeResult> {
+    await delay(60);
+    // No real funds move in the mock; a real adapter would refund/void the PG charge.
+    void req;
+    return { ok: true };
   }
 
   async settleToStreamer(req: SettlementRequest): Promise<SettlementResult> {
