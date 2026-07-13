@@ -1,6 +1,6 @@
 # motoo — Progress Tracker
 
-_Last updated: 2026-07-10_
+_Last updated: 2026-07-12_
 
 Living status of the build. Update the checkboxes as work lands. See
 [`DECISIONS.md`](./DECISIONS.md) for why things are the way they are and
@@ -8,9 +8,10 @@ Living status of the build. Update the checkboxes as work lands. See
 
 ## Current focus
 
-1. **Phase 2 mochi-marketplace** ✅ — creator onboarding + dashboard + user buy/spend built and verified locally.
-2. **Deployment pipeline** (blocked) — Supabase (Seoul) + Vercel (icn1); needs the Supabase DB password to push schema + import to Vercel.
-3. **Frontend polish** (next) — copy/design passes on the new Phase 2 surfaces.
+1. **Phase 2 mochi-marketplace** ✅ — creator issuance + Studio + user buy/spend, verified locally.
+2. **Phase 4 accounts** ✅ — auth-aware app, fan onboarding (본인인증 gate), and the **additive creator model** (a user who *also* owns a Studio). See below.
+3. **Deployment** (blocked) — Supabase (Seoul) + Vercel (icn1); needs the Supabase DB password to push schema + import to Vercel.
+4. **Next** — `/explore` as the real consumer home (still the Phase-1 trust-ranking grid); real PG + real 본인인증 (both need a business registration + contract).
 
 ---
 
@@ -59,12 +60,12 @@ Verified: `pnpm db:push` + `db:seed` succeed; all Phase 2 routes render 200 with
 data; the buy → redeem → cancel-refund invariants hold end-to-end against Postgres
 (buy credits, redeem debits, cancel refunds, KRW = qty × price); `tsc` clean, vocab passes.
 
-### Creator side
-- [x] Creator signup + onboarding (email/pw + name, age, gender, creator type, handle, mochi price/goal) → `/creator/onboarding`
-- [x] Per-creator dashboard shell + guard → `/creator/dashboard`
-- [x] Mochi issuance controls: price + soft-goal quantity + pause → `/creator/dashboard/mochi`
-- [x] Marketplace item CRUD (title, price in mochi, type, stock, active) → `/creator/dashboard/items`
-- [x] Order view + mark-fulfilled / cancel-refund (fulfillment off-platform) → `/creator/dashboard/orders`
+### Creator side (the **Studio**, `/studio`)
+- [x] Studio shell + guard (owns a Streamer) → `/studio`
+- [x] Mochi issuance controls: price + soft-goal quantity + pause → `/studio/mochi`
+- [x] Marketplace item CRUD (title, price in mochi, type, stock, active) → `/studio/items`
+- [x] Order view + mark-fulfilled / cancel-refund (fulfillment off-platform) → `/studio/orders`
+- [x] Become-a-creator setup (add-on to a signed-in user) → `/creator/onboarding`, entered via `/api/become-creator`
 
 ### User side
 - [x] Discover creators (existing `/explore`)
@@ -79,17 +80,38 @@ data; the buy → redeem → cancel-refund invariants hold end-to-end against Po
 - [x] `MarketplaceItem` + `Order` models (+ `MarketplaceItemType`, `OrderStatus`, `Gender` enums)
 - [x] Phase-1 backing/tiers/founding-number **retired from the UI** (routes/schema kept dormant); founding number dropped from the new flow
 
-### Auth
-- [x] Real credentials login form (`/login`) replacing the stub; creator onboarding creates the account + signs in
-- Dev logins: fan `demo@motoo.dev / motoo`, **creator `creator@motoo.dev / motoo`** (owns flagship `@creatorA`)
-
-### Phase 3 follow-ups
+### Phase 3 follow-ups ✅
 - [x] User order/redemption history — a "주문 내역" section on `/me/mochi` (`getOrdersForBacker`)
-- [x] User self-signup — real `/signup` form + action (role=backer); role-aware login redirect (creators → dashboard)
+- [x] User self-signup — real `/signup` form + action
 - [x] Automated tests — `pnpm test` runs 10 money-logic integration tests (node:test via tsx) incl. the two concurrency guards
-- [ ] Real Korean PG (Toss/NICE) — needs credentials **and** a redirect-based flow (see "Real payments" below); mock only today
-- [ ] On-platform fulfillment for access passes / digital perks
-- [ ] Real age verification / guardian consent; admin console; enable OAuth (Naver/Kakao/Google scaffolded, off)
+
+---
+
+## Phase 4 — Auth, onboarding, accounts ✅ (built, verified locally)
+
+### Auth
+- [x] Real credentials login (`/login`) + self-signup (`/signup`) — split-layout, **social-first** (Kakao/Naver/Google) with email/password below a divider; password policy (8+ chars, letter+number) + confirm field
+- [x] **Auth-aware app**: `Nav` is a server component reading the session; signed-in shows name + logout (+ Studio link for creators)
+- [x] **OAuth**: **Google + Naver live in dev** (creds in `.env`, gitignored). Kakao stays a "준비 중" badge — blocked on business registration. Buttons activate the moment creds appear (`getEnabledOAuthProviders`)
+- [x] Auth config split for edge middleware: `auth.config.ts` (session + `authorized`, no Prisma) vs `auth.ts` (providers + Prisma `jwt`); `src/proxy.ts` = the middleware
+- [x] Stale-session self-heal: a cookie for a deleted account signs out via `/api/session-reset` instead of looping
+
+### Onboarding (every new user, redirect-enforced by `proxy.ts`)
+- [x] `/onboarding` — confirm nickname, pick a unique public `@handle` (live availability), **본인인증** (identity/age gate), agree to terms (필수) + marketing (선택)
+- [x] **`VerificationProvider` abstraction + mock** (`VERIFICATION_PROVIDER`) — real 본인인증 = 본인확인기관 contract + business reg (like the PG). Mock simulates a verified adult, persisted server-side
+- [x] `/terms` + `/privacy` placeholder pages
+
+### Accounts — the additive creator model
+- [x] **A creator is a USER who also owns a Studio** — not a separate account or a mode. Dropped `role: streamer` from routing; creator status = owns a `Streamer`, surfaced as `session.user.creator` (handle or null)
+- [x] **Role-aware home**: logged-out → marketing landing `/`; every signed-in user → `/explore`; creators reach the Studio via a nav link
+- [x] **Become a creator**: `/api/become-creator` — signed-in user → creator setup; logged-out → signup, remembering the intent (cookie) so the combined flow (signup → onboarding → creator setup) continues; `/signup` shows a creator-mode banner
+- [x] Nav: **스튜디오** link for creators, subtle **크리에이터 되기** for users; marketing links only when logged out
+- Dev logins: fan `demo@motoo.dev / motoo`, **creator `creator@motoo.dev / motoo`** (a user who owns `@creatorA`)
+
+### Not built (need a business registration + paid contract — same blocker class)
+- [ ] Real Korean PG (Toss/NICE / PortOne) — needs credentials **and** a redirect+confirm flow (see "Real payments" below)
+- [ ] Real 본인인증 (NICE/PASS/간편인증) — ~₩40/verification + 사업자등록. PortOne aggregates PG + 간편인증 in one integration
+- [ ] On-platform fulfillment; admin console; guardian-consent flow for minors
 
 ## Real payments — what a live PG needs (not built)
 

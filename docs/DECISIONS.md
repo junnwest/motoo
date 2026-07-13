@@ -3,6 +3,42 @@
 Why the project is the way it is. Newest first. Keep entries short: decision,
 rationale, and any constraint it creates.
 
+## 2026-07-12 — Additive creator model (user base + Studio)
+A creator is **a user who also owns a Studio** (`Streamer`), not a separate account
+or a mode. Dropped `role: streamer` from all routing; creator status is derived from
+Streamer ownership and surfaced as `session.user.creator` (handle or null).
+- Rationale: how YouTube/Twitch/Patreon work — one identity, additive capability. A
+  creator naturally wants to support other creators, which a role-toggle blocks.
+- Constraint: `session.user.creator` lives in the JWT; the become-a-creator action calls
+  `unstable_update()` so a new Studio shows up without re-login. `role` keeps only
+  user/admin meaning. `/creator/dashboard` renamed to **`/studio`** ("Studio" — works for
+  all creator types, not just streamers).
+- **Become a creator = combined flow**: `/api/become-creator` routes a signed-in user to
+  creator setup, or a logged-out visitor to signup while remembering the intent (cookie),
+  so signup → onboarding → creator setup chains automatically.
+
+## 2026-07-11 — Role-aware home; marketing demoted, not deleted
+Logged-out visitors get the marketing landing `/`; every signed-in user is redirected to
+`/explore` (the consumer home). The creator marketing page (`/creators`) stays public but
+demoted (footer link), so creator acquisition still works without shoving it at everyone.
+- Rationale: real products send signed-in users to their app home, not the pitch.
+
+## 2026-07-11 — Fan onboarding + identity verification as an abstraction
+Every new user completes `/onboarding` (nickname, unique `@handle`, 본인인증, terms),
+enforced by `proxy.ts`. Age is a real **본인인증 step** behind a `VerificationProvider`
+(mirrors `PaymentProvider`); the **mock** simulates a verified adult, persisted server-side.
+- Rationale: a self-reported birthdate is theater; real age = 본인확인기관 (NICE/PASS/
+  간편인증), which needs a `사업자등록` + paid contract (~₩40/verification) — same blocker
+  class as the PG. Build the flow now, swap the adapter later (`VERIFICATION_PROVIDER`).
+- Kakao login is blocked the same way (business verification); Google + Naver are free to
+  register and are **live in dev**.
+
+## 2026-07-11 — Auth split for edge middleware + self-healing sessions
+Split Auth.js into `auth.config.ts` (edge-safe: session + `authorized` onboarding gate, no
+Prisma) and `auth.ts` (providers + Prisma `jwt`); `src/proxy.ts` is the middleware (Next 16
+renamed `middleware`→`proxy`). A stale cookie (deleted account, e.g. after a dev reseed)
+self-heals via `/api/session-reset` instead of looping /onboarding ↔ /login.
+
 ## 2026-07-10 — Phase 3 follow-ups: order history, self-signup, tests
 Built the buildable, verifiable slice of the Phase 3 backlog.
 - **Order history** on `/me/mochi` (`getOrdersForBacker`) — users see redeemed

@@ -17,41 +17,48 @@ spec and [`design-handoff/`](./design-handoff/) for the visual system.
 - **[docs/DECISIONS.md](./docs/DECISIONS.md)** — decision log with rationale
 - **[docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md)** — deploy runbook + infra state (Vercel + Supabase Seoul)
 
-**Current direction:** the **mochi-marketplace pivot** (Phase 2) is the product for the
-demo — creators issue their own mochi, users buy it and spend it in each creator's
-marketplace. It's **planned, not yet built** — see PROGRESS.md for the plan. The original
-**Streamer Trust Report** thesis is shelved for the demo; its schema and components stay
-in the tree. What's live today is the Phase 1 foundation below.
+**Current direction:** the **mochi-marketplace** is built and verified locally — creators
+issue their own mochi, users buy it and spend it in each creator's marketplace. Accounts
+are **additive**: everyone is a user (fan); a **creator** is a user who *also* owns a
+**Studio**. The original **Streamer Trust Report** thesis is shelved; its schema/components
+stay in the tree, dormant.
 
-## What's built so far (Phase 1 — landing + core backing flow)
+## What's built
 
 | Route | Page |
 | --- | --- |
-| `/` | Fan landing (default) |
-| `/creators` | Creator landing (link sent to creators; reachable from the fan page's "크리에이터이신가요?") |
-| `/explore` | Streamer grid — ranked by **trust signals, never money raised** — with filters |
-| `/s/[handle]` | Streamer profile + tiers + **Backer Wall** + Trust Report summary |
-| `/s/[handle]/back` | Backing flow: age gate → tier → display → message → pay, with the non-financial disclosure and **founding-number reveal** |
-| `/login` `/signup` `/apply` `/s/[handle]/report` | Placeholders (out of Phase-1 scope) |
+| `/` | Marketing landing (logged-out only; signed-in users are routed to `/explore`) |
+| `/explore` | Creators grid — the consumer home (still the Phase-1 trust ranking; to be reworked) |
+| `/s/[handle]` | Creator profile: **buy mochi** module + **marketplace** (spend mochi on items) |
+| `/me/mochi` | "My mochi": per-creator holdings + order/redemption history |
+| `/login` · `/signup` | Real auth — split-layout, social-first (Kakao/Naver/Google) + email; password policy + confirm |
+| `/onboarding` | New-user gate: nickname, unique `@handle`, **본인인증** (age/identity), terms |
+| `/studio` (+ `/mochi` `/items` `/orders`) | The **Studio** (creator console): mochi issuance, item CRUD, orders |
+| `/creators` → `/api/become-creator` | Creator pitch → become-a-creator (add-on to a user account) |
 
-Out of scope for now: streamer dashboard, admin, full Trust Report document/PDF, real PG.
-The schema and design system already support them.
+**Account model:** a creator is a `Backer` (the account/user table) that owns a `Streamer`
+via `Streamer.ownerId`. Creator status = `session.user.creator` (Studio handle or null).
+Signed-in users land on `/explore`; creators get a **스튜디오** nav link. Onboarding is
+redirect-enforced by `src/proxy.ts`.
+
+Not built (all need a `사업자등록` + paid contract): real PG (Toss/NICE/PortOne),
+real 본인인증 (NICE/PASS/간편인증), Kakao login. Mocks stand in behind provider abstractions.
 
 ## Stack
 
 - **Next.js 16** (App Router) · TypeScript · **Tailwind v4** (design tokens in [`src/app/globals.css`](./src/app/globals.css))
 - **Postgres + Prisma 6** — money is integer KRW, never floats
 - **next-intl** — `ko` default, `en` scaffold, no hardcoded strings ([`messages/`](./messages/))
-- **Auth.js v5** — dev credentials + Naver/Kakao/Google scaffold, roles `backer`/`streamer`/`admin`
-- **Payments** — Korean virtual-currency ("모찌"/cookies) model behind a `PaymentProvider` interface; `MockPaymentProvider` in dev, Toss/NICE adapters stubbed
+- **Auth.js v5** — credentials + **Google/Naver live** (Kakao scaffold); edge `auth.config.ts` + Node `auth.ts` split; `src/proxy.ts` middleware enforces onboarding
+- **Provider abstractions** — `PaymentProvider` (mochi charges) and `VerificationProvider` (본인인증), both `mock` in dev, swapped via `PAYMENT_PROVIDER` / `VERIFICATION_PROVIDER`
 
-## Key invariants (enforced in code)
+## Key invariants (enforced + tested)
 
-- **Founding number** is assigned once per (streamer, backer) via the `FoundingMembership`
-  table (two DB unique constraints), never reused/reordered, never released on refund.
-  See [`src/lib/backing.ts`](./src/lib/backing.ts).
-- **`PerkDelivery` rows** (not `Perk.status`) are the source of truth for the Execution grade.
-- **Grades** are words only — `Emerging` / `Strong` / `Excellent` — never a numeric score.
+- **Mochi is money**: `src/lib/mochi.ts` uses row-locked conditional updates so concurrent
+  redemptions can't oversell stock or drive a holding negative. `pnpm test` proves it
+  (buy/redeem/cancel invariants + concurrency guards).
+- **Not a financial product**: no investment vocabulary in copy (`pnpm check:vocab`).
+- Dormant Phase-1 invariants (founding number, grades) remain in the schema, unused.
 
 ## Getting started
 
@@ -59,15 +66,17 @@ Prereqs: Node 20+, pnpm, Docker (for Postgres).
 
 ```bash
 pnpm install
-cp .env.example .env        # dev defaults work as-is
+cp .env.example .env        # dev defaults work as-is (OAuth optional — see .env.example)
 pnpm db:up                  # start Postgres (docker compose, host port 5433)
 pnpm db:push                # create schema
-pnpm db:seed                # sample streamers, tiers, backers, reports
+pnpm db:seed                # sample creators, mochi issuance, items, holdings, orders
 pnpm dev                    # http://localhost:3000
+pnpm test                   # money-logic integration tests (needs db:up)
 ```
 
-Dev login: `demo@motoo.dev` / `motoo`. In dev, the backing flow falls back to this
-demo backer when no one is signed in (see [`src/lib/session.ts`](./src/lib/session.ts)).
+Dev logins: fan `demo@motoo.dev` / `motoo`; creator `creator@motoo.dev` / `motoo` (a user
+who owns `@creatorA`). Both land on `/explore`. In dev, `src/lib/session.ts` falls back to
+the demo fan/creator when nobody's signed in.
 
 ## Scripts
 
@@ -76,5 +85,6 @@ demo backer when no one is signed in (see [`src/lib/session.ts`](./src/lib/sessi
 | `pnpm dev` / `pnpm build` / `pnpm start` | Next.js dev / build / production |
 | `pnpm db:up` / `pnpm db:down` | Start / stop Postgres |
 | `pnpm db:push` / `pnpm db:seed` / `pnpm db:studio` | Schema push / seed / Prisma Studio |
+| `pnpm test` | Money-logic integration tests (node:test via tsx; needs `db:up`) |
 | `pnpm check:vocab` | Banned-vocabulary check on message catalogs (spec §2) |
 | `pnpm lint` | ESLint |

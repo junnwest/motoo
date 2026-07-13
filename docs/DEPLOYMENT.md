@@ -1,6 +1,6 @@
 # motoo — Deployment
 
-_Last updated: 2026-07-09_
+_Last updated: 2026-07-12_
 
 **Target:** Vercel (app, region `icn1` Seoul) + Supabase Pro (Postgres, region Seoul).
 Auto-deploy on push to `main`, preview deploys per PR.
@@ -27,9 +27,18 @@ Auto-deploy on push to `main`, preview deploys per PR.
 | `DIRECT_URL` | Supabase → Connect → ORM/Prisma → **direct** (`:5432`) |
 | `AUTH_SECRET` | `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"` |
 | `AUTH_TRUST_HOST` | `true` |
-| `PAYMENT_PROVIDER` | `mock` |
+| `PAYMENT_PROVIDER` | `mock` (real Toss/NICE/PortOne needs a merchant contract) |
+| `VERIFICATION_PROVIDER` | `mock` (real 본인인증 needs a 본인확인기관 contract) |
+| `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` | Google Cloud OAuth client — **set locally, live in dev** |
+| `AUTH_NAVER_ID` / `AUTH_NAVER_SECRET` | Naver Developers app — **set locally, live in dev** |
+| `AUTH_KAKAO_ID` / `AUTH_KAKAO_SECRET` | blank — blocked on business registration |
 
 Supabase project host: `nrfhwhefabahsfzuyxqu` @ `aws-1-ap-northeast-2.pooler.supabase.com`.
+
+> **OAuth redirect URIs** are per-environment. Dev uses
+> `http://localhost:3000/api/auth/callback/{google,naver}`. Before deploying, add the
+> production callback (`https://<domain>/api/auth/callback/{provider}`) in each provider's
+> console. See `.env.example` for the per-provider setup runbook.
 
 ## One-time: initialize the Supabase database
 
