@@ -1,8 +1,9 @@
 # motoo
 
 A two-sided Korean creator-support platform. **Current direction: a mochi-marketplace** —
-each creator issues their own **mochi** (prepaid marketplace credit, capped as a soft
-goal), users buy it and spend it in that creator's marketplace. See
+each creator issues their own **mochi** (prepaid marketplace credit, minted on purchase),
+users buy it and spend it in that creator's marketplace. Price ratchets up in tiers
+(early supporters get in cheaper); mochi is never a security. See
 [`motoo-product-description.md`](./motoo-product-description.md) for the original product
 spec and [`design-handoff/`](./design-handoff/) for the visual system.
 
@@ -33,7 +34,7 @@ stay in the tree, dormant.
 | `/me/mochi` | "My mochi": per-creator holdings + order/redemption history |
 | `/login` · `/signup` | Real auth — split-layout, social-first (Kakao/Naver/Google) + email; password policy + confirm |
 | `/onboarding` | New-user gate: nickname, unique `@handle`, **본인인증** (age/identity), terms |
-| `/studio` (+ `/mochi` `/items` `/orders`) | The **Studio** (creator console): mochi issuance, item CRUD, orders |
+| `/studio` | The **Studio** (creator console): single-page dashboard — overview + mochi issuance (ratcheting tiers) + item CRUD + orders |
 | `/creators` → `/api/become-creator` | Creator pitch → become-a-creator (add-on to a user account) |
 
 **Account model:** a creator is a `Backer` (the account/user table) that owns a `Streamer`

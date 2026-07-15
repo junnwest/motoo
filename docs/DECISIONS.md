@@ -125,6 +125,9 @@ handoff is shelved (schema/components kept, not featured).
   orders) and adds creator auth/onboarding + dashboard.
 
 ## 2026-07-09 — Mochi supply = "capped as a soft goal"
+> Evolved by the **2026-07-15 ratcheting price tiers** entry above — the soft goal is now
+> per-tier availability and the price ratchets up. The "not a security" stance below still holds.
+
 A creator sets quantity × price as a **target** (e.g. 100 × ₩200 = ₩20,000). Mochi is
 prepaid credit spendable only in that creator's marketplace. **Non-transferable,
 unspent-refundable, no resale/return.**
