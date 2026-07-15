@@ -3,6 +3,54 @@
 Why the project is the way it is. Newest first. Keep entries short: decision,
 rationale, and any constraint it creates.
 
+## 2026-07-14 — Mochi issuance: ratcheting price tiers (prepaid credit, not a security)
+Mochi is fungible prepaid credit, minted **on purchase**, scoped to one creator. Once
+bought it's the fan's — spendable or refundable **at the KRW paid**; the creator can
+never claw back or devalue held mochi. The creator has two levers, available anytime
+(onboarding or Studio):
+- **Add availability** (same price): raise the current tier's `goalQuantity`.
+- **Raise price** (new tier): set a higher per-mochi price. Price **only ratchets up**
+  (new ≥ current, enforced client + server). A raise resets the tier meter
+  (`soldQuantity → 0`) and **discards** leftover availability at the old price — harmless,
+  since nothing was minted; unbought headroom just disappears.
+
+- **Rationale**: gives an "early supporters got in cheaper" feel — a deliberate, legal
+  workaround for an investment *feel* — while staying a prepaid credit. Existing holders
+  are never affected; the only benefit is cheaper effective access to items.
+- **The hard line**: the *mechanic* carries the momentum; the *copy* may not. No
+  investment/return vocabulary (투자/수익/return/yield) — `pnpm check:vocab` is the build
+  gate, §2 the rule. Let the rising number speak.
+- **No speculation payout**: non-transferable + refund-at-paid ⇒ no buy-low-refund-high,
+  no secondary market. Item prices stay fixed in mochi, so raising the mochi price is what
+  makes everything pricier for latecomers.
+- **Over-issuance** is disincentivised by obligation, not tokenomics: mochi is a
+  refundable liability + a fulfillment duty + trust metrics. Issuing more does **not**
+  dilute holders (mochi isn't equity), so there is deliberately no supply cap.
+
+Data/constraints this creates:
+- `MochiIssuance.soldQuantity` = the **current tier's** sold count (resets on a raise);
+  `lifetimeSold` tracks total-ever for stats. `goalQuantity` = availability at the current
+  price (the "X left" scarcity meter).
+- `MochiHolding.krwPaidTotal` records lifetime KRW paid so refund-at-paid can be built
+  later. **Not built yet**: the unspent-refund flow + exact per-lot refund accounting
+  (needs a purchase-lot ledger). Deferred deliberately.
+- No price-history table yet (future: show a creator's 100→200→300 ladder to fans).
+
+## 2026-07-15 — Creator taxonomy: type (primary) → category (dependent)
+`크리에이터 유형` is the primary facet — **streamer / youtuber / author** — and `카테고리`
+is a dependent sub-facet whose options depend on the chosen type (e.g. author → 소설/웹툰/
+일러스트/에세이). Single source of truth: `src/lib/creatorTaxonomy.ts` (`CREATOR_TYPES`,
+`CATEGORIES_BY_TYPE`), used by the setup form's dependent dropdown, `createStudio`
+validation, and the fan browse (explore filters, home chips, cards, `streamers.ts`).
+- **Inverts the old browse model**: `category` used to be the primary browse facet;
+  now `creatorType` is, and browse filters type-first then sub-category.
+- Both `Streamer.creatorType` and `.category` stay plain `String` columns (no DB enum) —
+  the taxonomy is validated in app code, so adding types/categories is a one-file edit.
+- Studio is now a **single-page dashboard** (overview + issuance + items + orders on
+  `/studio`; the `/studio/{mochi,items,orders}` sub-routes were removed). Creator-signup
+  intent persists on the Backer row (`creatorIntent`), and a stale-session loop in the
+  creator path self-heals via `/api/session-reset`.
+
 ## 2026-07-12 — Additive creator model (user base + Studio)
 A creator is **a user who also owns a Studio** (`Streamer`), not a separate account
 or a mode. Dropped `role: streamer` from all routing; creator status is derived from

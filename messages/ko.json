@@ -225,7 +225,8 @@
       "body": "필터를 조정하거나 다른 카테고리를 둘러보세요.",
       "cta": "필터 초기화"
     },
-    "resultCount": "{count}명의 크리에이터"
+    "resultCount": "{count}명의 크리에이터",
+    "filterType": "유형"
   },
   "profile": {
     "backers": "백커",
@@ -414,14 +415,33 @@
     "mochiPrice": "모찌 1개 가격 (원)",
     "mochiGoal": "발행 목표 수량",
     "mochiGoalHint": "목표일 뿐, 넘겨도 괜찮아요. 예: 100개 × 200원 = 20,000원",
-    "goalSummary": "{goal}개 × {price}원 = 목표 {total}원",
+    "goalSummary": "총 {total}원 · 모찌 {goal}개 · 개당 {price}원",
     "submit": "마켓 열기",
     "submitting": "여는 중…",
     "errors": {
       "emailTaken": "이미 사용 중인 이메일이에요.",
       "handleTaken": "이미 사용 중인 프로필 주소예요.",
-      "generic": "마켓을 열지 못했어요. 입력값을 확인해 주세요."
-    }
+      "generic": "마켓을 열지 못했어요. 입력값을 확인해 주세요.",
+      "typeRequired": "크리에이터 유형을 선택해 주세요.",
+      "categoryRequired": "카테고리를 선택해 주세요.",
+      "priceMin": "모찌 1개 가격은 100원 이상이어야 해요.",
+      "countMin": "모찌는 최소 10개 이상 발행해야 해요.",
+      "totalMin": "총 발행액은 5만원 이상이어야 해요."
+    },
+    "typePlaceholder": "유형을 선택하세요",
+    "categoryPlaceholder": "카테고리를 선택하세요",
+    "categoryTypeFirst": "유형을 먼저 선택하세요",
+    "sectionMochiHint": "발행량을 선택하세요. 모찌 1개는 100원부터예요.",
+    "presets": {
+      "s": "10만원",
+      "m": "50만원",
+      "l": "100만원",
+      "custom": "직접 설정"
+    },
+    "presetSub": "모찌 {count}개 · 개당 {price}원",
+    "customPrice": "모찌 1개 가격 (원)",
+    "customCount": "발행 수량 (개)",
+    "mochiFloorHint": "개당 100원 이상 · 10개 이상 · 총 5만원 이상 발행할 수 있어요."
   },
   "creatorDashboard": {
     "navHome": "홈",
@@ -449,7 +469,20 @@
       "activeOff": "판매가 일시 중지되었어요.",
       "sold": "지금까지 {count}개 판매",
       "save": "저장",
-      "saved": "저장됐어요"
+      "saved": "저장됐어요",
+      "floorHint": "개당 100원 이상 · 10개 이상 · 총 5만원 이상이어야 해요.",
+      "priceMin": "모찌 1개 가격은 100원 이상이어야 해요.",
+      "countMin": "모찌는 최소 10개 이상이어야 해요.",
+      "totalMin": "총 발행액은 5만원 이상이어야 해요.",
+      "summaryTitle": "발행 요약",
+      "summaryTotal": "총 발행 규모",
+      "summarySold": "판매됨",
+      "summaryRemaining": "남은 수량",
+      "summaryPrice": "모찌 1개 가격",
+      "priceOnlyUp": "모찌 가격은 올리기만 할 수 있어요.",
+      "priceOnlyUpHint": "가격은 올리기만 할 수 있어요. 이미 구매한 팬은 영향을 받지 않아요.",
+      "raiseWarning": "가격을 올리면 이전 가격의 남은 물량은 사라지고, 판매 집계가 새로 시작돼요.",
+      "twoActions": "같은 가격에 판매 수량을 늘리거나, 가격을 올릴 수 있어요. 가격은 내릴 수 없어요."
     },
     "items": {
       "title": "마켓 아이템",
@@ -592,5 +625,50 @@
     "privacyTitle": "개인정보처리방침",
     "placeholder": "데모용 자리표시 문서예요. 정식 약관은 추후 제공됩니다.",
     "back": "돌아가기"
+  },
+  "creatorTaxonomy": {
+    "types": {
+      "streamer": "스트리머",
+      "youtuber": "유튜버",
+      "author": "작가"
+    },
+    "categories": {
+      "virtual": "버추얼",
+      "game": "게임",
+      "music": "음악",
+      "daily": "일상",
+      "study": "공부",
+      "vlog": "브이로그",
+      "education": "교육",
+      "entertainment": "엔터테인먼트",
+      "novel": "소설",
+      "webtoon": "웹툰",
+      "illustration": "일러스트레이션",
+      "essay": "에세이"
+    },
+    "allTypes": "전체 유형",
+    "allCategories": "전체 카테고리"
+  },
+  "mochiIssuance": {
+    "presets": {
+      "s": "10만원",
+      "m": "50만원",
+      "l": "100만원",
+      "custom": "직접 설정"
+    },
+    "presetSub": "모찌 {count}개 · 개당 {price}원",
+    "customPrice": "모찌 1개 가격 (원)",
+    "customCount": "발행 수량 (개)",
+    "floorHint": "개당 100원 이상 · 10개 이상 · 총 5만원 이상 발행할 수 있어요.",
+    "summary": "총 {total}원 · 모찌 {goal}개 · 개당 {price}원",
+    "priceOnlyUpHint": "가격은 올리기만 할 수 있어요. 이미 구매한 팬은 영향을 받지 않아요.",
+    "raiseWarning": "가격을 올리면 이전 가격의 남은 물량은 사라지고, 판매 집계가 새로 시작돼요.",
+    "presetsUnavailable": "가격을 올린 뒤에는 직접 설정으로 수량·가격을 조정하세요.",
+    "errors": {
+      "priceMin": "모찌 1개 가격은 100원 이상이어야 해요.",
+      "countMin": "모찌는 최소 10개 이상 발행해야 해요.",
+      "totalMin": "총 발행액은 5만원 이상이어야 해요.",
+      "priceOnlyUp": "모찌 가격은 올리기만 할 수 있어요."
+    }
   }
 }

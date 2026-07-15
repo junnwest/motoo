@@ -114,10 +114,21 @@ export async function completeOnboarding(
   await unstable_update({});
 
   // Combined "become a creator" flow: if the user set out to create a Studio,
-  // continue to creator setup instead of the home page.
+  // continue to creator setup instead of the home page. The intent is persisted
+  // on the Backer (captured at the onboarding page, so it survives OAuth
+  // round-trips and long gaps); the cookie is a same-session fast-path fallback.
   const jar = await cookies();
-  if (jar.get("creatorIntent")?.value === "1") {
+  const wantsCreator =
+    backer.creatorIntent || jar.get("creatorIntent")?.value === "1";
+  if (wantsCreator) {
     jar.delete("creatorIntent");
+    if (backer.creatorIntent) {
+      // Consume the flag so it can't re-trigger later.
+      await prisma.backer.update({
+        where: { id: backer.id },
+        data: { creatorIntent: false },
+      });
+    }
     redirect("/creator/onboarding");
   }
   redirect("/");

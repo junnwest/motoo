@@ -3,13 +3,19 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useCallback } from "react";
+import {
+  CREATOR_TYPES,
+  CATEGORIES_BY_TYPE,
+  ALL_CATEGORIES,
+  isCreatorType,
+} from "@/lib/creatorTaxonomy";
 
 /** URL-driven filter/sort bar for Explore. Ranking never includes money raised. */
 export function ExploreFilters() {
   const router = useRouter();
   const params = useSearchParams();
   const t = useTranslations("explore");
-  const tCat = useTranslations("fanLanding.categories");
+  const tax = useTranslations("creatorTaxonomy");
 
   const setParam = useCallback(
     (key: string, value: string) => {
@@ -20,6 +26,25 @@ export function ExploreFilters() {
     },
     [params, router],
   );
+
+  // Type is primary; category is its dependent sub-facet. Changing the type
+  // clears any category that no longer belongs to it.
+  const setType = useCallback(
+    (value: string) => {
+      const next = new URLSearchParams(params.toString());
+      if (!value || value === "all") next.delete("type");
+      else next.set("type", value);
+      next.delete("category");
+      router.push(`/explore?${next.toString()}`);
+    },
+    [params, router],
+  );
+
+  const activeType = params.get("type") ?? "all";
+  const categoryOptions =
+    activeType !== "all" && isCreatorType(activeType)
+      ? CATEGORIES_BY_TYPE[activeType]
+      : ALL_CATEGORIES;
 
   const selectClass =
     "rounded-[12px] border border-line-3 bg-white px-3 py-[10px] text-[14px] font-medium text-ink outline-none focus:border-coral";
@@ -41,14 +66,29 @@ export function ExploreFilters() {
       </form>
 
       <select
+        aria-label={t("filterType")}
+        className={selectClass}
+        value={activeType}
+        onChange={(e) => setType(e.target.value)}
+      >
+        <option value="all">{t("filterType")}</option>
+        {CREATOR_TYPES.map((ty) => (
+          <option key={ty} value={ty}>
+            {tax(`types.${ty}`)}
+          </option>
+        ))}
+      </select>
+
+      <select
         aria-label={t("filterCategory")}
         className={selectClass}
         value={params.get("category") ?? "all"}
         onChange={(e) => setParam("category", e.target.value)}
       >
-        {["all", "game", "daily", "music", "virtual", "study"].map((c) => (
+        <option value="all">{t("filterCategory")}</option>
+        {categoryOptions.map((c) => (
           <option key={c} value={c}>
-            {c === "all" ? t("filterCategory") : tCat(c as never)}
+            {tax(`categories.${c}`)}
           </option>
         ))}
       </select>

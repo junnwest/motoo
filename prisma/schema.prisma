@@ -178,6 +178,10 @@ model Backer {
   onboardedAt      DateTime?
   termsAgreedAt    DateTime? // 필수 약관(이용약관·개인정보) 동의 시각
   marketingConsent Boolean   @default(false) // 선택 마케팅 수신 동의
+  // "become a creator" intent, captured durably at signup so it survives OAuth
+  // round-trips and long gaps between signup and finishing onboarding. Consumed
+  // once by completeOnboarding to route the user to /creator/onboarding.
+  creatorIntent    Boolean   @default(false)
 
   // Identity verification (본인인증) — populated by a VerificationProvider (mock in
   // dev; NICE/PASS in prod). Real age gate for payments; not self-reported.
@@ -318,9 +322,10 @@ model MochiIssuance {
   id               String   @id @default(cuid())
   streamerId       String   @unique
   streamer         Streamer @relation(fields: [streamerId], references: [id], onDelete: Cascade)
-  pricePerMochiKrw Int // integer KRW price of one mochi unit
-  goalQuantity     Int // soft-goal target: how many mochi the creator hopes to sell
-  soldQuantity     Int      @default(0) // mochi units sold so far
+  pricePerMochiKrw Int // integer KRW price of one mochi unit AT THE CURRENT TIER
+  goalQuantity     Int // availability at the current price (the "X left" meter)
+  soldQuantity     Int      @default(0) // sold IN THE CURRENT TIER; resets to 0 on a price raise
+  lifetimeSold     Int      @default(0) // total mochi ever sold, across all tiers (for stats)
   active           Boolean  @default(true) // creator can pause sales
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
@@ -337,6 +342,7 @@ model MochiHolding {
   backer         Backer   @relation(fields: [backerId], references: [id], onDelete: Cascade)
   balance        Int      @default(0) // unspent mochi units held for this creator
   purchasedTotal Int      @default(0) // lifetime mochi purchased from this creator
+  krwPaidTotal   Int      @default(0) // lifetime KRW paid — basis for future refund-at-paid
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 

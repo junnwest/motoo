@@ -100,14 +100,14 @@ export async function Nav({ variant = "fan" }: { variant?: "fan" | "creator" }) 
               {isCreator ? (
                 <Link
                   href="/studio"
-                  className="hidden font-semibold text-ink hover:text-coral-deep sm:inline"
+                  className="font-semibold text-ink hover:text-coral-deep"
                 >
                   {t("studio")}
                 </Link>
               ) : (
                 <Link
                   href="/api/become-creator"
-                  className="hidden text-muted hover:text-ink sm:inline"
+                  className="text-muted hover:text-ink"
                 >
                   {t("becomeCreator")}
                 </Link>

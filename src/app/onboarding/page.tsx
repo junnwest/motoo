@@ -1,7 +1,9 @@
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { getTranslations } from "next-intl/server";
 import { Nav } from "@/components/Nav";
 import { Eyebrow } from "@/components/ui/Eyebrow";
+import { prisma } from "@/lib/db";
 import { getCurrentBacker } from "@/lib/session";
 import { OnboardingForm } from "./OnboardingForm";
 
@@ -12,6 +14,26 @@ export default async function OnboardingPage() {
   // the middleware would send right back here → redirect loop.
   if (!backer) redirect("/api/session-reset");
   if (backer.onboardedAt) redirect("/");
+
+  // Durably capture "become a creator" intent the moment the user first reaches
+  // onboarding — the creatorIntent cookie is still fresh here (minutes after
+  // signup, before any OAuth round-trip or multi-day gap can drop it). We flip
+  // it onto the Backer row so completeOnboarding routes to /creator/onboarding
+  // no matter how long the user takes to finish. Idempotent + best-effort: a
+  // failure here must never block onboarding.
+  if (!backer.creatorIntent) {
+    const wantsCreator = (await cookies()).get("creatorIntent")?.value === "1";
+    if (wantsCreator) {
+      try {
+        await prisma.backer.update({
+          where: { id: backer.id },
+          data: { creatorIntent: true },
+        });
+      } catch {
+        // Best-effort; the cookie still serves as a same-session fallback below.
+      }
+    }
+  }
 
   const t = await getTranslations("onboarding");
 

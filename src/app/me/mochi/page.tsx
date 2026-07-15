@@ -6,6 +6,7 @@ import { Mochi } from "@/components/Mochi";
 import { Avatar } from "@/components/ui/Placeholder";
 import { getCurrentBacker } from "@/lib/session";
 import { getHoldingsForBacker, getOrdersForBacker } from "@/lib/mochi";
+import { ALL_CATEGORIES } from "@/lib/creatorTaxonomy";
 
 const ORDER_STATUS_CHIP: Record<string, string> = {
   pending: "bg-coral-chip text-coral-deep",
@@ -30,6 +31,7 @@ function formatKstDate(date: Date): string {
  */
 export default async function MyMochiPage() {
   const t = await getTranslations("myMochi");
+  const tax = await getTranslations("creatorTaxonomy");
   const backer = await getCurrentBacker();
 
   if (!backer) {
@@ -104,7 +106,9 @@ export default async function MyMochiPage() {
                       {h.streamer.displayName}
                     </div>
                     <div className="truncate text-[13px] text-muted">
-                      {h.streamer.category}
+                      {ALL_CATEGORIES.includes(h.streamer.category)
+                        ? tax(`categories.${h.streamer.category}`)
+                        : h.streamer.category}
                     </div>
                   </div>
                 </div>

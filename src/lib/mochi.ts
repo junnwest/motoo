@@ -91,17 +91,24 @@ export async function buyMochi(input: BuyMochiInput): Promise<BuyMochiResult> {
           backerId: input.backerId,
           balance: charge.mochiGranted,
           purchasedTotal: charge.mochiGranted,
+          krwPaidTotal: amountKrw,
         },
         update: {
           balance: { increment: charge.mochiGranted },
           purchasedTotal: { increment: charge.mochiGranted },
+          // Lifetime KRW paid — the basis for a future refund-at-paid flow.
+          krwPaidTotal: { increment: amountKrw },
         },
       });
 
-      // Advance soft-goal progress (a soft goal — buying past it is allowed).
+      // Advance the current tier's meter (soft goal — buying past it is allowed)
+      // and the lifetime total (which survives price-raise tier resets).
       await tx.mochiIssuance.update({
         where: { streamerId: input.streamerId },
-        data: { soldQuantity: { increment: charge.mochiGranted } },
+        data: {
+          soldQuantity: { increment: charge.mochiGranted },
+          lifetimeSold: { increment: charge.mochiGranted },
+        },
       });
 
       return holding;

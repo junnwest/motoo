@@ -6,6 +6,8 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { getCurrentBacker } from "@/lib/session";
 import { unstable_update } from "@/auth";
+import { CREATOR_TYPES, isCategoryForType } from "@/lib/creatorTaxonomy";
+import { validateIssuance } from "@/lib/issuance";
 
 /**
  * Create a Studio (Streamer) for the CURRENT signed-in user. Becoming a creator
@@ -21,11 +23,11 @@ const setupSchema = z.object({
     .min(2)
     .max(30)
     .regex(/^[a-z0-9_]+$/),
-  category: z.enum(["game", "music", "virtual", "daily", "study"]),
-  creatorType: z.string().max(60).optional().default(""),
+  creatorType: z.enum(CREATOR_TYPES),
+  category: z.string().trim().min(1),
   bio: z.string().max(500).optional().default(""),
-  mochiPriceKrw: z.coerce.number().int().positive(),
-  mochiGoal: z.coerce.number().int().positive(),
+  mochiPriceKrw: z.coerce.number().int(),
+  mochiGoal: z.coerce.number().int(),
 });
 
 export type CreatorSetupInput = z.input<typeof setupSchema>;
@@ -37,6 +39,15 @@ export async function createStudio(
   if (!parsed.success) return { ok: false, error: "generic" };
   const data = parsed.data;
   const handle = data.handle.toLowerCase();
+
+  // Category must belong to the chosen type (taxonomy is the source of truth),
+  // and the issuance must clear the floors (100원/10개/5만원). Server-authoritative
+  // so a client bypass can't create an invalid Studio.
+  if (!isCategoryForType(data.creatorType, data.category)) {
+    return { ok: false, error: "categoryRequired" };
+  }
+  const issuanceError = validateIssuance(data.mochiPriceKrw, data.mochiGoal);
+  if (issuanceError) return { ok: false, error: issuanceError };
 
   const user = await getCurrentBacker();
   if (!user) return { ok: false, error: "generic" };

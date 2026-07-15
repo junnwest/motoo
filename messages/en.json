@@ -225,7 +225,8 @@
       "body": "Adjust your filters or explore another category.",
       "cta": "Reset filters"
     },
-    "resultCount": "{count} creators"
+    "resultCount": "{count} creators",
+    "filterType": "Type"
   },
   "profile": {
     "backers": "backers",
@@ -414,14 +415,33 @@
     "mochiPrice": "Price per mochi (KRW)",
     "mochiGoal": "Issuance goal (quantity)",
     "mochiGoalHint": "A goal only — going past it is fine. e.g. 100 × ₩200 = ₩20,000",
-    "goalSummary": "{goal} × ₩{price} = ₩{total} goal",
+    "goalSummary": "Total {total} KRW · {goal} mochi · {price} KRW each",
     "submit": "Open my market",
     "submitting": "Opening…",
     "errors": {
       "emailTaken": "That email is already in use.",
       "handleTaken": "That profile address is already taken.",
-      "generic": "We couldn't open your market. Please check your inputs."
-    }
+      "generic": "We couldn't open your market. Please check your inputs.",
+      "typeRequired": "Please choose a creator type.",
+      "categoryRequired": "Please choose a category.",
+      "priceMin": "Each mochi must be at least 100 KRW.",
+      "countMin": "You must issue at least 10 mochi.",
+      "totalMin": "Total issuance must be at least 50,000 KRW."
+    },
+    "typePlaceholder": "Choose a type",
+    "categoryPlaceholder": "Choose a category",
+    "categoryTypeFirst": "Choose a type first",
+    "sectionMochiHint": "Pick how much to issue. Mochi start at 100 KRW each.",
+    "presets": {
+      "s": "100K KRW",
+      "m": "500K KRW",
+      "l": "1M KRW",
+      "custom": "Custom"
+    },
+    "presetSub": "{count} mochi · {price} KRW each",
+    "customPrice": "Price per mochi (KRW)",
+    "customCount": "Number of mochi",
+    "mochiFloorHint": "At least 100 KRW each, 10 mochi, and 50,000 KRW total."
   },
   "creatorDashboard": {
     "navHome": "Home",
@@ -449,7 +469,20 @@
       "activeOff": "Sales are paused.",
       "sold": "{count} sold so far",
       "save": "Save",
-      "saved": "Saved"
+      "saved": "Saved",
+      "floorHint": "At least 100 KRW each, 10 mochi, and 50,000 KRW total.",
+      "priceMin": "Each mochi must be at least 100 KRW.",
+      "countMin": "You must issue at least 10 mochi.",
+      "totalMin": "Total issuance must be at least 50,000 KRW.",
+      "summaryTitle": "Issuance summary",
+      "summaryTotal": "Total issuance",
+      "summarySold": "Sold",
+      "summaryRemaining": "Remaining",
+      "summaryPrice": "Price per mochi",
+      "priceOnlyUp": "Mochi price can only go up.",
+      "priceOnlyUpHint": "Price can only increase. Fans who already bought are unaffected.",
+      "raiseWarning": "Raising the price discards the remaining supply at the old price and resets the sold count.",
+      "twoActions": "Add more supply at the same price, or raise the price. Price can't go down."
     },
     "items": {
       "title": "Market items",
@@ -592,5 +625,50 @@
     "privacyTitle": "Privacy Policy",
     "placeholder": "Placeholder document for the demo. Full terms to come.",
     "back": "Back"
+  },
+  "creatorTaxonomy": {
+    "types": {
+      "streamer": "Streamer",
+      "youtuber": "YouTuber",
+      "author": "Author"
+    },
+    "categories": {
+      "virtual": "Virtual",
+      "game": "Game",
+      "music": "Music",
+      "daily": "Daily",
+      "study": "Study",
+      "vlog": "Vlog",
+      "education": "Education",
+      "entertainment": "Entertainment",
+      "novel": "Novel",
+      "webtoon": "Webtoon",
+      "illustration": "Illustration",
+      "essay": "Essay"
+    },
+    "allTypes": "All types",
+    "allCategories": "All categories"
+  },
+  "mochiIssuance": {
+    "presets": {
+      "s": "100K KRW",
+      "m": "500K KRW",
+      "l": "1M KRW",
+      "custom": "Custom"
+    },
+    "presetSub": "{count} mochi · {price} KRW each",
+    "customPrice": "Price per mochi (KRW)",
+    "customCount": "Number of mochi",
+    "floorHint": "At least 100 KRW each, 10 mochi, and 50,000 KRW total.",
+    "summary": "Total {total} KRW · {goal} mochi · {price} KRW each",
+    "priceOnlyUpHint": "Price can only increase. Fans who already bought are unaffected.",
+    "raiseWarning": "Raising the price discards the remaining supply at the old price and resets the sold count.",
+    "presetsUnavailable": "After a price raise, use Custom to adjust the amount and price.",
+    "errors": {
+      "priceMin": "Each mochi must be at least 100 KRW.",
+      "countMin": "You must issue at least 10 mochi.",
+      "totalMin": "Total issuance must be at least 50,000 KRW.",
+      "priceOnlyUp": "Mochi price can only go up."
+    }
   }
 }

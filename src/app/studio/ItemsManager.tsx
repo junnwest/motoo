@@ -64,25 +64,29 @@ export function ItemsManager({ items }: { items: DashboardItem[] }) {
         </div>
       ) : null}
 
-      {items.map((item) =>
-        editingId === item.id ? (
-          <ItemForm
-            key={item.id}
-            item={item}
-            onClose={() => setEditingId(null)}
-            submitLabel={t("items.save")}
-          />
-        ) : (
-          <ItemCard
-            key={item.id}
-            item={item}
-            onEdit={() => {
-              setEditingId(item.id);
-              setCreating(false);
-            }}
-          />
-        ),
-      )}
+      {/* Cards pack two-up on wider viewports; an inline edit form spans the row. */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {items.map((item) =>
+          editingId === item.id ? (
+            <div key={item.id} className="sm:col-span-2">
+              <ItemForm
+                item={item}
+                onClose={() => setEditingId(null)}
+                submitLabel={t("items.save")}
+              />
+            </div>
+          ) : (
+            <ItemCard
+              key={item.id}
+              item={item}
+              onEdit={() => {
+                setEditingId(item.id);
+                setCreating(false);
+              }}
+            />
+          ),
+        )}
+      </div>
     </div>
   );
 }
@@ -108,7 +112,7 @@ function ItemCard({
   const remaining = item.stock === null ? null : item.stock - item.redeemedCount;
 
   return (
-    <div className="rounded-[16px] border border-line-2 bg-card p-5">
+    <div className="flex h-full flex-col rounded-[16px] border border-line-2 bg-card p-5">
       <div className="flex flex-wrap items-center gap-2">
         <h3 className="text-[17px] font-extrabold tracking-[-0.02em] text-ink">
           {item.title}
@@ -136,7 +140,7 @@ function ItemCard({
         ) : null}
       </div>
 
-      <div className="mt-4 flex gap-2">
+      <div className="mt-auto flex gap-2 pt-4">
         <Button type="button" variant="secondary" onClick={onEdit} disabled={isPending}>
           {t("items.edit")}
         </Button>

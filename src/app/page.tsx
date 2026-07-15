@@ -12,6 +12,7 @@ import { StreamerCard } from "@/components/StreamerCard";
 import { Avatar } from "@/components/ui/Placeholder";
 import { GradeBadge } from "@/components/GradeBadge";
 import { getExploreStreamers, type StreamerCard as CardData } from "@/lib/streamers";
+import { CREATOR_TYPES } from "@/lib/creatorTaxonomy";
 import { formatCount } from "@/lib/format";
 
 export default async function FanLandingPage() {
@@ -24,6 +25,7 @@ export default async function FanLandingPage() {
 
   const t = await getTranslations("fanLanding");
   const tc = await getTranslations("common");
+  const tax = await getTranslations("creatorTaxonomy");
 
   let trending: CardData[] = [];
   try {
@@ -33,7 +35,8 @@ export default async function FanLandingPage() {
   }
   const spotlight = trending[0];
 
-  const categories = ["all", "game", "daily", "music", "virtual", "study"] as const;
+  // Browse chips are keyed on creator TYPE (primary facet); "all" clears it.
+  const typeChips = ["all", ...CREATOR_TYPES] as const;
 
   return (
     <>
@@ -89,19 +92,19 @@ export default async function FanLandingPage() {
             </button>
           </form>
 
-          {/* Category chips */}
+          {/* Type chips (primary browse facet) */}
           <div className="mt-[18px] flex flex-wrap justify-center gap-[9px]">
-            {categories.map((c, i) => (
+            {typeChips.map((c, i) => (
               <Link
                 key={c}
-                href={c === "all" ? "/explore" : `/explore?category=${c}`}
+                href={c === "all" ? "/explore" : `/explore?type=${c}`}
                 className={`rounded-full px-[18px] py-[9px] text-[14.5px] font-medium ${
                   i === 0
                     ? "bg-ink text-cream"
                     : "border border-line-3 bg-white text-ink hover:border-coral/50"
                 }`}
               >
-                {t(`categories.${c}` as never)}
+                {c === "all" ? t("categories.all") : tax(`types.${c}`)}
               </Link>
             ))}
           </div>

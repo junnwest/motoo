@@ -21,7 +21,7 @@ export default async function CreatorDashboardLayout({
     <div className="min-h-screen bg-cream">
       {/* Top bar */}
       <header className="border-b border-line bg-card">
-        <div className="mx-auto flex max-w-[1100px] items-center justify-between gap-4 px-6 py-4">
+        <div className="mx-auto flex max-w-[1680px] items-center justify-between gap-4 px-6 py-4 lg:px-10">
           <div className="flex items-center gap-4">
             <Link
               href="/"
@@ -45,7 +45,7 @@ export default async function CreatorDashboardLayout({
       </header>
 
       {/* Two-column body */}
-      <div className="mx-auto grid max-w-[1100px] grid-cols-1 gap-8 px-6 py-10 md:grid-cols-[200px_1fr]">
+      <div className="mx-auto grid max-w-[1680px] grid-cols-1 gap-8 px-6 py-10 md:grid-cols-[200px_1fr] lg:px-10">
         <aside className="md:sticky md:top-10 md:self-start">
           <DashboardNav
             labels={{

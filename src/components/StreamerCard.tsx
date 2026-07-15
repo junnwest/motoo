@@ -5,17 +5,20 @@ import { GradeBadge } from "./GradeBadge";
 import { Avatar, Thumbnail } from "./ui/Placeholder";
 import { Mochi } from "./Mochi";
 import { formatPercent } from "@/lib/format";
+import { ALL_CATEGORIES, isCreatorType } from "@/lib/creatorTaxonomy";
 
 /** Explore grid card. Surfaces trust signals — never money raised. */
 export function StreamerCard({ streamer }: { streamer: StreamerCardData }) {
   const t = useTranslations("explore");
-  const tf = useTranslations("fanLanding.categories");
-  const category =
-    (["all", "game", "daily", "music", "virtual", "study"] as const).includes(
-      streamer.category as never,
-    )
-      ? tf(streamer.category as never)
-      : streamer.category;
+  const tax = useTranslations("creatorTaxonomy");
+  const category = ALL_CATEGORIES.includes(streamer.category)
+    ? tax(`categories.${streamer.category}`)
+    : streamer.category;
+  const typeLabel =
+    streamer.creatorType && isCreatorType(streamer.creatorType)
+      ? tax(`types.${streamer.creatorType}`)
+      : null;
+  const facet = typeLabel ? `${typeLabel} · ${category}` : category;
 
   return (
     <Link
@@ -36,7 +39,7 @@ export function StreamerCard({ streamer }: { streamer: StreamerCardData }) {
               @{streamer.displayName}
             </div>
             <div className="text-[12px] text-muted">
-              {category} · {streamer.avgViewers}명
+              {facet} · {streamer.avgViewers}명
             </div>
           </div>
         </div>

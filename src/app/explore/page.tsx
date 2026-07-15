@@ -21,6 +21,7 @@ export default async function ExplorePage({
 
   const params: ExploreParams = {
     q: typeof sp.q === "string" ? sp.q : undefined,
+    type: typeof sp.type === "string" ? sp.type : undefined,
     category: typeof sp.category === "string" ? sp.category : undefined,
     backerRange: (typeof sp.backerRange === "string"
       ? sp.backerRange

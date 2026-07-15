@@ -1,9 +1,13 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useCallback, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
-import { Mochi } from "@/components/Mochi";
+import {
+  MochiIssuancePicker,
+  type IssuanceSelection,
+} from "@/components/MochiIssuancePicker";
+import { MOCHI_MIN_PRICE } from "@/lib/issuance";
 import { updateIssuance } from "./actions";
 
 type Issuance = {
@@ -13,35 +17,47 @@ type Issuance = {
   active: boolean;
 } | null;
 
-const labelClass = "mb-1.5 block text-[13px] font-semibold text-muted-2";
-const inputClass =
-  "w-full rounded-[12px] border border-line-3 bg-white px-4 py-3 text-[15px] outline-none focus:border-coral/60";
+const FLOOR_KEYS = ["priceMin", "countMin", "totalMin", "priceOnlyUp"];
 
+/**
+ * Studio issuance editor. Uses the same MochiIssuancePicker as creator onboarding
+ * (preloaded with the current price + availability), so setup and editing share
+ * one interface. The picker enforces the ratchet: price only goes up, a raise
+ * shows the discard warning, and presets hide once the price is above 100원.
+ */
 export function MochiSettingsForm({ issuance }: { issuance: Issuance }) {
   const t = useTranslations("creatorDashboard");
+  const tm = useTranslations("mochiIssuance");
   const [isPending, startTransition] = useTransition();
 
-  const [price, setPrice] = useState(String(issuance?.pricePerMochiKrw ?? 200));
-  const [goal, setGoal] = useState(String(issuance?.goalQuantity ?? 100));
   const [active, setActive] = useState(issuance?.active ?? false);
   const [saved, setSaved] = useState(false);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const currentPrice = issuance?.pricePerMochiKrw ?? null;
+  const [mochi, setMochi] = useState<IssuanceSelection | null>(null);
+  const onMochiChange = useCallback((v: IssuanceSelection) => setMochi(v), []);
+
+  const blocked = !mochi || !!mochi.error;
+  const errorText =
+    error && FLOOR_KEYS.includes(error) ? tm(`errors.${error}`) : t("saveError");
 
   function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaved(false);
-    setError(false);
+    setError(null);
+    if (!mochi || mochi.error) return setError(mochi?.error ?? "countMin");
     startTransition(async () => {
       const res = await updateIssuance({
-        pricePerMochiKrw: Math.trunc(Number(price)),
-        goalQuantity: Math.trunc(Number(goal)),
+        pricePerMochiKrw: mochi.price,
+        goalQuantity: mochi.count,
         active,
       });
       if (res.ok) {
         setSaved(true);
         setTimeout(() => setSaved(false), 2500);
       } else {
-        setError(true);
+        setError(res.error);
       }
     });
   }
@@ -49,46 +65,19 @@ export function MochiSettingsForm({ issuance }: { issuance: Issuance }) {
   return (
     <form
       onSubmit={onSubmit}
-      className="max-w-[520px] rounded-[20px] border border-line-2 bg-card p-6"
+      className="max-w-[560px] rounded-[20px] border border-line-2 bg-card p-6"
     >
       <div className="flex flex-col gap-5">
-        <div>
-          <label htmlFor="mochi-price" className={labelClass}>
-            {t("mochi.price")}
-          </label>
-          <input
-            id="mochi-price"
-            type="number"
-            min={1}
-            step={1}
-            inputMode="numeric"
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
-            className={inputClass}
-          />
-        </div>
+        <p className="text-[13px] text-muted">{t("mochi.twoActions")}</p>
 
-        <div>
-          <label htmlFor="mochi-goal" className={labelClass}>
-            {t("mochi.goal")}
-          </label>
-          <input
-            id="mochi-goal"
-            type="number"
-            min={1}
-            step={1}
-            inputMode="numeric"
-            value={goal}
-            onChange={(e) => setGoal(e.target.value)}
-            className={inputClass}
-          />
-          {issuance ? (
-            <p className="mt-1.5 flex items-center gap-1.5 text-[13px] text-muted">
-              <Mochi width={16} height={12} />
-              {t("mochi.sold", { count: issuance.soldQuantity })}
-            </p>
-          ) : null}
-        </div>
+        <MochiIssuancePicker
+          minPrice={currentPrice ?? MOCHI_MIN_PRICE}
+          currentPrice={currentPrice}
+          defaultMode={issuance ? "custom" : undefined}
+          defaultPrice={issuance ? String(issuance.pricePerMochiKrw) : undefined}
+          defaultCount={issuance ? String(issuance.goalQuantity) : undefined}
+          onChange={onMochiChange}
+        />
 
         <label className="flex cursor-pointer items-start gap-3">
           <input
@@ -108,7 +97,7 @@ export function MochiSettingsForm({ issuance }: { issuance: Issuance }) {
         </label>
 
         <div className="flex items-center gap-3">
-          <Button type="submit" variant="primary" disabled={isPending}>
+          <Button type="submit" variant="primary" disabled={isPending || blocked}>
             {t("mochi.save")}
           </Button>
           {saved ? (
@@ -118,7 +107,7 @@ export function MochiSettingsForm({ issuance }: { issuance: Issuance }) {
           ) : null}
           {error ? (
             <span className="text-[13px] font-semibold text-live">
-              {t("saveError")}
+              {errorText}
             </span>
           ) : null}
         </div>

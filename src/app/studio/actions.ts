@@ -6,6 +6,7 @@ import { MarketplaceItemType } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { getCurrentCreator } from "@/lib/session";
 import { fulfillOrder, cancelOrder } from "@/lib/mochi";
+import { validateIssuance } from "@/lib/issuance";
 
 /**
  * Server actions for the creator dashboard.
@@ -41,6 +42,26 @@ export async function updateIssuance(input: {
     if (!parsed.success) return { ok: false, error: "generic" };
     const { pricePerMochiKrw, goalQuantity, active } = parsed.data;
 
+    // Same issuance floors as creator onboarding (100원/10개/5만원). Keeps a
+    // creator from dropping below the minimum via the Studio editor later.
+    const issuanceError = validateIssuance(pricePerMochiKrw, goalQuantity);
+    if (issuanceError) return { ok: false, error: issuanceError };
+
+    const existing = await prisma.mochiIssuance.findUnique({
+      where: { streamerId: creator.id },
+      select: { pricePerMochiKrw: true },
+    });
+
+    // Price only ratchets up. Lowering it is rejected. A raise opens a NEW tier:
+    // reset the tier meter (soldQuantity → 0), discarding leftover availability at
+    // the old price (harmless — nothing was minted). Same price = just adjust the
+    // current tier's availability. Held mochi is never touched either way.
+    if (existing && pricePerMochiKrw < existing.pricePerMochiKrw) {
+      return { ok: false, error: "priceOnlyUp" };
+    }
+    const priceRaised =
+      !!existing && pricePerMochiKrw > existing.pricePerMochiKrw;
+
     await prisma.mochiIssuance.upsert({
       where: { streamerId: creator.id },
       create: {
@@ -49,11 +70,15 @@ export async function updateIssuance(input: {
         goalQuantity,
         active,
       },
-      update: { pricePerMochiKrw, goalQuantity, active },
+      update: {
+        pricePerMochiKrw,
+        goalQuantity,
+        active,
+        ...(priceRaised ? { soldQuantity: 0 } : {}),
+      },
     });
 
     revalidatePath(DASHBOARD);
-    revalidatePath(`${DASHBOARD}/mochi`);
     return { ok: true };
   } catch {
     return { ok: false, error: "generic" };

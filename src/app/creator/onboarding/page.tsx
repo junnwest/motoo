@@ -34,7 +34,10 @@ export default async function CreatorSetupPage() {
           </p>
         </header>
 
-        <CreatorSetupForm defaultName={user.nickname} />
+        <CreatorSetupForm
+          defaultName={user.nickname}
+          defaultHandle={user.handle ?? ""}
+        />
       </section>
       <Footer variant="fan" />
     </>

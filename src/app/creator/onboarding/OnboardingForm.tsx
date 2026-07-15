@@ -1,12 +1,20 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useCallback, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { Button } from "@/components/ui/Button";
+import {
+  MochiIssuancePicker,
+  type IssuanceSelection,
+} from "@/components/MochiIssuancePicker";
+import {
+  CREATOR_TYPES,
+  CATEGORIES_BY_TYPE,
+  type CreatorType,
+} from "@/lib/creatorTaxonomy";
+import { MOCHI_MIN_PRICE } from "@/lib/issuance";
 import { createStudio } from "./actions";
-
-const CATEGORIES = ["game", "music", "virtual", "daily", "study"] as const;
 
 const inputClass =
   "w-full rounded-[12px] border border-line-3 bg-white px-4 py-3 text-[15px] outline-none focus:border-coral/60";
@@ -14,30 +22,62 @@ const labelClass = "mb-1.5 block text-[13px] font-semibold text-muted-2";
 
 /**
  * Creator setup — the add-on that turns a signed-in user into a creator by
- * opening their Studio. Collects only creator-specific info (public profile +
- * mochi issuance); account + identity were done at user signup/onboarding.
+ * opening their Studio. Collects creator TYPE (primary) → CATEGORY (dependent
+ * sub-facet) + mochi issuance (shared MochiIssuancePicker: presets or custom,
+ * floored at 100원/10개/5만원). Account + identity were done at user signup.
  */
-export function CreatorSetupForm({ defaultName }: { defaultName: string }) {
+export function CreatorSetupForm({
+  defaultName,
+  defaultHandle,
+}: {
+  defaultName: string;
+  defaultHandle: string;
+}) {
   const t = useTranslations("creatorOnboarding");
-  const tcat = useTranslations("fanLanding.categories");
+  const tax = useTranslations("creatorTaxonomy");
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
   const [displayName, setDisplayName] = useState(defaultName);
-  const [handle, setHandle] = useState("");
-  const [category, setCategory] = useState<(typeof CATEGORIES)[number]>("game");
-  const [creatorType, setCreatorType] = useState("");
+  // Prefill the Studio address with the account @handle (already chosen +
+  // unique at onboarding). Still editable: the Streamer handle is a separate
+  // namespace, so it can differ or collide.
+  const [handle, setHandle] = useState(defaultHandle);
+  const [creatorType, setCreatorType] = useState<CreatorType | "">("");
+  const [category, setCategory] = useState("");
   const [bio, setBio] = useState("");
-  const [mochiPriceKrw, setMochiPriceKrw] = useState("");
-  const [mochiGoal, setMochiGoal] = useState("");
 
-  const price = Number(mochiPriceKrw) || 0;
-  const goal = Number(mochiGoal) || 0;
-  const total = price * goal;
+  // Mochi issuance is owned by the shared picker; it reports the resolved
+  // (price, count) + validity here. Starts invalid until the picker mounts.
+  const [mochi, setMochi] = useState<IssuanceSelection>({
+    price: 0,
+    count: 0,
+    error: "countMin",
+    raised: false,
+  });
+  const onMochiChange = useCallback((v: IssuanceSelection) => setMochi(v), []);
+
+  const categoryOptions = creatorType ? CATEGORIES_BY_TYPE[creatorType] : [];
+
+  const canSubmit =
+    !!displayName.trim() &&
+    !!handle.trim() &&
+    !!creatorType &&
+    !!category &&
+    !mochi.error &&
+    !pending;
+
+  function onTypeChange(next: string) {
+    setCreatorType(next as CreatorType);
+    setCategory(""); // reset dependent category when the type changes
+  }
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    if (!creatorType) return setError("typeRequired");
+    if (!category) return setError("categoryRequired");
+    if (mochi.error) return setError(mochi.error);
     startTransition(async () => {
       // createStudio throws NEXT_REDIRECT on success; it only returns on failure.
       const res = await createStudio({
@@ -46,8 +86,8 @@ export function CreatorSetupForm({ defaultName }: { defaultName: string }) {
         category,
         creatorType,
         bio,
-        mochiPriceKrw,
-        mochiGoal,
+        mochiPriceKrw: String(mochi.price),
+        mochiGoal: String(mochi.count),
       });
       if (res && !res.ok) setError(res.error);
     });
@@ -90,7 +130,30 @@ export function CreatorSetupForm({ defaultName }: { defaultName: string }) {
             <p className="mt-1.5 text-[13px] text-muted">{t("handleHint")}</p>
           </div>
 
+          {/* 유형(주) → 카테고리(종속) */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <label htmlFor="creatorType" className={labelClass}>
+                {t("creatorType")}
+              </label>
+              <select
+                id="creatorType"
+                value={creatorType}
+                onChange={(e) => onTypeChange(e.target.value)}
+                required
+                className={inputClass}
+              >
+                <option value="" disabled>
+                  {t("typePlaceholder")}
+                </option>
+                {CREATOR_TYPES.map((ty) => (
+                  <option key={ty} value={ty}>
+                    {tax(`types.${ty}`)}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             <div>
               <label htmlFor="category" className={labelClass}>
                 {t("category")}
@@ -98,31 +161,22 @@ export function CreatorSetupForm({ defaultName }: { defaultName: string }) {
               <select
                 id="category"
                 value={category}
-                onChange={(e) =>
-                  setCategory(e.target.value as (typeof CATEGORIES)[number])
-                }
-                className={inputClass}
+                onChange={(e) => setCategory(e.target.value)}
+                required
+                disabled={!creatorType}
+                className={`${inputClass} disabled:bg-panel disabled:text-muted`}
               >
-                {CATEGORIES.map((c) => (
+                <option value="" disabled>
+                  {creatorType
+                    ? t("categoryPlaceholder")
+                    : t("categoryTypeFirst")}
+                </option>
+                {categoryOptions.map((c) => (
                   <option key={c} value={c}>
-                    {tcat(c)}
+                    {tax(`categories.${c}`)}
                   </option>
                 ))}
               </select>
-            </div>
-
-            <div>
-              <label htmlFor="creatorType" className={labelClass}>
-                {t("creatorType")}
-              </label>
-              <input
-                id="creatorType"
-                type="text"
-                value={creatorType}
-                onChange={(e) => setCreatorType(e.target.value)}
-                placeholder={t("creatorTypePlaceholder")}
-                className={inputClass}
-              />
             </div>
           </div>
 
@@ -144,48 +198,9 @@ export function CreatorSetupForm({ defaultName }: { defaultName: string }) {
 
       {/* 모찌 발행 */}
       <section className="rounded-[20px] border border-line-2 bg-card p-6 sm:p-7">
-        <Eyebrow className="mb-4">{t("sectionMochi")}</Eyebrow>
-        <div className="flex flex-col gap-4">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <label htmlFor="mochiPriceKrw" className={labelClass}>
-                {t("mochiPrice")}
-              </label>
-              <input
-                id="mochiPriceKrw"
-                type="number"
-                min={1}
-                inputMode="numeric"
-                value={mochiPriceKrw}
-                onChange={(e) => setMochiPriceKrw(e.target.value)}
-                required
-                className={inputClass}
-              />
-            </div>
-
-            <div>
-              <label htmlFor="mochiGoal" className={labelClass}>
-                {t("mochiGoal")}
-              </label>
-              <input
-                id="mochiGoal"
-                type="number"
-                min={1}
-                inputMode="numeric"
-                value={mochiGoal}
-                onChange={(e) => setMochiGoal(e.target.value)}
-                required
-                className={inputClass}
-              />
-            </div>
-          </div>
-
-          <p className="text-[13px] text-muted">{t("mochiGoalHint")}</p>
-
-          <div className="rounded-[16px] bg-panel px-4 py-3 text-[14px] font-semibold text-ink">
-            {t("goalSummary", { goal, price, total })}
-          </div>
-        </div>
+        <Eyebrow className="mb-2">{t("sectionMochi")}</Eyebrow>
+        <p className="mb-4 text-[13px] text-muted">{t("sectionMochiHint")}</p>
+        <MochiIssuancePicker minPrice={MOCHI_MIN_PRICE} onChange={onMochiChange} />
       </section>
 
       {error && (
@@ -198,7 +213,7 @@ export function CreatorSetupForm({ defaultName }: { defaultName: string }) {
         type="submit"
         variant="primary"
         size="lg"
-        disabled={pending}
+        disabled={!canSubmit}
         className="w-full"
       >
         {pending ? t("submitting") : t("submit")}

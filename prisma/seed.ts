@@ -34,7 +34,8 @@ const CATEGORIES = ["game", "music", "virtual", "daily", "study"];
 interface StreamerSeed {
   handle: string;
   displayName: string;
-  category: string;
+  creatorType: string; // primary facet: streamer | youtuber | author
+  category: string; // sub-facet, must belong to the creatorType
   bio: string;
   avgViewers: number;
   followerCount: number;
@@ -45,14 +46,16 @@ interface StreamerSeed {
 }
 
 const STREAMERS: StreamerSeed[] = [
-  { handle: "creatorA", displayName: "크리에이터A", category: "virtual", bio: "매주 화·목·토 라이브. 따뜻한 버추얼 방송을 해요.", avgViewers: 120, followerCount: 8400, backers: 42, recurringRate: 0.41, fulfillment: 0.94, publish: true },
-  { handle: "creatorC", displayName: "크리에이터C", category: "music", bio: "매주 화·목·토 라이브 음악 방송. 따뜻한 커뮤니티예요.", avgViewers: 240, followerCount: 15200, backers: 55, recurringRate: 0.38, fulfillment: 0.9, publish: true },
-  { handle: "creatorE", displayName: "크리에이터E", category: "virtual", bio: "버추얼 게임 방송. 같이 웃고 떠들어요.", avgViewers: 300, followerCount: 21000, backers: 38, recurringRate: 0.33, fulfillment: 0.86, publish: false },
-  { handle: "creatorB", displayName: "크리에이터B", category: "daily", bio: "잔잔한 일상 브이로그와 수다 방송.", avgViewers: 80, followerCount: 3200, backers: 21, recurringRate: 0.29, fulfillment: 0.78, publish: false },
-  { handle: "creatorD", displayName: "크리에이터D", category: "game", bio: "FPS·공포게임 위주. 리액션 맛집.", avgViewers: 180, followerCount: 9800, backers: 33, recurringRate: 0.35, fulfillment: 0.88, publish: true },
-  { handle: "creatorF", displayName: "크리에이터F", category: "study", bio: "함께 공부하는 스터디윗미 방송.", avgViewers: 60, followerCount: 2100, backers: 14, recurringRate: 0.22, fulfillment: 0.7, publish: false },
-  { handle: "creatorG", displayName: "크리에이터G", category: "music", bio: "어쿠스틱 커버와 자작곡 라이브.", avgViewers: 140, followerCount: 6700, backers: 27, recurringRate: 0.31, fulfillment: 0.82, publish: false },
-  { handle: "creatorH", displayName: "크리에이터H", category: "game", bio: "인디게임 탐험가. 숨은 명작 발굴.", avgViewers: 95, followerCount: 4100, backers: 19, recurringRate: 0.26, fulfillment: 0.75, publish: false },
+  { handle: "creatorA", displayName: "크리에이터A", creatorType: "streamer", category: "virtual", bio: "매주 화·목·토 라이브. 따뜻한 버추얼 방송을 해요.", avgViewers: 120, followerCount: 8400, backers: 42, recurringRate: 0.41, fulfillment: 0.94, publish: true },
+  { handle: "creatorC", displayName: "크리에이터C", creatorType: "streamer", category: "music", bio: "매주 화·목·토 라이브 음악 방송. 따뜻한 커뮤니티예요.", avgViewers: 240, followerCount: 15200, backers: 55, recurringRate: 0.38, fulfillment: 0.9, publish: true },
+  { handle: "creatorE", displayName: "크리에이터E", creatorType: "streamer", category: "virtual", bio: "버추얼 게임 방송. 같이 웃고 떠들어요.", avgViewers: 300, followerCount: 21000, backers: 38, recurringRate: 0.33, fulfillment: 0.86, publish: false },
+  { handle: "creatorB", displayName: "크리에이터B", creatorType: "youtuber", category: "vlog", bio: "잔잔한 일상 브이로그와 수다 영상.", avgViewers: 80, followerCount: 3200, backers: 21, recurringRate: 0.29, fulfillment: 0.78, publish: false },
+  { handle: "creatorD", displayName: "크리에이터D", creatorType: "streamer", category: "game", bio: "FPS·공포게임 위주. 리액션 맛집.", avgViewers: 180, followerCount: 9800, backers: 33, recurringRate: 0.35, fulfillment: 0.88, publish: true },
+  { handle: "creatorF", displayName: "크리에이터F", creatorType: "streamer", category: "study", bio: "함께 공부하는 스터디윗미 방송.", avgViewers: 60, followerCount: 2100, backers: 14, recurringRate: 0.22, fulfillment: 0.7, publish: false },
+  { handle: "creatorG", displayName: "크리에이터G", creatorType: "youtuber", category: "music", bio: "어쿠스틱 커버와 자작곡 영상.", avgViewers: 140, followerCount: 6700, backers: 27, recurringRate: 0.31, fulfillment: 0.82, publish: false },
+  { handle: "creatorH", displayName: "크리에이터H", creatorType: "youtuber", category: "game", bio: "인디게임 탐험가. 숨은 명작 발굴.", avgViewers: 95, followerCount: 4100, backers: 19, recurringRate: 0.26, fulfillment: 0.75, publish: false },
+  { handle: "creatorI", displayName: "크리에이터I", creatorType: "author", category: "webtoon", bio: "주 2회 연재하는 일상 웹툰 작가예요.", avgViewers: 0, followerCount: 5300, backers: 24, recurringRate: 0.34, fulfillment: 0.85, publish: true },
+  { handle: "creatorJ", displayName: "크리에이터J", creatorType: "author", category: "novel", bio: "판타지 장편소설을 연재하고 있어요.", avgViewers: 0, followerCount: 2800, backers: 12, recurringRate: 0.25, fulfillment: 0.72, publish: false },
 ];
 
 const TIER_TEMPLATES = [
@@ -163,6 +166,7 @@ async function main() {
   // Captured for post-loop holdings/orders so the flagship demo looks alive.
   let flagship: {
     streamerId: string;
+    pricePerMochiKrw: number;
     items: { id: string; priceMochi: number }[];
   } | null = null;
 
@@ -175,7 +179,7 @@ async function main() {
         displayName: s.displayName,
         bio: s.bio,
         category: s.category,
-        creatorType: pick(["버추얼 스트리머", "게임 스트리머", "음악", "일상"]),
+        creatorType: s.creatorType,
         status: "approved",
         avgViewers: s.avgViewers,
         followerCount: s.followerCount,
@@ -188,8 +192,9 @@ async function main() {
     });
 
     // Phase 2: mochi issuance + marketplace items for this creator.
-    const pricePerMochiKrw = pick([100, 150, 200, 300]);
-    const goalQuantity = pick([100, 150, 200, 300]);
+    // Kept above the issuance floors (100원/10개/5만원): min here is 100×500.
+    const pricePerMochiKrw = pick([100, 150, 200]);
+    const goalQuantity = pick([500, 1000, 2000, 5000]);
     const itemCount = 3 + Math.floor(rand() * 3); // 3–5 items
     const items = [];
     for (let i = 0; i < itemCount; i++) {
@@ -217,12 +222,14 @@ async function main() {
         pricePerMochiKrw,
         goalQuantity,
         soldQuantity,
+        lifetimeSold: soldQuantity, // single seeded tier: lifetime == current tier
         active: true,
       },
     });
     if (isFlagship) {
       flagship = {
         streamerId: streamer.id,
+        pricePerMochiKrw,
         items: items.map((it) => ({ id: it.id, priceMochi: it.priceMochi })),
       };
     }
@@ -446,6 +453,7 @@ async function main() {
         backerId: demo.id,
         balance: 42,
         purchasedTotal: 60,
+        krwPaidTotal: 60 * flagship.pricePerMochiKrw,
       },
     });
 
@@ -459,6 +467,7 @@ async function main() {
           backerId: b.id,
           balance: Math.floor(purchased * (0.3 + rand() * 0.6)),
           purchasedTotal: purchased,
+          krwPaidTotal: purchased * flagship.pricePerMochiKrw,
         },
       });
     }

@@ -5,6 +5,7 @@ import { gradeRank } from "./grades";
 export interface StreamerCard {
   handle: string;
   displayName: string;
+  creatorType: string | null;
   category: string;
   avatarUrl: string | null;
   avgViewers: number;
@@ -19,6 +20,7 @@ function reportToCard(
   streamer: {
     handle: string;
     displayName: string;
+    creatorType: string | null;
     category: string;
     avatarUrl: string | null;
     avgViewers: number;
@@ -32,6 +34,7 @@ function reportToCard(
   return {
     handle: streamer.handle,
     displayName: streamer.displayName,
+    creatorType: streamer.creatorType,
     category: streamer.category,
     avatarUrl: streamer.avatarUrl,
     avgViewers: streamer.avgViewers,
@@ -47,6 +50,7 @@ export type ExploreSort = "readiness" | "backers" | "recurring" | "newest";
 
 export interface ExploreParams {
   q?: string;
+  type?: string;
   category?: string;
   backerRange?: "all" | "under50" | "50to200" | "over200";
   sort?: ExploreSort;
@@ -62,6 +66,9 @@ export async function getExploreStreamers(
   const streamers = await prisma.streamer.findMany({
     where: {
       status: "approved",
+      ...(params.type && params.type !== "all"
+        ? { creatorType: params.type }
+        : {}),
       ...(params.category && params.category !== "all"
         ? { category: params.category }
         : {}),

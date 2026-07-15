@@ -1,10 +1,33 @@
 # motoo — Progress Tracker
 
-_Last updated: 2026-07-12_
+_Last updated: 2026-07-15_
 
 Living status of the build. Update the checkboxes as work lands. See
 [`DECISIONS.md`](./DECISIONS.md) for why things are the way they are and
 [`DEPLOYMENT.md`](./DEPLOYMENT.md) for infra state.
+
+## Recent — 2026-07-15 (creator taxonomy + mochi economics + Studio UX)
+
+- [x] **Creator taxonomy**: `크리에이터 유형` (primary: streamer/youtuber/author) → `카테고리`
+  (dependent sub-facet). Shared source of truth `src/lib/creatorTaxonomy.ts`, wired
+  through creator setup, server validation, and browse (explore filters, home chips,
+  cards, `streamers.ts`). Seed diversified across all three types.
+- [x] **Mochi issuance UX**: standard presets (10만/50만/100만) + custom, with floors
+  (100원/10개/5만원) in `src/lib/issuance.ts`. One shared `MochiIssuancePicker`
+  component used by both onboarding and the Studio editor.
+- [x] **Mochi ratcheting price tiers** (see DECISIONS 2026-07-15): price only goes up;
+  a raise opens a new tier (`soldQuantity` resets, leftover discarded); `lifetimeSold`
+  tracks total; `krwPaidTotal` captured for a future refund flow. Held mochi never
+  touched. Enforced client + server; money tests still green.
+- [x] **Studio = single-page dashboard**: overview + 모찌 발행 + 마켓 아이템 + 주문 all on
+  `/studio` (sub-routes `/studio/{mochi,items,orders}` removed), full-frame width,
+  sections paired horizontally, item cards 2-up, issuance summary card, scrollspy nav.
+- [x] **Creator-signup flow hardening**: `creatorIntent` persisted to the Backer row at
+  onboarding (survives OAuth + long gaps), nav "크리에이터 되기 / 스튜디오" visible on
+  mobile, and a stale-session redirect loop in the creator path self-heals via
+  `/api/session-reset` (`become-creator` checks the Backer still exists).
+- [x] Verified: `tsc` clean, `check:vocab` clean, `pnpm test` 10/10, browser-checked
+  onboarding + Studio + explore filters + the ratchet.
 
 ## Current focus
 
@@ -61,10 +84,11 @@ data; the buy → redeem → cancel-refund invariants hold end-to-end against Po
 (buy credits, redeem debits, cancel refunds, KRW = qty × price); `tsc` clean, vocab passes.
 
 ### Creator side (the **Studio**, `/studio`)
-- [x] Studio shell + guard (owns a Streamer) → `/studio`
-- [x] Mochi issuance controls: price + soft-goal quantity + pause → `/studio/mochi`
-- [x] Marketplace item CRUD (title, price in mochi, type, stock, active) → `/studio/items`
-- [x] Order view + mark-fulfilled / cancel-refund (fulfillment off-platform) → `/studio/orders`
+- [x] Studio shell + guard (owns a Streamer) → `/studio` — **single-page dashboard**
+      (overview + issuance + items + orders), 2026-07-15; sub-routes removed
+- [x] Mochi issuance controls: ratcheting price tiers + availability + pause (shared `MochiIssuancePicker`)
+- [x] Marketplace item CRUD (title, price in mochi, type, stock, active) — 2-up cards
+- [x] Order view + mark-fulfilled / cancel-refund (fulfillment off-platform)
 - [x] Become-a-creator setup (add-on to a signed-in user) → `/creator/onboarding`, entered via `/api/become-creator`
 
 ### User side
