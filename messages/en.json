@@ -509,7 +509,143 @@
       "save": "Save",
       "edit": "Edit",
       "delete": "Delete",
-      "cancel": "Cancel"
+      "cancel": "Cancel",
+      "thumbnails": {
+        "label": "Thumbnail",
+        "groups": {
+          "default": "Type default",
+          "participate": "Voting & input",
+          "video": "Video & clips",
+          "recognition": "Thanks & credit",
+          "goods": "Goods",
+          "time": "Time"
+        }
+      },
+      "fulfillment": {
+        "label": "How it's fulfilled",
+        "instant": "Instant",
+        "request": "Request",
+        "instantHint": "Settles the moment it's bought. (e.g. a vote)",
+        "requestHint": "Files into your orders list to handle. (e.g. a mission)"
+      },
+      "suggestions": {
+        "label": "Suggested items",
+        "hint": "Examples for your kind of work. Tap one to pre-fill the form, then edit freely before adding.",
+        "groups": {
+          "streamer_content": "Content suggestions",
+          "streamer_mission": "Stream missions & soft pledges",
+          "streamer_clip": "Video & clip content",
+          "streamer_mention": "On-stream mentions & credit",
+          "youtuber_plan": "Content suggestions & planning",
+          "youtuber_content": "Video content",
+          "youtuber_credit": "In-video mentions & credits",
+          "author_direction": "Story direction & suggestions",
+          "author_process": "Work & process reveals",
+          "author_mention": "In-work mentions & credit"
+        },
+        "items": {
+          "str_next_game_vote": {
+            "title": "Next-game vote",
+            "desc": "Help pick the game played on the next stream by vote."
+          },
+          "str_genre_vote": {
+            "title": "Content genre vote",
+            "desc": "Help choose the genre of the next content."
+          },
+          "str_indie_submit": {
+            "title": "Indie game pick",
+            "desc": "Submit an indie game you'd love to see played."
+          },
+          "str_penalty_candidate": {
+            "title": "Penalty nomination",
+            "desc": "Nominate a candidate for a stream penalty."
+          },
+          "str_mission_propose": {
+            "title": "Stream mission proposal",
+            "desc": "Propose a mission to attempt on stream."
+          },
+          "str_unseen_clip": {
+            "title": "Unreleased clip access",
+            "desc": "Watch a clip that didn't make the edit."
+          },
+          "str_behind": {
+            "title": "Behind-the-scenes video",
+            "desc": "Get a behind-the-scenes video from the stream."
+          },
+          "str_supporter_credit": {
+            "title": "Supporter credit",
+            "desc": "Your name goes on the stream's supporter list."
+          },
+          "str_live_shoutout": {
+            "title": "Live shout-out",
+            "desc": "Get a live thank-you by name on stream."
+          },
+          "yt_topic_vote": {
+            "title": "Next-topic vote",
+            "desc": "Vote on the topic of the next video."
+          },
+          "yt_idea_submit": {
+            "title": "Idea submission",
+            "desc": "Submit a video planning idea."
+          },
+          "yt_thumbnail_vote": {
+            "title": "Thumbnail vote",
+            "desc": "Help pick one of the candidate thumbnails."
+          },
+          "yt_unseen_footage": {
+            "title": "Unreleased footage",
+            "desc": "Get footage that was cut from the edit."
+          },
+          "yt_full_version": {
+            "title": "Extended / full version",
+            "desc": "Watch the extended or full-length cut."
+          },
+          "yt_making": {
+            "title": "Making-of / behind-the-scenes",
+            "desc": "Get filming and editing behind-the-scenes."
+          },
+          "yt_ending_credit": {
+            "title": "Ending-credits mention",
+            "desc": "Your name appears in the video's end credits."
+          },
+          "yt_shoutout": {
+            "title": "In-video shout-out",
+            "desc": "Get a thank-you by name in the video."
+          },
+          "au_plot_vote": {
+            "title": "Story-direction vote",
+            "desc": "Help decide the next chapter's direction by vote."
+          },
+          "au_setting_submit": {
+            "title": "Character & setting idea",
+            "desc": "Submit a character or setting idea."
+          },
+          "au_spinoff_submit": {
+            "title": "Spin-off pitch",
+            "desc": "Pitch a topic for a side story or one-shot."
+          },
+          "au_preview": {
+            "title": "Early preview",
+            "desc": "Read the next chapter before everyone else."
+          },
+          "au_sketch": {
+            "title": "Rough & sketch reveal",
+            "desc": "See work-in-progress roughs and sketches."
+          },
+          "au_note": {
+            "title": "Notes & author commentary",
+            "desc": "Get chapter notes and author commentary."
+          },
+          "au_supporter_credit": {
+            "title": "Supporter credit",
+            "desc": "Your name goes on the work's supporter list."
+          },
+          "au_character_name": {
+            "title": "Character name cameo",
+            "desc": "A minor character named after you. (rare)"
+          }
+        }
+      }
     },
     "orders": {
       "title": "Orders",
@@ -551,6 +687,7 @@
     "redeem": "Use mochi",
     "redeeming": "Processing…",
     "redeemed": "Done! The creator will prepare it soon.",
+    "redeemedInstant": "Applied right away!",
     "notePlaceholder": "Leave a note about your request (optional)",
     "needMore": "Not enough mochi. Please buy some first.",
     "types": {
@@ -558,6 +695,10 @@
       "access": "Access / membership",
       "physical": "Physical goods",
       "session": "1:1 time"
+    },
+    "fulfillment": {
+      "instant": "Instant",
+      "request": "Request"
     },
     "disclosure": "Mochi is prepaid credit for use only in this creator's market. It is non-transferable and non-resellable, and any unused mochi is refundable.",
     "errors": {

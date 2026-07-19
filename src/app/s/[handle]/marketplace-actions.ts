@@ -56,7 +56,7 @@ const redeemSchema = z.object({
 });
 
 export type RedeemItemActionResult =
-  | { ok: true; balance: number; mochiSpent: number }
+  | { ok: true; balance: number; mochiSpent: number; instant: boolean }
   | { ok: false; error: string };
 
 export async function redeemItemAction(
@@ -70,13 +70,13 @@ export async function redeemItemAction(
   if (!backer) return { ok: false, error: "login" };
 
   try {
-    const { balance, mochiSpent } = await redeemItem({
+    const { balance, mochiSpent, instant } = await redeemItem({
       backerId: backer.id,
       itemId: data.itemId,
       note: data.note ?? null,
     });
     revalidatePath(`/s/${data.handle}`);
-    return { ok: true, balance, mochiSpent };
+    return { ok: true, balance, mochiSpent, instant };
   } catch (e) {
     const msg = e instanceof Error ? e.message : "";
     if (msg === "OUT_OF_STOCK") return { ok: false, error: "outOfStock" };

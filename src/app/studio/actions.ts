@@ -2,11 +2,12 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { MarketplaceItemType } from "@prisma/client";
+import { MarketplaceItemType, FulfillmentMode } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { getCurrentCreator } from "@/lib/session";
 import { fulfillOrder, cancelOrder } from "@/lib/mochi";
 import { validateIssuance } from "@/lib/issuance";
+import { isThumbnailKey } from "@/lib/itemThumbnails";
 
 /**
  * Server actions for the creator dashboard.
@@ -91,6 +92,14 @@ const itemSchema = z.object({
   description: z.string().trim().optional().default(""),
   priceMochi: positiveInt,
   itemType: z.nativeEnum(MarketplaceItemType),
+  // Curated thumbnail slug, or null for the itemType default. Unknown keys are
+  // coerced to null so a stale/forged key can never persist.
+  thumbnailKey: z
+    .string()
+    .nullable()
+    .optional()
+    .transform((v) => (v && isThumbnailKey(v) ? v : null)),
+  fulfillment: z.nativeEnum(FulfillmentMode),
   stock: positiveInt.nullable(),
   active: z.boolean(),
 });
@@ -102,6 +111,8 @@ export async function upsertItem(input: {
   description?: string;
   priceMochi: number;
   itemType: MarketplaceItemType;
+  thumbnailKey?: string | null;
+  fulfillment: FulfillmentMode;
   stock: number | null;
   active: boolean;
 }): Promise<ActionResult> {
@@ -111,8 +122,17 @@ export async function upsertItem(input: {
 
     const parsed = itemSchema.safeParse(input);
     if (!parsed.success) return { ok: false, error: "generic" };
-    const { id, title, description, priceMochi, itemType, stock, active } =
-      parsed.data;
+    const {
+      id,
+      title,
+      description,
+      priceMochi,
+      itemType,
+      thumbnailKey,
+      fulfillment,
+      stock,
+      active,
+    } = parsed.data;
 
     if (id) {
       // Verify ownership before mutating.
@@ -125,7 +145,16 @@ export async function upsertItem(input: {
       }
       await prisma.marketplaceItem.update({
         where: { id },
-        data: { title, description, priceMochi, itemType, stock, active },
+        data: {
+          title,
+          description,
+          priceMochi,
+          itemType,
+          thumbnailKey,
+          fulfillment,
+          stock,
+          active,
+        },
       });
     } else {
       // New item is appended after the creator's current items.
@@ -139,6 +168,8 @@ export async function upsertItem(input: {
           description,
           priceMochi,
           itemType,
+          thumbnailKey,
+          fulfillment,
           stock,
           active,
           sortOrder: count,

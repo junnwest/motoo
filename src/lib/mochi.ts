@@ -153,6 +153,8 @@ export interface RedeemItemResult {
   orderId: string;
   mochiSpent: number;
   balance: number;
+  /** true when the item auto-completed (instant); false when it awaits the creator. */
+  instant: boolean;
 }
 
 /**
@@ -216,6 +218,11 @@ export async function redeemItem(
       select: { balance: true },
     });
 
+    // Instant items settle on redemption — the order is recorded already
+    // fulfilled, so it never lands in the creator's pending queue (and, like any
+    // fulfilled order, can't be cancelled/refunded afterward). Request items stay
+    // pending for the creator to act on.
+    const instant = item.fulfillment === "instant";
     const order = await tx.order.create({
       data: {
         streamerId: item.streamerId,
@@ -224,7 +231,8 @@ export async function redeemItem(
         mochiSpent,
         quantity,
         note: input.note ?? null,
-        status: "pending",
+        status: instant ? "fulfilled" : "pending",
+        fulfilledAt: instant ? new Date() : null,
       },
     });
 
@@ -232,6 +240,7 @@ export async function redeemItem(
       orderId: order.id,
       mochiSpent,
       balance: holding?.balance ?? 0,
+      instant,
     };
   });
 }

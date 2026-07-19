@@ -509,7 +509,143 @@
       "save": "저장",
       "edit": "수정",
       "delete": "삭제",
-      "cancel": "취소"
+      "cancel": "취소",
+      "thumbnails": {
+        "label": "썸네일",
+        "groups": {
+          "default": "유형 기본",
+          "participate": "투표·참여",
+          "video": "영상·클립",
+          "recognition": "감사·인정",
+          "goods": "굿즈·실물",
+          "time": "시간"
+        }
+      },
+      "fulfillment": {
+        "label": "이용 방식",
+        "instant": "즉시 완료",
+        "request": "요청 접수",
+        "instantHint": "구매하면 바로 반영돼요. (예: 투표권)",
+        "requestHint": "주문 목록에 접수돼요. 직접 처리하세요. (예: 미션)"
+      },
+      "suggestions": {
+        "label": "추천 아이템",
+        "hint": "내 활동에 맞는 예시예요. 누르면 내용이 채워지니 자유롭게 고쳐서 추가하세요.",
+        "groups": {
+          "streamer_content": "콘텐츠 추천",
+          "streamer_mission": "방송 미션·소프트 공약",
+          "streamer_clip": "영상·클립 콘텐츠",
+          "streamer_mention": "방송 내 멘션·인정",
+          "youtuber_plan": "콘텐츠 추천·기획 참여",
+          "youtuber_content": "영상 콘텐츠 제공",
+          "youtuber_credit": "영상 내 멘션·크레딧",
+          "author_direction": "작품 방향·콘텐츠 추천",
+          "author_process": "작업물·과정 공개",
+          "author_mention": "작품 내 멘션·인정"
+        },
+        "items": {
+          "str_next_game_vote": {
+            "title": "다음 게임 투표권",
+            "desc": "다음 방송에서 플레이할 게임을 투표로 함께 정해요."
+          },
+          "str_genre_vote": {
+            "title": "콘텐츠 장르 투표권",
+            "desc": "다음에 할 콘텐츠 장르를 함께 골라요."
+          },
+          "str_indie_submit": {
+            "title": "인디게임 추천 제출권",
+            "desc": "해봤으면 하는 인디게임을 직접 추천해요."
+          },
+          "str_penalty_candidate": {
+            "title": "벌칙 후보 등록권",
+            "desc": "방송 벌칙 후보를 제안해요."
+          },
+          "str_mission_propose": {
+            "title": "방송 미션 제안권",
+            "desc": "방송에서 도전할 미션을 제안해요."
+          },
+          "str_unseen_clip": {
+            "title": "미공개 클립 열람권",
+            "desc": "편집본에 없는 미공개 클립을 봐요."
+          },
+          "str_behind": {
+            "title": "비하인드 영상",
+            "desc": "방송 뒷이야기 비하인드 영상을 받아요."
+          },
+          "str_supporter_credit": {
+            "title": "후원자 명단 등재",
+            "desc": "방송 후원자 명단에 닉네임이 올라가요."
+          },
+          "str_live_shoutout": {
+            "title": "실시간 감사 인사",
+            "desc": "방송 중 닉네임을 불러 감사 인사를 전해요."
+          },
+          "yt_topic_vote": {
+            "title": "다음 영상 주제 투표권",
+            "desc": "다음에 다룰 영상 주제를 투표로 정해요."
+          },
+          "yt_idea_submit": {
+            "title": "기획 아이디어 제출권",
+            "desc": "영상 기획 아이디어를 제안해요."
+          },
+          "yt_thumbnail_vote": {
+            "title": "썸네일 투표권",
+            "desc": "후보 썸네일 중 하나를 함께 골라요."
+          },
+          "yt_unseen_footage": {
+            "title": "미공개 촬영본",
+            "desc": "편집에서 빠진 미공개 촬영본을 받아요."
+          },
+          "yt_full_version": {
+            "title": "확장판·풀버전 영상",
+            "desc": "본편의 확장판·풀버전을 봐요."
+          },
+          "yt_making": {
+            "title": "제작기·비하인드",
+            "desc": "촬영·편집 비하인드를 받아요."
+          },
+          "yt_ending_credit": {
+            "title": "엔딩 크레딧 등재",
+            "desc": "영상 엔딩 크레딧에 닉네임이 올라가요."
+          },
+          "yt_shoutout": {
+            "title": "영상 내 감사 인사",
+            "desc": "영상에서 닉네임을 언급해 감사 인사를 전해요."
+          },
+          "au_plot_vote": {
+            "title": "전개 방향 투표권",
+            "desc": "다음 화 전개를 투표로 함께 정해요."
+          },
+          "au_setting_submit": {
+            "title": "캐릭터·설정 제안권",
+            "desc": "캐릭터나 설정 아이디어를 제안해요."
+          },
+          "au_spinoff_submit": {
+            "title": "외전 소재 추천권",
+            "desc": "외전·단편 소재를 추천해요."
+          },
+          "au_preview": {
+            "title": "미리보기·선공개",
+            "desc": "다음 화를 먼저 읽어요."
+          },
+          "au_sketch": {
+            "title": "러프·스케치 공개",
+            "desc": "작업 러프와 스케치를 봐요."
+          },
+          "au_note": {
+            "title": "후기·작가 노트",
+            "desc": "회차 후기와 작가 노트를 받아요."
+          },
+          "au_supporter_credit": {
+            "title": "후원자 명단 등재",
+            "desc": "작품 후원자 명단에 닉네임이 올라가요."
+          },
+          "au_character_name": {
+            "title": "캐릭터 이름 반영",
+            "desc": "단역 캐릭터 이름에 반영해요. (희소)"
+          }
+        }
+      }
     },
     "orders": {
       "title": "주문",
@@ -551,6 +687,7 @@
     "redeem": "모찌로 이용하기",
     "redeeming": "처리 중…",
     "redeemed": "완료됐어요! 크리에이터가 곧 준비할 거예요.",
+    "redeemedInstant": "바로 반영됐어요!",
     "notePlaceholder": "요청 내용을 남겨보세요 (선택)",
     "needMore": "모찌가 부족해요. 먼저 구매해 주세요.",
     "types": {
@@ -558,6 +695,10 @@
       "access": "액세스·멤버십",
       "physical": "실물 굿즈",
       "session": "1:1 시간"
+    },
+    "fulfillment": {
+      "instant": "즉시",
+      "request": "요청 접수"
     },
     "disclosure": "모찌는 이 크리에이터의 마켓에서만 쓰는 선불 이용권이에요. 양도·재판매가 되지 않으며, 사용하지 않은 모찌는 환불받을 수 있어요.",
     "errors": {

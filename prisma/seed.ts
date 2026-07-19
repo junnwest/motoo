@@ -2,6 +2,7 @@ import {
   PrismaClient,
   BackingDisplay,
   MarketplaceItemType,
+  FulfillmentMode,
 } from "@prisma/client";
 import { computeGrades, type TrustMetrics } from "../src/lib/grades";
 import { hashPassword } from "../src/lib/password";
@@ -70,13 +71,15 @@ const ITEM_TEMPLATES: {
   description: string;
   priceMochi: number;
   itemType: MarketplaceItemType;
+  thumbnailKey: string;
+  fulfillment: FulfillmentMode;
   stock: number | null;
 }[] = [
-  { title: "실시간 샤라웃", description: "방송 중에 닉네임을 불러드려요.", priceMochi: 3, itemType: "digital", stock: null },
-  { title: "노래 신청", description: "다음 라이브에서 원하는 곡을 불러드려요.", priceMochi: 5, itemType: "digital", stock: null },
-  { title: "멤버 전용 포스트", description: "비공개 소식과 사진을 받아보세요.", priceMochi: 10, itemType: "access", stock: null },
-  { title: "손편지", description: "정성껏 쓴 손편지를 보내드려요.", priceMochi: 30, itemType: "physical", stock: 20 },
-  { title: "1:1 통화 5분", description: "짧은 통화로 가깝게 인사해요.", priceMochi: 50, itemType: "session", stock: 5 },
+  { title: "실시간 샤라웃", description: "방송 중에 닉네임을 불러드려요.", priceMochi: 3, itemType: "digital", thumbnailKey: "shoutout", fulfillment: "instant", stock: null },
+  { title: "노래 신청", description: "다음 라이브에서 원하는 곡을 불러드려요.", priceMochi: 5, itemType: "digital", thumbnailKey: "vote", fulfillment: "request", stock: null },
+  { title: "멤버 전용 포스트", description: "비공개 소식과 사진을 받아보세요.", priceMochi: 10, itemType: "access", thumbnailKey: "badge", fulfillment: "request", stock: null },
+  { title: "손편지", description: "정성껏 쓴 손편지를 보내드려요.", priceMochi: 30, itemType: "physical", thumbnailKey: "letter", fulfillment: "request", stock: 20 },
+  { title: "1:1 통화 5분", description: "짧은 통화로 가깝게 인사해요.", priceMochi: 50, itemType: "session", thumbnailKey: "call", fulfillment: "request", stock: 5 },
 ];
 
 async function main() {
@@ -207,6 +210,8 @@ async function main() {
           description: tpl.description,
           priceMochi: tpl.priceMochi,
           itemType: tpl.itemType,
+          thumbnailKey: tpl.thumbnailKey,
+          fulfillment: tpl.fulfillment,
           stock: tpl.stock,
           redeemedCount,
           sortOrder: i,

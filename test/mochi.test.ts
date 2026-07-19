@@ -32,9 +32,13 @@ async function cleanup() {
   }
 }
 
-async function newItem(priceMochi: number, stock: number | null = null) {
+async function newItem(
+  priceMochi: number,
+  stock: number | null = null,
+  fulfillment: "instant" | "request" = "request",
+) {
   return prisma.marketplaceItem.create({
-    data: { streamerId, title: "test-item", priceMochi, itemType: "digital", stock },
+    data: { streamerId, title: "test-item", priceMochi, itemType: "digital", fulfillment, stock },
   });
 }
 
@@ -102,9 +106,21 @@ describe("redeemItem", () => {
     assert.equal(r.balance, 7);
     const order = await prisma.order.findUniqueOrThrow({ where: { id: r.orderId } });
     assert.equal(order.status, "pending");
+    assert.equal(r.instant, false);
     assert.equal(order.note, "hi");
     const after = await prisma.marketplaceItem.findUniqueOrThrow({ where: { id: item.id } });
     assert.equal(after.redeemedCount, 1);
+  });
+
+  it("auto-fulfills an instant item on redemption (no pending order)", async () => {
+    await buyMochi({ backerId, streamerId, quantity: 10, idempotencyKey: "k" });
+    const item = await newItem(3, null, "instant");
+    const r = await redeemItem({ backerId, itemId: item.id });
+    assert.equal(r.instant, true);
+    assert.equal(r.balance, 7); // money still moves
+    const order = await prisma.order.findUniqueOrThrow({ where: { id: r.orderId } });
+    assert.equal(order.status, "fulfilled");
+    assert.ok(order.fulfilledAt); // stamped at redemption
   });
 
   it("rejects when balance is insufficient (and leaves balance untouched)", async () => {

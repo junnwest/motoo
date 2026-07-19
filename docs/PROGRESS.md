@@ -1,10 +1,34 @@
 # motoo — Progress Tracker
 
-_Last updated: 2026-07-15_
+_Last updated: 2026-07-19_
 
 Living status of the build. Update the checkboxes as work lands. See
 [`DECISIONS.md`](./DECISIONS.md) for why things are the way they are and
 [`DEPLOYMENT.md`](./DEPLOYMENT.md) for infra state.
+
+## Recent — 2026-07-19 (marketplace items: suggestions + thumbnails + fulfillment · Supabase live)
+
+- [x] **Suggested items framework**: a creator opening 마켓 아이템 sees ready-made item
+  templates for their creator type (streamer/youtuber/author), grouped by intent.
+  Clicking a chip pre-fills the item form. Single source of truth
+  `src/lib/itemSuggestions.ts` (i18n-keyed slugs); reuses `upsertItem`, no new action.
+- [x] **Item thumbnails**: every marketplace item has a thumbnail — a curated glyph on a
+  palette-tinted tile, **code-defined** (no uploads/storage/moderation), like `Mochi.tsx`.
+  `src/lib/itemThumbnails.ts` + `ItemThumbnail`; new nullable `MarketplaceItem.thumbnailKey`
+  (stores the slug, not a URL); server-validates the key (unknown → null). Suggestion chips
+  pre-select one; a picker in the form overrides; itemType default when unset.
+- [x] **Fulfillment modes** (`FulfillmentMode { instant, request }` on `MarketplaceItem`,
+  default `request`): **instant** items auto-complete on redemption (order recorded
+  `fulfilled`, never enters the pending queue — e.g. a vote); **request** items stay
+  `pending` for the creator to act on (e.g. a mission). `redeemItem` sets status by mode
+  and returns an `instant` flag (fan sees "바로 반영됐어요!" vs the request copy). Both
+  cards show an 즉시/요청 badge. Money invariants intact.
+- [x] **Deployment — Supabase initialized**: schema pushed + fully seeded to Supabase Pro
+  (Seoul); connection verified. DB now has the new `thumbnailKey`/`fulfillment` columns.
+  Vercel project import (`motoo`) + env vars + first deploy is the remaining step.
+- [x] Verified: `tsc` clean, `check:vocab` clean, **`pnpm test` 11/11** (added an instant
+  auto-fulfill case), both surfaces render on the live dev server. Pre-existing lint
+  issues (OnboardingForm, Placeholder, design-handoff assets) untouched.
 
 ## Recent — 2026-07-15 (creator taxonomy + mochi economics + Studio UX)
 
@@ -33,7 +57,7 @@ Living status of the build. Update the checkboxes as work lands. See
 
 1. **Phase 2 mochi-marketplace** ✅ — creator issuance + Studio + user buy/spend, verified locally.
 2. **Phase 4 accounts** ✅ — auth-aware app, fan onboarding (본인인증 gate), and the **additive creator model** (a user who *also* owns a Studio). See below.
-3. **Deployment** (blocked) — Supabase (Seoul) + Vercel (icn1); needs the Supabase DB password to push schema + import to Vercel.
+3. **Deployment** (in progress) — Supabase (Seoul) **initialized** (schema + seed live); remaining: import the Vercel `motoo` project (icn1) + set env vars + first deploy.
 4. **Next** — `/explore` as the real consumer home (still the Phase-1 trust-ranking grid); real PG + real 본인인증 (both need a business registration + contract).
 
 ---
@@ -65,8 +89,8 @@ Living status of the build. Update the checkboxes as work lands. See
 - [x] `.env.example` documents Supabase pooled/direct strings
 - [x] Supabase project created (Seoul, Data API off) — ref `nrfhwhefabahsfzuyxqu`
 - [x] Code pushed to GitHub `junnwest/motoo` (main)
-- [ ] Schema pushed + seeded to Supabase _(blocked: need DB password)_
-- [ ] Vercel project imported + env vars set + first deploy
+- [x] Schema pushed + seeded to Supabase (2026-07-19) — 10 streamers / 63 backers / 40 items / 10 holdings / 5 orders
+- [ ] Vercel project imported + env vars set + first deploy _(import screen reached; env vars from `.env.production.local`)_
 - [ ] Verify deployed site (landing/explore/profile render, DB connected)
 
 See [`DEPLOYMENT.md`](./DEPLOYMENT.md) for the exact steps and env-var list.

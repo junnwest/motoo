@@ -3,6 +3,44 @@
 Why the project is the way it is. Newest first. Keep entries short: decision,
 rationale, and any constraint it creates.
 
+## 2026-07-19 — Marketplace item fulfillment modes (instant vs request)
+A marketplace item declares how a redemption settles: `FulfillmentMode { instant, request }`
+on `MarketplaceItem` (default `request`).
+- **instant** (e.g. a vote ticket): `redeemItem` records the order **already `fulfilled`**
+  (stamps `fulfilledAt`) — money still moves, but it never enters the creator's pending
+  queue and, like any fulfilled order, can't be cancelled/refunded.
+- **request** (e.g. a mission): stays `pending` for the creator to fulfil/cancel — the
+  existing off-platform flow.
+- **Rationale**: some perks need no creator action; forcing them through the pending list
+  is noise. `fulfillOrder`/`cancelOrder` already gate on `status === "pending"`, so instant
+  orders are automatically non-actionable — no special-casing.
+- **Constraint**: instant redemptions are irreversible (no refund path) — chosen to match
+  "completes instantly." Money invariants unchanged; the money test asserts both modes.
+  `redeemItem` returns an `instant` flag so the fan sees mode-appropriate copy.
+
+## 2026-07-19 — Item thumbnails are curated + code-defined, not uploads
+Every marketplace item has a thumbnail, chosen from a curated set (`src/lib/itemThumbnails.ts`),
+not uploaded. Each asset is a glyph on a palette-tinted tile defined in code (like `Mochi.tsx`
+/ `Placeholder.tsx`); the item stores a stable `thumbnailKey` slug, never a URL.
+- **Rationale**: no storage/CDN, no moderation surface on a public marketplace, and perfect
+  brand consistency. Most items are intangible (votes, access, shout-outs) — there's nothing
+  to photograph — so an iconographic tile fits better than stock imagery.
+- **Safety**: `upsertItem` validates the key against the curated set (unknown → null), so a
+  stale/forged key can never persist. `null` resolves to a per-`itemType` default, so legacy
+  and blank items still look intentional.
+- **Leverage**: keyed to the suggestion framework, so most items get a fitting thumbnail with
+  zero extra clicks (the chip pre-selects it). Swapping emoji glyphs for custom SVG later is
+  a drop-in change inside `ItemThumbnail` — no wiring touched.
+
+## 2026-07-19 — Suggested items keyed on creator type
+The Studio item section offers ready-made templates (`src/lib/itemSuggestions.ts`), grouped by
+intent, chosen by the creator's **type** (streamer/youtuber/author) — not category. Clicking a
+chip pre-fills the normal item form (title/description/price/type/thumbnail/fulfillment).
+- **Rationale**: a blank item form is a cold start; type-scoped examples teach what a good
+  perk looks like for *this* kind of creator. Type (not category) keeps the set small (~5/group)
+  and always present. Nothing is binding — it's a seed the creator edits, so it reuses
+  `upsertItem` with no new server action.
+
 ## 2026-07-14 — Mochi issuance: ratcheting price tiers (prepaid credit, not a security)
 Mochi is fungible prepaid credit, minted **on purchase**, scoped to one creator. Once
 bought it's the fan's — spendable or refundable **at the KRW paid**; the creator can

@@ -83,6 +83,8 @@ export default async function CreatorDashboardHome() {
     description: item.description,
     priceMochi: item.priceMochi,
     itemType: item.itemType,
+    thumbnailKey: item.thumbnailKey,
+    fulfillment: item.fulfillment,
     stock: item.stock,
     redeemedCount: item.redeemedCount,
     active: item.active,
@@ -198,7 +200,7 @@ export default async function CreatorDashboardHome() {
           title={t("items.title")}
           subtitle={t("items.subtitle")}
         >
-          <ItemsManager items={items} />
+          <ItemsManager items={items} creatorType={creator.creatorType} />
         </Section>
       </div>
 

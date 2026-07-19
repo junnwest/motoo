@@ -1,12 +1,13 @@
 # motoo — Deployment
 
-_Last updated: 2026-07-12_
+_Last updated: 2026-07-19_
 
 **Target:** Vercel (app, region `icn1` Seoul) + Supabase Pro (Postgres, region Seoul).
 Auto-deploy on push to `main`, preview deploys per PR.
 
 > No secrets live in this repo. Connection strings, DB password, and `AUTH_SECRET`
-> live only in `.env` (gitignored) locally and in Vercel's env vars.
+> live only in `.env` / `.env.production.local` (both gitignored) locally and in
+> Vercel's env vars. A local `DEPLOY_RUNBOOK.local.md` (gitignored) has the paste-and-run steps.
 
 ## Status
 
@@ -15,9 +16,14 @@ Auto-deploy on push to `main`, preview deploys per PR.
 | Prisma `directUrl` + `vercel.json` (icn1) | ✅ done |
 | Supabase project (Seoul, Data API off) | ✅ created — ref `nrfhwhefabahsfzuyxqu` |
 | Push code to GitHub `junnwest/motoo` | ✅ done (main, via HTTPS remote) |
-| Schema push + seed to Supabase | ⏳ blocked — need DB password |
-| Vercel project + env vars + deploy | ⏳ pending |
+| Schema push + seed to Supabase | ✅ done 2026-07-19 (via `.env.production.local` DIRECT_URL) |
+| Vercel project + env vars + deploy | ⏳ in progress — import `motoo`, paste `.env.production.local` |
 | Verify deployed site | ⏳ pending |
+
+> **Note (Hobby plan):** function-region selection via `vercel.json` (`icn1`) is a Pro
+> feature — on Hobby it's likely ignored, so functions run in Vercel's default US region
+> while the DB is in Seoul (adds cross-Pacific latency per query). Fine for the demo;
+> revisit on Pro.
 
 ## Env vars (set in Vercel + local `.env`)
 

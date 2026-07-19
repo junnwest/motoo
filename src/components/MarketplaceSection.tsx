@@ -5,10 +5,12 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { Mochi } from "@/components/Mochi";
+import { ItemThumbnail } from "@/components/ItemThumbnail";
 import { formatCount } from "@/lib/format";
 import { redeemItemAction } from "@/app/s/[handle]/marketplace-actions";
 
 type ItemType = "digital" | "access" | "physical" | "session";
+type Fulfillment = "instant" | "request";
 
 type MarketItem = {
   id: string;
@@ -16,6 +18,8 @@ type MarketItem = {
   description: string | null;
   priceMochi: number;
   itemType: ItemType;
+  thumbnailKey: string | null;
+  fulfillment: Fulfillment;
   stock: number | null;
   redeemedCount: number;
 };
@@ -82,6 +86,7 @@ function ItemCard({
   const [open, setOpen] = useState(false);
   const [note, setNote] = useState("");
   const [done, setDone] = useState(false);
+  const [doneInstant, setDoneInstant] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const remaining = item.stock !== null ? item.stock - item.redeemedCount : null;
@@ -98,6 +103,7 @@ function ItemCard({
       });
       if (res.ok) {
         setDone(true);
+        setDoneInstant(res.instant);
         setOpen(false);
         router.refresh();
       } else {
@@ -108,13 +114,31 @@ function ItemCard({
 
   return (
     <div className="flex flex-col rounded-[16px] border border-line-2 bg-card p-5">
-      <div className="flex items-start justify-between gap-3">
-        <h3 className="text-[16px] font-extrabold tracking-[-0.02em] text-ink">
-          {item.title}
-        </h3>
-        <span className="flex-none rounded-full bg-coral-chip px-2.5 py-1 text-[11px] font-semibold text-coral-deep">
-          {t(`types.${item.itemType}`)}
-        </span>
+      <div className="flex items-start gap-3">
+        <ItemThumbnail
+          thumbnailKey={item.thumbnailKey}
+          itemType={item.itemType}
+          size={48}
+        />
+        <div className="flex min-w-0 flex-1 items-start justify-between gap-3">
+          <h3 className="text-[16px] font-extrabold tracking-[-0.02em] text-ink">
+            {item.title}
+          </h3>
+          <div className="flex flex-none flex-col items-end gap-1">
+            <span className="rounded-full bg-coral-chip px-2.5 py-1 text-[11px] font-semibold text-coral-deep">
+              {t(`types.${item.itemType}`)}
+            </span>
+            <span
+              className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${
+                item.fulfillment === "instant"
+                  ? "bg-sage-bg text-sage"
+                  : "bg-panel text-muted-2"
+              }`}
+            >
+              {t(`fulfillment.${item.fulfillment}`)}
+            </span>
+          </div>
+        </div>
       </div>
 
       {item.description && (
@@ -209,7 +233,7 @@ function ItemCard({
 
         {done && (
           <p className="mt-2 rounded-[12px] bg-sage-bg px-4 py-2.5 text-[14px] font-semibold text-sage">
-            {t("redeemed")}
+            {t(doneInstant ? "redeemedInstant" : "redeemed")}
           </p>
         )}
         {error && (

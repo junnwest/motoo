@@ -73,6 +73,8 @@ export default async function StreamerProfilePage({
     description: i.description,
     priceMochi: i.priceMochi,
     itemType: i.itemType,
+    thumbnailKey: i.thumbnailKey,
+    fulfillment: i.fulfillment,
     stock: i.stock,
     redeemedCount: i.redeemedCount,
   }));

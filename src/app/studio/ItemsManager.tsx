@@ -3,11 +3,29 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { MarketplaceItemType } from "@prisma/client";
+import { MarketplaceItemType, FulfillmentMode } from "@prisma/client";
 import { Button } from "@/components/ui/Button";
 import { Mochi } from "@/components/Mochi";
+import { ItemThumbnail } from "@/components/ItemThumbnail";
 import { formatCount } from "@/lib/format";
+import { suggestionsForType } from "@/lib/itemSuggestions";
+import { THUMBNAIL_GROUPS } from "@/lib/itemThumbnails";
 import { upsertItem, deleteItem } from "./actions";
+
+/** Seed values for a new item, e.g. from a suggestion chip. */
+type ItemDraft = Pick<
+  DashboardItem,
+  "title" | "description" | "priceMochi" | "itemType" | "thumbnailKey" | "fulfillment"
+>;
+
+const EMPTY_DRAFT: ItemDraft = {
+  title: "",
+  description: "",
+  priceMochi: 10,
+  itemType: MarketplaceItemType.digital,
+  thumbnailKey: null,
+  fulfillment: FulfillmentMode.request,
+};
 
 export type DashboardItem = {
   id: string;
@@ -15,6 +33,8 @@ export type DashboardItem = {
   description: string | null;
   priceMochi: number;
   itemType: MarketplaceItemType;
+  thumbnailKey: string | null;
+  fulfillment: FulfillmentMode;
   stock: number | null;
   redeemedCount: number;
   active: boolean;
@@ -31,34 +51,46 @@ const labelClass = "mb-1.5 block text-[13px] font-semibold text-muted-2";
 const inputClass =
   "w-full rounded-[12px] border border-line-3 bg-white px-4 py-3 text-[15px] outline-none focus:border-coral/60";
 
-export function ItemsManager({ items }: { items: DashboardItem[] }) {
+export function ItemsManager({
+  items,
+  creatorType,
+}: {
+  items: DashboardItem[];
+  creatorType: string | null;
+}) {
   const t = useTranslations("creatorDashboard");
-  const [creating, setCreating] = useState(false);
+  // A non-null draft means the create form is open, seeded with these values.
+  // `draftSeq` bumps on every open so the form remounts and re-seeds its state.
+  const [draft, setDraft] = useState<ItemDraft | null>(null);
+  const [draftSeq, setDraftSeq] = useState(0);
   const [editingId, setEditingId] = useState<string | null>(null);
+
+  function openCreate(seed: ItemDraft | null) {
+    setDraft(seed ?? EMPTY_DRAFT);
+    setDraftSeq((n) => n + 1);
+    setEditingId(null);
+  }
 
   return (
     <div className="flex flex-col gap-4">
       <div>
-        <Button
-          type="button"
-          variant="dark"
-          onClick={() => {
-            setCreating(true);
-            setEditingId(null);
-          }}
-        >
+        <Button type="button" variant="dark" onClick={() => openCreate(null)}>
           {t("items.addNew")}
         </Button>
       </div>
 
-      {creating ? (
+      <SuggestionPanel creatorType={creatorType} onPick={openCreate} />
+
+      {draft ? (
         <ItemForm
-          onClose={() => setCreating(false)}
+          key={draftSeq}
+          initial={draft}
+          onClose={() => setDraft(null)}
           submitLabel={t("items.add")}
         />
       ) : null}
 
-      {items.length === 0 && !creating ? (
+      {items.length === 0 && !draft ? (
         <div className="rounded-[16px] border border-line-2 bg-card p-6 text-[15px] text-muted">
           {t("items.empty")}
         </div>
@@ -81,11 +113,84 @@ export function ItemsManager({ items }: { items: DashboardItem[] }) {
               item={item}
               onEdit={() => {
                 setEditingId(item.id);
-                setCreating(false);
+                setDraft(null);
               }}
             />
           ),
         )}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Ready-made item templates for the creator's type, grouped by intent. A chip is
+ * a starting point — picking one just opens the create form pre-filled, so the
+ * creator still edits price, wording, and stock before it's live.
+ */
+function SuggestionPanel({
+  creatorType,
+  onPick,
+}: {
+  creatorType: string | null;
+  onPick: (seed: ItemDraft) => void;
+}) {
+  const t = useTranslations("creatorDashboard");
+  const groups = suggestionsForType(creatorType);
+  if (groups.length === 0) return null;
+
+  return (
+    <div className="rounded-[16px] border border-line-2 bg-card p-5">
+      <h3 className="text-[15px] font-bold text-ink">
+        {t("items.suggestions.label")}
+      </h3>
+      <p className="mt-1 text-[13px] text-muted">
+        {t("items.suggestions.hint")}
+      </p>
+      <div className="mt-4 flex flex-col gap-4">
+        {groups.map((group) => (
+          <div key={group.key}>
+            <div className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-muted-2">
+              {t(`items.suggestions.groups.${group.key}` as never)}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {group.items.map((s) => {
+                const title = t(
+                  `items.suggestions.items.${s.key}.title` as never,
+                );
+                const description = t(
+                  `items.suggestions.items.${s.key}.desc` as never,
+                );
+                return (
+                  <button
+                    key={s.key}
+                    type="button"
+                    onClick={() =>
+                      onPick({
+                        title,
+                        description,
+                        priceMochi: s.priceMochi,
+                        itemType: s.itemType,
+                        thumbnailKey: s.thumbnailKey,
+                        fulfillment: s.fulfillment,
+                      })
+                    }
+                    className="flex items-center gap-1.5 rounded-full border border-line-3 bg-white px-3.5 py-2 text-[13.5px] font-medium text-ink transition-colors hover:border-coral/60 hover:bg-coral-chip"
+                  >
+                    <span aria-hidden="true" className="text-muted-2">
+                      +
+                    </span>
+                    {title}
+                    <span className="flex items-center gap-0.5 text-[12px] text-muted-2">
+                      <Mochi width={13} height={10} />
+                      {formatCount(s.priceMochi)}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -113,22 +218,40 @@ function ItemCard({
 
   return (
     <div className="flex h-full flex-col rounded-[16px] border border-line-2 bg-card p-5">
-      <div className="flex flex-wrap items-center gap-2">
-        <h3 className="text-[17px] font-extrabold tracking-[-0.02em] text-ink">
-          {item.title}
-        </h3>
-        <span className="rounded-full bg-panel px-2.5 py-0.5 text-[12px] font-semibold text-muted-2">
-          {t(`items.types.${item.itemType}`)}
-        </span>
-        {!item.active ? (
-          <span className="rounded-full bg-panel px-2.5 py-0.5 text-[12px] font-semibold text-muted">
-            {t("mochi.activeOff")}
-          </span>
-        ) : null}
+      <div className="flex items-start gap-3">
+        <ItemThumbnail
+          thumbnailKey={item.thumbnailKey}
+          itemType={item.itemType}
+          size={44}
+        />
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="text-[17px] font-extrabold tracking-[-0.02em] text-ink">
+              {item.title}
+            </h3>
+            <span className="rounded-full bg-panel px-2.5 py-0.5 text-[12px] font-semibold text-muted-2">
+              {t(`items.types.${item.itemType}`)}
+            </span>
+            <span
+              className={`rounded-full px-2.5 py-0.5 text-[12px] font-semibold ${
+                item.fulfillment === "instant"
+                  ? "bg-sage-bg text-sage"
+                  : "bg-coral-chip text-coral-deep"
+              }`}
+            >
+              {t(`items.fulfillment.${item.fulfillment}`)}
+            </span>
+            {!item.active ? (
+              <span className="rounded-full bg-panel px-2.5 py-0.5 text-[12px] font-semibold text-muted">
+                {t("mochi.activeOff")}
+              </span>
+            ) : null}
+          </div>
+          {item.description ? (
+            <p className="mt-1.5 text-[14px] text-muted">{item.description}</p>
+          ) : null}
+        </div>
       </div>
-      {item.description ? (
-        <p className="mt-1.5 text-[14px] text-muted">{item.description}</p>
-      ) : null}
       <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px] text-muted">
         <span className="flex items-center gap-1.5 font-semibold text-body">
           <Mochi width={16} height={12} />
@@ -157,12 +280,141 @@ function ItemCard({
   );
 }
 
+/**
+ * Curated thumbnail picker. A `null` value means "use the itemType default" —
+ * shown as the first swatch, which live-previews whatever the current type
+ * resolves to. Selecting the active swatch again clears back to that default.
+ */
+function ThumbnailPicker({
+  value,
+  itemType,
+  onChange,
+}: {
+  value: string | null;
+  itemType: MarketplaceItemType;
+  onChange: (key: string | null) => void;
+}) {
+  const t = useTranslations("creatorDashboard");
+
+  function swatchClass(selected: boolean) {
+    return `rounded-[12px] p-0.5 transition-shadow ${
+      selected
+        ? "ring-2 ring-coral ring-offset-1 ring-offset-panel"
+        : "ring-1 ring-line-3 hover:ring-coral/50"
+    }`;
+  }
+
+  return (
+    <div>
+      <span className={labelClass}>{t("items.thumbnails.label")}</span>
+      <div className="flex flex-col gap-3 rounded-[12px] border border-line-3 bg-white p-3">
+        {/* Default (itemType-derived) swatch. */}
+        <div>
+          <div className="mb-1.5 text-[12px] font-semibold text-muted-2">
+            {t("items.thumbnails.groups.default")}
+          </div>
+          <button
+            type="button"
+            aria-pressed={value === null}
+            onClick={() => onChange(null)}
+            className={swatchClass(value === null)}
+          >
+            <ItemThumbnail thumbnailKey={null} itemType={itemType} size={40} />
+          </button>
+        </div>
+
+        {THUMBNAIL_GROUPS.map((group) => (
+          <div key={group.key}>
+            <div className="mb-1.5 text-[12px] font-semibold text-muted-2">
+              {t(`items.thumbnails.groups.${group.key}` as never)}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {group.assets.map((asset) => {
+                const selected = value === asset.key;
+                return (
+                  <button
+                    key={asset.key}
+                    type="button"
+                    aria-pressed={selected}
+                    onClick={() => onChange(selected ? null : asset.key)}
+                    className={swatchClass(selected)}
+                  >
+                    <ItemThumbnail
+                      thumbnailKey={asset.key}
+                      itemType={itemType}
+                      size={40}
+                    />
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Fulfillment-mode selector. `instant` settles the redemption on purchase (e.g. a
+ * vote); `request` files it in the creator's pending order list to act on (e.g. a
+ * mission). Two-button segmented control with a mode-specific hint.
+ */
+function FulfillmentPicker({
+  value,
+  onChange,
+}: {
+  value: FulfillmentMode;
+  onChange: (mode: FulfillmentMode) => void;
+}) {
+  const t = useTranslations("creatorDashboard");
+  const modes: FulfillmentMode[] = [
+    FulfillmentMode.instant,
+    FulfillmentMode.request,
+  ];
+
+  return (
+    <div>
+      <span className={labelClass}>{t("items.fulfillment.label")}</span>
+      <div className="grid grid-cols-2 gap-2">
+        {modes.map((mode) => {
+          const selected = value === mode;
+          return (
+            <button
+              key={mode}
+              type="button"
+              aria-pressed={selected}
+              onClick={() => onChange(mode)}
+              className={`rounded-[12px] border px-4 py-3 text-left transition-colors ${
+                selected
+                  ? "border-coral bg-coral-chip"
+                  : "border-line-3 bg-white hover:border-coral/50"
+              }`}
+            >
+              <span className="block text-[14px] font-bold text-ink">
+                {t(`items.fulfillment.${mode}`)}
+              </span>
+              <span className="mt-0.5 block text-[12px] leading-snug text-muted">
+                {t(`items.fulfillment.${mode}Hint`)}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function ItemForm({
   item,
+  initial,
   onClose,
   submitLabel,
 }: {
+  /** Present when editing an existing item (carries its id). */
   item?: DashboardItem;
+  /** Seed values when creating (blank form or a picked suggestion). */
+  initial?: ItemDraft;
   onClose: () => void;
   submitLabel: string;
 }) {
@@ -170,11 +422,18 @@ function ItemForm({
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
-  const [title, setTitle] = useState(item?.title ?? "");
-  const [description, setDescription] = useState(item?.description ?? "");
-  const [price, setPrice] = useState(String(item?.priceMochi ?? 10));
+  const seed = item ?? initial ?? EMPTY_DRAFT;
+  const [title, setTitle] = useState(seed.title ?? "");
+  const [description, setDescription] = useState(seed.description ?? "");
+  const [price, setPrice] = useState(String(seed.priceMochi ?? 10));
   const [itemType, setItemType] = useState<MarketplaceItemType>(
-    item?.itemType ?? MarketplaceItemType.digital,
+    seed.itemType ?? MarketplaceItemType.digital,
+  );
+  const [thumbnailKey, setThumbnailKey] = useState<string | null>(
+    seed.thumbnailKey ?? null,
+  );
+  const [fulfillment, setFulfillment] = useState<FulfillmentMode>(
+    seed.fulfillment ?? FulfillmentMode.request,
   );
   const [stock, setStock] = useState(
     item?.stock === null || item?.stock === undefined
@@ -195,6 +454,8 @@ function ItemForm({
         description: description.trim(),
         priceMochi: Math.trunc(Number(price)),
         itemType,
+        thumbnailKey,
+        fulfillment,
         stock: trimmedStock === "" ? null : Math.trunc(Number(trimmedStock)),
         active,
       });
@@ -241,6 +502,14 @@ function ItemForm({
             className={`${inputClass} resize-y`}
           />
         </div>
+
+        <ThumbnailPicker
+          value={thumbnailKey}
+          itemType={itemType}
+          onChange={setThumbnailKey}
+        />
+
+        <FulfillmentPicker value={fulfillment} onChange={setFulfillment} />
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <div>

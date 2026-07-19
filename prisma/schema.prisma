@@ -94,6 +94,12 @@ enum OrderStatus {
   cancelled // creator cancelled; mochi refunded to the buyer's holding
 }
 
+// How a redemption settles.
+enum FulfillmentMode {
+  instant // completes on redemption — no creator action (e.g. a vote ticket)
+  request // needs the creator to act; lands in the pending order list (e.g. a mission)
+}
+
 model Streamer {
   id            String         @id @default(cuid())
   handle        String         @unique
@@ -361,6 +367,8 @@ model MarketplaceItem {
   description   String?
   priceMochi    Int // price in mochi units
   itemType      MarketplaceItemType
+  thumbnailKey  String? // curated thumbnail slug (see lib/itemThumbnails); null = itemType default
+  fulfillment   FulfillmentMode     @default(request) // instant = auto-complete; request = creator acts
   stock         Int? // null = unlimited; otherwise remaining stock is stock - redeemedCount
   redeemedCount Int                 @default(0)
   active        Boolean             @default(true)
