@@ -7,6 +7,7 @@ import { ButtonLink } from "@/components/ui/Button";
 import { Mochi } from "@/components/Mochi";
 import { Avatar } from "@/components/ui/Placeholder";
 import { GradeBadge } from "@/components/GradeBadge";
+import { CreatorFacet } from "@/components/CreatorFacet";
 import { BackerWall } from "@/components/BackerWall";
 import { BuyMochi } from "@/components/BuyMochi";
 import { MarketplaceSection } from "@/components/MarketplaceSection";
@@ -14,6 +15,7 @@ import { getStreamerProfile } from "@/lib/streamers";
 import { getCurrentBacker } from "@/lib/session";
 import { getHolding } from "@/lib/mochi";
 import { formatPercent } from "@/lib/format";
+import { isCreatorType, ALL_CATEGORIES } from "@/lib/creatorTaxonomy";
 import type { Grade } from "@/lib/grades";
 
 export default async function StreamerProfilePage({
@@ -24,6 +26,7 @@ export default async function StreamerProfilePage({
   const { handle } = await params;
   const t = await getTranslations("profile");
   const tc = await getTranslations("common");
+  const tax = await getTranslations("creatorTaxonomy");
   // Independent reads run concurrently (the viewer's account doesn't depend on
   // the profile). Issuance + items are folded into the profile query itself.
   const [data, backer] = await Promise.all([
@@ -118,6 +121,20 @@ export default async function StreamerProfilePage({
               </h1>
               {report && <GradeBadge grade={grades!.sponsorReadiness} size="sm" />}
             </div>
+            <CreatorFacet
+              variant="chips"
+              className="mt-2.5"
+              typeLabel={
+                streamer.creatorType && isCreatorType(streamer.creatorType)
+                  ? tax(`types.${streamer.creatorType}`)
+                  : null
+              }
+              categoryLabel={
+                ALL_CATEGORIES.includes(streamer.category)
+                  ? tax(`categories.${streamer.category}`)
+                  : streamer.category
+              }
+            />
             {streamer.bio && (
               <p className="mt-2 max-w-[560px] text-[15.5px] leading-[1.6] text-body">
                 {streamer.bio}

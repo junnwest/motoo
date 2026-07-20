@@ -8,6 +8,11 @@ import { getCurrentCreator } from "@/lib/session";
 import { fulfillOrder, cancelOrder } from "@/lib/mochi";
 import { validateIssuance } from "@/lib/issuance";
 import { isThumbnailKey } from "@/lib/itemThumbnails";
+import {
+  isCreatorType,
+  isCategoryForType,
+  type CreatorType,
+} from "@/lib/creatorTaxonomy";
 
 /**
  * Server actions for the creator dashboard.
@@ -80,6 +85,82 @@ export async function updateIssuance(input: {
     });
 
     revalidatePath(DASHBOARD);
+    return { ok: true };
+  } catch {
+    return { ok: false, error: "generic" };
+  }
+}
+
+// Optional free-text link/handle field: trimmed, empties normalized to null.
+const linkField = z
+  .string()
+  .trim()
+  .max(300)
+  .optional()
+  .transform((v) => (v && v.length > 0 ? v : null));
+
+const profileSchema = z.object({
+  displayName: z.string().trim().min(1).max(40),
+  bio: z
+    .string()
+    .trim()
+    .max(500)
+    .optional()
+    .transform((v) => (v && v.length > 0 ? v : null)),
+  creatorType: z.string().refine(isCreatorType),
+  category: z.string().trim().min(1),
+  chzzk: linkField,
+  soop: linkField,
+  youtube: linkField,
+  twitch: linkField,
+  discordUrl: linkField,
+  fanCafeUrl: linkField,
+});
+
+/** Update this creator's public profile (identity/account fields are separate). */
+export async function updateStreamerProfile(input: {
+  displayName: string;
+  bio?: string;
+  creatorType: string;
+  category: string;
+  chzzk?: string;
+  soop?: string;
+  youtube?: string;
+  twitch?: string;
+  discordUrl?: string;
+  fanCafeUrl?: string;
+}): Promise<ActionResult> {
+  try {
+    const creator = await getCurrentCreator();
+    if (!creator) return { ok: false, error: "generic" };
+
+    const parsed = profileSchema.safeParse(input);
+    if (!parsed.success) return { ok: false, error: "generic" };
+    const d = parsed.data;
+
+    // Category must belong to the chosen type (same rule as creator setup).
+    if (!isCategoryForType(d.creatorType as CreatorType, d.category)) {
+      return { ok: false, error: "generic" };
+    }
+
+    await prisma.streamer.update({
+      where: { id: creator.id },
+      data: {
+        displayName: d.displayName,
+        bio: d.bio,
+        creatorType: d.creatorType,
+        category: d.category,
+        chzzk: d.chzzk,
+        soop: d.soop,
+        youtube: d.youtube,
+        twitch: d.twitch,
+        discordUrl: d.discordUrl,
+        fanCafeUrl: d.fanCafeUrl,
+      },
+    });
+
+    revalidatePath(DASHBOARD);
+    revalidatePath(`/s/${creator.handle}`);
     return { ok: true };
   } catch {
     return { ok: false, error: "generic" };

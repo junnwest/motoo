@@ -449,7 +449,28 @@
     "navItems": "Market items",
     "navOrders": "Orders",
     "viewPublic": "View public page ↗",
-    "welcome": "Welcome, {name}",
+    "welcome": "{name}'s dashboard",
+    "helpLabel": "Help",
+    "settings": {
+      "title": "Settings",
+      "subtitle": "Manage your public profile.",
+      "button": "Settings",
+      "back": "Back to dashboard",
+      "sectionLinks": "Platform links",
+      "handleReadonly": "Your Studio address (@handle) can't be changed.",
+      "linkPlaceholder": "https://...",
+      "save": "Save",
+      "saving": "Saving…",
+      "saved": "Saved",
+      "links": {
+        "chzzk": "CHZZK",
+        "soop": "SOOP",
+        "youtube": "YouTube",
+        "twitch": "Twitch",
+        "discord": "Discord",
+        "fanCafe": "Fan cafe"
+      }
+    },
     "statSold": "Mochi sold",
     "statGoal": "Issuance goal",
     "statHolders": "Fans holding mochi",
@@ -460,7 +481,7 @@
     "setupMochi": "Set up mochi issuance →",
     "saveError": "Couldn't save. Please check your inputs.",
     "mochi": {
-      "title": "Mochi issuance",
+      "title": "Issue more mochi",
       "subtitle": "Set the price of one mochi and your issuance goal. The goal is a soft target — going past it is fine.",
       "price": "Price per mochi (KRW)",
       "goal": "Issuance goal (quantity)",

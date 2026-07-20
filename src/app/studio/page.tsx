@@ -3,13 +3,17 @@ import { getTranslations } from "next-intl/server";
 import { getCurrentCreator } from "@/lib/session";
 import { getCreatorDashboard } from "@/lib/streamers";
 import { formatCount } from "@/lib/format";
+import { CreatorFacet } from "@/components/CreatorFacet";
+import { isCreatorType, ALL_CATEGORIES } from "@/lib/creatorTaxonomy";
+import { SettingsButton } from "./SettingsButton";
 import { MochiSettingsForm } from "./MochiSettingsForm";
 import { ItemsManager, type DashboardItem } from "./ItemsManager";
 import { OrdersTable, type DashboardOrder } from "./OrdersTable";
+import { InfoTooltip } from "./InfoTooltip";
 
 function StatTile({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-[16px] border border-line-2 bg-card p-5">
+    <div className="flex flex-col justify-center rounded-[16px] border border-line-2 bg-card p-5">
       <div className="text-[26px] font-extrabold tracking-[-0.02em] text-ink">
         {value}
       </div>
@@ -32,22 +36,41 @@ function Section({
   title,
   subtitle,
   children,
+  divider = true,
+  action,
+  fill = false,
 }: {
   id: string;
   title: string;
-  subtitle: string;
+  subtitle?: string;
   children: ReactNode;
+  // The top rule separates stacked rows; drop it when a section shares a row
+  // with the borderless overview (row 1) so there's no stray half-width line.
+  divider?: boolean;
+  // Optional right-aligned header slot (info tooltip, action button, …).
+  action?: ReactNode;
+  // Make the body grow to fill the column height (equal-height rows).
+  fill?: boolean;
 }) {
   // scroll-mt keeps the section clear of the sticky top bar when jumped to.
   return (
-    <section id={id} className="scroll-mt-24">
-      <header className="mb-5 border-t border-line-2 pt-8">
-        <h2 className="text-[22px] font-extrabold tracking-[-0.02em] text-ink">
-          {title}
-        </h2>
-        <p className="mt-1 max-w-[560px] text-[14px] text-muted">{subtitle}</p>
+    <section id={id} className={`scroll-mt-24 ${fill ? "flex flex-col" : ""}`}>
+      <header className={`mb-5 ${divider ? "border-t border-line-2 pt-8" : ""}`}>
+        <div className="flex items-start justify-between gap-4">
+          <h2 className="text-[22px] font-extrabold tracking-[-0.02em] text-ink">
+            {title}
+          </h2>
+          {action ? <div className="flex-none">{action}</div> : null}
+        </div>
+        {subtitle ? (
+          <p className="mt-1 max-w-[560px] text-[14px] text-muted">{subtitle}</p>
+        ) : null}
       </header>
-      {children}
+      {fill ? (
+        <div className="flex min-h-0 flex-1 flex-col">{children}</div>
+      ) : (
+        children
+      )}
     </section>
   );
 }
@@ -66,6 +89,7 @@ export default async function CreatorDashboardHome() {
   if (!data) return null;
 
   const t = await getTranslations("creatorDashboard");
+  const tax = await getTranslations("creatorTaxonomy");
 
   const issuanceRaw = data.mochiIssuance;
   const issuance = issuanceRaw
@@ -111,66 +135,79 @@ export default async function CreatorDashboardHome() {
 
   return (
     <div className="flex flex-col gap-10">
-      {/* Overview */}
-      <section id="overview" className="scroll-mt-24">
-        <h1 className="text-[28px] font-extrabold tracking-[-0.02em] text-ink">
-          {t("welcome", { name: creator.displayName })}
-        </h1>
-
-        <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-          <StatTile
-            label={t("statSold")}
-            value={formatCount(issuanceRaw?.lifetimeSold ?? 0)}
-          />
-          <StatTile
-            label={t("statGoal")}
-            value={formatCount(issuance?.goalQuantity ?? 0)}
-          />
-          <StatTile
-            label={t("statHolders")}
-            value={formatCount(data._count.mochiHoldings)}
-          />
-          <StatTile
-            label={t("statPendingOrders")}
-            value={formatCount(pendingOrders)}
-          />
-          <StatTile
-            label={t("statItems")}
-            value={formatCount(data.marketplaceItems.length)}
-          />
-        </div>
-
-        {issuance ? (
-          <div className="mt-4 rounded-[16px] border border-line-2 bg-card p-5">
-            <div className="mb-2 flex items-center justify-between text-[13px] font-semibold text-muted-2">
-              <span>{t("statGoal")}</span>
-              <span>{t("goalProgress", { percent })}</span>
-            </div>
-            <div className="h-3 w-full overflow-hidden rounded-full bg-panel">
-              <div
-                className="h-full rounded-full bg-coral"
-                style={{ width: `${Math.min(percent, 100)}%` }}
+      {/* Row 1 — overview + mochi issuance. Columns stretch to equal height; the
+          overview's three blocks each grow to fill a third, so there's no gap. */}
+      <div className="grid grid-cols-1 gap-10 xl:grid-cols-[1fr_minmax(0,480px)]">
+        <section id="overview" className="flex scroll-mt-24 flex-col">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h1 className="text-[34px] font-extrabold tracking-[-0.02em] text-ink sm:text-[38px]">
+                {t("welcome", { name: creator.displayName })}
+              </h1>
+              <CreatorFacet
+                variant="text"
+                className="mt-1.5"
+                typeLabel={
+                  creator.creatorType && isCreatorType(creator.creatorType)
+                    ? tax(`types.${creator.creatorType}`)
+                    : null
+                }
+                categoryLabel={
+                  ALL_CATEGORIES.includes(creator.category)
+                    ? tax(`categories.${creator.category}`)
+                    : creator.category
+                }
               />
             </div>
+            <SettingsButton label={t("settings.button")} />
           </div>
-        ) : null}
-      </section>
 
-      {/* Narrow mochi column + wide market-items column, side by side on wide screens. */}
-      <div className="grid grid-cols-1 gap-10 xl:grid-cols-[minmax(0,440px)_1fr]">
-        <Section
-          id="mochi"
-          title={t("mochi.title")}
-          subtitle={t("mochi.subtitle")}
-        >
-          <div className="flex flex-col gap-4">
-            <MochiSettingsForm issuance={issuance} />
+          {/* Stats / progress / summary each flex-1 → equal thirds of the column. */}
+          <div className="mt-6 flex flex-1 flex-col gap-4">
+            <div className="grid flex-1 auto-rows-fr grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+              <StatTile
+                label={t("statSold")}
+                value={formatCount(issuanceRaw?.lifetimeSold ?? 0)}
+              />
+              <StatTile
+                label={t("statGoal")}
+                value={formatCount(issuance?.goalQuantity ?? 0)}
+              />
+              <StatTile
+                label={t("statHolders")}
+                value={formatCount(data._count.mochiHoldings)}
+              />
+              <StatTile
+                label={t("statPendingOrders")}
+                value={formatCount(pendingOrders)}
+              />
+              <StatTile
+                label={t("statItems")}
+                value={formatCount(data.marketplaceItems.length)}
+              />
+            </div>
+
             {issuance ? (
-              <div className="rounded-[16px] border border-line-2 bg-card p-5">
+              <div className="flex flex-1 flex-col justify-center rounded-[16px] border border-line-2 bg-card p-5">
+                <div className="mb-2 flex items-center justify-between text-[13px] font-semibold text-muted-2">
+                  <span>{t("statGoal")}</span>
+                  <span>{t("goalProgress", { percent })}</span>
+                </div>
+                <div className="h-3 w-full overflow-hidden rounded-full bg-panel">
+                  <div
+                    className="h-full rounded-full bg-coral"
+                    style={{ width: `${Math.min(percent, 100)}%` }}
+                  />
+                </div>
+              </div>
+            ) : null}
+
+            {issuance ? (
+              <div className="flex flex-1 flex-col rounded-[16px] border border-line-2 bg-card p-5">
                 <h3 className="mb-3 text-[15px] font-bold text-ink">
                   {t("mochi.summaryTitle")}
                 </h3>
-                <dl className="flex flex-col gap-2.5 text-[14px]">
+                <dl className="flex flex-1 flex-col justify-between gap-2.5 text-[14px]">
                   <SummaryRow
                     label={t("mochi.summaryPrice")}
                     value={`${issuance.pricePerMochiKrw.toLocaleString("ko-KR")}원`}
@@ -193,25 +230,49 @@ export default async function CreatorDashboardHome() {
               </div>
             ) : null}
           </div>
-        </Section>
+        </section>
 
         <Section
-          id="items"
-          title={t("items.title")}
-          subtitle={t("items.subtitle")}
+          id="mochi"
+          title={t("mochi.title")}
+          divider={false}
+          fill
+          action={
+            <InfoTooltip
+              label={t("helpLabel")}
+              items={[
+                t("mochi.subtitle"),
+                t("mochi.twoActions"),
+                t("mochi.priceOnlyUpHint"),
+                t("mochi.activeOn"),
+              ]}
+            />
+          }
         >
-          <ItemsManager items={items} creatorType={creator.creatorType} />
+          <MochiSettingsForm issuance={issuance} />
         </Section>
       </div>
 
-      {/* Orders is a wide table — give it the full frame. */}
-      <Section
-        id="orders"
-        title={t("orders.title")}
-        subtitle={t("orders.subtitle")}
-      >
-        <OrdersTable orders={orders} />
-      </Section>
+      {/* Row 2 — orders + market items. Market items get the wider column
+          (more room for suggestions + item cards) than the orders table. */}
+      <div className="grid grid-cols-1 gap-10 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)] xl:items-start">
+        <Section
+          id="orders"
+          title={t("orders.title")}
+          action={
+            <InfoTooltip
+              label={t("helpLabel")}
+              items={[t("orders.subtitle")]}
+            />
+          }
+        >
+          <OrdersTable orders={orders} />
+        </Section>
+
+        {/* ItemsManager renders its own section header so the "새 아이템" button
+            can sit at the header's right (it owns the create-form state). */}
+        <ItemsManager items={items} creatorType={creator.creatorType} />
+      </div>
     </div>
   );
 }

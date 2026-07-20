@@ -1,9 +1,9 @@
 # motoo — Deployment
 
-_Last updated: 2026-07-19_
+_Last updated: 2026-07-20_
 
-**Target:** Vercel (app, region `icn1` Seoul) + Supabase Pro (Postgres, region Seoul).
-Auto-deploy on push to `main`, preview deploys per PR.
+**Live at [themotoo.com](https://themotoo.com).** Vercel (app) + Supabase Pro
+(Postgres, Seoul). Auto-deploy on push to `main`, preview deploys per PR.
 
 > No secrets live in this repo. Connection strings, DB password, and `AUTH_SECRET`
 > live only in `.env` / `.env.production.local` (both gitignored) locally and in
@@ -17,8 +17,10 @@ Auto-deploy on push to `main`, preview deploys per PR.
 | Supabase project (Seoul, Data API off) | ✅ created — ref `nrfhwhefabahsfzuyxqu` |
 | Push code to GitHub `junnwest/motoo` | ✅ done (main, via HTTPS remote) |
 | Schema push + seed to Supabase | ✅ done 2026-07-19 (via `.env.production.local` DIRECT_URL) |
-| Vercel project + env vars + deploy | ⏳ in progress — import `motoo`, paste `.env.production.local` |
-| Verify deployed site | ⏳ pending |
+| Vercel project + env vars + deploy | ✅ done 2026-07-20 (project `motoo`, auto-deploy on `main`) |
+| Custom domain `themotoo.com` | ✅ done — Squarespace DNS → Vercel (A `76.76.21.21` + CNAME `www`), Let's Encrypt TLS; **www is primary**, apex 308-redirects |
+| Production OAuth callbacks | ✅ Google + Naver added for `themotoo.com` |
+| Verify deployed site | ✅ `/explore` + `/s/[handle]` render 200 against Supabase, no console errors |
 
 > **Note (Hobby plan):** function-region selection via `vercel.json` (`icn1`) is a Pro
 > feature — on Hobby it's likely ignored, so functions run in Vercel's default US region

@@ -10,6 +10,7 @@ import { ItemThumbnail } from "@/components/ItemThumbnail";
 import { formatCount } from "@/lib/format";
 import { suggestionsForType } from "@/lib/itemSuggestions";
 import { THUMBNAIL_GROUPS } from "@/lib/itemThumbnails";
+import { InfoTooltip } from "./InfoTooltip";
 import { upsertItem, deleteItem } from "./actions";
 
 /** Seed values for a new item, e.g. from a suggestion chip. */
@@ -72,14 +73,30 @@ export function ItemsManager({
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <div>
-        <Button type="button" variant="dark" onClick={() => openCreate(null)}>
+    <section id="items" className="scroll-mt-24">
+      {/* Header mirrors the Section component (border-t divider + title) so it
+          lines up with the orders column; the "새 아이템" button sits at the right. */}
+      <header className="mb-5 flex items-start justify-between gap-4 border-t border-line-2 pt-8">
+        <div>
+          <h2 className="text-[22px] font-extrabold tracking-[-0.02em] text-ink">
+            {t("items.title")}
+          </h2>
+          <p className="mt-1 max-w-[560px] text-[14px] text-muted">
+            {t("items.subtitle")}
+          </p>
+        </div>
+        <Button
+          type="button"
+          variant="dark"
+          onClick={() => openCreate(null)}
+          className="flex-none"
+        >
           {t("items.addNew")}
         </Button>
-      </div>
+      </header>
 
-      <SuggestionPanel creatorType={creatorType} onPick={openCreate} />
+      <div className="flex flex-col gap-4">
+        <SuggestionPanel creatorType={creatorType} onPick={openCreate} />
 
       {draft ? (
         <ItemForm
@@ -100,7 +117,7 @@ export function ItemsManager({
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {items.map((item) =>
           editingId === item.id ? (
-            <div key={item.id} className="sm:col-span-2">
+            <div key={item.id} className="col-span-full">
               <ItemForm
                 item={item}
                 onClose={() => setEditingId(null)}
@@ -118,8 +135,9 @@ export function ItemsManager({
             />
           ),
         )}
+        </div>
       </div>
-    </div>
+    </section>
   );
 }
 
@@ -141,12 +159,15 @@ function SuggestionPanel({
 
   return (
     <div className="rounded-[16px] border border-line-2 bg-card p-5">
-      <h3 className="text-[15px] font-bold text-ink">
-        {t("items.suggestions.label")}
-      </h3>
-      <p className="mt-1 text-[13px] text-muted">
-        {t("items.suggestions.hint")}
-      </p>
+      <div className="flex items-center justify-between gap-3">
+        <h3 className="text-[15px] font-bold text-ink">
+          {t("items.suggestions.label")}
+        </h3>
+        <InfoTooltip
+          label={t("helpLabel")}
+          items={[t("items.suggestions.hint")]}
+        />
+      </div>
       <div className="mt-4 flex flex-col gap-4">
         {groups.map((group) => (
           <div key={group.key}>

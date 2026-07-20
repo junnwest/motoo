@@ -449,7 +449,28 @@
     "navItems": "마켓 아이템",
     "navOrders": "주문",
     "viewPublic": "공개 페이지 보기 ↗",
-    "welcome": "{name} 님, 안녕하세요",
+    "welcome": "{name}의 대시보드",
+    "helpLabel": "도움말",
+    "settings": {
+      "title": "설정",
+      "subtitle": "공개 프로필 정보를 관리하세요.",
+      "button": "설정",
+      "back": "대시보드로 돌아가기",
+      "sectionLinks": "플랫폼 링크",
+      "handleReadonly": "스튜디오 주소(@아이디)는 변경할 수 없어요.",
+      "linkPlaceholder": "https://...",
+      "save": "저장",
+      "saving": "저장 중…",
+      "saved": "저장했어요",
+      "links": {
+        "chzzk": "CHZZK",
+        "soop": "SOOP",
+        "youtube": "YouTube",
+        "twitch": "Twitch",
+        "discord": "Discord",
+        "fanCafe": "팬카페"
+      }
+    },
     "statSold": "판매된 모찌",
     "statGoal": "발행 목표",
     "statHolders": "모찌 보유 팬",
@@ -460,7 +481,7 @@
     "setupMochi": "모찌 발행 설정하기 →",
     "saveError": "저장하지 못했어요. 입력값을 확인해 주세요.",
     "mochi": {
-      "title": "모찌 발행 설정",
+      "title": "모찌 추가 발행",
       "subtitle": "모찌 1개의 가격과 발행 목표 수량을 정하세요. 목표는 넘겨도 괜찮은 소프트 목표예요.",
       "price": "모찌 1개 가격 (원)",
       "goal": "발행 목표 수량",

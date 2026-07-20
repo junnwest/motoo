@@ -1,10 +1,33 @@
 # motoo — Progress Tracker
 
-_Last updated: 2026-07-19_
+_Last updated: 2026-07-20_
 
 Living status of the build. Update the checkboxes as work lands. See
 [`DECISIONS.md`](./DECISIONS.md) for why things are the way they are and
 [`DEPLOYMENT.md`](./DEPLOYMENT.md) for infra state.
+
+## Recent — 2026-07-20 (Studio dashboard redesign + creator settings · deployed live)
+
+- [x] **Single-view Studio dashboard**: sidebar removed (`DashboardNav` deleted); the
+  dashboard is one scroll in a 2×2 grid — **overview + 모찌 추가 발행** (row 1), **주문 +
+  마켓 아이템** (row 2). Columns are balanced to equal height (the overview's stats/progress/
+  summary each fill a third; the mochi form fills its column); market items get the wider
+  row-2 column, the orders table is compacted (stacked action buttons) so it fits.
+- [x] **Guidance moved into ⓘ info tooltips**: the 모찌 추가 발행 (renamed from 모찌 발행 설정),
+  주문, and 추천 아이템 headers each show an info icon on hover/focus instead of inline
+  subtitle/hint text. Shared `InfoTooltip` + `creatorDashboard.helpLabel`.
+- [x] **Creator taxonomy now displayed**: type · category shown under the Studio greeting and
+  as chips on the public profile (`/s/[handle]`). New shared `CreatorFacet` component
+  (`chips` + `text` variants), labels from `creatorTaxonomy.*`.
+- [x] **Creator profile Settings**: new `/studio/settings` page + `updateStreamerProfile`
+  server action (display name, bio, type→category dependent dropdown, 6 platform links;
+  handle read-only). Entry is a gear **설정** button on the dashboard header — deliberately
+  **not** in the navbar (chrome stays consistent across Studio pages). Save round-trip +
+  profile revalidation verified.
+- [x] **Marketplace item thumbnails/fulfillment/suggestions header polish**: 새 아이템 button
+  moved into the 마켓 아이템 section header (right side); market-item cards render 2-up.
+- [x] Verified: `tsc` clean, lint clean (changed files), `check:vocab` clean, `pnpm test`
+  11/11, browser-checked the dashboard, settings save, and profile facet on the live dev server.
 
 ## Recent — 2026-07-19 (marketplace items: suggestions + thumbnails + fulfillment · Supabase live)
 
@@ -57,7 +80,7 @@ Living status of the build. Update the checkboxes as work lands. See
 
 1. **Phase 2 mochi-marketplace** ✅ — creator issuance + Studio + user buy/spend, verified locally.
 2. **Phase 4 accounts** ✅ — auth-aware app, fan onboarding (본인인증 gate), and the **additive creator model** (a user who *also* owns a Studio). See below.
-3. **Deployment** (in progress) — Supabase (Seoul) **initialized** (schema + seed live); remaining: import the Vercel `motoo` project (icn1) + set env vars + first deploy.
+3. **Deployment** ✅ — **live at [themotoo.com](https://themotoo.com)** (Vercel + Supabase Seoul). Custom domain wired (Squarespace DNS → Vercel), OAuth callbacks set, auto-deploy on push to `main`.
 4. **Next** — `/explore` as the real consumer home (still the Phase-1 trust-ranking grid); real PG + real 본인인증 (both need a business registration + contract).
 
 ---
@@ -90,8 +113,10 @@ Living status of the build. Update the checkboxes as work lands. See
 - [x] Supabase project created (Seoul, Data API off) — ref `nrfhwhefabahsfzuyxqu`
 - [x] Code pushed to GitHub `junnwest/motoo` (main)
 - [x] Schema pushed + seeded to Supabase (2026-07-19) — 10 streamers / 63 backers / 40 items / 10 holdings / 5 orders
-- [ ] Vercel project imported + env vars set + first deploy _(import screen reached; env vars from `.env.production.local`)_
-- [ ] Verify deployed site (landing/explore/profile render, DB connected)
+- [x] Vercel project imported + env vars set + first deploy (2026-07-20)
+- [x] Verify deployed site — `/explore` + `/s/[handle]` render 200 against Supabase, no console errors
+- [x] Custom domain **themotoo.com** (Squarespace DNS → Vercel A/CNAME, Let's Encrypt TLS); www primary, apex redirects
+- [x] Production OAuth callbacks added (Google + Naver)
 
 See [`DEPLOYMENT.md`](./DEPLOYMENT.md) for the exact steps and env-var list.
 

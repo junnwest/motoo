@@ -3,7 +3,6 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { getCurrentCreator } from "@/lib/session";
-import { DashboardNav } from "./DashboardNav";
 
 export default async function CreatorDashboardLayout({
   children,
@@ -44,18 +43,8 @@ export default async function CreatorDashboardLayout({
         </div>
       </header>
 
-      {/* Two-column body */}
-      <div className="mx-auto grid max-w-[1680px] grid-cols-1 gap-8 px-6 py-10 md:grid-cols-[200px_1fr] lg:px-10">
-        <aside className="md:sticky md:top-10 md:self-start">
-          <DashboardNav
-            labels={{
-              home: t("navHome"),
-              mochi: t("navMochi"),
-              items: t("navItems"),
-              orders: t("navOrders"),
-            }}
-          />
-        </aside>
+      {/* Single-view body — no sidebar; the dashboard is one scroll. */}
+      <div className="mx-auto max-w-[1680px] px-6 py-10 lg:px-10">
         <main className="min-w-0">{children}</main>
       </div>
     </div>

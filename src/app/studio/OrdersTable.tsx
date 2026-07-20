@@ -50,16 +50,16 @@ export function OrdersTable({ orders }: { orders: DashboardOrder[] }) {
 
   return (
     <div className="overflow-x-auto rounded-[16px] border border-line-2 bg-card">
-      <table className="w-full min-w-[720px] border-collapse text-left">
+      <table className="w-full min-w-[480px] border-collapse text-left">
         <thead>
           <tr className="border-b border-line text-[13px] text-muted">
-            <th className="px-4 py-3 font-semibold">{t("orders.colItem")}</th>
-            <th className="px-4 py-3 font-semibold">{t("orders.colFan")}</th>
-            <th className="px-4 py-3 font-semibold">{t("orders.colMochi")}</th>
-            <th className="px-4 py-3 font-semibold">{t("orders.colNote")}</th>
-            <th className="px-4 py-3 font-semibold">{t("orders.colStatus")}</th>
-            <th className="px-4 py-3 font-semibold">{t("orders.colDate")}</th>
-            <th className="px-4 py-3" />
+            <th className="px-3 py-3 font-semibold">{t("orders.colItem")}</th>
+            <th className="px-3 py-3 font-semibold">{t("orders.colFan")}</th>
+            <th className="px-3 py-3 font-semibold">{t("orders.colMochi")}</th>
+            <th className="px-3 py-3 font-semibold">{t("orders.colNote")}</th>
+            <th className="px-3 py-3 font-semibold">{t("orders.colStatus")}</th>
+            <th className="px-3 py-3 font-semibold">{t("orders.colDate")}</th>
+            <th className="px-3 py-3" />
           </tr>
         </thead>
         <tbody>
@@ -86,32 +86,32 @@ function OrderRow({ order }: { order: DashboardOrder }) {
 
   return (
     <tr className="border-b border-line last:border-b-0 align-top">
-      <td className="px-4 py-3 text-[14px] font-semibold text-ink">
+      <td className="px-3 py-3 text-[14px] font-semibold text-ink">
         {order.itemTitle}
       </td>
-      <td className="px-4 py-3 text-[14px] text-body">{order.fan}</td>
-      <td className="px-4 py-3 text-[14px] text-body">
+      <td className="px-3 py-3 text-[14px] text-body">{order.fan}</td>
+      <td className="px-3 py-3 text-[14px] text-body">
         <span className="flex items-center gap-1.5">
           <Mochi width={16} height={12} />
           {formatCount(order.mochiSpent)}
         </span>
       </td>
-      <td className="max-w-[220px] px-4 py-3 text-[13px] text-muted">
+      <td className="max-w-[140px] px-3 py-3 text-[13px] text-muted">
         {order.note || "—"}
       </td>
-      <td className="px-4 py-3">
+      <td className="px-3 py-3">
         <span
           className={`inline-block rounded-full px-2.5 py-0.5 text-[12px] font-semibold ${statusChipClass[order.status]}`}
         >
           {t(`orders.status.${order.status}`)}
         </span>
       </td>
-      <td className="whitespace-nowrap px-4 py-3 text-[13px] text-muted">
+      <td className="whitespace-nowrap px-3 py-3 text-[13px] text-muted">
         {formatDate(order.createdAt)}
       </td>
-      <td className="px-4 py-3">
+      <td className="px-3 py-3">
         {order.status === "pending" ? (
-          <div className="flex justify-end gap-2 whitespace-nowrap">
+          <div className="flex flex-col items-stretch gap-1.5 whitespace-nowrap">
             <Button
               type="button"
               variant="primary"

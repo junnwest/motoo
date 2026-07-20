@@ -175,9 +175,12 @@ export function MochiIssuancePicker({
         </div>
       ) : null}
 
-      <p className="mt-3 text-[13px] text-muted">
-        {currentPrice !== null ? t("priceOnlyUpHint") : t("floorHint")}
-      </p>
+      {/* Floor hint only during first-time setup; when editing (currentPrice
+          set, i.e. the Studio) the ratchet guidance lives in the section's info
+          tooltip instead, so the form stays clean. */}
+      {currentPrice === null ? (
+        <p className="mt-3 text-[13px] text-muted">{t("floorHint")}</p>
+      ) : null}
 
       {raised ? (
         <p className="mt-2 rounded-[10px] bg-coral-chip px-3 py-2 text-[13px] font-medium text-coral-deep">

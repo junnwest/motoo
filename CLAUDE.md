@@ -44,10 +44,11 @@ Google/Naver OAuth are live in dev (`.env`, gitignored); Kakao + real 본인인�
 need a business registration (`사업자등록`) — mocks stand in until then.
 
 ## Deploy
-Vercel (region `icn1`) + Supabase Pro Postgres (Seoul, project `nrfhwhefabahsfzuyxqu`).
-Secrets (DB password, `AUTH_SECRET`, connection strings) are **not in the repo** — they
-live in `.env` (gitignored) and Vercel env vars. See docs/DEPLOYMENT.md for the current
-blockers and the env-var list.
+**Live at [themotoo.com](https://themotoo.com)** — Vercel + Supabase Pro Postgres (Seoul,
+project `nrfhwhefabahsfzuyxqu`); auto-deploys on push to `main`. Secrets (DB password,
+`AUTH_SECRET`, connection strings) are **not in the repo** — they live in `.env` /
+`.env.production.local` (both gitignored) and Vercel env vars. See docs/DEPLOYMENT.md for
+the env-var list and the runbook.
 
 ## Stack
 Next.js 16 (App Router) · TypeScript · Tailwind v4 · Prisma 6 + Postgres · next-intl ·

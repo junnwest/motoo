@@ -65,11 +65,9 @@ export function MochiSettingsForm({ issuance }: { issuance: Issuance }) {
   return (
     <form
       onSubmit={onSubmit}
-      className="max-w-[560px] rounded-[20px] border border-line-2 bg-card p-6"
+      className="flex min-h-0 flex-1 flex-col justify-center rounded-[20px] border border-line-2 bg-card p-6"
     >
       <div className="flex flex-col gap-5">
-        <p className="text-[13px] text-muted">{t("mochi.twoActions")}</p>
-
         <MochiIssuancePicker
           minPrice={currentPrice ?? MOCHI_MIN_PRICE}
           currentPrice={currentPrice}
@@ -79,20 +77,15 @@ export function MochiSettingsForm({ issuance }: { issuance: Issuance }) {
           onChange={onMochiChange}
         />
 
-        <label className="flex cursor-pointer items-start gap-3">
+        <label className="flex cursor-pointer items-center gap-3">
           <input
             type="checkbox"
             checked={active}
             onChange={(e) => setActive(e.target.checked)}
-            className="mt-0.5 h-5 w-5 shrink-0 rounded-[6px] border border-line-3 accent-coral"
+            className="h-5 w-5 shrink-0 rounded-[6px] border border-line-3 accent-coral"
           />
-          <span>
-            <span className="block text-[15px] font-semibold text-ink">
-              {t("mochi.active")}
-            </span>
-            <span className="mt-0.5 block text-[13px] text-muted">
-              {active ? t("mochi.activeOn") : t("mochi.activeOff")}
-            </span>
+          <span className="text-[15px] font-semibold text-ink">
+            {t("mochi.active")}
           </span>
         </label>
 

@@ -3,6 +3,33 @@
 Why the project is the way it is. Newest first. Keep entries short: decision,
 rationale, and any constraint it creates.
 
+## 2026-07-20 — Studio settings entry lives in content, not the navbar
+The creator-profile settings page (`/studio/settings`) is reached via a gear button in
+the **dashboard header**, not the Studio top bar.
+- **Rationale**: the navbar/top bar should stay consistent across every Studio page (chrome,
+  not content). Settings edit the *creator profile* specifically, so the entry point belongs
+  with the dashboard content. Keeps navigation predictable.
+- **Constraint**: `handle` is read-only in settings — it's the public `/s/[handle]` URL, so
+  changing it would break links; edited fields are display name, bio, type→category, and the
+  six platform links, guarded by `updateStreamerProfile` (auth-scoped, category-must-match-type).
+
+## 2026-07-20 — Section guidance as info tooltips, not inline subtitles
+Studio section headers (모찌 추가 발행, 주문, 추천 아이템) put helper text behind an ⓘ icon
+(hover/focus) instead of an always-on subtitle/hint line.
+- **Rationale**: the forms read cleaner without paragraphs of guidance; the info is one hover
+  away when needed. One shared `InfoTooltip` + a shared `creatorDashboard.helpLabel`.
+- **Note**: the ratchet *warning* (raising the price discards leftover supply) stays inline —
+  it's a live consequence of an action, not general help. 모찌 발행 설정 was renamed
+  **모찌 추가 발행** (it issues *more* mochi; the old name implied first-time setup).
+
+## 2026-07-20 — Single-view Studio dashboard (no sidebar)
+The Studio is one scroll in a 2×2 grid (overview + issuance; orders + market items), columns
+balanced to equal height. The scrollspy sidebar (`DashboardNav`) was removed.
+- **Rationale**: everything already fit one page; the sidebar was navigation for content that's
+  all visible at once. Removing it widens the content and simplifies the layout. Market items
+  get the wider row-2 column (richest cards); the orders table compacts (stacked row actions)
+  to fit the narrower column.
+
 ## 2026-07-19 — Marketplace item fulfillment modes (instant vs request)
 A marketplace item declares how a redemption settles: `FulfillmentMode { instant, request }`
 on `MarketplaceItem` (default `request`).
