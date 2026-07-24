@@ -3,6 +3,33 @@
 Why the project is the way it is. Newest first. Keep entries short: decision,
 rationale, and any constraint it creates.
 
+## 2026-07-24 — Studio on its own subdomain (studio.themotoo.com)
+The creator console is split onto `studio.themotoo.com`; `themotoo.com` (www) stays the
+consumer app. **One codebase, one Vercel project** — the split is host-based routing in
+`src/proxy.ts`, not a second app.
+- **How**: any host starting with `studio.` is the Studio host. There, clean URLs
+  (`/` = dashboard, `/settings`) are **rewritten** into the internal `/studio` route group,
+  and consumer/auth paths **308 to the apex**. On the apex, `/studio*` 308s to the subdomain.
+  The creator gate runs in middleware off the JWT (`user.creator`) — no DB at the edge.
+- **Shared login**: the session cookie is set on `.themotoo.com` (`AUTH_COOKIE_DOMAIN`, prod
+  only) so one login works on both hosts. Only the session token gets the shared domain;
+  CSRF/PKCE cookies (`__Host-` prefixed) forbid `Domain` and stay on the apex, where **all
+  auth flows live** (login/onboarding/become-creator never move to the studio host).
+- **Rationale**: a creator console and a consumer app are different products with different
+  chrome; separate hosts make that legible and let the console evolve independently. One
+  codebase keeps auth/DB/components shared (a creator is also a fan).
+- **Constraints / gotchas**:
+  - Studio pages are an explicit allowlist in `proxy.ts` (`/`, `/settings`) — **extend it when
+    adding Studio routes**, or they'll be treated as consumer pages and bounce to the apex.
+  - In-Studio links are root-relative (`/`, `/settings`); the apex `/studio*` rule forwards
+    any legacy `/studio` link in one hop, so those weren't all rewritten.
+  - The split only activates on `*.themotoo.com` / `*.localhost`; Vercel `*.vercel.app`
+    previews keep the single-host behavior (serve `/studio` inline).
+  - **Dev**: use `studio.localhost:PORT` (resolves to loopback automatically). Next's dev
+    server relativizes a redirect whose target equals its `localhost` binding, which would
+    loop the studio→apex consumer hop — so in dev that one hop serves inline instead of
+    redirecting (prod redirects normally; its origins genuinely differ).
+
 ## 2026-07-20 — Studio settings entry lives in content, not the navbar
 The creator-profile settings page (`/studio/settings`) is reached via a gear button in
 the **dashboard header**, not the Studio top bar.

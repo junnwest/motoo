@@ -34,8 +34,30 @@ if (process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET) {
   );
 }
 
+// Share the session cookie across subdomains (themotoo.com ↔ studio.themotoo.com)
+// so one login works on both. Set AUTH_COOKIE_DOMAIN=.themotoo.com in production;
+// leave it unset in dev/preview so cookies stay host-only. Only the session token
+// needs the shared domain — CSRF/PKCE cookies (`__Host-` prefixed) forbid Domain
+// and stay put on the apex, where all auth flows happen.
+const cookieDomain = process.env.AUTH_COOKIE_DOMAIN;
+
 export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
   ...authConfig,
+  ...(cookieDomain
+    ? {
+        cookies: {
+          sessionToken: {
+            options: {
+              domain: cookieDomain,
+              path: "/",
+              httpOnly: true,
+              sameSite: "lax",
+              secure: true,
+            },
+          },
+        },
+      }
+    : {}),
   providers: [
     // Dev-only email + password login against the Backer table.
     Credentials({

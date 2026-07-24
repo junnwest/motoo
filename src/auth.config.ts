@@ -23,6 +23,18 @@ const ONBOARDING_ALLOW = [
   "/signup",
 ];
 
+/**
+ * Is `pathname` reachable by a signed-in-but-not-onboarded user? True for the
+ * onboarding page itself and the pages it links to. Shared by the `authorized`
+ * callback below and the middleware in src/proxy.ts so the gate has one source
+ * of truth.
+ */
+export function isOnboardingExempt(pathname: string): boolean {
+  return ONBOARDING_ALLOW.some(
+    (p) => pathname === p || pathname.startsWith(`${p}/`),
+  );
+}
+
 export const authConfig = {
   session: { strategy: "jwt" },
   trustHost: true,
@@ -44,11 +56,7 @@ export const authConfig = {
       if (user.onboarded) return true;
       if (user.role === "admin") return true; // staff
 
-      const { pathname } = request.nextUrl;
-      const allowed = ONBOARDING_ALLOW.some(
-        (p) => pathname === p || pathname.startsWith(`${p}/`),
-      );
-      if (allowed) return true;
+      if (isOnboardingExempt(request.nextUrl.pathname)) return true;
       return NextResponse.redirect(new URL("/onboarding", request.nextUrl));
     },
   },

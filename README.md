@@ -18,7 +18,7 @@ spec and [`design-handoff/`](./design-handoff/) for the visual system.
 - **[docs/DECISIONS.md](./docs/DECISIONS.md)** — decision log with rationale
 - **[docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md)** — deploy runbook + infra state (Vercel + Supabase Seoul)
 
-**Live at [themotoo.com](https://themotoo.com)** (Vercel + Supabase Seoul; auto-deploys on push to `main`).
+**Live at [themotoo.com](https://themotoo.com)** (consumer app) + **[studio.themotoo.com](https://studio.themotoo.com)** (creator console) — same Vercel project + codebase, host-split in `src/proxy.ts` with a session cookie shared across `.themotoo.com`. Supabase Seoul; auto-deploys on push to `main`.
 
 **Current direction:** the **mochi-marketplace** is built and deployed — creators
 issue their own mochi, users buy it and spend it in each creator's marketplace. Accounts
@@ -36,8 +36,8 @@ stay in the tree, dormant.
 | `/me/mochi` | "My mochi": per-creator holdings + order/redemption history |
 | `/login` · `/signup` | Real auth — split-layout, social-first (Kakao/Naver/Google) + email; password policy + confirm |
 | `/onboarding` | New-user gate: nickname, unique `@handle`, **본인인증** (age/identity), terms |
-| `/studio` | The **Studio** (creator console): single-view dashboard (no sidebar) — overview + mochi issuance (ratcheting tiers) + orders + market items, with per-section ⓘ help |
-| `/studio/settings` | Creator-profile settings — display name, bio, type→category, platform links (handle read-only) |
+| `studio.themotoo.com/` | The **Studio** (creator console, own subdomain): single-view dashboard (no sidebar) — overview + mochi issuance (ratcheting tiers) + orders + market items, with per-section ⓘ help. Internally the `/studio` route group; apex `/studio` 308s here. |
+| `studio.themotoo.com/settings` | Creator-profile settings — display name, bio, type→category, platform links (handle read-only) |
 | `/creators` → `/api/become-creator` | Creator pitch → become-a-creator (add-on to a user account) |
 
 **Account model:** a creator is a `Backer` (the account/user table) that owns a `Streamer`
