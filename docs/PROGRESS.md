@@ -6,6 +6,32 @@ Living status of the build. Update the checkboxes as work lands. See
 [`DECISIONS.md`](./DECISIONS.md) for why things are the way they are and
 [`DEPLOYMENT.md`](./DEPLOYMENT.md) for infra state.
 
+## Recent — 2026-07-24 (unified navbar + signup role modal + landing/design polish · deployed live)
+
+- [x] **Unified navbar**: one bar for every page/section/user type — brand left, a
+  single **avatar** (initials monogram) right; every link + logout live in a
+  click-to-open dropdown (`UserMenu`). `Nav` is auth- **and** host-aware: consumer
+  items on the apex, Studio items (설정/공개 프로필) on `studio.*`. The Studio dropped
+  its custom top bar and uses the same `Nav`.
+- [x] **Signup role modal**: the two forked CTAs (회원가입 / 크리에이터 시작하기) collapse into
+  a single **회원가입** button that opens a 후원자 / 크리에이터 chooser modal (`SignupModal`,
+  portal-rendered so the nav's `backdrop-blur` can't trap it; `SignupButton` trigger).
+  후원자 → `/signup`, 크리에이터 → `/api/become-creator`. **Login stays unified** (additive
+  accounts). Used in the nav + login page.
+- [x] **Landing**: two role CTAs at first glance (후원자로 시작하기 / 크리에이터로 시작하기),
+  unified login link, **hero search removed**, and **all 둘러보기 links removed from the
+  body** (chips, "전체 둘러보기", final-CTA explore button). Footer explore links kept
+  (shared chrome).
+- [x] **Design-review pass** (`/design-review`): FINDING-001 — `Mochi` hardcoded inline
+  `position:relative`, overriding the `absolute` class so decorative blobs rendered *on
+  top of* hero text; removed it (fixes decorations site-wide). FINDING-002/003 — benefit +
+  creator-tool emoji → brand-colored line icons (new `src/components/ui/Icons.tsx`).
+  FINDING-004 — empty-state 🍡 dango → brand Mochi glyph. Hero floating mochis → soft
+  static circles (matching the final CTA). See DECISIONS 2026-07-24.
+- [x] Verified: `tsc`/lint/`check:vocab` clean, 11/11 money tests, browser-checked every
+  surface, and **verified live on www.themotoo.com** (new hero/CTAs, line icons, signup
+  modal, studio split intact, no console errors).
+
 ## Recent — 2026-07-24 (Studio split onto studio.themotoo.com)
 
 - [x] **Two-domain routing**: `themotoo.com` = consumer app, `studio.themotoo.com` =

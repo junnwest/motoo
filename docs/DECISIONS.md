@@ -3,6 +3,51 @@
 Why the project is the way it is. Newest first. Keep entries short: decision,
 rationale, and any constraint it creates.
 
+## 2026-07-24 — Unified navbar + avatar dropdown (one bar everywhere)
+Every page/section/user type shares one `Nav`: brand left, a single avatar (initials
+monogram) right, and **every link + logout inside a click-to-open dropdown** (`UserMenu`).
+- **Rationale**: the old nav had a fan/creator `variant` split *and* the Studio ran a
+  separate top bar — inconsistent chrome. One component, one avatar, is how YouTube/Twitch/
+  Patreon work and reads as intentional, not assembled.
+- **Context-aware, not variant-aware**: `Nav` reads the session and the request host, so the
+  dropdown shows consumer items on the apex and Studio items (설정 / 공개 프로필) on `studio.*`.
+  Links are path-relative — the middleware forwards cross-host ones in one hop.
+- **Constraint**: the `variant` prop is gone; all call sites are `<Nav />`. Avatar is a
+  monogram (no image pipeline); `Backer.avatarUrl` still isn't exposed to the session.
+
+## 2026-07-24 — Signup role modal; login stays unified
+A single 회원가입 button opens a **후원자 / 크리에이터 chooser modal** (`SignupModal`) instead of
+forking the CTA into two links. 후원자 → `/signup`, 크리에이터 → `/api/become-creator`.
+- **Rationale**: the login page had two competing prompts; one button + a modal is cleaner
+  and mirrors Toonation's pattern (the reference the owner gave). The landing surfaces the
+  same choice as two inline role buttons "at first glance" (no modal needed there).
+- **Login is NOT split** — accounts are additive (one identity; a creator also owns a Studio),
+  so there's a single login flow. Only signup forks (it's an intent choice, not a separate
+  account). See [[additive-creator-model]] (2026-07-12).
+- **Constraint**: `SignupModal` is **portal-rendered to `document.body`** — the nav's
+  `backdrop-blur` creates a containing block that would otherwise trap the `fixed` overlay.
+
+## 2026-07-24 — Landing funnels to signup, not browse
+The logged-out landing hero leads with the two role CTAs; the **hero search and all 둘러보기
+(/explore) links were removed from the body** (chips, "전체 둘러보기", the final-CTA explore
+button). Footer explore links stay (shared chrome used on logged-in pages too).
+- **Rationale**: owner's direction — a logged-out visitor should sign up, not browse. The
+  landing renders only for logged-out users (signed-in users redirect to `/explore`), so
+  this scopes cleanly to the logged-out experience.
+
+## 2026-07-24 — Design language: line icons over emoji, circles over floating mochis
+Design-review swaps that make the marketing surfaces read hand-crafted, not vibe-coded.
+- **Emoji → line icons**: benefit cards (💌🎁🏅📒) and the creators feature/how-it-works
+  grids (👥✅💸📈🔗🏅📄) now use a shared Feather-style set (`src/components/ui/Icons.tsx`),
+  brand-colored (coral-deep / sage-text) on the existing tinted tiles. Emoji-as-icon was the
+  strongest AI-slop tell.
+- **Hero decorations → soft static circles** (matching the final CTA), replacing floating
+  mochi glyphs. Brand mochi glyphs stay in the mochi-explainer section.
+- **Root-cause fix**: `Mochi` no longer hardcodes inline `position` — it was overriding the
+  `absolute` class and rendering decorations on top of the hero text (fixed site-wide).
+- **Empty states**: 🍡 dango emoji → the real brand Mochi glyph.
+- Conventional glyphs (🔍 search, 🔒 lock, ✓ form-checks) deliberately left as-is.
+
 ## 2026-07-24 — Studio on its own subdomain (studio.themotoo.com)
 The creator console is split onto `studio.themotoo.com`; `themotoo.com` (www) stays the
 consumer app. **One codebase, one Vercel project** — the split is host-based routing in

@@ -34,7 +34,7 @@ stay in the tree, dormant.
 | `/explore` | Creators grid — the consumer home (still the Phase-1 trust ranking; to be reworked) |
 | `/s/[handle]` | Creator profile: **buy mochi** module + **marketplace** (spend mochi on items) |
 | `/me/mochi` | "My mochi": per-creator holdings + order/redemption history |
-| `/login` · `/signup` | Real auth — split-layout, social-first (Kakao/Naver/Google) + email; password policy + confirm |
+| `/login` · `/signup` | Real auth — social-first (Kakao/Naver/Google) + email; password policy + confirm. One **회원가입** button opens a 후원자/크리에이터 role modal (login stays unified) |
 | `/onboarding` | New-user gate: nickname, unique `@handle`, **본인인증** (age/identity), terms |
 | `studio.themotoo.com/` | The **Studio** (creator console, own subdomain): single-view dashboard (no sidebar) — overview + mochi issuance (ratcheting tiers) + orders + market items, with per-section ⓘ help. Internally the `/studio` route group; apex `/studio` 308s here. |
 | `studio.themotoo.com/settings` | Creator-profile settings — display name, bio, type→category, platform links (handle read-only) |
@@ -42,8 +42,9 @@ stay in the tree, dormant.
 
 **Account model:** a creator is a `Backer` (the account/user table) that owns a `Streamer`
 via `Streamer.ownerId`. Creator status = `session.user.creator` (Studio handle or null).
-Signed-in users land on `/explore`; creators get a **스튜디오** nav link. Onboarding is
-redirect-enforced by `src/proxy.ts`.
+Signed-in users land on `/explore`; creators reach the Studio from the **avatar dropdown**
+in the unified nav (one bar for every page/user type; Studio-context items on `studio.*`).
+Onboarding is redirect-enforced by `src/proxy.ts`.
 
 Not built (all need a `사업자등록` + paid contract): real PG (Toss/NICE/PortOne),
 real 본인인증 (NICE/PASS/간편인증), Kakao login. Mocks stand in behind provider abstractions.
