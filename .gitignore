@@ -40,6 +40,9 @@ dev.log
 
 # typescript
 *.tsbuildinfo
+
+# claude code — personal, machine-local settings (permissions etc.)
+.claude/settings.local.json
 next-env.d.ts
 .gstack/
 
