@@ -27,8 +27,12 @@ export function Mochi({
       aria-hidden="true"
       className={className}
       style={{
+        // No hardcoded `position` here: decorative mochis pass `absolute` (+
+        // left/top) via className, and an inline position would override it,
+        // trapping them in normal flow on top of the text. Inline mochis are
+        // unaffected (static == relative with no offsets). Callers can still set
+        // position through the `style` prop (spread below).
         display: "inline-block",
-        position: "relative",
         width,
         height,
         flex: "none",
