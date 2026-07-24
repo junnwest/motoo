@@ -46,23 +46,10 @@ export default async function FanLandingPage() {
 
       {/* Hero */}
       <section className="relative overflow-hidden bg-cream-warm px-6 py-16 text-center sm:px-14 sm:py-[78px]">
-        <Mochi width={64} height={52} float className="absolute left-[8%] top-10" />
-        <Mochi
-          width={46}
-          height={38}
-          float
-          floatDuration={5}
-          floatDelay={0.5}
-          className="absolute right-[12%] top-28"
-        />
-        <Mochi
-          width={38}
-          height={31}
-          float
-          floatDuration={7}
-          floatDelay={0.2}
-          className="absolute bottom-8 left-[16%] hidden sm:block"
-        />
+        {/* Soft decorative circles (same shape as the final CTA), not floating mochis */}
+        <div className="absolute left-[8%] top-10 h-16 w-16 rounded-[46%_46%_48%_48%/52%_52%_48%_48%] bg-coral-soft/45" />
+        <div className="absolute right-[12%] top-28 h-11 w-11 rounded-[46%_46%_48%_48%/52%_52%_48%_48%] bg-white/60" />
+        <div className="absolute bottom-8 left-[16%] hidden h-9 w-9 rounded-[46%_46%_48%_48%/52%_52%_48%_48%] bg-coral-soft/35 sm:block" />
         <div className="relative mx-auto max-w-[720px]">
           <Eyebrow className="mb-[22px]">{t("eyebrow")}</Eyebrow>
           <h1 className="text-[38px] font-extrabold leading-[1.12] tracking-[-0.035em] sm:text-[60px]">
