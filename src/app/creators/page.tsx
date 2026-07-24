@@ -10,6 +10,8 @@ import {
   IconWallet,
   IconTrend,
   IconLink,
+  IconAward,
+  IconDocument,
 } from "@/components/ui/Icons";
 import { Mochi } from "@/components/Mochi";
 import { Avatar } from "@/components/ui/Placeholder";
@@ -139,8 +141,8 @@ export default async function CreatorLandingPage() {
         <div className="grid gap-6 md:grid-cols-3">
           {[
             { n: 1, right: <span className="flex gap-[6px]"><Mochi width={30} height={24} /><Mochi width={30} height={24} /></span> },
-            { n: 2, right: <span className="flex h-9 w-9 items-center justify-center rounded-[11px] bg-coral-chip text-[19px]">🏅</span> },
-            { n: 3, right: <span className="flex h-9 w-9 items-center justify-center rounded-[11px] bg-sage-bg text-[18px]">📄</span> },
+            { n: 2, right: <span className="flex h-9 w-9 items-center justify-center rounded-[11px] bg-coral-chip text-coral-deep"><IconAward width={19} height={19} /></span> },
+            { n: 3, right: <span className="flex h-9 w-9 items-center justify-center rounded-[11px] bg-sage-bg text-sage-text"><IconDocument width={18} height={18} /></span> },
           ].map((s) => (
             <div
               key={s.n}
