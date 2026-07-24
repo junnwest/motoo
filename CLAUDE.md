@@ -7,9 +7,16 @@ thesis is shelved for the demo; schema kept.)
 **Accounts are additive:** everyone is a **user (fan)**; a **creator** is just a user who
 *also owns a Studio* (a `Streamer`). No separate account type, no mode toggle — creator
 status = `session.user.creator` (their Studio handle, or null). Signed-in users land on
-`/explore`; creators reach their **Studio** (`/studio`) via a nav link. New users go
+`/explore`; creators reach their **Studio** via a nav link. New users go
 through `/onboarding` (nickname, unique `@handle`, 본인인증, terms), enforced by
 `src/proxy.ts` (the edge middleware).
+
+**Two domains, one codebase:** `themotoo.com` = consumer app; **`studio.themotoo.com`** =
+creator console (the `/studio` route group, served at the subdomain root). The split is
+host-based routing in `src/proxy.ts`; the session cookie is shared across `.themotoo.com`
+(`AUTH_COOKIE_DOMAIN`, prod only) so one login works on both. Auth/onboarding/become-creator
+all live on the apex. **Adding a Studio route?** Add its path to the `isStudioPage` allowlist
+in `src/proxy.ts` or it'll bounce to the apex. Dev: `studio.localhost:PORT`. See DECISIONS 2026-07-24.
 
 ## Read these first (resume point)
 - **[docs/PROGRESS.md](docs/PROGRESS.md)** — living status: what's done, in progress, next. **Start here.**

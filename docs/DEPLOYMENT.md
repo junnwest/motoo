@@ -2,8 +2,12 @@
 
 _Last updated: 2026-07-20_
 
-**Live at [themotoo.com](https://themotoo.com).** Vercel (app) + Supabase Pro
-(Postgres, Seoul). Auto-deploy on push to `main`, preview deploys per PR.
+**Live at [themotoo.com](https://themotoo.com)** (consumer app) and
+**[studio.themotoo.com](https://studio.themotoo.com)** (creator console). Both are the
+**same** Vercel project + codebase — the split is host-based routing in `src/proxy.ts`
+with a session cookie shared across `.themotoo.com` (see `AUTH_COOKIE_DOMAIN` below and
+DECISIONS 2026-07-24). Supabase Pro (Postgres, Seoul). Auto-deploy on push to `main`,
+preview deploys per PR.
 
 > No secrets live in this repo. Connection strings, DB password, and `AUTH_SECRET`
 > live only in `.env` / `.env.production.local` (both gitignored) locally and in
@@ -19,7 +23,8 @@ _Last updated: 2026-07-20_
 | Schema push + seed to Supabase | ✅ done 2026-07-19 (via `.env.production.local` DIRECT_URL) |
 | Vercel project + env vars + deploy | ✅ done 2026-07-20 (project `motoo`, auto-deploy on `main`) |
 | Custom domain `themotoo.com` | ✅ done — Squarespace DNS → Vercel (A `76.76.21.21` + CNAME `www`), Let's Encrypt TLS; **www is primary**, apex 308-redirects |
-| Production OAuth callbacks | ✅ Google + Naver added for `themotoo.com` |
+| Studio subdomain `studio.themotoo.com` | ✅ done 2026-07-24 — Squarespace `studio` CNAME → `cname.vercel-dns.com`, added on the same Vercel project; serves the creator console (host-split in `src/proxy.ts`) |
+| Production OAuth callbacks | ✅ Google + Naver added for `themotoo.com` (studio host redirects login to the apex — **no** studio callbacks) |
 | Verify deployed site | ✅ `/explore` + `/s/[handle]` render 200 against Supabase, no console errors |
 
 > **Note (Hobby plan):** function-region selection via `vercel.json` (`icn1`) is a Pro
@@ -35,6 +40,7 @@ _Last updated: 2026-07-20_
 | `DIRECT_URL` | Supabase → Connect → ORM/Prisma → **direct** (`:5432`) |
 | `AUTH_SECRET` | `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"` |
 | `AUTH_TRUST_HOST` | `true` |
+| `AUTH_COOKIE_DOMAIN` | `.themotoo.com` (**Production only**, leading dot) — shares the session cookie across `themotoo.com` ↔ `studio.themotoo.com`. **Leave unset** in dev/preview so cookies stay host-only. |
 | `PAYMENT_PROVIDER` | `mock` (real Toss/NICE/PortOne needs a merchant contract) |
 | `VERIFICATION_PROVIDER` | `mock` (real 본인인증 needs a 본인확인기관 contract) |
 | `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` | Google Cloud OAuth client — **set locally, live in dev** |

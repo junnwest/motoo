@@ -1,10 +1,25 @@
 # motoo — Progress Tracker
 
-_Last updated: 2026-07-20_
+_Last updated: 2026-07-24_
 
 Living status of the build. Update the checkboxes as work lands. See
 [`DECISIONS.md`](./DECISIONS.md) for why things are the way they are and
 [`DEPLOYMENT.md`](./DEPLOYMENT.md) for infra state.
+
+## Recent — 2026-07-24 (Studio split onto studio.themotoo.com)
+
+- [x] **Two-domain routing**: `themotoo.com` = consumer app, `studio.themotoo.com` =
+  creator console — one codebase/Vercel project, host-based routing in `src/proxy.ts`.
+  Studio host serves clean URLs (`/` = dashboard, `/settings`) rewritten into the `/studio`
+  route group; consumer/auth paths there 308 to the apex, and apex `/studio*` 308s to the
+  subdomain. Creator gate runs in middleware off the JWT (no edge DB).
+- [x] **Shared session** across subdomains via `AUTH_COOKIE_DOMAIN=.themotoo.com` (prod only;
+  session token gets the domain, CSRF/PKCE cookies stay host-only). Login/onboarding/
+  become-creator all stay on the apex.
+- [x] Infra: `studio` CNAME at Squarespace → Vercel, domain added to the project, env var set.
+- [x] Verified locally on `studio.localhost:3002` — both directions redirect with no loops,
+  dashboard + settings render, apex landing intact; `tsc`/lint/`check:vocab` clean. See
+  DECISIONS 2026-07-24.
 
 ## Recent — 2026-07-20 (Studio dashboard redesign + creator settings · deployed live)
 

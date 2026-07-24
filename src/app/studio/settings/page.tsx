@@ -30,7 +30,7 @@ export default async function StudioSettingsPage() {
   return (
     <div className="mx-auto max-w-[720px]">
       <Link
-        href="/studio"
+        href="/"
         className="text-[13px] font-semibold text-muted hover:text-ink"
       >
         ← {t("settings.back")}
