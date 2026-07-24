@@ -4,6 +4,13 @@ import { Footer } from "@/components/Footer";
 import { SafetyStrip } from "@/components/SafetyStrip";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { ButtonLink } from "@/components/ui/Button";
+import {
+  IconUsers,
+  IconCheckCircle,
+  IconWallet,
+  IconTrend,
+  IconLink,
+} from "@/components/ui/Icons";
 import { Mochi } from "@/components/Mochi";
 import { Avatar } from "@/components/ui/Placeholder";
 import { SampleReportCard, SampleReportBrowser } from "@/components/SampleReport";
@@ -214,15 +221,15 @@ export default async function CreatorLandingPage() {
         </h2>
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
           {[
-            { key: "crm", icon: "👥", bg: "bg-coral-chip" },
-            { key: "perk", icon: "✅", bg: "bg-sage-bg" },
-            { key: "payout", icon: "💸", bg: "bg-coral-chip" },
-            { key: "analytics", icon: "📈", bg: "bg-sage-bg" },
-            { key: "report", icon: "🔗", bg: "bg-coral-chip" },
+            { key: "crm", Icon: IconUsers, tile: "bg-coral-chip text-coral-deep" },
+            { key: "perk", Icon: IconCheckCircle, tile: "bg-sage-bg text-sage-text" },
+            { key: "payout", Icon: IconWallet, tile: "bg-coral-chip text-coral-deep" },
+            { key: "analytics", Icon: IconTrend, tile: "bg-sage-bg text-sage-text" },
+            { key: "report", Icon: IconLink, tile: "bg-coral-chip text-coral-deep" },
           ].map((f) => (
             <div key={f.key} className="rounded-[18px] border border-line-2 bg-card p-6">
-              <div className={`mb-4 flex h-10 w-10 items-center justify-center rounded-[11px] text-[18px] ${f.bg}`}>
-                {f.icon}
+              <div className={`mb-4 flex h-10 w-10 items-center justify-center rounded-[11px] ${f.tile}`}>
+                <f.Icon width={20} height={20} />
               </div>
               <div className="mb-[6px] text-[17px] font-extrabold">
                 {t(`features.${f.key}Title` as never)}
