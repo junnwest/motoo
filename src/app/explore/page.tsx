@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 import { Eyebrow } from "@/components/ui/Eyebrow";
+import { Mochi } from "@/components/Mochi";
 import { StreamerCard } from "@/components/StreamerCard";
 import { ExploreFilters } from "@/components/ExploreFilters";
 import {
@@ -64,7 +65,10 @@ export default async function ExplorePage({
           </div>
         ) : (
           <div className="mt-16 flex flex-col items-center rounded-[24px] border border-dashed border-line-3 bg-cream-warm/50 px-6 py-20 text-center">
-            <div className="mb-3 text-[40px]">🍡</div>
+            <div className="mb-3 flex items-end justify-center gap-1.5">
+              <Mochi width={38} height={31} float />
+              <Mochi width={50} height={41} float floatDelay={0.5} />
+            </div>
             <h2 className="text-[20px] font-extrabold">{t("empty.title")}</h2>
             <p className="mt-2 max-w-[360px] text-[15px] text-body">
               {t("empty.body")}
