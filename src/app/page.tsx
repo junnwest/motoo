@@ -7,6 +7,12 @@ import { Footer } from "@/components/Footer";
 import { SafetyStrip } from "@/components/SafetyStrip";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { ButtonLink } from "@/components/ui/Button";
+import {
+  IconSend,
+  IconGift,
+  IconAward,
+  IconDashboard,
+} from "@/components/ui/Icons";
 import { Mochi } from "@/components/Mochi";
 import { StreamerCard } from "@/components/StreamerCard";
 import { Avatar } from "@/components/ui/Placeholder";
@@ -148,19 +154,35 @@ export default async function FanLandingPage() {
         </h2>
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
           {[
-            { key: "message", icon: "💌", bg: "bg-coral-chip" },
-            { key: "perks", icon: "🎁", bg: "bg-sage-bg" },
-            { key: "badge", icon: "🏅", bg: "bg-coral-chip" },
-            { key: "dashboard", icon: "📒", bg: "bg-sage-bg" },
+            {
+              key: "message",
+              Icon: IconSend,
+              tile: "bg-coral-chip text-coral-deep",
+            },
+            {
+              key: "perks",
+              Icon: IconGift,
+              tile: "bg-sage-bg text-sage-text",
+            },
+            {
+              key: "badge",
+              Icon: IconAward,
+              tile: "bg-coral-chip text-coral-deep",
+            },
+            {
+              key: "dashboard",
+              Icon: IconDashboard,
+              tile: "bg-sage-bg text-sage-text",
+            },
           ].map((b) => (
             <div
               key={b.key}
               className="flex items-start gap-5 rounded-[20px] border border-line-2 bg-card p-8"
             >
               <div
-                className={`flex h-12 w-12 flex-none items-center justify-center rounded-[14px] text-[22px] ${b.bg}`}
+                className={`flex h-12 w-12 flex-none items-center justify-center rounded-[14px] ${b.tile}`}
               >
-                {b.icon}
+                <b.Icon />
               </div>
               <div>
                 <h3 className="mb-[7px] text-[21px] font-extrabold">
