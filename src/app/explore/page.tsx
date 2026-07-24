@@ -33,7 +33,7 @@ export default async function ExplorePage({
 
   return (
     <>
-      <Nav variant="fan" />
+      <Nav />
 
       <section className="mx-auto max-w-[1200px] px-6 py-12 sm:px-14">
         <Eyebrow className="mb-3">{t("eyebrow")}</Eyebrow>

@@ -12,7 +12,6 @@ import { StreamerCard } from "@/components/StreamerCard";
 import { Avatar } from "@/components/ui/Placeholder";
 import { GradeBadge } from "@/components/GradeBadge";
 import { getExploreStreamers, type StreamerCard as CardData } from "@/lib/streamers";
-import { CREATOR_TYPES } from "@/lib/creatorTaxonomy";
 import { formatCount } from "@/lib/format";
 
 export default async function FanLandingPage() {
@@ -25,7 +24,7 @@ export default async function FanLandingPage() {
 
   const t = await getTranslations("fanLanding");
   const tc = await getTranslations("common");
-  const tax = await getTranslations("creatorTaxonomy");
+  const ta = await getTranslations("auth");
 
   let trending: CardData[] = [];
   try {
@@ -35,12 +34,9 @@ export default async function FanLandingPage() {
   }
   const spotlight = trending[0];
 
-  // Browse chips are keyed on creator TYPE (primary facet); "all" clears it.
-  const typeChips = ["all", ...CREATOR_TYPES] as const;
-
   return (
     <>
-      <Nav variant="fan" />
+      <Nav />
 
       {/* Hero */}
       <section className="relative overflow-hidden bg-cream-warm px-6 py-16 text-center sm:px-14 sm:py-[78px]">
@@ -73,59 +69,34 @@ export default async function FanLandingPage() {
             {t("heroSubtitle")}
           </p>
 
-          {/* Search */}
-          <form
-            action="/explore"
-            className="mx-auto mt-8 flex max-w-[560px] flex-col gap-[10px] sm:flex-row"
-          >
-            <label className="flex flex-1 items-center gap-[10px] rounded-[15px] border-[1.5px] border-line-3 bg-white px-5 py-[15px] text-left text-[16px] text-muted focus-within:border-coral">
-              <span aria-hidden="true">🔍</span>
-              <input
-                name="q"
-                placeholder={t("searchPlaceholder")}
-                className="w-full bg-transparent text-ink outline-none placeholder:text-muted"
-                aria-label={t("searchPlaceholder")}
-              />
-            </label>
-            <button className="rounded-[15px] bg-coral px-7 py-[15px] text-[16px] font-bold text-white shadow-coral">
-              {tc("search")}
-            </button>
-          </form>
-
-          {/* Type chips (primary browse facet) */}
-          <div className="mt-[18px] flex flex-wrap justify-center gap-[9px]">
-            {typeChips.map((c, i) => (
-              <Link
-                key={c}
-                href={c === "all" ? "/explore" : `/explore?type=${c}`}
-                className={`rounded-full px-[18px] py-[9px] text-[14.5px] font-medium ${
-                  i === 0
-                    ? "bg-ink text-cream"
-                    : "border border-line-3 bg-white text-ink hover:border-coral/50"
-                }`}
-              >
-                {c === "all" ? t("categories.all") : tax(`types.${c}`)}
-              </Link>
-            ))}
+          {/* Role CTAs — the choice at first glance (fan vs creator) */}
+          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <ButtonLink href="/signup" variant="primary" size="lg">
+              {ta("startAsFan")}
+            </ButtonLink>
+            <ButtonLink href="/api/become-creator" variant="dark" size="lg">
+              {ta("startAsCreator")}
+            </ButtonLink>
           </div>
+          <p className="mt-4 text-[14px] text-muted">
+            {ta("alreadyMember")}{" "}
+            <Link
+              href="/login"
+              className="font-semibold text-coral-deep hover:underline"
+            >
+              {tc("login")}
+            </Link>
+          </p>
         </div>
       </section>
 
       {/* Trending creators */}
       <section className="mx-auto max-w-[1200px] px-6 py-20 sm:px-14">
-        <div className="mb-8 flex items-end justify-between">
-          <div>
-            <Eyebrow className="mb-3">{t("trendingEyebrow")}</Eyebrow>
-            <h2 className="text-[30px] font-extrabold tracking-[-0.03em] sm:text-[40px]">
-              {t("trendingTitle")}
-            </h2>
-          </div>
-          <Link
-            href="/explore"
-            className="whitespace-nowrap text-[15px] font-semibold text-muted hover:text-ink"
-          >
-            {tc("seeAll")} →
-          </Link>
+        <div className="mb-8">
+          <Eyebrow className="mb-3">{t("trendingEyebrow")}</Eyebrow>
+          <h2 className="text-[30px] font-extrabold tracking-[-0.03em] sm:text-[40px]">
+            {t("trendingTitle")}
+          </h2>
         </div>
         {trending.length > 0 ? (
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -298,11 +269,8 @@ export default async function FanLandingPage() {
           <p className="mb-8 mt-[18px] text-[18px] text-white/85">
             {t("finalCtaBody")}
           </p>
-          <div className="flex flex-col items-center justify-center gap-[14px] sm:flex-row">
-            <ButtonLink href="/explore" variant="dark" size="lg">
-              {t("finalCtaPrimary")}
-            </ButtonLink>
-            <ButtonLink href="/signup" variant="onCoral" size="lg">
+          <div className="flex justify-center">
+            <ButtonLink href="/signup" variant="dark" size="lg">
               {tc("signup")}
             </ButtonLink>
           </div>

@@ -22,7 +22,7 @@ export default async function BackPage({
   if (!streamer || streamer.status !== "approved") {
     return (
       <>
-        <Nav variant="fan" />
+        <Nav />
         <section className="mx-auto flex max-w-[600px] flex-col items-center px-6 py-32 text-center">
           <div className="mb-4 text-[48px]">🔍</div>
           <h1 className="text-[26px] font-extrabold">{t("notFoundTitle")}</h1>
@@ -43,7 +43,7 @@ export default async function BackPage({
 
   return (
     <>
-      <Nav variant="fan" />
+      <Nav />
       <BackingFlow
         handle={handle}
         streamerName={`@${streamer.displayName}`}

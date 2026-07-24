@@ -22,7 +22,7 @@ export default async function CreatorSetupPage() {
 
   return (
     <>
-      <Nav variant="fan" />
+      <Nav />
       <section className="mx-auto w-full max-w-[640px] flex-1 px-6 py-14 sm:py-20">
         <header className="mb-8 text-center">
           <Eyebrow className="justify-center">{t("eyebrow")}</Eyebrow>

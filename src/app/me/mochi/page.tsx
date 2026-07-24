@@ -37,7 +37,7 @@ export default async function MyMochiPage() {
   if (!backer) {
     return (
       <>
-        <Nav variant="fan" />
+        <Nav />
         <section className="mx-auto max-w-[900px] px-6 py-14">
           <div className="flex flex-col items-center py-20 text-center">
             <div className="mb-4 text-[40px]">🍡</div>
@@ -64,7 +64,7 @@ export default async function MyMochiPage() {
 
   return (
     <>
-      <Nav variant="fan" />
+      <Nav />
 
       <section className="mx-auto max-w-[900px] px-6 py-14">
         <h1 className="text-[32px] font-extrabold tracking-[-0.02em] text-ink sm:text-[40px]">

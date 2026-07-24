@@ -39,7 +39,7 @@ export default async function OnboardingPage() {
 
   return (
     <>
-      <Nav variant="fan" />
+      <Nav />
       <section className="mx-auto flex w-full max-w-[520px] flex-1 flex-col justify-center px-5 py-12">
         <div className="mb-6 text-center">
           <Eyebrow className="justify-center">{t("eyebrow")}</Eyebrow>

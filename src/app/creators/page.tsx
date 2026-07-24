@@ -13,7 +13,7 @@ export default async function CreatorLandingPage() {
 
   return (
     <>
-      <Nav variant="creator" />
+      <Nav />
 
       {/* Hero */}
       <section className="relative overflow-hidden px-6 py-16 sm:px-14 sm:py-[74px]">
