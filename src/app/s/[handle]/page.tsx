@@ -7,6 +7,7 @@ import { ButtonLink } from "@/components/ui/Button";
 import { Mochi } from "@/components/Mochi";
 import { Avatar } from "@/components/ui/Placeholder";
 import { GradeBadge } from "@/components/GradeBadge";
+import { IconLock, IconSearch } from "@/components/ui/Icons";
 import { CreatorFacet } from "@/components/CreatorFacet";
 import { BackerWall } from "@/components/BackerWall";
 import { BuyMochi } from "@/components/BuyMochi";
@@ -39,7 +40,7 @@ export default async function StreamerProfilePage({
       <>
         <Nav />
         <section className="mx-auto flex max-w-[600px] flex-col items-center px-6 py-32 text-center">
-          <div className="mb-4 text-[48px]">🔍</div>
+          <IconSearch width={44} height={44} className="mb-4 text-muted" />
           <h1 className="text-[26px] font-extrabold">{t("notFoundTitle")}</h1>
           <p className="mt-3 text-[16px] text-body">{t("notFoundBody")}</p>
           <Link
@@ -117,8 +118,9 @@ export default async function StreamerProfilePage({
           <div className="flex-1">
             <div className="flex flex-wrap items-center gap-3">
               <h1 className="text-[28px] font-extrabold tracking-[-0.03em] sm:text-[34px]">
-                @{streamer.displayName}
+                {streamer.displayName}
               </h1>
+              <span className="text-[14px] text-muted">@{streamer.handle}</span>
               {report && <GradeBadge grade={grades!.sponsorReadiness} size="sm" />}
             </div>
             <CreatorFacet
@@ -279,7 +281,8 @@ export default async function StreamerProfilePage({
                       {locked ? (
                         <>
                           <div className="flex items-center gap-2 text-[13px] font-semibold text-muted">
-                            🔒 {t("backerOnly")}
+                            <IconLock width={14} height={14} />
+                            {t("backerOnly")}
                           </div>
                           <p className="mt-1 text-[13.5px] text-body">
                             {t("backerOnlyBody")}

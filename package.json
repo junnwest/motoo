@@ -9,6 +9,7 @@
     "lint": "eslint",
     "test": "tsx --test test/*.test.ts",
     "check:vocab": "tsx scripts/check-banned-vocab.ts",
+    "check:emoji": "tsx scripts/check-emoji.ts",
     "db:up": "docker compose up -d",
     "db:down": "docker compose down",
     "db:push": "prisma db push",

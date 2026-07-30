@@ -3,6 +3,90 @@
 Why the project is the way it is. Newest first. Keep entries short: decision,
 rationale, and any constraint it creates.
 
+## 2026-07-29 — The home's left rail is a *content* rail, and the fix was mostly data
+`/home` got a sticky left rail (응원 중인 크리에이터: total balance + per-creator balances) and
+widened 1100 → 1440.
+- **Why not a nav sidebar**: the entire fan-side destination list is 홈 · 둘러보기 · 내 모찌 ·
+  크리에이터 되기. Four links don't justify persistent 276px chrome — it would read as padding.
+  "Who I support" is real data that grows with the user (the Twitch followed-channels
+  pattern), so the rail carries content and the nav stays in the avatar dropdown.
+- **The real cause of "too simple" was data, not layout**: the demo fan held mochi in *one*
+  creator and had *one* order, while creators had 3–5 items and updates each. No layout
+  rescues one card in a three-column grid. The seed now gives the demo fan **4 holdings + a
+  second in-flight order**, so the home renders what a real user's looks like.
+- **New section, 지금 이용할 수 있는 아이템**: items affordable *right now* with the balance
+  already held for that creator, interleaved across creators so one cheap creator can't
+  crowd out the rest (`getAffordableItems`). This is the missing half of the loop — the app
+  showed a balance but never what it buys. Purely a read; `redeemItem` still enforces
+  balance and stock in its transaction, so a stale card can't oversell.
+- **Seeded creator posts are now varied** (6 templates, staggered dates). Every creator had
+  the identical "이번 달 목표 달성 감사합니다!", and the home aggregates them side by side —
+  four identical cards read as placeholder text.
+- **Known tension**: the zero-holdings home has no rail and a narrower column, so the layout
+  changes shape after a user's first purchase. Alternative (not taken): always render the
+  rail with an empty state inside it, keeping the shell stable.
+
+## 2026-07-29 — The app home is `/home`; `/` stays the marketing landing
+Signed-in users are still redirected off `/`, but now to a real app **home** at `/home`
+(`src/app/home/page.tsx` → `HomeSignedIn`) instead of to `/explore`. **Refines the
+2026-07-11 "role-aware home"** rule: the redirect stays, the destination changes.
+- **Rationale**: `/explore` is a browse *task* — verb-titled (크리에이터 둘러보기), opening with
+  a filter toolbar, and byte-identical for a logged-out visitor and a fan holding 42 모찌.
+  Using it as the landing surface made the app read as if it had no home, and the product's
+  core loop (buy mochi → spend → creator fulfills) was invisible on the page every user
+  landed on; the relationship data sat on `/me/mochi`, which they had to go find.
+- **One URL per job**: `/` = the pitch (logged-out only), `/home` = the app home,
+  `/explore` = browse. `/` was deliberately *not* made to serve both the landing and the
+  home — the marketing landing has to stay its own page.
+- **Order on `/home`**: 내 모찌 (balances) → 진행 중 (pending orders) → 소식 → a 4-card
+  discovery strip. Your mochi first, because it's the product's core noun.
+- **Adaptive zero-state**: 0 holdings (i.e. every new signup) → discovery-led with a
+  three-step primer and 8 creator cards. The relationship layout would be four empty boxes
+  on day one. Sections with no rows (`진행 중`, `소식`) don't render at all rather than
+  showing empty states.
+- **Constraints**: `/explore` is unchanged — the home never replaces it. Home queries live
+  in `src/lib/home.ts`, **not** `mochi.ts`, so the money-invariant surface covered by
+  `pnpm test` doesn't widen. The discovery strip filters out creators the user already holds
+  mochi in. Signed-out visitors hitting `/home` get the landing, not a login wall. The nav
+  brand links to `/home` when signed in on the consumer host (`/` elsewhere), and the
+  dropdown gained a 홈 item. This also puts the `Update` model to work on the consumer side
+  for the first time (it only rendered on profiles before).
+
+## 2026-07-29 — No emoji in the UI, anywhere (build-gated)
+Every user-visible glyph is a line icon from `src/components/ui/Icons.tsx`. **Supersedes
+the 2026-07-24 carve-out** that kept "conventional glyphs (🔍 search, 🔒 lock)" as emoji —
+those are now `IconSearch` / `IconLock`.
+- **Rationale**: emoji render in the *OS emoji font*, so the same screen looks different on
+  Windows / macOS / Android, they can't inherit brand color, and full-color pictographs next
+  to a hand-built monochrome icon set is the loudest remaining AI-slop tell (owner's call).
+- **Scope**: swept the search field, two 48px empty states, the backer-only lock, the
+  SafetyStrip refund/lock badges, and **all 21 marketplace-item thumbnails** —
+  `ThumbnailAsset.emoji` became `ThumbnailAsset.icon` (a component), so the tiles, the
+  Studio picker, and every item card switched in one change. Seeded fan messages
+  (💛🙌💪🎂) were stripped too — demo copy is product surface.
+- **Guard**: `pnpm check:emoji` (`scripts/check-emoji.ts`) fails on any pictograph in
+  `src/**` or `messages/*.json`, so the rule survives future sessions.
+- **Not emoji**: typographic arrows (→ ← ↔ ↗) and check/cross marks (✓ ✕ ○) stay — they're
+  punctuation, and the checker deliberately excludes those ranges.
+
+## 2026-07-29 — Creator cover art is generated, not uploaded
+Every creator gets cover art derived **deterministically from their handle**
+(`src/lib/creatorCovers.ts` + `CreatorCover.tsx`): a palette-tinted field, the brand's soft
+circles, and the creator's monogram. Replaces the grey "썸네일" placeholder box.
+- **Rationale**: the placeholder made the whole browse grid read as unfinished — the single
+  biggest "vibe coded" signal on the site. Same thesis as item thumbnails (2026-07-19):
+  code-defined means no storage, no CDN, no moderation surface on a public grid.
+- **Why derived, not stored**: no schema change and no creator action, so every existing row
+  got a cover the moment it shipped. Swapping in real uploads later is a drop-in change
+  inside `CreatorCover` — nothing else reads the tint tokens.
+- **Also fixed**: the card, home spotlight, and profile rendered `@{displayName}` — an `@`
+  glued onto a display *name*. Names now render plainly; the profile shows the real
+  `@handle` separately. Explore cards dropped the three-percentage stat block for one human
+  line ("38명이 응원하고 있어요"); the readiness grade still rides on the cover badge.
+- **Constraint**: seed display names are now real Korean creator names (별하루, 밤편지라디오,
+  …) while **handles stay `creatorA`–`creatorJ`**, so `@creatorA` references in CLAUDE.md
+  and the seeded creator login keep working.
+
 ## 2026-07-24 — Unified navbar + avatar dropdown (one bar everywhere)
 Every page/section/user type shares one `Nav`: brand left, a single avatar (initials
 monogram) right, and **every link + logout inside a click-to-open dropdown** (`UserMenu`).

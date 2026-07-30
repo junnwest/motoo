@@ -1,12 +1,13 @@
 import { useTranslations } from "next-intl";
+import { IconLock, IconRefund } from "@/components/ui/Icons";
 
 /** Legal/safety reassurance row shared by both landings (design handoff). */
 export function SafetyStrip({ bordered = true }: { bordered?: boolean }) {
   const t = useTranslations("safety");
-  const items: { badge: string; label: string }[] = [
+  const items: { badge: React.ReactNode; label: string }[] = [
     { badge: "19", label: t("ageCheck") },
-    { badge: "↩", label: t("refundPolicy") },
-    { badge: "🔒", label: t("directPg") },
+    { badge: <IconRefund width={15} height={15} />, label: t("refundPolicy") },
+    { badge: <IconLock width={15} height={15} />, label: t("directPg") },
   ];
 
   return (

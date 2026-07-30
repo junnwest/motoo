@@ -26,3 +26,18 @@ export function formatPercent(ratio: number): string {
 export function formatFoundingNumber(n: number): string {
   return `#${String(n).padStart(3, "0")}`;
 }
+
+/**
+ * YYYY.MM.DD in KST, so an evening-KST timestamp shows the local calendar day
+ * regardless of where the server runs (Vercel Hobby runs functions in the US).
+ */
+export function formatKstDate(date: Date): string {
+  const parts = new Intl.DateTimeFormat("ko-KR", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(date);
+  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? "";
+  return `${get("year")}.${get("month")}.${get("day")}`;
+}

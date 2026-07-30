@@ -27,7 +27,8 @@
     "studio": "스튜디오",
     "becomeCreator": "크리에이터 되기",
     "logout": "로그아웃",
-    "greeting": "{name}님"
+    "greeting": "{name}님",
+    "home": "홈"
   },
   "footer": {
     "fanTagline": "좋아하는 크리에이터를 응원하는 가장 따뜻한 방법.",
@@ -217,9 +218,7 @@
       "over200": "200명 이상"
     },
     "readinessNote": "트러스트 신호로 정렬 · 모금액 순위 없음",
-    "cardBackers": "백커",
-    "cardFulfillment": "퍼크 이행",
-    "cardRecurring": "재후원",
+    "cardSupporters": "{count}명이 응원하고 있어요",
     "empty": {
       "title": "조건에 맞는 크리에이터가 없어요",
       "body": "필터를 조정하거나 다른 카테고리를 둘러보세요.",
@@ -841,5 +840,35 @@
       "totalMin": "총 발행액은 5만원 이상이어야 해요.",
       "priceOnlyUp": "모찌 가격은 올리기만 할 수 있어요."
     }
+  },
+  "home": {
+    "greeting": "안녕하세요, {name}님",
+    "subtitle": "응원 중인 크리에이터의 소식과 모찌를 한곳에서 보세요.",
+    "subtitleNew": "마음이 가는 크리에이터를 찾아 첫 모찌를 보내보세요.",
+    "mochiTitle": "내 모찌",
+    "seeAll": "전체 보기",
+    "balance": "{count} 모찌",
+    "spend": "마켓에서 사용하기",
+    "findMore": "크리에이터 더 찾기",
+    "progressTitle": "진행 중 {count}건",
+    "spent": "{count} 모찌 사용",
+    "statusPending": "준비 중",
+    "newsTitle": "응원하는 크리에이터 소식",
+    "discoverTitle": "새로운 크리에이터",
+    "discoverTitleNew": "추천 크리에이터",
+    "browseAll": "크리에이터 전체 둘러보기",
+    "startTitle": "모찌는 이렇게 쓰여요",
+    "step1Title": "크리에이터 찾기",
+    "step1Body": "응원하고 싶은 크리에이터를 둘러보고 골라요.",
+    "step2Title": "모찌 보내기",
+    "step2Body": "그 크리에이터의 모찌를 구매해 마음을 전해요.",
+    "step3Title": "마켓에서 사용",
+    "step3Body": "모찌로 그 크리에이터의 아이템을 이용해요.",
+    "railTitle": "응원 중인 크리에이터",
+    "railTotal": "모찌 · {count}명 응원 중",
+    "orderHistory": "주문 내역 보기",
+    "affordableTitle": "지금 이용할 수 있는 아이템",
+    "itemPrice": "{count} 모찌",
+    "ofBalance": "/ 보유 {count}"
   }
 }

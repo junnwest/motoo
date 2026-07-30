@@ -47,16 +47,16 @@ interface StreamerSeed {
 }
 
 const STREAMERS: StreamerSeed[] = [
-  { handle: "creatorA", displayName: "크리에이터A", creatorType: "streamer", category: "virtual", bio: "매주 화·목·토 라이브. 따뜻한 버추얼 방송을 해요.", avgViewers: 120, followerCount: 8400, backers: 42, recurringRate: 0.41, fulfillment: 0.94, publish: true },
-  { handle: "creatorC", displayName: "크리에이터C", creatorType: "streamer", category: "music", bio: "매주 화·목·토 라이브 음악 방송. 따뜻한 커뮤니티예요.", avgViewers: 240, followerCount: 15200, backers: 55, recurringRate: 0.38, fulfillment: 0.9, publish: true },
-  { handle: "creatorE", displayName: "크리에이터E", creatorType: "streamer", category: "virtual", bio: "버추얼 게임 방송. 같이 웃고 떠들어요.", avgViewers: 300, followerCount: 21000, backers: 38, recurringRate: 0.33, fulfillment: 0.86, publish: false },
-  { handle: "creatorB", displayName: "크리에이터B", creatorType: "youtuber", category: "vlog", bio: "잔잔한 일상 브이로그와 수다 영상.", avgViewers: 80, followerCount: 3200, backers: 21, recurringRate: 0.29, fulfillment: 0.78, publish: false },
-  { handle: "creatorD", displayName: "크리에이터D", creatorType: "streamer", category: "game", bio: "FPS·공포게임 위주. 리액션 맛집.", avgViewers: 180, followerCount: 9800, backers: 33, recurringRate: 0.35, fulfillment: 0.88, publish: true },
-  { handle: "creatorF", displayName: "크리에이터F", creatorType: "streamer", category: "study", bio: "함께 공부하는 스터디윗미 방송.", avgViewers: 60, followerCount: 2100, backers: 14, recurringRate: 0.22, fulfillment: 0.7, publish: false },
-  { handle: "creatorG", displayName: "크리에이터G", creatorType: "youtuber", category: "music", bio: "어쿠스틱 커버와 자작곡 영상.", avgViewers: 140, followerCount: 6700, backers: 27, recurringRate: 0.31, fulfillment: 0.82, publish: false },
-  { handle: "creatorH", displayName: "크리에이터H", creatorType: "youtuber", category: "game", bio: "인디게임 탐험가. 숨은 명작 발굴.", avgViewers: 95, followerCount: 4100, backers: 19, recurringRate: 0.26, fulfillment: 0.75, publish: false },
-  { handle: "creatorI", displayName: "크리에이터I", creatorType: "author", category: "webtoon", bio: "주 2회 연재하는 일상 웹툰 작가예요.", avgViewers: 0, followerCount: 5300, backers: 24, recurringRate: 0.34, fulfillment: 0.85, publish: true },
-  { handle: "creatorJ", displayName: "크리에이터J", creatorType: "author", category: "novel", bio: "판타지 장편소설을 연재하고 있어요.", avgViewers: 0, followerCount: 2800, backers: 12, recurringRate: 0.25, fulfillment: 0.72, publish: false },
+  { handle: "creatorA", displayName: "별하루", creatorType: "streamer", category: "virtual", bio: "매주 화·목·토 라이브. 따뜻한 버추얼 방송을 해요.", avgViewers: 120, followerCount: 8400, backers: 42, recurringRate: 0.41, fulfillment: 0.94, publish: true },
+  { handle: "creatorC", displayName: "밤편지라디오", creatorType: "streamer", category: "music", bio: "매주 화·목·토 라이브 음악 방송. 따뜻한 커뮤니티예요.", avgViewers: 240, followerCount: 15200, backers: 55, recurringRate: 0.38, fulfillment: 0.9, publish: true },
+  { handle: "creatorE", displayName: "코코넛토끼", creatorType: "streamer", category: "virtual", bio: "버추얼 게임 방송. 같이 웃고 떠들어요.", avgViewers: 300, followerCount: 21000, backers: 38, recurringRate: 0.33, fulfillment: 0.86, publish: false },
+  { handle: "creatorB", displayName: "소소한하루", creatorType: "youtuber", category: "vlog", bio: "잔잔한 일상 브이로그와 수다 영상.", avgViewers: 80, followerCount: 3200, backers: 21, recurringRate: 0.29, fulfillment: 0.78, publish: false },
+  { handle: "creatorD", displayName: "불꽃여우", creatorType: "streamer", category: "game", bio: "FPS·공포게임 위주. 리액션 맛집.", avgViewers: 180, followerCount: 9800, backers: 33, recurringRate: 0.35, fulfillment: 0.88, publish: true },
+  { handle: "creatorF", displayName: "새벽공부방", creatorType: "streamer", category: "study", bio: "함께 공부하는 스터디윗미 방송.", avgViewers: 60, followerCount: 2100, backers: 14, recurringRate: 0.22, fulfillment: 0.7, publish: false },
+  { handle: "creatorG", displayName: "어쿠스틱민", creatorType: "youtuber", category: "music", bio: "어쿠스틱 커버와 자작곡 영상.", avgViewers: 140, followerCount: 6700, backers: 27, recurringRate: 0.31, fulfillment: 0.82, publish: false },
+  { handle: "creatorH", displayName: "픽셀탐험대", creatorType: "youtuber", category: "game", bio: "인디게임 탐험가. 숨은 명작 발굴.", avgViewers: 95, followerCount: 4100, backers: 19, recurringRate: 0.26, fulfillment: 0.75, publish: false },
+  { handle: "creatorI", displayName: "만두작가", creatorType: "author", category: "webtoon", bio: "주 2회 연재하는 일상 웹툰 작가예요.", avgViewers: 0, followerCount: 5300, backers: 24, recurringRate: 0.34, fulfillment: 0.85, publish: true },
+  { handle: "creatorJ", displayName: "달빛서고", creatorType: "author", category: "novel", bio: "판타지 장편소설을 연재하고 있어요.", avgViewers: 0, followerCount: 2800, backers: 12, recurringRate: 0.25, fulfillment: 0.72, publish: false },
 ];
 
 const TIER_TEMPLATES = [
@@ -66,6 +66,34 @@ const TIER_TEMPLATES = [
 ];
 
 // Phase 2: each creator's marketplace items, priced in that creator's mochi.
+/** Public creator posts. Varied so the home's aggregated 소식 grid isn't 4 copies. */
+const PUBLIC_UPDATES: { title: string; body: string }[] = [
+  {
+    title: "이번 달 목표 달성 감사합니다!",
+    body: "여러분 덕분에 이번 달 목표를 달성했어요. 다음 달엔 더 좋은 콘텐츠로 찾아올게요.",
+  },
+  {
+    title: "다음 주 방송 일정 안내",
+    body: "다음 주는 화·목·토 저녁 8시에 찾아뵐게요. 늦은 시간 방송도 한 번 준비 중이에요.",
+  },
+  {
+    title: "새 마켓 아이템을 추가했어요",
+    body: "여러분이 많이 물어보신 손편지와 멤버 전용 포스트를 마켓에 올려두었어요.",
+  },
+  {
+    title: "지난 콘텐츠 비하인드 풀었어요",
+    body: "편집에서 잘린 장면들을 모아 짧게 정리했어요. 재밌게 봐주시면 좋겠어요.",
+  },
+  {
+    title: "요청 주신 곡 준비하고 있어요",
+    body: "신청해주신 곡들 하나씩 연습 중이에요. 다음 방송에서 몇 곡 들려드릴게요.",
+  },
+  {
+    title: "조용히 쉬어가는 한 주였어요",
+    body: "이번 주는 목을 좀 쉬게 했어요. 걱정해주신 분들 정말 고마워요. 곧 돌아올게요.",
+  },
+];
+
 const ITEM_TEMPLATES: {
   title: string;
   description: string;
@@ -167,11 +195,15 @@ async function main() {
   });
 
   // Captured for post-loop holdings/orders so the flagship demo looks alive.
-  let flagship: {
+  type CreatorRef = {
     streamerId: string;
     pricePerMochiKrw: number;
     items: { id: string; priceMochi: number }[];
-  } | null = null;
+  };
+  let flagship: CreatorRef | null = null;
+  // Every creator, so the demo fan can hold mochi in several of them — a home
+  // with one balance card isn't representative of a real user.
+  const allCreators: CreatorRef[] = [];
 
   for (const s of STREAMERS) {
     console.log(`Creating streamer @${s.handle}…`);
@@ -231,12 +263,14 @@ async function main() {
         active: true,
       },
     });
+    const creatorRef = {
+      streamerId: streamer.id,
+      pricePerMochiKrw,
+      items: items.map((it) => ({ id: it.id, priceMochi: it.priceMochi })),
+    };
+    allCreators.push(creatorRef);
     if (isFlagship) {
-      flagship = {
-        streamerId: streamer.id,
-        pricePerMochiKrw,
-        items: items.map((it) => ({ id: it.id, priceMochi: it.priceMochi })),
-      };
+      flagship = creatorRef;
     }
 
     // Tiers
@@ -326,15 +360,15 @@ async function main() {
             display,
             displayName:
               display === BackingDisplay.nickname
-                ? `${backer.nickname}💛`
+                ? backer.nickname
                 : null,
             message: hasMessage
               ? pick([
-                  "항상 응원해요! 오래오래 방송해주세요 🙌",
+                  "항상 응원해요! 오래오래 방송해주세요.",
                   "덕분에 하루가 즐거워요.",
                   "첫 방송부터 지금까지 쭉 함께했어요.",
                   "다음 콘텐츠도 기대할게요!",
-                  "힘내세요, 우리가 있잖아요 💪",
+                  "힘내세요, 우리가 있잖아요.",
                 ])
               : null,
             status: "paid",
@@ -375,17 +409,19 @@ async function main() {
       data: { backersOwed: owedCount, deliveredAt: new Date(2026, 5, 18) },
     });
 
-    // Updates
+    // Updates. The public one varies per creator — the home aggregates these
+    // side by side, and four identical cards read as placeholder text.
+    const publicUpdate = pick(PUBLIC_UPDATES);
     await prisma.update.createMany({
       data: [
         {
           streamerId: streamer.id,
-          title: "이번 달 목표 달성 감사합니다!",
-          body: "여러분 덕분에 이번 달 목표를 달성했어요. 다음 달엔 더 좋은 콘텐츠로 찾아올게요.",
+          title: publicUpdate.title,
+          body: publicUpdate.body,
           visibility: "public",
-          publishedAt: new Date(2026, 5, 25),
-          viewCount: 1200,
-          reactionCount: 210,
+          publishedAt: new Date(2026, 5, 18 + Math.floor(rand() * 10)),
+          viewCount: 600 + Math.floor(rand() * 1400),
+          reactionCount: 80 + Math.floor(rand() * 260),
         },
         {
           streamerId: streamer.id,
@@ -477,11 +513,47 @@ async function main() {
       });
     }
 
+    // The demo fan also supports three other creators, so `/home` shows a real
+    // spread (balances rail, affordable items across creators) instead of one card.
+    const alsoSupported = allCreators
+      .filter((c) => c.streamerId !== flagship!.streamerId)
+      .slice(0, 3);
+    for (const c of alsoSupported) {
+      const purchased = 20 + Math.floor(rand() * 40);
+      await prisma.mochiHolding.create({
+        data: {
+          streamerId: c.streamerId,
+          backerId: demo.id,
+          balance: Math.floor(purchased * (0.4 + rand() * 0.5)),
+          purchasedTotal: purchased,
+          krwPaidTotal: purchased * c.pricePerMochiKrw,
+        },
+      });
+    }
+
+    // One in-flight order with another creator, so "진행 중" isn't single-creator.
+    const second = alsoSupported[0];
+    if (second) {
+      const secondItem = pick(second.items);
+      await prisma.order.create({
+        data: {
+          streamerId: second.streamerId,
+          backerId: demo.id,
+          itemId: secondItem.id,
+          mochiSpent: secondItem.priceMochi,
+          quantity: 1,
+          note: "이번 주 안에 부탁드려요.",
+          status: "pending",
+          createdAt: new Date(2026, 6, 12),
+        },
+      });
+    }
+
     // A few orders across statuses so the orders view is populated.
     const orderBuyers = [demo, ...holders.slice(0, 4)];
     const notes = [
       "다음 방송에서 불러주세요!",
-      "생일 축하 샤라웃 부탁드려요 🎂",
+      "생일 축하 샤라웃 부탁드려요.",
       null,
       "응원합니다, 오래오래 방송해주세요.",
       null,

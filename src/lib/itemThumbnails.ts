@@ -1,17 +1,45 @@
 /**
- * Curated marketplace-item thumbnails. Each "asset" is code-defined — a glyph on
- * a palette-tinted tile — not an uploaded image, so there's no storage, no CDN,
- * and no moderation surface (mirrors how Mochi.tsx / Placeholder.tsx generate
- * visuals rather than store them). An item stores a stable `thumbnailKey`; the
+ * Curated marketplace-item thumbnails. Each "asset" is code-defined — a line
+ * icon on a palette-tinted tile — not an uploaded image, so there's no storage,
+ * no CDN, and no moderation surface (mirrors how Mochi.tsx generates visuals
+ * rather than storing them). An item stores a stable `thumbnailKey`; the
  * renderer maps it to a tile, falling back to a per-itemType default so blank or
  * legacy items still look intentional.
+ *
+ * Marks are **line icons, never emoji** (DECISIONS 2026-07-29): they inherit the
+ * tile's brand color and render identically on every platform, where an emoji
+ * font would shift with the OS.
  *
  * The picker groups (투표·참여, 영상·클립, …) line up with the suggestion groups in
  * itemSuggestions.ts. Group + asset labels live in messages/*.json under
  * `creatorDashboard.items.thumbnails.*`.
  */
 
+import type { SVGProps, ComponentType } from "react";
 import { MarketplaceItemType } from "@prisma/client";
+import {
+  IconAward,
+  IconCamera,
+  IconClock,
+  IconDice,
+  IconEye,
+  IconFilm,
+  IconGame,
+  IconGift,
+  IconIdea,
+  IconImage,
+  IconMail,
+  IconMegaphone,
+  IconNote,
+  IconPencil,
+  IconPhone,
+  IconScroll,
+  IconSparkle,
+  IconTag,
+  IconTape,
+  IconTarget,
+  IconVote,
+} from "@/components/ui/Icons";
 
 /** Background tint token → the *static* Tailwind class Tailwind can see at build. */
 export const TINT_CLASS = {
@@ -27,8 +55,8 @@ export type Tint = keyof typeof TINT_CLASS;
 export type ThumbnailAsset = {
   /** Stable slug stored on MarketplaceItem.thumbnailKey. */
   key: string;
-  /** Glyph rendered on the tile. */
-  emoji: string;
+  /** Line icon rendered on the tile (never an emoji). */
+  icon: ComponentType<SVGProps<SVGSVGElement>>;
   tint: Tint;
 };
 
@@ -42,47 +70,47 @@ export const THUMBNAIL_GROUPS: ThumbnailGroup[] = [
   {
     key: "participate",
     assets: [
-      { key: "vote", emoji: "🗳️", tint: "coral" },
-      { key: "game", emoji: "🎮", tint: "coral" },
-      { key: "idea", emoji: "💡", tint: "coral" },
-      { key: "thumbnail", emoji: "🖼️", tint: "coral" },
-      { key: "mission", emoji: "🎯", tint: "coral" },
-      { key: "penalty", emoji: "🎲", tint: "coral" },
+      { key: "vote", icon: IconVote, tint: "coral" },
+      { key: "game", icon: IconGame, tint: "coral" },
+      { key: "idea", icon: IconIdea, tint: "coral" },
+      { key: "thumbnail", icon: IconImage, tint: "coral" },
+      { key: "mission", icon: IconTarget, tint: "coral" },
+      { key: "penalty", icon: IconDice, tint: "coral" },
     ],
   },
   {
     key: "video",
     assets: [
-      { key: "clip", emoji: "🎬", tint: "sage" },
-      { key: "behind", emoji: "🎥", tint: "sage" },
-      { key: "footage", emoji: "📼", tint: "sage" },
-      { key: "preview", emoji: "👀", tint: "sage" },
-      { key: "sketch", emoji: "✏️", tint: "sage" },
-      { key: "note", emoji: "📝", tint: "sage" },
+      { key: "clip", icon: IconFilm, tint: "sage" },
+      { key: "behind", icon: IconCamera, tint: "sage" },
+      { key: "footage", icon: IconTape, tint: "sage" },
+      { key: "preview", icon: IconEye, tint: "sage" },
+      { key: "sketch", icon: IconPencil, tint: "sage" },
+      { key: "note", icon: IconNote, tint: "sage" },
     ],
   },
   {
     key: "recognition",
     assets: [
-      { key: "credit", emoji: "📜", tint: "cream" },
-      { key: "shoutout", emoji: "📣", tint: "cream" },
-      { key: "name", emoji: "🏷️", tint: "cream" },
-      { key: "badge", emoji: "🏅", tint: "cream" },
+      { key: "credit", icon: IconScroll, tint: "cream" },
+      { key: "shoutout", icon: IconMegaphone, tint: "cream" },
+      { key: "name", icon: IconTag, tint: "cream" },
+      { key: "badge", icon: IconAward, tint: "cream" },
     ],
   },
   {
     key: "goods",
     assets: [
-      { key: "letter", emoji: "💌", tint: "sand" },
-      { key: "sticker", emoji: "✨", tint: "sand" },
-      { key: "gift", emoji: "🎁", tint: "sand" },
+      { key: "letter", icon: IconMail, tint: "sand" },
+      { key: "sticker", icon: IconSparkle, tint: "sand" },
+      { key: "gift", icon: IconGift, tint: "sand" },
     ],
   },
   {
     key: "time",
     assets: [
-      { key: "call", emoji: "📞", tint: "panel" },
-      { key: "session", emoji: "⏰", tint: "panel" },
+      { key: "call", icon: IconPhone, tint: "panel" },
+      { key: "session", icon: IconClock, tint: "panel" },
     ],
   },
 ];

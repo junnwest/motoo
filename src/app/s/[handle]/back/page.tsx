@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { Nav } from "@/components/Nav";
+import { IconSearch } from "@/components/ui/Icons";
 import { BackingFlow } from "@/components/BackingFlow";
 import { getStreamerForBacking } from "@/lib/streamers";
 import { getCurrentBacker } from "@/lib/session";
@@ -24,7 +25,7 @@ export default async function BackPage({
       <>
         <Nav />
         <section className="mx-auto flex max-w-[600px] flex-col items-center px-6 py-32 text-center">
-          <div className="mb-4 text-[48px]">🔍</div>
+          <IconSearch width={44} height={44} className="mb-4 text-muted" />
           <h1 className="text-[26px] font-extrabold">{t("notFoundTitle")}</h1>
           <p className="mt-3 text-[16px] text-body">{t("notFoundBody")}</p>
           <Link

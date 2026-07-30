@@ -7,7 +7,9 @@ thesis is shelved for the demo; schema kept.)
 **Accounts are additive:** everyone is a **user (fan)**; a **creator** is just a user who
 *also owns a Studio* (a `Streamer`). No separate account type, no mode toggle — creator
 status = `session.user.creator` (their Studio handle, or null). Signed-in users land on
-`/explore`; creators reach their **Studio** via a nav link. New users go
+**`/home`** (the app home: balances → pending orders → news → discovery); `/` stays the
+logged-out marketing landing and `/explore` stays the browse page. Creators reach their
+**Studio** via a nav link. New users go
 through `/onboarding` (nickname, unique `@handle`, 본인인증, terms), enforced by
 `src/proxy.ts` (the edge middleware).
 
@@ -33,6 +35,10 @@ in `src/proxy.ts` or it'll bounce to the apex. Dev: `studio.localhost:PORT`. See
   and the concurrency guards (no oversell, no negative balance).
 - Money is **integer KRW**, never floats.
 - Korean-first, **no hardcoded strings** — all copy in `messages/*.json` (next-intl).
+- **No emoji in the UI, anywhere.** Every user-visible glyph is a line icon from
+  `src/components/ui/Icons.tsx`. Emoji render in the OS emoji font, so they shift per
+  platform and can't take brand color. Run `pnpm check:emoji` after touching copy or
+  icons. (Typographic symbols — → ← ✓ ✕ — are fine; they're punctuation, not pictographs.)
 
 ## Run locally
 ```bash
@@ -40,13 +46,14 @@ pnpm install
 pnpm db:up && pnpm db:push && pnpm db:seed   # Postgres via docker (host port 5433)
 pnpm dev                                       # http://localhost:3000
 ```
-Dev logins: fan `demo@motoo.dev` / `motoo`; **creator `creator@motoo.dev` / `motoo`**
-(a user who owns `@creatorA`). Both land on `/explore`; the creator gets a **스튜디오** nav
-link. In dev, `src/lib/session.ts` falls back to the demo fan (`getCurrentBacker`) and demo
+Dev logins: fan `demo@motoo.dev` / `motoo` (holds mochi in 4 creators, so `/home` shows its
+populated state); **creator `creator@motoo.dev` / `motoo`** (a user who owns `@creatorA`).
+Both land on `/home`; the creator gets a **스튜디오** nav link. `pnpm db:seed` starts with
+`deleteMany()` — it wipes every account, including ones you signed up with locally. In dev, `src/lib/session.ts` falls back to the demo fan (`getCurrentBacker`) and demo
 creator (`getCurrentCreator`) when nobody's signed in. New signups are forced through
 `/onboarding` before the app; existing/seeded accounts are grandfathered.
 
-`pnpm test` (money logic), `pnpm check:vocab` (banned copy), `pnpm lint`.
+`pnpm test` (money logic), `pnpm check:vocab` (banned copy), `pnpm check:emoji`, `pnpm lint`.
 Google/Naver OAuth are live in dev (`.env`, gitignored); Kakao + real 본인인증 + real PG all
 need a business registration (`사업자등록`) — mocks stand in until then.
 

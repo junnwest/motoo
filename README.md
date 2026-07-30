@@ -30,8 +30,9 @@ stay in the tree, dormant.
 
 | Route | Page |
 | --- | --- |
-| `/` | Marketing landing (logged-out only; signed-in users are routed to `/explore`) |
-| `/explore` | Creators grid — the consumer home (still the Phase-1 trust ranking; to be reworked) |
+| `/` | Marketing landing (logged-out only; signed-in users are routed to `/home`) |
+| `/home` | **The app home.** A rail of the creators you support (live balances) beside a feed: items you can afford right now → in-flight orders → their latest posts → discovery. Adaptive — a user with no mochi yet gets a discovery-led single column with a how-it-works primer |
+| `/explore` | Creators grid — the dedicated browse page (filters, search, sort) |
 | `/s/[handle]` | Creator profile: **buy mochi** module + **marketplace** (spend mochi on items) |
 | `/me/mochi` | "My mochi": per-creator holdings + order/redemption history |
 | `/login` · `/signup` | Real auth — social-first (Kakao/Naver/Google) + email; password policy + confirm. One **회원가입** button opens a 후원자/크리에이터 role modal (login stays unified) |
@@ -42,7 +43,7 @@ stay in the tree, dormant.
 
 **Account model:** a creator is a `Backer` (the account/user table) that owns a `Streamer`
 via `Streamer.ownerId`. Creator status = `session.user.creator` (Studio handle or null).
-Signed-in users land on `/explore`; creators reach the Studio from the **avatar dropdown**
+Signed-in users land on `/home`; creators reach the Studio from the **avatar dropdown**
 in the unified nav (one bar for every page/user type; Studio-context items on `studio.*`).
 Onboarding is redirect-enforced by `src/proxy.ts`.
 
@@ -63,6 +64,10 @@ real 본인인증 (NICE/PASS/간편인증), Kakao login. Mocks stand in behind p
   redemptions can't oversell stock or drive a holding negative. `pnpm test` proves it
   (buy/redeem/cancel invariants + concurrency guards).
 - **Not a financial product**: no investment vocabulary in copy (`pnpm check:vocab`).
+- **No emoji in the UI**: every user-visible glyph is a line icon from
+  `src/components/ui/Icons.tsx` (`pnpm check:emoji` fails the build on any pictograph in
+  `src/**` or `messages/*.json`). Emoji render in the OS emoji font, so they shift per
+  platform and can't take brand color.
 - Dormant Phase-1 invariants (founding number, grades) remain in the schema, unused.
 
 ## Getting started
@@ -79,9 +84,14 @@ pnpm dev                    # http://localhost:3000
 pnpm test                   # money-logic integration tests (needs db:up)
 ```
 
-Dev logins: fan `demo@motoo.dev` / `motoo`; creator `creator@motoo.dev` / `motoo` (a user
-who owns `@creatorA`). Both land on `/explore`. In dev, `src/lib/session.ts` falls back to
-the demo fan/creator when nobody's signed in.
+Dev logins: fan `demo@motoo.dev` / `motoo` (holds mochi in 4 creators, so `/home` renders
+its populated state); creator `creator@motoo.dev` / `motoo` (a user who owns `@creatorA`).
+Both land on `/home`. For the zero-holdings home, use any `fan9@motoo.dev`-style pool
+account. In dev, `src/lib/session.ts` falls back to the demo fan/creator when nobody's
+signed in.
+
+> `pnpm db:seed` starts with `deleteMany()` — it wipes **all** accounts, including any you
+> signed up with locally. Re-seed knowingly.
 
 ## Scripts
 
@@ -92,4 +102,5 @@ the demo fan/creator when nobody's signed in.
 | `pnpm db:push` / `pnpm db:seed` / `pnpm db:studio` | Schema push / seed / Prisma Studio |
 | `pnpm test` | Money-logic integration tests (node:test via tsx; needs `db:up`) |
 | `pnpm check:vocab` | Banned-vocabulary check on message catalogs (spec §2) |
+| `pnpm check:emoji` | Fails on any emoji in `src/**` or `messages/*.json` (use a line icon) |
 | `pnpm lint` | ESLint |

@@ -27,7 +27,8 @@
     "studio": "Studio",
     "becomeCreator": "Become a creator",
     "logout": "Log out",
-    "greeting": "{name}"
+    "greeting": "{name}",
+    "home": "Home"
   },
   "footer": {
     "fanTagline": "The warmest way to back a creator you love.",
@@ -217,9 +218,7 @@
       "over200": "200+"
     },
     "readinessNote": "Ranked by trust signals · no money-raised leaderboard",
-    "cardBackers": "backers",
-    "cardFulfillment": "perk fulfillment",
-    "cardRecurring": "recurring",
+    "cardSupporters": "{count} fans cheering along",
     "empty": {
       "title": "No creators match your filters",
       "body": "Adjust your filters or explore another category.",
@@ -841,5 +840,35 @@
       "totalMin": "Total issuance must be at least 50,000 KRW.",
       "priceOnlyUp": "Mochi price can only go up."
     }
+  },
+  "home": {
+    "greeting": "Hello, {name}",
+    "subtitle": "Your mochi and news from the creators you support, in one place.",
+    "subtitleNew": "Find a creator you like and send your first mochi.",
+    "mochiTitle": "My mochi",
+    "seeAll": "See all",
+    "balance": "{count} mochi",
+    "spend": "Use in market",
+    "findMore": "Find more creators",
+    "progressTitle": "In progress ({count})",
+    "spent": "{count} mochi used",
+    "statusPending": "In progress",
+    "newsTitle": "News from your creators",
+    "discoverTitle": "New creators",
+    "discoverTitleNew": "Recommended creators",
+    "browseAll": "Browse all creators",
+    "startTitle": "How mochi works",
+    "step1Title": "Find a creator",
+    "step1Body": "Browse and pick a creator you want to cheer on.",
+    "step2Title": "Send mochi",
+    "step2Body": "Buy that creator's mochi to show your heart.",
+    "step3Title": "Use it in their market",
+    "step3Body": "Spend mochi on that creator's items.",
+    "railTitle": "Creators you support",
+    "railTotal": "mochi across {count}",
+    "orderHistory": "Order history",
+    "affordableTitle": "You can use these right now",
+    "itemPrice": "{count} mochi",
+    "ofBalance": "/ you hold {count}"
   }
 }

@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useCallback } from "react";
+import { IconSearch } from "@/components/ui/Icons";
 import {
   CREATOR_TYPES,
   CATEGORIES_BY_TYPE,
@@ -55,7 +56,7 @@ export function ExploreFilters() {
         action="/explore"
         className="flex flex-1 items-center gap-[10px] rounded-[12px] border border-line-3 bg-white px-4 py-[10px]"
       >
-        <span aria-hidden="true">🔍</span>
+        <IconSearch width={17} height={17} className="flex-none text-muted" />
         <input
           name="q"
           defaultValue={params.get("q") ?? ""}

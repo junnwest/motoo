@@ -15,18 +15,19 @@ import {
 } from "@/components/ui/Icons";
 import { Mochi } from "@/components/Mochi";
 import { StreamerCard } from "@/components/StreamerCard";
-import { Avatar } from "@/components/ui/Placeholder";
+import { CreatorCover } from "@/components/CreatorCover";
 import { GradeBadge } from "@/components/GradeBadge";
 import { getExploreStreamers, type StreamerCard as CardData } from "@/lib/streamers";
 import { formatCount } from "@/lib/format";
 
 export default async function FanLandingPage() {
   // "/" is the public marketing landing for logged-OUT visitors only. Everyone
-  // signed in — fan or creator — goes to the consumer home (/explore); creators
-  // reach their Studio via a nav link (one identity, not a separate mode).
+  // signed in goes to the app home (/home) — NOT /explore, which is a browse
+  // page and read as a subpage when used as the landing surface (DECISIONS
+  // 2026-07-29). Creators reach their Studio via a nav link (one identity).
   // (Non-onboarded users are caught by the onboarding middleware before this.)
   const session = await auth();
-  if (session?.user) redirect("/explore");
+  if (session?.user) redirect("/home");
 
   const t = await getTranslations("fanLanding");
   const tc = await getTranslations("common");
@@ -188,13 +189,16 @@ export default async function FanLandingPage() {
       {spotlight && (
         <section className="mx-auto max-w-[1200px] px-6 pb-[92px] sm:px-14">
           <div className="grid grid-cols-1 overflow-hidden rounded-[24px] border border-line-2 bg-card shadow-card md:grid-cols-2">
-            <div className="flex min-h-[240px] items-center justify-center bg-sand md:min-h-[340px]">
-              <Avatar name={spotlight.displayName} size={120} />
-            </div>
+            <CreatorCover
+              handle={spotlight.handle}
+              displayName={spotlight.displayName}
+              className="min-h-[240px] md:min-h-[340px]"
+              markClass="text-[104px] sm:text-[132px]"
+            />
             <div className="p-10 sm:p-11">
               <Eyebrow className="mb-4">{t("spotlightEyebrow")}</Eyebrow>
               <h2 className="text-[28px] font-extrabold tracking-[-0.03em] sm:text-[34px]">
-                @{spotlight.displayName}
+                {spotlight.displayName}
               </h2>
               <div className="mb-7 mt-6 flex gap-7">
                 <div>

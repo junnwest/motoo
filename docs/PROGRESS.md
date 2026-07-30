@@ -1,10 +1,44 @@
 # motoo — Progress Tracker
 
-_Last updated: 2026-07-24_
+_Last updated: 2026-07-29_
 
 Living status of the build. Update the checkboxes as work lands. See
 [`DECISIONS.md`](./DECISIONS.md) for why things are the way they are and
 [`DEPLOYMENT.md`](./DEPLOYMENT.md) for infra state.
+
+## Recent — 2026-07-29 (signed-in home + design de-slopping · local only, not yet deployed)
+
+- [x] **Real app home at `/home`** — signed-in users still redirect off `/`, but now to a
+  home instead of to `/explore`. Leads with **내 모찌** (per-creator balances), then **진행 중**
+  (pending orders), **소식** (updates from creators you hold mochi in — first consumer use of
+  the `Update` model), then a 4-card discovery strip. **Adaptive**: zero holdings →
+  discovery-led with a 3-step primer + 8 cards, so a new signup never sees empty boxes.
+  `/` stays the marketing landing (logged-out only) and `/explore` stays the browse page —
+  one URL per job. New `src/app/home/page.tsx` + `src/components/HomeSignedIn.tsx` +
+  `src/lib/home.ts` (kept out of `mochi.ts` so the money-test surface doesn't widen).
+  Nav brand → `/home` when signed in, plus a 홈 dropdown item. See DECISIONS 2026-07-29.
+- [x] **Home rail + density pass** — sticky left **content** rail (응원 중인 크리에이터: total
+  balance + per-creator balances + 주문 내역), container widened 1100 → 1440, and a new
+  **지금 이용할 수 있는 아이템** section (items affordable with the balance already held,
+  interleaved across creators — `getAffordableItems`). A nav-only sidebar was rejected: the
+  fan side has just four destinations. The root cause of "too simple" was **data** — the demo
+  fan held mochi in one creator; the seed now gives it 4 holdings + a second pending order,
+  and seeded creator posts vary (6 templates) instead of every creator sharing one.
+- [x] **Creator cover art** (`src/lib/creatorCovers.ts` + `CreatorCover.tsx`) — the grey
+  "썸네일" placeholder box is gone. A tinted field + soft circles + the creator's monogram,
+  picked deterministically from the handle: no schema change, no upload pipeline, every
+  existing row covered instantly. Explore cards dropped the 3-percentage stat block for one
+  human line (`{count}명이 응원하고 있어요`).
+- [x] **Fixed `@{displayName}`** on the card, home spotlight, and profile — an `@` glued onto
+  a display *name* (why everything read "@크리에이터E"). Profile now shows the real `@handle`
+  separately. Seed display names are real Korean creator names; handles stay `creatorA`–`J`.
+- [x] **No emoji anywhere in the UI** — swept 🔍 (3), 🔒 (2), ↩, all **21 marketplace item
+  thumbnails** (`ThumbnailAsset.emoji` → `.icon`), and seeded fan messages. `Icons.tsx` grew
+  10 → 32 line icons. New **`pnpm check:emoji`** guard fails the build on any pictograph in
+  `src/**` or `messages/*.json`. See DECISIONS 2026-07-29.
+- [x] Verified: `tsc` clean, lint clean on changed files, `check:vocab` + `check:emoji` clean,
+  `pnpm test` 11/11, both home states browser-checked signed in as a fan with and without
+  holdings, no console errors.
 
 ## Recent — 2026-07-24 (unified navbar + signup role modal + landing/design polish · deployed live)
 
@@ -122,7 +156,8 @@ Living status of the build. Update the checkboxes as work lands. See
 1. **Phase 2 mochi-marketplace** ✅ — creator issuance + Studio + user buy/spend, verified locally.
 2. **Phase 4 accounts** ✅ — auth-aware app, fan onboarding (본인인증 gate), and the **additive creator model** (a user who *also* owns a Studio). See below.
 3. **Deployment** ✅ — **live at [themotoo.com](https://themotoo.com)** (Vercel + Supabase Seoul). Custom domain wired (Squarespace DNS → Vercel), OAuth callbacks set, auto-deploy on push to `main`.
-4. **Next** — `/explore` as the real consumer home (still the Phase-1 trust-ranking grid); real PG + real 본인인증 (both need a business registration + contract).
+4. **Consumer home** ✅ — signed-in users land on **`/home`** (balances → pending orders → news → discovery), adaptive for users with no mochi yet. `/` stays the marketing landing; `/explore` stays the browse page.
+5. **Next** — design tier 2/3: the landing still repeats one section template five times, Latin eyebrows (`DISCOVER`, `HOW MOCHI WORKS`), English `STRONG`/`EMERGING` badges, unstyled native `<select>`s on explore, and Phase-1 vocabulary (백커·퍼크·트러스트 리포트) still on explore. Then real PG + real 본인인증 (both need a business registration + contract).
 
 ---
 
