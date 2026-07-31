@@ -1,8 +1,11 @@
 import { scryptSync, randomBytes, timingSafeEqual } from "node:crypto";
 
+/** Password policy shared by signup and settings: 8+ chars, letter + number. */
+export const PASSWORD_RE = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/;
+
 /**
- * Minimal password hashing for the dev credentials login (no native deps).
- * Real production auth relies on the OAuth providers (Naver / Kakao / Google).
+ * Password hashing for the credentials login path (email+password, live in
+ * both dev and production — OAuth users have no password to hash).
  */
 export function hashPassword(password: string): string {
   const salt = randomBytes(16).toString("hex");

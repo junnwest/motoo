@@ -30,7 +30,8 @@
     "greeting": "{name}님",
     "home": "홈",
     "notifications": "알림",
-    "notificationsEmpty": "아직 알림이 없어요"
+    "notificationsEmpty": "아직 알림이 없어요",
+    "ranking": "랭킹"
   },
   "footer": {
     "fanTagline": "좋아하는 크리에이터를 응원하는 가장 따뜻한 방법.",
@@ -740,7 +741,8 @@
       "outOfStock": "품절된 아이템이에요.",
       "insufficient": "모찌 잔액이 부족해요.",
       "generic": "처리하지 못했어요. 잠시 후 다시 시도해 주세요."
-    }
+    },
+    "followNudge": "{name}님을 팔로우하고 소식을 받아보세요"
   },
   "myMochi": {
     "title": "내 모찌",
@@ -874,12 +876,53 @@
     "affordableTitle": "지금 이용할 수 있는 아이템",
     "itemPrice": "{count} 모찌",
     "ofBalance": "/ 보유 {count}",
-    "railFollowing": "팔로잉"
+    "railFollowing": "팔로잉",
+    "statusTitle": "내 모찌 현황"
   },
   "notifications": {
     "title": "알림",
     "subtitle": "응원 중인 크리에이터의 소식을 모아서 보여드려요.",
     "markAllRead": "모두 읽음 처리",
     "empty": "아직 알림이 없어요. 크리에이터를 팔로우하거나 모찌를 보내면 여기서 소식을 받아볼 수 있어요."
+  },
+  "myProfile": {
+    "title": "프로필",
+    "editProfile": "프로필 편집"
+  },
+  "sidebar": {
+    "followingTitle": "팔로잉",
+    "followingEmpty": "아직 팔로우한 크리에이터가 없어요."
+  },
+  "ranking": {
+    "title": "내 랭킹",
+    "subtitle": "모찌를 구매한 크리에이터별로, 누적 구매량 기준의 내 순위예요.",
+    "empty": "아직 모찌를 구매한 크리에이터가 없어요.",
+    "rankOf": "{total}명 중 {rank}등"
+  },
+  "settings": {
+    "title": "설정",
+    "subtitle": "계정 정보를 관리해요.",
+    "identityTitle": "기본 정보",
+    "nicknameLabel": "닉네임",
+    "handleLabel": "@핸들",
+    "handleChecking": "확인 중…",
+    "handleAvailable": "사용할 수 있어요",
+    "handleTaken": "이미 사용 중인 핸들이에요",
+    "handleInvalid": "영문소문자·숫자·_만 가능, 2–20자",
+    "save": "저장",
+    "saving": "저장 중…",
+    "saved": "저장됐어요.",
+    "passwordTitle": "비밀번호",
+    "currentPasswordLabel": "현재 비밀번호",
+    "newPasswordLabel": "새 비밀번호",
+    "passwordHint": "8자 이상, 영문과 숫자를 함께 써주세요.",
+    "changePassword": "비밀번호 변경",
+    "oauthOnly": "소셜 로그인 계정은 비밀번호가 없어요.",
+    "errors": {
+      "generic": "문제가 생겼어요. 다시 시도해 주세요.",
+      "handleTaken": "이미 사용 중인 핸들이에요.",
+      "weakPassword": "8자 이상, 영문과 숫자를 함께 써주세요.",
+      "wrongPassword": "현재 비밀번호가 맞지 않아요."
+    }
   }
 }

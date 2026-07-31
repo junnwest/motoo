@@ -345,3 +345,41 @@ export function IconBell(props: SVGProps<SVGSVGElement>) {
     </Icon>
   );
 }
+
+export function IconTrophy(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Icon {...props}>
+      <path d="M7 4h10v5a5 5 0 0 1-10 0V4z" />
+      <path d="M7 5H4v2a3 3 0 0 0 3 3M17 5h3v2a3 3 0 0 1-3 3" />
+      <path d="M12 14v3M9 20h6M9.5 20a2.5 2.5 0 0 1 5 0" />
+    </Icon>
+  );
+}
+
+export function IconHome(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Icon {...props}>
+      <path d="m4 11 8-7 8 7" />
+      <path d="M6 10v9a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-9" />
+      <path d="M10 20v-6h4v6" />
+    </Icon>
+  );
+}
+
+export function IconCompass(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Icon {...props}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="m15 9-2 6-6 2 2-6z" />
+    </Icon>
+  );
+}
+
+export function IconStudio(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Icon {...props}>
+      <rect x="2" y="6" width="20" height="14" rx="3" />
+      <path d="M8 6 11 2h5L13 6M9 12.5v3l5-1.5-5-1.5z" />
+    </Icon>
+  );
+}

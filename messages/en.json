@@ -30,7 +30,8 @@
     "greeting": "{name}",
     "home": "Home",
     "notifications": "Notifications",
-    "notificationsEmpty": "No notifications yet"
+    "notificationsEmpty": "No notifications yet",
+    "ranking": "Ranking"
   },
   "footer": {
     "fanTagline": "The warmest way to back a creator you love.",
@@ -740,7 +741,8 @@
       "outOfStock": "This item is sold out.",
       "insufficient": "Not enough mochi.",
       "generic": "We couldn't process that. Please try again shortly."
-    }
+    },
+    "followNudge": "Follow {name} to hear from them"
   },
   "myMochi": {
     "title": "My mochi",
@@ -874,12 +876,53 @@
     "affordableTitle": "You can use these right now",
     "itemPrice": "{count} mochi",
     "ofBalance": "/ you hold {count}",
-    "railFollowing": "Following"
+    "railFollowing": "Following",
+    "statusTitle": "My mochi status"
   },
   "notifications": {
     "title": "Notifications",
     "subtitle": "Updates from the creators you support, gathered in one place.",
     "markAllRead": "Mark all as read",
     "empty": "No notifications yet. Follow a creator or send mochi to start hearing from them here."
+  },
+  "myProfile": {
+    "title": "Profile",
+    "editProfile": "Edit profile"
+  },
+  "sidebar": {
+    "followingTitle": "Following",
+    "followingEmpty": "No creators followed yet."
+  },
+  "ranking": {
+    "title": "My ranking",
+    "subtitle": "Your standing among each creator's supporters, by lifetime mochi purchased.",
+    "empty": "No creators bought yet.",
+    "rankOf": "#{rank} of {total}"
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Manage your account.",
+    "identityTitle": "Basic info",
+    "nicknameLabel": "Nickname",
+    "handleLabel": "@handle",
+    "handleChecking": "Checking…",
+    "handleAvailable": "Available",
+    "handleTaken": "That handle is taken",
+    "handleInvalid": "Letters, numbers, _ only, 2–20 chars",
+    "save": "Save",
+    "saving": "Saving…",
+    "saved": "Saved.",
+    "passwordTitle": "Password",
+    "currentPasswordLabel": "Current password",
+    "newPasswordLabel": "New password",
+    "passwordHint": "8+ characters, including a letter and a number.",
+    "changePassword": "Change password",
+    "oauthOnly": "Social login accounts have no password.",
+    "errors": {
+      "generic": "Something went wrong. Please try again.",
+      "handleTaken": "That handle is already taken.",
+      "weakPassword": "8+ characters, including a letter and a number.",
+      "wrongPassword": "Current password is incorrect."
+    }
   }
 }

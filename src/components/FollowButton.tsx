@@ -24,6 +24,18 @@ export function FollowButton({
   const [following, setFollowing] = useState(initialFollowing);
   const [pending, startTransition] = useTransition();
 
+  // Adjust state during render when the prop changes, not via useEffect —
+  // React's documented pattern for this (an effect would cost an extra,
+  // avoidable render). Needed because useState's initial value only applies
+  // on mount: a router.refresh() after the BuyMochi follow-nudge toggles the
+  // same creator wouldn't otherwise reach this already-mounted instance.
+  const [prevInitialFollowing, setPrevInitialFollowing] =
+    useState(initialFollowing);
+  if (initialFollowing !== prevInitialFollowing) {
+    setPrevInitialFollowing(initialFollowing);
+    setFollowing(initialFollowing);
+  }
+
   if (!signedIn) return null; // signup happens via the buy-mochi CTA, not here
 
   function onClick() {

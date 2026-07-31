@@ -6,25 +6,32 @@ import { BrandLogo } from "./BrandLogo";
 import { SignupButton } from "./SignupButton";
 import { UserMenu, type MenuItem } from "./UserMenu";
 import { NotificationBell } from "./NotificationBell";
-import { getNotificationsForBacker, getUnreadCount } from "@/lib/notify";
+import { IconStudio, IconTrophy } from "@/components/ui/Icons";
+import { getUnreadCount } from "@/lib/notify";
 
 /**
- * Top navigation — one bar for every page, section, and user type.
+ * Top navigation (DECISIONS 2026-07-30 restructure).
  *
- * Layout is deliberately minimal: brand on the left, a single avatar on the
- * right. Every link (Explore, My mochi, Studio / become-creator, settings, …)
- * and logout live in the avatar's click-to-open dropdown (see UserMenu).
+ * On the consumer host, signed in: brand · [랭킹 icon] [알림 icon] [스튜디오
+ * pill] [avatar]. Ranking and notifications are plain icon-links straight to
+ * their dedicated pages — no dropdown preview, unlike the avatar. The Studio
+ * pill is **always shown**, creator or not: clicking it either opens the
+ * console (a creator) or starts the become-a-creator flow (a fan) — the same
+ * routing `/api/become-creator` already did, just promoted from a dropdown
+ * link to persistent chrome (mirrors YouTube's own Studio button).
  *
- * It's auth-aware and host-aware (server component): it reads the session and
- * the request host on every render, so it's always fresh after a sign-in/out
- * and shows Studio-context items on `studio.*` and consumer items on the apex.
- * Links are path-relative — the middleware forwards any cross-host ones
- * (e.g. Explore from the Studio host → apex) in a single hop.
+ * The avatar dropdown is now identity-only: Profile, Settings, and My channel
+ * (creators only) + logout. 홈/둘러보기 moved into the Sidebar (see
+ * ConsumerShell); 내 모찌 moved into Profile.
+ *
+ * Host-aware: the Studio host keeps its own console-context dropdown
+ * (설정/공개 프로필/둘러보기) and none of the new consumer-only chrome.
  */
 export async function Nav() {
   const t = await getTranslations("nav");
   const tc = await getTranslations("common");
-  const tm = await getTranslations("myMochi");
+  const tmp = await getTranslations("myProfile");
+  const ts = await getTranslations("settings");
   const tcd = await getTranslations("creatorDashboard");
 
   const session = await auth();
@@ -36,18 +43,14 @@ export async function Nav() {
   const host = (await headers()).get("host") ?? "";
   const onStudioHost = host.startsWith("studio.");
 
-  // Notifications are fan-side (order/item/price events) — surfaced on the
-  // consumer host only, matching 홈/내 모찌/둘러보기 above.
-  const showBell = authed && !onStudioHost;
-  const [notifications, unreadCount] = showBell
-    ? await Promise.all([
-        getNotificationsForBacker(session!.user!.id!, 6),
-        getUnreadCount(session!.user!.id!),
-      ])
-    : [[], 0];
+  const showConsumerChrome = authed && !onStudioHost;
+  const unreadCount = showConsumerChrome
+    ? await getUnreadCount(session!.user!.id!)
+    : 0;
 
-  // Context-aware dropdown items. Studio host surfaces console actions; the
-  // consumer app surfaces fan actions + the creator entry point.
+  // Studio-host dropdown stays as it was; the consumer dropdown is now
+  // identity-only (Profile/Settings/My channel) — everything else moved out
+  // to the Sidebar or the Studio pill.
   const items: MenuItem[] = onStudioHost
     ? [
         { label: tcd("settings.title"), href: "/settings" },
@@ -55,12 +58,9 @@ export async function Nav() {
         { label: t("explore"), href: "/explore" },
       ]
     : [
-        ...(authed ? [{ label: t("home"), href: "/home" }] : []),
-        { label: t("explore"), href: "/explore" },
-        { label: tm("title"), href: "/me/mochi" },
-        handle
-          ? { label: t("studio"), href: "/studio" }
-          : { label: t("becomeCreator"), href: "/api/become-creator" },
+        { label: tmp("title"), href: "/profile" },
+        { label: ts("title"), href: "/settings" },
+        ...(handle ? [{ label: tcd("viewPublic"), href: `/s/${handle}` }] : []),
       ];
 
   return (
@@ -72,20 +72,27 @@ export async function Nav() {
 
         {authed ? (
           <div className="flex items-center gap-1.5 sm:gap-2.5">
-            {showBell && (
-              <NotificationBell
-                items={notifications.map((n) => ({
-                  id: n.id,
-                  title: n.title,
-                  body: n.body,
-                  link: n.link,
-                  read: n.read,
-                  createdAt: n.createdAt.toISOString(),
-                }))}
-                unreadCount={unreadCount}
-                seeAllLabel={t("notifications")}
-                emptyLabel={t("notificationsEmpty")}
-              />
+            {showConsumerChrome && (
+              <>
+                <Link
+                  href="/ranking"
+                  aria-label={t("ranking")}
+                  className="flex h-9 w-9 items-center justify-center rounded-full text-ink transition hover:bg-panel focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-deep"
+                >
+                  <IconTrophy width={19} height={19} />
+                </Link>
+                <NotificationBell
+                  unreadCount={unreadCount}
+                  label={t("notifications")}
+                />
+                <Link
+                  href={handle ? "/studio" : "/api/become-creator"}
+                  className="ml-1 flex items-center gap-2 rounded-full border border-line-3 bg-white px-4 py-2 text-[13.5px] font-bold text-ink transition-colors hover:border-coral hover:text-coral-deep sm:ml-2"
+                >
+                  <IconStudio width={16} height={16} />
+                  {t("studio")}
+                </Link>
+              </>
             )}
             <UserMenu
               name={name}

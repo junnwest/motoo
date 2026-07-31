@@ -3,6 +3,57 @@
 Why the project is the way it is. Newest first. Keep entries short: decision,
 rationale, and any constraint it creates.
 
+## 2026-07-30 — Full nav restructure: persistent Sidebar, Ranking, Profile, Settings
+Owner-driven redesign, decided via a round of clarifying questions before any code (five
+forks: what ranking ranks, whether Profile absorbs `/me/mochi`, follow/holding coupling,
+`/explore`'s fate, and sidebar scope). No schema change — everything below reuses the
+`Follow`/`Notification`/`MochiHolding` models from earlier the same day.
+- **Nav, consumer host, signed in**: 랭킹 icon → `/ranking`, 알림 icon → `/notifications`
+  (both plain icon-links, no dropdown preview — `NotificationBell` lost its dropdown to
+  match), a **Studio pill** (always visible, creator or not — clicking routes to `/studio`
+  if they own one or into the existing become-a-creator flow if not, mirroring YouTube's
+  own Studio button), then the avatar. The avatar dropdown is now **identity-only**:
+  Profile, Settings, My channel (creators only) + logout — everything else moved out.
+- **Persistent left Sidebar** (`ConsumerShell` wraps `Nav` + `Sidebar` + page content): 홈 /
+  둘러보기 links, then the following list. Applied to every signed-in consumer page —
+  `/home`, `/explore`, `/ranking`, `/notifications`, `/profile`, `/settings`, and a
+  creator's public `/s/[handle]` — deliberately NOT the marketing landing, auth flows, the
+  focused back/pay flow, or anywhere on the Studio host. It has to survive navigation
+  rather than flicker per-page, since it contains the very nav links (둘러보기) a user would
+  click.
+- **Holding and Following stay strictly independent** — the Sidebar's list is Follow rows
+  only; a creator you've paid but never followed will NOT appear there. To close that gap,
+  **`BuyMochi` nudges a follow right after a first purchase** (an inline prompt in the
+  success state, not an auto-follow) — `FollowButton` and the nudge are separate component
+  instances, so a nudge-triggered toggle calls `router.refresh()` and `FollowButton` adjusts
+  its displayed state **during render** when the prop changes (not via `useEffect` —
+  react-hooks' `set-state-in-effect` rule flags that as an avoidable extra render; adjusting
+  state while rendering is the documented pattern for "reset state when a prop changes").
+- **Ranking**: a fan's rank **among one creator's supporters**, by lifetime mochi purchased
+  (`MochiHolding.purchasedTotal`) — deliberately distinct from the retired Phase-1 founding
+  number (arrival order, not a money signal). Computed live in `src/lib/ranking.ts`
+  (`ORDER BY`, no stored rank) — cheap at this scale, and a stored value would drift the
+  moment anyone buys. Surfaced two places: the dedicated `/ranking` page (one row per held
+  creator) and inline on each balance card on `/home`.
+- **`/profile` absorbs `/me/mochi`** (holdings + order history) behind an identity header
+  (nickname, handle, avatar); `/me/mochi` now redirects there. **`/settings` is new** —
+  nickname/handle (reuses onboarding's `checkHandle` live-availability action) and password
+  change, gated behind `backer.passwordHash` existing (OAuth-only accounts see a note
+  instead of a form they can't use). Distinct from the Studio host's own `/settings`
+  (creator profile) — different hosts, no route collision (`src/proxy.ts`'s studio rewrite
+  only fires when the request host starts with `studio.`).
+- **`/explore` is unchanged** — kept exactly as the filter/search/sort page, just reached
+  via the Sidebar instead of the avatar dropdown.
+- **`HomeSignedIn` simplified**: now owns only the mochi-status (with rank) + suggestion
+  columns — the Sidebar carries what used to be its own rail. The "supports anyone via
+  holding or following" adaptive trigger from earlier the same day narrows back to **"holds
+  mochi anywhere"** for the status column specifically (there's nothing money-shaped to show
+  a follow-only supporter), but news still sources from held **and** followed creators, so a
+  follow-only user isn't starved of updates just because the status card doesn't apply.
+- **Suggestions are now single-column, larger blocks** (thumbnail + name), explicitly not
+  the dense StreamerCard grid — the YouTube-Music "album block" look the owner asked for,
+  distinct from the Sidebar's compact list rows for the same underlying data shape.
+
 ## 2026-07-30 — Notifications + Follow: the home rail merges paid and free support
 Two new models. **`Follow`** (streamerId+backerId, unique) is a free, in-app "keep me
 posted" relationship — distinct from `MochiHolding` (money) and the dormant

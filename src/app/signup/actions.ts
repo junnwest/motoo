@@ -3,13 +3,9 @@
 import { z } from "zod";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
-import { hashPassword } from "@/lib/password";
+import { hashPassword, PASSWORD_RE } from "@/lib/password";
 import { signIn } from "@/auth";
 import { AuthError } from "next-auth";
-
-// Password policy: 8+ chars including at least one letter and one number.
-// Enforced here too, so a client bypass can't create a weak password.
-const PASSWORD_RE = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/;
 
 const signupSchema = z.object({
   email: z.string().email(),

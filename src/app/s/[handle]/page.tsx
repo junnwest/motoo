@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { Nav } from "@/components/Nav";
+import { ConsumerShell } from "@/components/ConsumerShell";
 import { Footer } from "@/components/Footer";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { ButtonLink } from "@/components/ui/Button";
@@ -40,7 +40,7 @@ export default async function StreamerProfilePage({
   if (!data) {
     return (
       <>
-        <Nav />
+        <ConsumerShell>
         <section className="mx-auto flex max-w-[600px] flex-col items-center px-6 py-32 text-center">
           <IconSearch width={44} height={44} className="mb-4 text-muted" />
           <h1 className="text-[26px] font-extrabold">{t("notFoundTitle")}</h1>
@@ -52,6 +52,7 @@ export default async function StreamerProfilePage({
             {t("backToExplore")}
           </Link>
         </section>
+        </ConsumerShell>
         <Footer variant="fan" />
       </>
     );
@@ -114,8 +115,7 @@ export default async function StreamerProfilePage({
 
   return (
     <>
-      <Nav />
-
+      <ConsumerShell>
       {/* Header */}
       <section className="border-b border-line bg-cream-warm px-6 py-12 sm:px-14">
         <div className="mx-auto flex max-w-[1100px] flex-col gap-6 sm:flex-row sm:items-center">
@@ -228,6 +228,7 @@ export default async function StreamerProfilePage({
               issuance={issuance}
               balance={balance}
               loggedIn={!!backer}
+              following={following}
             />
           </div>
 
@@ -317,6 +318,7 @@ export default async function StreamerProfilePage({
           </div>
         </aside>
       </div>
+      </ConsumerShell>
 
       <Footer variant="fan" />
     </>

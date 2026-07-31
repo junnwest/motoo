@@ -6,8 +6,10 @@ import { useTranslations } from "next-intl";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { Mochi } from "@/components/Mochi";
+import { IconHeart } from "@/components/ui/Icons";
 import { formatKrw, formatCount } from "@/lib/format";
 import { buyMochiAction } from "@/app/s/[handle]/marketplace-actions";
+import { toggleFollow } from "@/lib/follows";
 
 type Issuance = {
   pricePerMochiKrw: number;
@@ -28,6 +30,7 @@ export function BuyMochi({
   issuance,
   balance,
   loggedIn,
+  following,
 }: {
   handle: string;
   streamerId: string;
@@ -35,6 +38,9 @@ export function BuyMochi({
   issuance: Issuance | null;
   balance: number;
   loggedIn: boolean;
+  /** Already following this creator? Gates the post-purchase follow nudge —
+   * omit/false for a logged-out visitor, who can't follow yet anyway. */
+  following?: boolean;
 }) {
   const t = useTranslations("marketplace");
   const router = useRouter();
@@ -42,6 +48,21 @@ export function BuyMochi({
   const [quantity, setQuantity] = useState(10);
   const [success, setSuccess] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // First purchase is the moment "do you want to hear from them" is most
+  // relevant — buying does NOT auto-follow (DECISIONS 2026-07-30: the two
+  // stay independent), so this nudges instead.
+  const [nowFollowing, setNowFollowing] = useState(!!following);
+  const [followPending, startFollowTransition] = useTransition();
+
+  function onFollowClick() {
+    startFollowTransition(async () => {
+      const res = await toggleFollow(streamerId, handle);
+      if (res.ok) {
+        setNowFollowing(res.following);
+        router.refresh(); // syncs the header FollowButton's server-rendered prop
+      }
+    });
+  }
 
   const onSale = issuance !== null && issuance.active;
 
@@ -190,9 +211,22 @@ export function BuyMochi({
           </div>
 
           {success !== null && (
-            <p className="mt-3 rounded-[12px] bg-sage-bg px-4 py-3 text-[14px] font-semibold text-sage">
-              {t("bought", { count: success })}
-            </p>
+            <div className="mt-3 rounded-[12px] bg-sage-bg px-4 py-3">
+              <p className="text-[14px] font-semibold text-sage">
+                {t("bought", { count: success })}
+              </p>
+              {!nowFollowing && (
+                <button
+                  type="button"
+                  onClick={onFollowClick}
+                  disabled={followPending}
+                  className="mt-2.5 flex items-center gap-1.5 rounded-[10px] bg-white px-3 py-2 text-[13px] font-bold text-ink transition-colors hover:text-coral-deep disabled:opacity-60"
+                >
+                  <IconHeart width={14} height={14} />
+                  {t("followNudge", { name: creatorName })}
+                </button>
+              )}
+            </div>
           )}
           {error && (
             <p className="mt-3 text-[14px] font-semibold text-live">

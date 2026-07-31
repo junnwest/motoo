@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { Nav } from "@/components/Nav";
+import { ConsumerShell } from "@/components/ConsumerShell";
 import { Footer } from "@/components/Footer";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { Mochi } from "@/components/Mochi";
@@ -34,8 +34,7 @@ export default async function ExplorePage({
 
   return (
     <>
-      <Nav />
-
+      <ConsumerShell>
       <section className="mx-auto max-w-[1200px] px-6 py-12 sm:px-14">
         <Eyebrow className="mb-3">{t("eyebrow")}</Eyebrow>
         <h1 className="text-[32px] font-extrabold tracking-[-0.03em] sm:text-[40px]">
@@ -82,6 +81,7 @@ export default async function ExplorePage({
           </div>
         )}
       </section>
+      </ConsumerShell>
 
       <Footer variant="fan" />
     </>

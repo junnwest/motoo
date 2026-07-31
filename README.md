@@ -31,8 +31,11 @@ stay in the tree, dormant.
 | Route | Page |
 | --- | --- |
 | `/` | Marketing landing (logged-out only; signed-in users are routed to `/home`) |
-| `/home` | **The app home.** A rail of every creator you support — held (balance) or followed (free) — beside a feed: items you can afford right now → in-flight orders → their latest posts → discovery. Adaptive — a user who supports no one yet gets a discovery-led single column with a how-it-works primer |
-| `/notifications` | Full notification history (order fulfilled/cancelled, a supported creator adds an item or raises their price) — mark-all-read. A bell in the nav surfaces the latest few |
+| `/home` | **The app home.** Two columns: mochi status (balance + rank per creator) → items you can afford right now → in-flight orders → news, beside a suggestion column (larger single-column blocks). Adaptive — holds no mochi yet → a how-it-works primer instead of the status column. The following list lives in the persistent Sidebar, not here |
+| `/ranking` | Your rank among each held creator's supporters, by lifetime mochi purchased |
+| `/notifications` | Full notification history (order fulfilled/cancelled, a supported creator adds an item or raises their price) — mark-all-read. A bell icon in the nav shows the unread count |
+| `/profile` | Identity + mochi holdings + order history (absorbs the old `/me/mochi`, which now redirects here) |
+| `/settings` | Nickname/handle + password change (apex-only; distinct from the Studio host's own `/settings`) |
 | `/explore` | Creators grid — the dedicated browse page (filters, search, sort) |
 | `/s/[handle]` | Creator profile: **buy mochi** module + **marketplace** (spend mochi on items) |
 | `/me/mochi` | "My mochi": per-creator holdings + order/redemption history |
@@ -44,8 +47,10 @@ stay in the tree, dormant.
 
 **Account model:** a creator is a `Backer` (the account/user table) that owns a `Streamer`
 via `Streamer.ownerId`. Creator status = `session.user.creator` (Studio handle or null).
-Signed-in users land on `/home`; creators reach the Studio from the **avatar dropdown**
-in the unified nav (one bar for every page/user type; Studio-context items on `studio.*`).
+Signed-in users land on `/home`; a persistent **Studio pill** in the nav (always visible)
+routes a creator straight to the console or a fan into the become-a-creator flow. Every
+signed-in consumer page also gets a **persistent left Sidebar** (`ConsumerShell`) — 홈/
+둘러보기 + the following list — that survives navigation rather than being page-local.
 Onboarding is redirect-enforced by `src/proxy.ts`.
 
 Not built (all need a `사업자등록` + paid contract): real PG (Toss/NICE/PortOne),

@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { auth } from "@/auth";
-import { Nav } from "@/components/Nav";
+import { ConsumerShell } from "@/components/ConsumerShell";
 import { Footer } from "@/components/Footer";
 import { NotificationList } from "./NotificationList";
 import { getNotificationsForBacker } from "@/lib/notify";
@@ -17,7 +17,7 @@ export default async function NotificationsPage() {
 
   return (
     <>
-      <Nav />
+      <ConsumerShell>
       <main className="mx-auto max-w-[720px] px-6 py-12 sm:px-10 sm:py-16">
         <div className="flex items-center justify-between gap-4">
           <h1 className="text-[28px] font-extrabold tracking-[-0.03em] text-ink sm:text-[34px]">
@@ -40,6 +40,7 @@ export default async function NotificationsPage() {
           emptyLabel={t("empty")}
         />
       </main>
+      </ConsumerShell>
       <Footer variant="fan" />
     </>
   );

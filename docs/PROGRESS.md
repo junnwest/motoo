@@ -6,6 +6,38 @@ Living status of the build. Update the checkboxes as work lands. See
 [`DECISIONS.md`](./DECISIONS.md) for why things are the way they are and
 [`DEPLOYMENT.md`](./DEPLOYMENT.md) for infra state.
 
+## Recent — 2026-07-30 (full nav restructure: Sidebar, Ranking, Profile, Settings · local only, not yet deployed)
+
+- [x] **Persistent left Sidebar** on every signed-in consumer page (`ConsumerShell`) — 홈/
+  둘러보기 + the (strictly Follow-only) following list. Survives navigation instead of being
+  a home-page widget, since it holds the very nav links you'd click.
+- [x] **Nav restructure**: 랭킹 + 알림 are now plain icon-links (no dropdown — the bell lost
+  its preview to match), a persistent **Studio pill** (routes to `/studio` or the
+  become-a-creator flow depending on ownership — always visible), avatar dropdown trimmed
+  to Profile/Settings/My channel + logout.
+- [x] **`/ranking`** — a fan's rank among each supported creator's supporters, by lifetime
+  mochi purchased (`src/lib/ranking.ts`), computed live. Also shown inline on `/home`'s
+  balance cards.
+- [x] **`/profile`** absorbs `/me/mochi` (holdings + order history) behind an identity
+  header; old route redirects. **`/settings`** is new — nickname/handle (live availability,
+  reused from onboarding) + password change (skipped for OAuth-only accounts).
+- [x] **Follow-nudge on first purchase** — `BuyMochi` prompts a follow after a successful
+  buy (holding and following stay independent by design; this is how the Sidebar's list
+  still ends up complete). Fixed a real cross-component sync gap this surfaced: the header
+  `FollowButton` and the nudge are separate instances, so the nudge now `router.refresh()`s
+  and `FollowButton` adjusts its displayed state during render (not via `useEffect`, which
+  the react-hooks `set-state-in-effect` rule correctly flags as an avoidable extra render).
+- [x] **`HomeSignedIn` simplified** to two columns (mochi status + suggestions) — the
+  Sidebar now carries what used to be its own following rail. Suggestions became larger
+  single-column blocks (thumbnail + name), not the dense grid.
+- [x] No schema change — everything reuses `Follow`/`Notification`/`MochiHolding` from
+  earlier the same day. See DECISIONS 2026-07-30.
+- [x] Verified: `tsc`, eslint, `check:vocab`, `check:emoji` clean, `pnpm test` 11/11,
+  **`pnpm build` clean** (23 routes), browser-verified the full flow signed in as both a
+  fan and a creator — Studio pill both branches, avatar dropdown both variants, ranking
+  page, profile, settings (handle-availability both states), and the follow-nudge → header
+  sync fix, end to end.
+
 ## Recent — 2026-07-30 (notifications + follow list + home widened · local only, not yet deployed)
 
 - [x] **Notifications**: new `Notification` model + `src/lib/notify.ts` (best-effort,

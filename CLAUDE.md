@@ -7,11 +7,15 @@ thesis is shelved for the demo; schema kept.)
 **Accounts are additive:** everyone is a **user (fan)**; a **creator** is just a user who
 *also owns a Studio* (a `Streamer`). No separate account type, no mode toggle — creator
 status = `session.user.creator` (their Studio handle, or null). Signed-in users land on
-**`/home`** (the app home: a rail merging held + followed creators, beside a feed —
-affordable items → pending orders → news → discovery); `/` stays the logged-out
-marketing landing and `/explore` stays the browse page. Creators reach their
-**Studio** via a nav link. A bell in the nav surfaces `/notifications` (order/item/price
-events, best-effort via `src/lib/notify.ts`, never inside `mochi.ts`'s transactions). New users go
+**`/home`** (mochi status with rank, per `src/lib/ranking.ts` → affordable items → pending
+orders → news, beside a suggestion column); `/` stays the logged-out marketing landing and
+`/explore` stays the browse page. Every signed-in consumer page gets a **persistent left
+Sidebar** (`ConsumerShell`: 홈/둘러보기 + the following list — Follow only, never merged
+with `MochiHolding`); a **Studio pill** in the nav (always visible) routes a creator to
+`/studio` or a fan into become-a-creator. A bell icon surfaces `/notifications` (order/
+item/price events, best-effort via `src/lib/notify.ts`, never inside `mochi.ts`'s
+transactions). `/profile` (identity + holdings + history) and `/settings` (nickname/handle/
+password) round out the avatar dropdown. New users go
 through `/onboarding` (nickname, unique `@handle`, 본인인증, terms), enforced by
 `src/proxy.ts` (the edge middleware).
 
