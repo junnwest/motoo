@@ -6,7 +6,24 @@ Living status of the build. Update the checkboxes as work lands. See
 [`DECISIONS.md`](./DECISIONS.md) for why things are the way they are and
 [`DEPLOYMENT.md`](./DEPLOYMENT.md) for infra state.
 
-## Recent — 2026-07-31 (persistent 3-column shell: left/right sticky, middle changes · local only, not yet deployed)
+## Recent — 2026-07-31 (true edge alignment + universal rail, no exceptions · local only, not yet deployed)
+
+- [x] **Fixed a real layout bug**: the 3-column shell was centered inside `max-w-[1600px]`,
+  so on wide screens both rails sat at the edge of that centered block, not the true browser
+  edge. Dropped the cap on `ConsumerShell` and `Nav` (`w-full` instead of `mx-auto max-w-…`)
+  so the sidebars and the nav logo/icons all sit flush to the real viewport edge.
+- [x] **Column separators**: `RightRail` gained `border-l` (matching Sidebar's `border-r`) so
+  the three columns read as visually distinct panels.
+- [x] **`/s/[handle]`'s rail exception is gone** — reversed after the owner re-confirmed "no
+  matter what" a second time. That page's own two-column grid (marketplace/wall left,
+  Buy Mochi/Report/Updates right) collapsed into one column (Buy Mochi first, then
+  marketplace → trust report → backer wall → updates), freeing the right slot for the now-
+  truly-universal `RightRail`. `RightRail` also stopped collapsing to nothing when it has no
+  suggestions — always shows its shell with an empty-state line instead.
+  See DECISIONS 2026-07-31.
+- [x] Verified: `tsc`, eslint, `check:vocab`, `check:emoji` clean, `pnpm test` 11/11,
+  `pnpm build` clean (23 routes), browser-checked at 1920px — true edge alignment confirmed,
+  identical rail content on every page including the creator profile.
 
 - [x] **New `RightRail`** (discovery suggestions) promoted out of `/home` into
   `ConsumerShell`, alongside the left `Sidebar` — both now render on every wrapped page

@@ -877,7 +877,8 @@
     "itemPrice": "{count} mochi",
     "ofBalance": "/ you hold {count}",
     "railFollowing": "Following",
-    "statusTitle": "My mochi status"
+    "statusTitle": "My mochi status",
+    "discoverEmpty": "No new creators to suggest right now."
   },
   "notifications": {
     "title": "Notifications",

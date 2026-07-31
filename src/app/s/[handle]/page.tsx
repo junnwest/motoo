@@ -40,7 +40,7 @@ export default async function StreamerProfilePage({
   if (!data) {
     return (
       <>
-        <ConsumerShell rightRail={false}>
+        <ConsumerShell>
         <section className="mx-auto flex max-w-[600px] flex-col items-center px-6 py-32 text-center">
           <IconSearch width={44} height={44} className="mb-4 text-muted" />
           <h1 className="text-[26px] font-extrabold">{t("notFoundTitle")}</h1>
@@ -115,10 +115,10 @@ export default async function StreamerProfilePage({
 
   return (
     <>
-      <ConsumerShell rightRail={false}>
+      <ConsumerShell>
       {/* Header */}
       <section className="border-b border-line bg-cream-warm px-6 py-12 sm:px-14">
-        <div className="mx-auto flex max-w-[1100px] flex-col gap-6 sm:flex-row sm:items-center">
+        <div className="mx-auto flex max-w-[900px] flex-col gap-6 sm:flex-row sm:items-center">
           <Avatar name={streamer.displayName} size={92} src={streamer.avatarUrl} />
           <div className="flex-1">
             <div className="flex flex-wrap items-center gap-3">
@@ -175,7 +175,7 @@ export default async function StreamerProfilePage({
         </div>
 
         {/* headline stats */}
-        <div className="mx-auto mt-8 grid max-w-[1100px] grid-cols-2 gap-3 sm:grid-cols-4">
+        <div className="mx-auto mt-8 grid max-w-[900px] grid-cols-2 gap-3 sm:grid-cols-4">
           {headlineStats.map((s) => (
             <div
               key={s.label}
@@ -190,133 +190,131 @@ export default async function StreamerProfilePage({
         </div>
       </section>
 
-      <div className="mx-auto grid max-w-[1100px] gap-12 px-6 py-14 sm:px-14 lg:grid-cols-[1.3fr_1fr]">
-        {/* Left: marketplace + backer wall */}
-        <div className="flex flex-col gap-14">
-          {/* Marketplace (spend mochi) */}
-          <MarketplaceSection
+      <div className="mx-auto flex max-w-[900px] flex-col gap-14 px-6 py-14 sm:px-14">
+        {/* Buy mochi — first: the header's 모찌 보내기 CTA anchors straight here,
+            and it's the entry point for a new supporter before there's a
+            marketplace to spend on. Single column now that the RightRail is
+            universal (DECISIONS 2026-07-31) — this page no longer carves out
+            its own side column, so BuyMochi/report/updates flow inline. */}
+        <div id="buy-mochi" className="scroll-mt-24">
+          <BuyMochi
             handle={streamer.handle}
+            streamerId={streamer.id}
+            creatorName={streamer.displayName}
+            issuance={issuance}
             balance={balance}
             loggedIn={!!backer}
-            items={items}
+            following={following}
           />
+        </div>
 
-          {/* Backer Wall */}
-          <div>
-            <div className="mb-1 flex items-baseline gap-3">
-              <h2 className="text-[24px] font-extrabold tracking-[-0.02em]">
-                {t("backerWallTitle")}
-              </h2>
-              <span className="text-[14px] text-muted">
-                {t("backerWallSubtitle")}
-              </span>
-            </div>
-            <div className="mt-4">
-              <BackerWall entries={backerWall.slice(0, 60)} />
-            </div>
+        {/* Marketplace (spend mochi) */}
+        <MarketplaceSection
+          handle={streamer.handle}
+          balance={balance}
+          loggedIn={!!backer}
+          items={items}
+        />
+
+        {/* Trust Report summary */}
+        <div className="rounded-[20px] border border-line-2 bg-card p-6">
+          <Eyebrow className="mb-2">{t("reportSummaryTitle")}</Eyebrow>
+          {report && grades ? (
+            <>
+              <p className="mb-4 text-[13px] text-muted">
+                {t("reportSummarySubtitle")}
+              </p>
+              <div className="mb-4 flex items-center justify-between rounded-[14px] bg-panel p-4">
+                <span className="text-[14px] font-semibold">
+                  {t("sponsorReadiness")}
+                </span>
+                <GradeBadge grade={grades.sponsorReadiness} size="sm" />
+              </div>
+              <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                {(
+                  [
+                    ["fanSupport", grades.fanSupport],
+                    ["fanLoyalty", grades.fanLoyalty],
+                    ["execution", grades.execution],
+                    ["growth", grades.growth],
+                  ] as [string, Grade][]
+                ).map(([key, grade]) => (
+                  <li
+                    key={key}
+                    className="flex items-center justify-between text-[14px]"
+                  >
+                    <span className="text-body">{reportAreaLabel(key)}</span>
+                    <GradeBadge grade={grade} size="sm" showDot={false} />
+                  </li>
+                ))}
+              </ul>
+              <Link
+                href={`/s/${streamer.handle}/report`}
+                className="mt-5 inline-block text-[14px] font-bold text-coral-deep"
+              >
+                {t("viewFullReport")}
+              </Link>
+            </>
+          ) : (
+            <p className="text-[14px] text-body">{t("noReport")}</p>
+          )}
+        </div>
+
+        {/* Backer Wall */}
+        <div>
+          <div className="mb-1 flex items-baseline gap-3">
+            <h2 className="text-[24px] font-extrabold tracking-[-0.02em]">
+              {t("backerWallTitle")}
+            </h2>
+            <span className="text-[14px] text-muted">
+              {t("backerWallSubtitle")}
+            </span>
+          </div>
+          <div className="mt-4">
+            <BackerWall entries={backerWall.slice(0, 60)} />
           </div>
         </div>
 
-        {/* Right: buy mochi + report summary + updates */}
-        <aside className="flex flex-col gap-10">
-          {/* Buy mochi */}
-          <div id="buy-mochi" className="scroll-mt-24">
-            <BuyMochi
-              handle={streamer.handle}
-              streamerId={streamer.id}
-              creatorName={streamer.displayName}
-              issuance={issuance}
-              balance={balance}
-              loggedIn={!!backer}
-              following={following}
-            />
-          </div>
-
-          {/* Trust Report summary */}
-          <div className="rounded-[20px] border border-line-2 bg-card p-6">
-            <Eyebrow className="mb-2">{t("reportSummaryTitle")}</Eyebrow>
-            {report && grades ? (
-              <>
-                <p className="mb-4 text-[13px] text-muted">
-                  {t("reportSummarySubtitle")}
-                </p>
-                <div className="mb-4 flex items-center justify-between rounded-[14px] bg-panel p-4">
-                  <span className="text-[14px] font-semibold">
-                    {t("sponsorReadiness")}
-                  </span>
-                  <GradeBadge grade={grades.sponsorReadiness} size="sm" />
-                </div>
-                <ul className="flex flex-col gap-2">
-                  {(
-                    [
-                      ["fanSupport", grades.fanSupport],
-                      ["fanLoyalty", grades.fanLoyalty],
-                      ["execution", grades.execution],
-                      ["growth", grades.growth],
-                    ] as [string, Grade][]
-                  ).map(([key, grade]) => (
-                    <li
-                      key={key}
-                      className="flex items-center justify-between text-[14px]"
-                    >
-                      <span className="text-body">{reportAreaLabel(key)}</span>
-                      <GradeBadge grade={grade} size="sm" showDot={false} />
-                    </li>
-                  ))}
-                </ul>
-                <Link
-                  href={`/s/${streamer.handle}/report`}
-                  className="mt-5 inline-block text-[14px] font-bold text-coral-deep"
-                >
-                  {t("viewFullReport")}
-                </Link>
-              </>
-            ) : (
-              <p className="text-[14px] text-body">{t("noReport")}</p>
-            )}
-          </div>
-
-          {/* Updates */}
-          <div>
-            <h2 className="mb-4 text-[20px] font-extrabold tracking-[-0.02em]">
-              {t("updatesTitle")}
-            </h2>
-            {updates.length === 0 ? (
-              <p className="text-[14px] text-body">{t("updatesEmpty")}</p>
-            ) : (
-              <ul className="flex flex-col gap-3">
-                {updates.map((u) => {
-                  const locked = u.visibility !== "public";
-                  return (
-                    <li
-                      key={u.id}
-                      className="rounded-[16px] border border-line-2 bg-card p-4"
-                    >
-                      {locked ? (
-                        <>
-                          <div className="flex items-center gap-2 text-[13px] font-semibold text-muted">
-                            <IconLock width={14} height={14} />
-                            {t("backerOnly")}
-                          </div>
-                          <p className="mt-1 text-[13.5px] text-body">
-                            {t("backerOnlyBody")}
-                          </p>
-                        </>
-                      ) : (
-                        <>
-                          <div className="text-[15px] font-bold">{u.title}</div>
-                          <p className="mt-1 line-clamp-2 text-[13.5px] leading-[1.5] text-body">
-                            {u.body}
-                          </p>
-                        </>
-                      )}
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-          </div>
-        </aside>
+        {/* Updates */}
+        <div>
+          <h2 className="mb-4 text-[20px] font-extrabold tracking-[-0.02em]">
+            {t("updatesTitle")}
+          </h2>
+          {updates.length === 0 ? (
+            <p className="text-[14px] text-body">{t("updatesEmpty")}</p>
+          ) : (
+            <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {updates.map((u) => {
+                const locked = u.visibility !== "public";
+                return (
+                  <li
+                    key={u.id}
+                    className="rounded-[16px] border border-line-2 bg-card p-4"
+                  >
+                    {locked ? (
+                      <>
+                        <div className="flex items-center gap-2 text-[13px] font-semibold text-muted">
+                          <IconLock width={14} height={14} />
+                          {t("backerOnly")}
+                        </div>
+                        <p className="mt-1 text-[13.5px] text-body">
+                          {t("backerOnlyBody")}
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <div className="text-[15px] font-bold">{u.title}</div>
+                        <p className="mt-1 line-clamp-2 text-[13.5px] leading-[1.5] text-body">
+                          {u.body}
+                        </p>
+                      </>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
       </div>
       </ConsumerShell>
 

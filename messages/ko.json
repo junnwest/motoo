@@ -877,7 +877,8 @@
     "itemPrice": "{count} 모찌",
     "ofBalance": "/ 보유 {count}",
     "railFollowing": "팔로잉",
-    "statusTitle": "내 모찌 현황"
+    "statusTitle": "내 모찌 현황",
+    "discoverEmpty": "지금은 추천할 새로운 크리에이터가 없어요."
   },
   "notifications": {
     "title": "알림",

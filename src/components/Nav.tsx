@@ -65,7 +65,7 @@ export async function Nav() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-cream/90 backdrop-blur">
-      <nav className="mx-auto flex h-16 max-w-[1600px] items-center justify-between px-5 sm:px-8">
+      <nav className="flex h-16 w-full items-center justify-between px-5 sm:px-8">
         {/* Signed in on the consumer app, the brand goes to the app home;
             everywhere else it goes to "/" (marketing landing / Studio root). */}
         <BrandLogo href={authed && !onStudioHost ? "/home" : "/"} />

@@ -6,14 +6,18 @@ import { auth } from "@/auth";
 /**
  * The app frame for signed-in consumer pages. Three independent columns
  * (DECISIONS 2026-07-31): a persistent left Sidebar (nav + following) and a
- * persistent right RightRail (discovery suggestions) that stay put across
- * navigation — only the middle (`children`) changes per page. Both rails are
- * `sticky`, so they also stay in view while the middle column scrolls, not
- * just while navigating between pages.
+ * persistent right RightRail (discovery suggestions) — universal, no
+ * per-page exceptions, including a creator's public `/s/[handle]` (that page
+ * folded its own Buy Mochi/Report/Updates into a single middle column to make
+ * room). Only the middle (`children`) changes per page. Both rails are
+ * `sticky` and flush to the true viewport edge — **not** centered inside a
+ * max-width wrapper, which would leave them stranded away from the window
+ * edge on any screen wider than the cap. Only the middle column's own content
+ * (each page sets its own max-width) is centered; the shell itself spans the
+ * full viewport width, same as `Nav`.
  *
  * Used on /home, /explore, /ranking, /notifications, /profile, /settings,
- * and a creator's public /s/[handle] (left Sidebar only there — see
- * `rightRail` below).
+ * and /s/[handle].
  *
  * Deliberately NOT used on: the logged-out marketing landing (`/`), auth
  * flows (login/signup/onboarding — a sidebar full of nav is a distraction
@@ -26,13 +30,8 @@ import { auth } from "@/auth";
  */
 export async function ConsumerShell({
   children,
-  rightRail = true,
 }: {
   children: React.ReactNode;
-  /** Off on a creator's public profile — that page has its own right column
-   * (Buy Mochi, Trust Report, News) and is where money changes hands, so a
-   * second rail would crowd the one page that most needs the room. */
-  rightRail?: boolean;
 }) {
   const session = await auth();
   const backerId = session?.user?.id;
@@ -40,10 +39,10 @@ export async function ConsumerShell({
   return (
     <>
       <Nav />
-      <div className="mx-auto flex max-w-[1600px] items-start">
+      <div className="flex w-full items-start">
         {backerId && <Sidebar backerId={backerId} />}
         <div className="min-w-0 flex-1">{children}</div>
-        {backerId && rightRail && <RightRail backerId={backerId} />}
+        {backerId && <RightRail backerId={backerId} />}
       </div>
     </>
   );

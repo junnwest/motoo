@@ -3,6 +3,32 @@
 Why the project is the way it is. Newest first. Keep entries short: decision,
 rationale, and any constraint it creates.
 
+## 2026-07-31 — Rails pinned to the true viewport edge; rail is now universal, no exception
+Two more corrections, same session, against the same "three independent columns" spec.
+- **Real bug, not a taste call**: `ConsumerShell`'s flex row was wrapped in `mx-auto
+  max-w-[1600px]`, so on any screen wider than 1600px the whole 3-column block centered with
+  equal dead space on both sides — the sidebars sat at the edge of that centered block, not
+  the edge of the browser window. "Left/right bar not aligned" was accurate: fixed by
+  dropping the cap entirely (`flex w-full`) so the shell spans the true viewport, matching
+  `Nav`, which got the same fix (`mx-auto max-w-[1600px]` → `w-full`) so the logo/icons line
+  up with the rails beneath them instead of centering separately.
+- **Column separators added**: `RightRail` gained `border-l border-line` (Sidebar already had
+  `border-r`) — a visible edge between all three columns, per "the sections need visible
+  separation" (clarified: this meant the three columns, not reintroducing the just-removed
+  content-card boxes).
+- **`RightRail` always renders its own shell now**, even with zero discover candidates (a
+  `discoverEmpty` copy state instead of `return null`) — collapsing the column when discovery
+  ran dry would reproduce the exact "the rail disappears" symptom this round was fixing, just
+  for a content reason instead of a routing one.
+- **The `/s/[handle]` exception is gone.** Explicitly reversed after re-confirming with the
+  owner (their first answer picked keeping the page's own column; a follow-up message called
+  the rail disappearing there a bug and asked for "no matter what" a second time — taken as
+  overriding the earlier answer). The creator profile page's own two-column grid (marketplace
+  +wall on the left, Buy Mochi/Report/Updates on the right) collapsed into **one column**
+  (max-w 900px, matching every other page): Buy Mochi first (the header's 모찌 보내기 CTA
+  already anchors there), then marketplace, trust report, backer wall, updates. `ConsumerShell`
+  lost its `rightRail` prop entirely — there's no longer a caller that needs to turn it off.
+
 ## 2026-07-31 — Three independent columns; only the middle changes per page
 Owner's framing: three columns act independently — left sticks left, right sticks right,
 "like all sidebars, stay there no matter what." Only the middle is the actual page content.
