@@ -117,7 +117,7 @@ export default async function StreamerProfilePage({
     <>
       <ConsumerShell>
       {/* Header */}
-      <section className="border-b border-line bg-cream-warm px-6 py-12 sm:px-14">
+      <section className="border-b border-line bg-cream-warm px-6 py-12 sm:px-10">
         <div className="mx-auto flex max-w-[900px] flex-col gap-6 sm:flex-row sm:items-center">
           <Avatar name={streamer.displayName} size={92} src={streamer.avatarUrl} />
           <div className="flex-1">
@@ -190,7 +190,7 @@ export default async function StreamerProfilePage({
         </div>
       </section>
 
-      <div className="mx-auto flex max-w-[900px] flex-col gap-14 px-6 py-14 sm:px-14">
+      <div className="mx-auto flex max-w-[900px] flex-col gap-14 px-6 py-14 sm:px-10">
         {/* Buy mochi — first: the header's 모찌 보내기 CTA anchors straight here,
             and it's the entry point for a new supporter before there's a
             marketplace to spend on. Single column now that the RightRail is

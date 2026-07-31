@@ -18,7 +18,7 @@ export default async function NotificationsPage() {
   return (
     <>
       <ConsumerShell>
-      <main className="mx-auto max-w-[720px] px-6 py-12 sm:px-10 sm:py-16">
+      <main className="mx-auto max-w-[900px] px-6 py-12 sm:px-10 sm:py-16">
         <div className="flex items-center justify-between gap-4">
           <h1 className="text-[28px] font-extrabold tracking-[-0.03em] text-ink sm:text-[34px]">
             {t("title")}

@@ -6,6 +6,19 @@ Living status of the build. Update the checkboxes as work lands. See
 [`DECISIONS.md`](./DECISIONS.md) for why things are the way they are and
 [`DEPLOYMENT.md`](./DEPLOYMENT.md) for infra state.
 
+## Recent — 2026-07-31 (unified page width + heading style across the app)
+
+- [x] **One content width for every page**: `/home`, `/explore`, `/ranking`,
+  `/notifications`, `/profile`, and `/s/[handle]` all now share `max-w-[900px] px-6 py-12
+  sm:px-10 sm:py-16` and the same H1 style (`text-[28px]/sm:text-[34px]`) — previously
+  ranged 640–1200px with three different H1 sizes. `/explore` dropped its one-off `Eyebrow`
+  label and moved its card grid to `lg:grid-cols-3` (from 4) to suit the narrower column.
+  `/settings` is the one intentional exception, kept narrower since it's a form, not a
+  content feed. See DECISIONS 2026-07-31.
+- [x] Verified: `tsc`, eslint, `check:vocab`, `check:emoji` clean, `pnpm test` 11/11,
+  `pnpm build` clean (23 routes), browser-checked all six pages line up at the same left
+  edge and title size.
+
 ## Recent — 2026-07-31 (fixed collapsed-rail border line stopping short)
 
 - [x] **Collapsed rail's border line was cut short**: the collapsed strip used

@@ -64,7 +64,7 @@ export async function HomeSignedIn({
   const hasMochi = holdings.length > 0;
 
   return (
-    <div className="mx-auto max-w-[900px] px-6 py-10 sm:px-10 sm:py-14">
+    <div className="mx-auto max-w-[900px] px-6 py-12 sm:px-10 sm:py-16">
       <h1 className="text-[28px] font-extrabold tracking-[-0.03em] text-ink sm:text-[34px]">
         {t("greeting", { name: nickname })}
       </h1>

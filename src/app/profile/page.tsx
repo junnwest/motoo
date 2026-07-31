@@ -48,7 +48,7 @@ export default async function ProfilePage() {
           <div className="flex flex-wrap items-center gap-5">
             <Avatar name={backer.nickname} src={backer.avatarUrl} size={72} />
             <div className="min-w-0 flex-1">
-              <h1 className="text-[26px] font-extrabold tracking-[-0.03em] text-ink sm:text-[32px]">
+              <h1 className="text-[28px] font-extrabold tracking-[-0.03em] text-ink sm:text-[34px]">
                 {backer.nickname}
               </h1>
               {backer.handle && (

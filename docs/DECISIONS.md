@@ -3,6 +3,28 @@
 Why the project is the way it is. Newest first. Keep entries short: decision,
 rationale, and any constraint it creates.
 
+## 2026-07-31 — One content width and heading style for every ConsumerShell page
+User: 둘러보기 (`/explore`) uses a visibly wider column than 홈 (`/home`), and the fonts
+don't line up either — asked to make every page consistent. Audited all seven pages'
+middle-column wrapper: max-widths ranged from 640px (settings) to 1200px (explore), with
+three different vertical-padding patterns and H1 sizes drifting between 26/32, 28/34, and
+32/40px depending on the page.
+- **Standardized on `max-w-[900px] px-6 py-12 sm:px-10 sm:py-16`** and H1
+  `text-[28px] font-extrabold tracking-[-0.03em] sm:text-[34px]` — the values already used
+  by the plurality of pages (home, ranking-adjacent, profile, settings), not a new value
+  invented for this fix. Applied to `/home`, `/explore`, `/ranking`, `/notifications`,
+  `/profile`; `/s/[handle]`'s hero band and post-hero content already sat at max-w-900, so
+  only its horizontal padding (`sm:px-14` → `sm:px-10`) needed aligning.
+- **`/explore` lost its `Eyebrow` label** ("discover" above the H1) — no other consumer
+  page has one, and it was contributing to the "fonts look different" complaint by adding
+  an element nothing else has. Its card grid dropped from `lg:grid-cols-4` to
+  `lg:grid-cols-3` to keep cards a comfortable size now that the column is narrower
+  (~257px/card either way — verified by screenshot, not just arithmetic).
+- **`/settings` kept its narrower `max-w-[640px]`** — the one deliberate exception. It's a
+  form, not a content feed; widening its input fields to match a 900px feed column would
+  make them look oversized, not "consistent" in any way that helps. Everything else in this
+  fix is a feed-style page (cards/rows), so one shared width made sense there.
+
 ## 2026-07-31 — Collapsed rail's border line was stopping short, right below the arrow
 User: the reopen arrow's border-line "next to it" doesn't reach the bottom — the vertical
 divider stopped a short way down instead of running the full page height. Root cause: the

@@ -2,7 +2,6 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { ConsumerShell } from "@/components/ConsumerShell";
 import { Footer } from "@/components/Footer";
-import { Eyebrow } from "@/components/ui/Eyebrow";
 import { Mochi } from "@/components/Mochi";
 import { StreamerCard } from "@/components/StreamerCard";
 import { ExploreFilters } from "@/components/ExploreFilters";
@@ -35,12 +34,11 @@ export default async function ExplorePage({
   return (
     <>
       <ConsumerShell>
-      <section className="mx-auto max-w-[1200px] px-6 py-12 sm:px-14">
-        <Eyebrow className="mb-3">{t("eyebrow")}</Eyebrow>
-        <h1 className="text-[32px] font-extrabold tracking-[-0.03em] sm:text-[40px]">
+      <section className="mx-auto max-w-[900px] px-6 py-12 sm:px-10 sm:py-16">
+        <h1 className="text-[28px] font-extrabold tracking-[-0.03em] text-ink sm:text-[34px]">
           {t("title")}
         </h1>
-        <p className="mt-2 max-w-[560px] text-[16px] text-body">{t("subtitle")}</p>
+        <p className="mt-2 text-[15.5px] text-body">{t("subtitle")}</p>
 
         <div className="mt-7">
           <ExploreFilters />
@@ -57,7 +55,7 @@ export default async function ExplorePage({
         </div>
 
         {streamers.length > 0 ? (
-          <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {streamers.map((s) => (
               <StreamerCard key={s.handle} streamer={s} />
             ))}
