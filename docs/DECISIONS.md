@@ -3,6 +3,33 @@
 Why the project is the way it is. Newest first. Keep entries short: decision,
 rationale, and any constraint it creates.
 
+## 2026-07-31 — Both rails are foldable, persisted, same mechanic mirrored
+User spec: on hover, a fold button appears to the left of the RightRail's "새로운
+크리에이터" header, pushing the header right to make room; once collapsed, a reopen
+button sits on the rail's own edge. "Same thing" for the left Sidebar.
+- **Split each rail into server (fetch) + client (interactive) halves.** Collapse state
+  needs `localStorage`, and the Sidebar's active-page highlight needs `usePathname()` —
+  neither is available to the async server components that fetch `following`/`discover`.
+  `Sidebar`/`RightRail` now just fetch and hand plain data to new `SidebarPanel`/
+  `RightRailPanel` client components, which own all the rendering and interaction.
+  `SidebarNavLinks.tsx` (the previous active-state-only split) is folded into
+  `SidebarPanel` and deleted — one client component per rail, not two.
+- **Same fold mechanic on both sides**, not a mirrored one: the button sits before the
+  header text on hover (width 0 → real width, `group-hover`), pushing the label right, on
+  both the RightRail's "새로운 크리에이터" and the Sidebar's "팔로잉" (the only other
+  text header in that rail — collapsing there hides the nav links above it too, since the
+  toggle controls the whole rail, not just the following list).
+- **Collapsed state**: rail shrinks to a `w-12` strip holding just a centered reopen
+  chevron, on the same edge the rail already sits on (right edge for RightRail, left edge
+  for Sidebar) — not a fully-hidden rail with a floating button elsewhere.
+- **Persistence via `usePersistedCollapse`** (`src/lib/usePersistedCollapse.ts`), a shared
+  hook using `useSyncExternalStore` against `localStorage` — **not** a mount `useEffect` +
+  `setState`, which trips `react-hooks/set-state-in-effect` (hit this same rule earlier
+  this session on `FollowButton`; same lesson, different component). Server snapshot is
+  always `false` (expanded) so SSR and first paint agree; the real preference applies once
+  React reconciles against the client snapshot — a rail collapsed on one page stays
+  collapsed after navigating to another.
+
 ## 2026-07-31 — `bg-panel` is literally the same color as the page background
 User: "I wish there was a box behind the buttons that appear on hover and stays on
 click" — about the Sidebar active-state work from minutes earlier. Root cause:

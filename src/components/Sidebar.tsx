@@ -1,9 +1,5 @@
-import Link from "next/link";
-import { getTranslations } from "next-intl/server";
-import { CreatorCover } from "@/components/CreatorCover";
-import { SidebarNavLinks } from "@/components/SidebarNavLinks";
+import { SidebarPanel } from "@/components/SidebarPanel";
 import { getFollowList } from "@/lib/follows";
-import { ALL_CATEGORIES } from "@/lib/creatorTaxonomy";
 
 /**
  * The persistent left sidebar (DECISIONS 2026-07-30) — a real app frame, not a
@@ -13,54 +9,13 @@ import { ALL_CATEGORIES } from "@/lib/creatorTaxonomy";
  *
  * The following list is strictly Follow rows (never merged with
  * MochiHolding) — see src/lib/follows.ts.
+ *
+ * Only fetches the following list — the collapsible shell, nav links, and
+ * active-page highlighting all live in `SidebarPanel` (a client component;
+ * `usePathname()` and the collapse toggle's `localStorage` aren't available
+ * to this async server component).
  */
 export async function Sidebar({ backerId }: { backerId: string }) {
-  const t = await getTranslations("sidebar");
-  const tn = await getTranslations("nav");
-  const tax = await getTranslations("creatorTaxonomy");
   const following = await getFollowList(backerId);
-
-  return (
-    <aside className="sticky top-16 hidden max-h-[calc(100vh-64px)] w-[260px] flex-none overflow-y-auto border-r border-line px-3 py-6 lg:block">
-      <SidebarNavLinks homeLabel={tn("home")} exploreLabel={tn("explore")} />
-
-      <div className="mb-2 mt-6 px-3 text-[12px] font-bold uppercase tracking-[0.08em] text-muted">
-        {t("followingTitle")}
-      </div>
-
-      {following.length === 0 ? (
-        <p className="px-3 text-[13px] leading-relaxed text-muted">
-          {t("followingEmpty")}
-        </p>
-      ) : (
-        <ul className="flex flex-col gap-0.5">
-          {following.map((c) => (
-            <li key={c.streamerId}>
-              <Link
-                href={`/s/${c.handle}`}
-                className="flex items-center gap-2.5 rounded-[10px] px-3 py-2 transition-colors hover:bg-cream-warm"
-              >
-                <CreatorCover
-                  handle={c.handle}
-                  displayName={c.displayName}
-                  className="h-7 w-7 flex-none rounded-full"
-                  markClass="text-[12px]"
-                />
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[13.5px] font-semibold text-ink">
-                    {c.displayName}
-                  </span>
-                  <span className="block truncate text-[11px] text-muted">
-                    {ALL_CATEGORIES.includes(c.category)
-                      ? tax(`categories.${c.category}`)
-                      : c.category}
-                  </span>
-                </span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      )}
-    </aside>
-  );
+  return <SidebarPanel following={following} />;
 }

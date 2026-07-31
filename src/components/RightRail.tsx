@@ -1,11 +1,7 @@
-import Link from "next/link";
-import { getTranslations } from "next-intl/server";
-import { CreatorCover } from "@/components/CreatorCover";
-import { FollowButton } from "@/components/FollowButton";
+import { RightRailPanel } from "@/components/RightRailPanel";
 import { getHoldingsForBacker } from "@/lib/mochi";
 import { getFollowList } from "@/lib/follows";
 import { getExploreStreamers } from "@/lib/streamers";
-import { ALL_CATEGORIES } from "@/lib/creatorTaxonomy";
 
 /**
  * The persistent right rail — discovery suggestions, mirroring the left
@@ -16,21 +12,15 @@ import { ALL_CATEGORIES } from "@/lib/creatorTaxonomy";
  * its own Buy Mochi/Report/Updates into its single middle column to make
  * room; see DECISIONS 2026-07-31).
  *
- * Always renders its own shell (border + heading), even with zero
- * candidates — collapsing the column entirely when discovery runs dry would
- * make the right edge flicker in and out exactly like the bug this was meant
- * to fix.
- *
- * Two-up grid, small thumbnails, an instant Follow button per card
- * (DECISIONS 2026-07-31): the rail is 300px wide, so a single-column shelf
- * of 140px-tall images read as oversized for a suggestions list. Cards are
- * strictly discover-only (already-followed/held creators are filtered out
- * before this renders), so `initialFollowing` is always false.
+ * Only fetches the discover list — the collapsible shell, header, and grid
+ * all live in `RightRailPanel` (a client component; collapse state needs
+ * `localStorage`/`usePathname`-style hooks this async server component can't
+ * use). Two-up grid, small thumbnails, an instant Follow button per card
+ * (DECISIONS 2026-07-31): cards are strictly discover-only (already-
+ * followed/held creators are filtered out here), so `initialFollowing` on
+ * each card is always false.
  */
 export async function RightRail({ backerId }: { backerId: string }) {
-  const t = await getTranslations("home");
-  const tax = await getTranslations("creatorTaxonomy");
-
   const [holdings, follows] = await Promise.all([
     getHoldingsForBacker(backerId),
     getFollowList(backerId),
@@ -49,57 +39,13 @@ export async function RightRail({ backerId }: { backerId: string }) {
   }
 
   return (
-    <aside className="sticky top-16 hidden max-h-[calc(100vh-64px)] w-[300px] flex-none overflow-y-auto border-l border-line px-4 py-6 xl:block">
-      <div className="mb-4 flex items-baseline justify-between gap-4">
-        <h2 className="text-[15px] font-extrabold tracking-[-0.01em] text-ink">
-          {t("discoverTitle")}
-        </h2>
-        <Link
-          href="/explore"
-          className="flex-none text-[12.5px] font-bold text-coral-deep hover:underline"
-        >
-          {t("seeAll")} →
-        </Link>
-      </div>
-      {discover.length === 0 ? (
-        <p className="text-[13px] leading-relaxed text-muted">
-          {t("discoverEmpty")}
-        </p>
-      ) : (
-        <div className="grid grid-cols-2 gap-x-3 gap-y-5">
-          {discover.map((s) => (
-            <div key={s.handle}>
-              <Link href={`/s/${s.handle}`} className="group block">
-                <CreatorCover
-                  handle={s.handle}
-                  displayName={s.displayName}
-                  className="h-[90px] w-full rounded-[10px] transition-opacity group-hover:opacity-90"
-                  markClass="text-[22px]"
-                />
-                <div className="mt-2">
-                  <div className="truncate text-[13px] font-extrabold text-ink">
-                    {s.displayName}
-                  </div>
-                  <div className="mt-0.5 truncate text-[11px] text-muted">
-                    {ALL_CATEGORIES.includes(s.category)
-                      ? tax(`categories.${s.category}`)
-                      : s.category}
-                  </div>
-                </div>
-              </Link>
-              <div className="mt-2">
-                <FollowButton
-                  streamerId={s.id}
-                  handle={s.handle}
-                  initialFollowing={false}
-                  signedIn
-                  compact
-                />
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </aside>
+    <RightRailPanel
+      items={discover.map((s) => ({
+        id: s.id,
+        handle: s.handle,
+        displayName: s.displayName,
+        category: s.category,
+      }))}
+    />
   );
 }

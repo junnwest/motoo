@@ -6,6 +6,21 @@ Living status of the build. Update the checkboxes as work lands. See
 [`DECISIONS.md`](./DECISIONS.md) for why things are the way they are and
 [`DEPLOYMENT.md`](./DEPLOYMENT.md) for infra state.
 
+## Recent — 2026-07-31 (both rails are now foldable, state persists)
+
+- [x] **Sidebar and RightRail are both collapsible**: hover reveals a fold button before
+  the section header (새로운 크리에이터 / 팔로잉), which grows in and pushes the header
+  right; clicking it shrinks the whole rail to a thin strip with just a reopen chevron on
+  its own edge. State persists across navigation via a new shared hook,
+  `usePersistedCollapse` (`useSyncExternalStore` + `localStorage`, not a mount effect —
+  avoids the `set-state-in-effect` lint rule).
+- [x] Each rail split into a server half (data fetch: `Sidebar`/`RightRail`) and a client
+  half (interaction: new `SidebarPanel`/`RightRailPanel`) — `SidebarNavLinks.tsx` folded
+  into `SidebarPanel` and removed. See DECISIONS 2026-07-31.
+- [x] Verified: `tsc`, eslint, `check:vocab`, `check:emoji` clean, `pnpm test` 11/11,
+  `pnpm build` clean (23 routes), browser-checked hover-reveal, collapse, reopen, and
+  persistence across a page navigation on both rails.
+
 ## Recent — 2026-07-31 (fixed invisible nav hover/active box)
 
 - [x] **`bg-panel` was invisible against the page**: `--color-panel` is the exact same hex
