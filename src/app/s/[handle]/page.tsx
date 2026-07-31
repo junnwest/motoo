@@ -40,7 +40,7 @@ export default async function StreamerProfilePage({
   if (!data) {
     return (
       <>
-        <ConsumerShell>
+        <ConsumerShell rightRail={false}>
         <section className="mx-auto flex max-w-[600px] flex-col items-center px-6 py-32 text-center">
           <IconSearch width={44} height={44} className="mb-4 text-muted" />
           <h1 className="text-[26px] font-extrabold">{t("notFoundTitle")}</h1>
@@ -115,7 +115,7 @@ export default async function StreamerProfilePage({
 
   return (
     <>
-      <ConsumerShell>
+      <ConsumerShell rightRail={false}>
       {/* Header */}
       <section className="border-b border-line bg-cream-warm px-6 py-12 sm:px-14">
         <div className="mx-auto flex max-w-[1100px] flex-col gap-6 sm:flex-row sm:items-center">

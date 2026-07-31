@@ -21,7 +21,7 @@ export async function Sidebar({ backerId }: { backerId: string }) {
   const following = await getFollowList(backerId);
 
   return (
-    <aside className="hidden w-[260px] flex-none border-r border-line px-3 py-6 lg:block">
+    <aside className="sticky top-16 hidden max-h-[calc(100vh-64px)] w-[260px] flex-none overflow-y-auto border-r border-line px-3 py-6 lg:block">
       <nav className="flex flex-col gap-0.5">
         <SidebarLink href="/home" icon={<IconHome width={18} height={18} />}>
           {tn("home")}

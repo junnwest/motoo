@@ -3,6 +3,27 @@
 Why the project is the way it is. Newest first. Keep entries short: decision,
 rationale, and any constraint it creates.
 
+## 2026-07-31 — Three independent columns; only the middle changes per page
+Owner's framing: three columns act independently — left sticks left, right sticks right,
+"like all sidebars, stay there no matter what." Only the middle is the actual page content.
+- **New `src/components/RightRail.tsx`**, promoted out of `HomeSignedIn` where discovery
+  suggestions used to live as a home-page-local column. Independent data fetch (own
+  holdings/follows exclusion + `getExploreStreamers`), same shape as `Sidebar` — neither
+  depends on the other or on the middle content.
+- **Both rails are now `sticky top-16`** with their own `max-h-[calc(100vh-64px)]
+  overflow-y-auto` — they don't just persist across navigation (`ConsumerShell` already did
+  that), they now stay pinned in the viewport while the middle column scrolls, matching "stay
+  there no matter what" literally rather than just "present on every page."
+- **`ConsumerShell` gained a `rightRail` prop** (default `true`). **Off on `/s/[handle]`**
+  specifically — a creator's public profile already has its own purpose-built right column
+  (Buy Mochi, Trust Report, News) and is where money actually changes hands; a second rail
+  would crowd the one page that most needs the room. Confirmed with the owner rather than
+  guessed — the alternative (folding that column into the middle so the rail is truly
+  universal) was explicitly on the table and rejected in favor of this exception.
+- **`HomeSignedIn` lost its own discover column** — single-column now (mochi status →
+  affordable → pending → news), narrower `max-w-[900px]` for readability now that it isn't
+  sharing width with a rail it no longer renders itself. One discover surface, not two.
+
 ## 2026-07-31 — Sections are bare, not boxed (Spotify-referenced, corrected)
 Owner asked to look at Spotify's own web player directly. First pass got this wrong: I
 inspected the CSS of Spotify's **sidebar promo widget** ("Create your first playlist" —

@@ -6,6 +6,22 @@ Living status of the build. Update the checkboxes as work lands. See
 [`DECISIONS.md`](./DECISIONS.md) for why things are the way they are and
 [`DEPLOYMENT.md`](./DEPLOYMENT.md) for infra state.
 
+## Recent — 2026-07-31 (persistent 3-column shell: left/right sticky, middle changes · local only, not yet deployed)
+
+- [x] **New `RightRail`** (discovery suggestions) promoted out of `/home` into
+  `ConsumerShell`, alongside the left `Sidebar` — both now render on every wrapped page
+  (`/home`, `/explore`, `/ranking`, `/notifications`, `/profile`, `/settings`) with
+  identical content regardless of which page you're on. **Both rails are `sticky`** (stay
+  pinned while the middle column scrolls, not just present across navigation).
+  **Exception**: off on a creator's public `/s/[handle]`, which keeps its own existing right
+  column (Buy Mochi/Trust Report/News) — confirmed with the owner rather than assumed, since
+  the alternative (folding that column into the page) was a real, much bigger option.
+  `HomeSignedIn` dropped its own discover column now that it's redundant. See
+  DECISIONS 2026-07-31.
+- [x] Verified: `tsc`, eslint, `check:vocab`, `check:emoji` clean, `pnpm test` 11/11,
+  `pnpm build` clean (23 routes), browser-checked all pages — same rail content on
+  home/profile/settings, no rail on the creator profile.
+
 ## Recent — 2026-07-31 (Spotify-referenced sections, corrected to bare · local only, not yet deployed)
 
 - [x] **Sections are bare, not boxed** — a first pass wrongly generalized Spotify's sidebar
