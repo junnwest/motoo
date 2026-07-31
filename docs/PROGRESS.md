@@ -6,6 +6,19 @@ Living status of the build. Update the checkboxes as work lands. See
 [`DECISIONS.md`](./DECISIONS.md) for why things are the way they are and
 [`DEPLOYMENT.md`](./DEPLOYMENT.md) for infra state.
 
+## Recent — 2026-07-31 (fixed collapsed-rail border line stopping short)
+
+- [x] **Collapsed rail's border line was cut short**: the collapsed strip used
+  `max-h-[calc(100vh-64px)]` (a cap) with no matching `h-` (a floor), so its box height was
+  driven by its one-button content (~80px), not the full sticky column — the border line
+  could only run alongside those ~80px, leaving the rest of the viewport with no divider
+  below the reopen arrow. Fixed in both `RightRailPanel` and `SidebarPanel`: swapped
+  `max-h-[calc(100vh-64px)] overflow-y-auto` for a fixed `h-[calc(100vh-64px)]`. See
+  DECISIONS 2026-07-31.
+- [x] Verified: `tsc`, eslint, `check:vocab`, `check:emoji` clean, `pnpm test` 11/11,
+  `pnpm build` clean (23 routes), full-viewport screenshot confirmed both borders now run
+  the complete height when collapsed.
+
 ## Recent — 2026-07-31 (both rails are now foldable, state persists)
 
 - [x] **Sidebar and RightRail are both collapsible**: hover reveals a fold button before

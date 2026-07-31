@@ -3,6 +3,22 @@
 Why the project is the way it is. Newest first. Keep entries short: decision,
 rationale, and any constraint it creates.
 
+## 2026-07-31 — Collapsed rail's border line was stopping short, right below the arrow
+User: the reopen arrow's border-line "next to it" doesn't reach the bottom — the vertical
+divider stopped a short way down instead of running the full page height. Root cause: the
+collapsed strip's className had `max-h-[calc(100vh-64px)]` (a cap) with no matching `h-`
+(a floor), so the `<aside>`'s actual box height was driven by its content — just one 32px
+button plus `py-6` padding, ~80px total — not the sticky column's full available height.
+The `border-l`/`border-r` on that box could only ever run alongside those ~80px; below
+that, the aside's DOM box had already ended, so there was nothing left to draw a border
+against for the rest of the viewport. Confirmed with a full-viewport screenshot (not just
+a cropped one near the top, which had been hiding this) — expanded state didn't show it
+because its content (cards, following list) was tall enough to reach the cap anyway; the
+collapsed state's near-empty content exposed the missing floor. Fixed in both
+`RightRailPanel` and `SidebarPanel`'s collapsed branch: `max-h-[calc(100vh-64px)]
+overflow-y-auto` → `h-[calc(100vh-64px)]` (a fixed height, not a cap — no scroll needed for
+one button, so `overflow-y-auto` came out too).
+
 ## 2026-07-31 — Both rails are foldable, persisted, same mechanic mirrored
 User spec: on hover, a fold button appears to the left of the RightRail's "새로운
 크리에이터" header, pushing the header right to make room; once collapsed, a reopen

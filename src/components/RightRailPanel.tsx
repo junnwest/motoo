@@ -32,7 +32,7 @@ export function RightRailPanel({
 
   if (collapsed) {
     return (
-      <aside className="sticky top-16 hidden max-h-[calc(100vh-64px)] w-12 flex-none overflow-y-auto border-l border-line py-6 xl:block">
+      <aside className="sticky top-16 hidden h-[calc(100vh-64px)] w-12 flex-none border-l border-line py-6 xl:block">
         <button
           type="button"
           onClick={() => toggle(false)}
