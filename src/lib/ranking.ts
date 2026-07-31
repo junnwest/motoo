@@ -77,3 +77,54 @@ export async function getSupporterRank(
   ]);
   return { rank: ahead + 1, total };
 }
+
+export type LeaderboardEntry = {
+  backerId: string;
+  nickname: string;
+  avatarUrl: string | null;
+  purchasedTotal: number;
+  rank: number;
+};
+
+/**
+ * A creator's own supporters, ranked by lifetime mochi purchased — the
+ * public-facing counterpart to `getSupporterRank`. Replaces the old
+ * founding-number "Backer Wall" (a Phase-1 Kickstarter-era concept, unrelated
+ * to the mochi model; see DECISIONS 2026-08-01). Same live-computed pattern:
+ * cheap at this scale, never drifts out of sync with a purchase.
+ */
+export async function getSupporterLeaderboard(
+  streamerId: string,
+  limit = 60,
+): Promise<{ entries: LeaderboardEntry[]; totalSupporters: number }> {
+  const [holdings, totalSupporters] = await Promise.all([
+    prisma.mochiHolding.findMany({
+      where: { streamerId, purchasedTotal: { gt: 0 } },
+      orderBy: { purchasedTotal: "desc" },
+      take: limit,
+      include: { backer: { select: { nickname: true, avatarUrl: true } } },
+    }),
+    prisma.mochiHolding.count({
+      where: { streamerId, purchasedTotal: { gt: 0 } },
+    }),
+  ]);
+
+  // Ties share a rank (two backers tied for the top both show #1).
+  let rank = 0;
+  let lastValue = -1;
+  const entries = holdings.map((h, i) => {
+    if (h.purchasedTotal !== lastValue) {
+      rank = i + 1;
+      lastValue = h.purchasedTotal;
+    }
+    return {
+      backerId: h.backerId,
+      nickname: h.backer.nickname,
+      avatarUrl: h.backer.avatarUrl,
+      purchasedTotal: h.purchasedTotal,
+      rank,
+    };
+  });
+
+  return { entries, totalSupporters };
+}

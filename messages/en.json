@@ -242,11 +242,9 @@
     "tierBackers": "{count} backing",
     "tierLimit": "{remaining} spots left",
     "tierBackButton": "Back this tier",
-    "backerWallTitle": "Backer Wall",
-    "backerWallSubtitle": "The fans who backed first",
-    "backerWallEmpty": "Still waiting for the first backer. Be the one to claim the first founding badge.",
-    "anonymousBacker": "Anonymous backer",
-    "foundingLabel": "Founding",
+    "leaderboardTitle": "Supporter ranking",
+    "leaderboardSubtitle": "By lifetime purchased · {count}",
+    "leaderboardEmpty": "No one has bought mochi here yet.",
     "updatesTitle": "Recent updates",
     "updatesEmpty": "No updates yet.",
     "backerOnly": "Backer-only update",
@@ -703,6 +701,7 @@
     }
   },
   "marketplace": {
+    "backToProfile": "Back to profile",
     "buyTitle": "Buy mochi",
     "buySubtitle": "Buy {name}'s mochi to use it in their market.",
     "pricePerMochi": "₩{price} per mochi",

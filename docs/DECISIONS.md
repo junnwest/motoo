@@ -3,6 +3,38 @@
 Why the project is the way it is. Newest first. Keep entries short: decision,
 rationale, and any constraint it creates.
 
+## 2026-08-01 — Buy Mochi moves to its own page; Backer Wall becomes a real ranking
+Three related fixes to the creator profile page, all from the same feedback pass.
+- **모찌 보내기 now routes to `/s/[handle]/buy`**, a focused standalone page (Nav only,
+  no ConsumerShell — same convention as the retired `/back` flow it replaces), instead of
+  jumping to an in-page `#buy-mochi` anchor. `BuyMochi` itself didn't need to change at all
+  — it was already a fully self-contained client component; only the wrapper moved.
+  `getStreamerMarketplace` (`src/lib/streamers.ts`), a query written for this exact purpose
+  but never actually called anywhere, finally gets used. `buyMochiAction`/`redeemItemAction`
+  now also `revalidatePath` the `/buy` route so its balance stays live after a purchase or
+  redemption made from either page.
+- **Backer Wall deleted, replaced by a real supporter ranking.** The old "Backer Wall"
+  (`BackerWall.tsx`, `getStreamerProfile`'s `backerWall`/`backerCount`) was leftover
+  Phase-1 Kickstarter-era plumbing — founding numbers and an anonymity toggle from the
+  shelved Trust Report thesis, querying the legacy `Backing` model, completely
+  disconnected from the mochi model. Replaced with `getSupporterLeaderboard`
+  (`src/lib/ranking.ts`) — the same live `ORDER BY purchasedTotal DESC` pattern as
+  `getSupporterRank`/`getMyRankings`, just for ALL of a creator's supporters instead of
+  one backer's own rank — rendered by a new `SupporterLeaderboard` component. The
+  headline "supporters" stat also switched from the legacy `backerCount` (a distinct-
+  founding-number count) to `leaderboard.totalSupporters` (a live `MochiHolding` count) —
+  same underlying bug class, same fix.
+- **"백커" swept from this page's copy** — never an agreed term (the product's fan-facing
+  vocabulary is 후원자/팬, see `CLAUDE.md`); it was a leftover transliteration from the
+  same Phase-1 thesis. Fixed on the headline stat label, the new leaderboard section, and
+  the Updates section's "backer-only" lock label — all on this one page. Deliberately did
+  *not* sweep other pages (explore's filter/sort labels, the still-routable legacy
+  `/back`/`BackingFlow` flow) — out of scope for this pass, not what was reported.
+- **Ranking (30%) + Marketplace (70%) side by side**, replacing the Backer Wall's old
+  spot: a 10-column grid (`sm:grid-cols-10`, `sm:col-span-3` / `sm:col-span-7`), stacking
+  to one column below `sm`. Freed up by moving BuyMochi out — the page no longer needs a
+  single wide column for it, and the leaderboard is naturally narrower than a market grid.
+
 ## 2026-07-31 — One content width and heading style for every ConsumerShell page
 User: 둘러보기 (`/explore`) uses a visibly wider column than 홈 (`/home`), and the fonts
 don't line up either — asked to make every page consistent. Audited all seven pages'

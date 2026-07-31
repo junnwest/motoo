@@ -1,10 +1,29 @@
 # motoo — Progress Tracker
 
-_Last updated: 2026-07-31_
+_Last updated: 2026-08-01_
 
 Living status of the build. Update the checkboxes as work lands. See
 [`DECISIONS.md`](./DECISIONS.md) for why things are the way they are and
 [`DEPLOYMENT.md`](./DEPLOYMENT.md) for infra state.
+
+## Recent — 2026-08-01 (Buy Mochi → own page; Backer Wall → real supporter ranking)
+
+- [x] **`/s/[handle]/buy`** (new): 모찌 보내기 now routes to a focused standalone page
+  instead of an in-page anchor. `BuyMochi` itself unchanged — just re-wrapped. Both
+  buy/redeem actions revalidate the new path too.
+- [x] **Backer Wall deleted** — it was Phase-1 Kickstarter-era plumbing (founding numbers,
+  the legacy `Backing` model), disconnected from the mochi model. Replaced with a real
+  supporter leaderboard (`getSupporterLeaderboard` in `src/lib/ranking.ts` +
+  `SupporterLeaderboard.tsx`), ranked live by lifetime mochi purchased — same pattern as
+  the existing per-backer `getSupporterRank`. Headline "supporters" stat now counts real
+  `MochiHolding` rows instead of the legacy backing count.
+- [x] **"백커" replaced with 후원자** on this page's copy (headline stat, leaderboard,
+  updates lock label) — never an agreed term, leftover from the same retired thesis.
+- [x] **Ranking (30%) + Marketplace (70%) side by side**, replacing the Backer Wall's old
+  full-width slot; stacks to one column on narrow viewports. See DECISIONS 2026-08-01.
+- [x] Verified: `tsc`, eslint, `check:vocab`, `check:emoji` clean, `pnpm test` 11/11,
+  `pnpm build` clean (24 routes, `/s/[handle]/buy` new), browser-tested the full purchase
+  flow end-to-end on the new page (balance + goal progress + leaderboard all updated live).
 
 ## Recent — 2026-07-31 (unified page width + heading style across the app)
 

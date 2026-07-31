@@ -41,6 +41,7 @@ export async function buyMochiAction(
       idempotencyKey: data.idempotencyKey,
     });
     revalidatePath(`/s/${data.handle}`);
+    revalidatePath(`/s/${data.handle}/buy`);
     return { ok: true, balance, amountKrw };
   } catch (e) {
     const msg = e instanceof Error ? e.message : "";
@@ -76,6 +77,7 @@ export async function redeemItemAction(
       note: data.note ?? null,
     });
     revalidatePath(`/s/${data.handle}`);
+    revalidatePath(`/s/${data.handle}/buy`);
     return { ok: true, balance, mochiSpent, instant };
   } catch (e) {
     const msg = e instanceof Error ? e.message : "";

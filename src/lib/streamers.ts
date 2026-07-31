@@ -122,7 +122,11 @@ export async function getExploreStreamers(
   return cards;
 }
 
-/** Full profile with tiers, backer wall, updates, and published report summary. */
+/**
+ * Full profile with tiers, updates, and published report summary. The
+ * supporter leaderboard (live mochi-purchase ranking) is a separate call —
+ * `getSupporterLeaderboard` in `@/lib/ranking` — not folded in here.
+ */
 export async function getStreamerProfile(handle: string) {
   const streamer = await prisma.streamer.findUnique({
     where: { handle },
@@ -138,9 +142,10 @@ export async function getStreamerProfile(handle: string) {
         orderBy: { reportNumber: "desc" },
         take: 1,
       },
-      // Phase 2: mochi issuance + active marketplace items, so the profile page
-      // renders the buy/spend modules from ONE streamer query (no second fetch).
-      mochiIssuance: true,
+      // Phase 2: active marketplace items, so the profile page renders the
+      // spend module from this one streamer query (no second fetch). Buy
+      // (mochiIssuance) moved to its own page/query — getStreamerMarketplace,
+      // used by /s/[handle]/buy — since it's no longer rendered here.
       marketplaceItems: {
         where: { active: true },
         orderBy: { sortOrder: "asc" },
@@ -149,36 +154,11 @@ export async function getStreamerProfile(handle: string) {
   });
   if (!streamer || streamer.status !== "approved") return null;
 
-  // Backer Wall — ordered by founding number, one row per backing (paid only).
-  const wall = await prisma.backing.findMany({
-    where: { streamerId: streamer.id, status: "paid" },
-    orderBy: { foundingNumber: "asc" },
-    select: {
-      id: true,
-      foundingNumber: true,
-      display: true,
-      displayName: true,
-      message: true,
-      createdAt: true,
-      backer: { select: { nickname: true } },
-      tier: { select: { name: true } },
-    },
-  });
-
-  // Dedup wall to one entry per founding number (a backer's first backing).
-  const seen = new Set<number>();
-  const backerWall = wall.filter((w) => {
-    if (seen.has(w.foundingNumber)) return false;
-    seen.add(w.foundingNumber);
-    return true;
-  });
-
   const report = streamer.reports[0];
   return {
     streamer,
     tiers: streamer.tiers,
     updates: streamer.updates,
-    backerWall,
     report: report
       ? {
           ...report,
@@ -186,7 +166,6 @@ export async function getStreamerProfile(handle: string) {
           grades: report.grades as unknown as TrustGrades,
         }
       : null,
-    backerCount: seen.size,
   };
 }
 

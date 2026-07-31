@@ -9,14 +9,14 @@ import { Avatar } from "@/components/ui/Placeholder";
 import { GradeBadge } from "@/components/GradeBadge";
 import { IconLock, IconSearch } from "@/components/ui/Icons";
 import { CreatorFacet } from "@/components/CreatorFacet";
-import { BackerWall } from "@/components/BackerWall";
-import { BuyMochi } from "@/components/BuyMochi";
+import { SupporterLeaderboard } from "@/components/SupporterLeaderboard";
 import { MarketplaceSection } from "@/components/MarketplaceSection";
 import { FollowButton } from "@/components/FollowButton";
 import { getStreamerProfile } from "@/lib/streamers";
 import { getCurrentBacker } from "@/lib/session";
 import { getHolding } from "@/lib/mochi";
 import { isFollowing } from "@/lib/follows";
+import { getSupporterLeaderboard } from "@/lib/ranking";
 import { formatPercent } from "@/lib/format";
 import { isCreatorType, ALL_CATEGORIES } from "@/lib/creatorTaxonomy";
 import type { Grade } from "@/lib/grades";
@@ -58,25 +58,19 @@ export default async function StreamerProfilePage({
     );
   }
 
-  const { streamer, updates, backerWall, report, backerCount } = data;
+  const { streamer, updates, report } = data;
   const metrics = report?.metrics;
   const grades = report?.grades;
 
   // Phase 2: mochi issuance + marketplace (from the profile query) + the
-  // viewer's holding balance (depends on both the streamer and the account).
-  const [holding, following] = await Promise.all([
+  // viewer's holding balance (depends on both the streamer and the account) +
+  // the supporter leaderboard (also live-computed, DECISIONS 2026-08-01).
+  const [holding, following, leaderboard] = await Promise.all([
     backer ? getHolding(streamer.id, backer.id) : null,
     backer ? isFollowing(streamer.id, backer.id) : false,
+    getSupporterLeaderboard(streamer.id),
   ]);
   const balance = holding?.balance ?? 0;
-  const issuance = streamer.mochiIssuance
-    ? {
-        pricePerMochiKrw: streamer.mochiIssuance.pricePerMochiKrw,
-        goalQuantity: streamer.mochiIssuance.goalQuantity,
-        soldQuantity: streamer.mochiIssuance.soldQuantity,
-        active: streamer.mochiIssuance.active,
-      }
-    : null;
   const items = streamer.marketplaceItems.map((i) => ({
     id: i.id,
     title: i.title,
@@ -98,7 +92,7 @@ export default async function StreamerProfilePage({
   ].filter((l) => l.href);
 
   const headlineStats = [
-    { value: `${backerCount}`, label: t("backers") },
+    { value: `${leaderboard.totalSupporters}`, label: t("backers") },
     {
       value: metrics ? formatPercent(metrics.fanSupport.recurringRate) : "—",
       label: t("recurringRate"),
@@ -168,7 +162,7 @@ export default async function StreamerProfilePage({
               initialFollowing={following}
               signedIn={!!backer}
             />
-            <ButtonLink href="#buy-mochi" size="lg">
+            <ButtonLink href={`/s/${streamer.handle}/buy`} size="lg">
               <Mochi width={18} height={14} /> {tc("sendMochi")}
             </ButtonLink>
           </div>
@@ -191,30 +185,27 @@ export default async function StreamerProfilePage({
       </section>
 
       <div className="mx-auto flex max-w-[900px] flex-col gap-14 px-6 py-14 sm:px-10">
-        {/* Buy mochi — first: the header's 모찌 보내기 CTA anchors straight here,
-            and it's the entry point for a new supporter before there's a
-            marketplace to spend on. Single column now that the RightRail is
-            universal (DECISIONS 2026-07-31) — this page no longer carves out
-            its own side column, so BuyMochi/report/updates flow inline. */}
-        <div id="buy-mochi" className="scroll-mt-24">
-          <BuyMochi
-            handle={streamer.handle}
-            streamerId={streamer.id}
-            creatorName={streamer.displayName}
-            issuance={issuance}
-            balance={balance}
-            loggedIn={!!backer}
-            following={following}
-          />
+        {/* Ranking (30%) + Marketplace (70%), side by side (DECISIONS
+            2026-08-01) — 모찌 보내기 now routes to its own page
+            (/s/[handle]/buy) instead of an in-page anchor, freeing this
+            column for the supporter leaderboard next to the market instead of
+            stacked above it. Stacks to one column on narrow viewports. */}
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-10">
+          <div className="sm:col-span-3">
+            <SupporterLeaderboard
+              entries={leaderboard.entries}
+              totalSupporters={leaderboard.totalSupporters}
+            />
+          </div>
+          <div className="sm:col-span-7">
+            <MarketplaceSection
+              handle={streamer.handle}
+              balance={balance}
+              loggedIn={!!backer}
+              items={items}
+            />
+          </div>
         </div>
-
-        {/* Marketplace (spend mochi) */}
-        <MarketplaceSection
-          handle={streamer.handle}
-          balance={balance}
-          loggedIn={!!backer}
-          items={items}
-        />
 
         {/* Trust Report summary */}
         <div className="rounded-[20px] border border-line-2 bg-card p-6">
@@ -258,21 +249,6 @@ export default async function StreamerProfilePage({
           ) : (
             <p className="text-[14px] text-body">{t("noReport")}</p>
           )}
-        </div>
-
-        {/* Backer Wall */}
-        <div>
-          <div className="mb-1 flex items-baseline gap-3">
-            <h2 className="text-[24px] font-extrabold tracking-[-0.02em]">
-              {t("backerWallTitle")}
-            </h2>
-            <span className="text-[14px] text-muted">
-              {t("backerWallSubtitle")}
-            </span>
-          </div>
-          <div className="mt-4">
-            <BackerWall entries={backerWall.slice(0, 60)} />
-          </div>
         </div>
 
         {/* Updates */}

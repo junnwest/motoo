@@ -233,7 +233,7 @@
     "filterType": "유형"
   },
   "profile": {
-    "backers": "백커",
+    "backers": "후원자",
     "recurringRate": "재후원율",
     "fulfillment": "퍼크 이행",
     "coreFans": "핵심 팬",
@@ -242,14 +242,12 @@
     "tierBackers": "{count}명 응원 중",
     "tierLimit": "{remaining}자리 남음",
     "tierBackButton": "이 티어로 응원하기",
-    "backerWallTitle": "백커 월",
-    "backerWallSubtitle": "먼저 응원해 준 팬들",
-    "backerWallEmpty": "아직 첫 백커를 기다리고 있어요. 첫 파운딩 배지의 주인공이 되어보세요.",
-    "anonymousBacker": "익명의 후원자",
-    "foundingLabel": "파운딩",
+    "leaderboardTitle": "후원자 랭킹",
+    "leaderboardSubtitle": "누적 구매량 기준 · {count}명",
+    "leaderboardEmpty": "아직 모찌를 구매한 후원자가 없어요.",
     "updatesTitle": "최근 소식",
     "updatesEmpty": "아직 소식이 없어요.",
-    "backerOnly": "백커 전용 소식",
+    "backerOnly": "후원자 전용 소식",
     "backerOnlyBody": "이 크리에이터를 응원하면 볼 수 있어요.",
     "reportSummaryTitle": "트러스트 리포트",
     "reportSummarySubtitle": "스폰서에게 공유되는 신뢰 요약",
@@ -703,6 +701,7 @@
     }
   },
   "marketplace": {
+    "backToProfile": "프로필로 돌아가기",
     "buyTitle": "모찌 구매",
     "buySubtitle": "{name} 님의 모찌를 구매해 마켓에서 사용하세요.",
     "pricePerMochi": "모찌 1개 {price}원",
