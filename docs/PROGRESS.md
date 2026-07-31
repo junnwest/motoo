@@ -6,7 +6,17 @@ Living status of the build. Update the checkboxes as work lands. See
 [`DECISIONS.md`](./DECISIONS.md) for why things are the way they are and
 [`DEPLOYMENT.md`](./DEPLOYMENT.md) for infra state.
 
-## Recent — 2026-07-31 (true edge alignment + universal rail, no exceptions · local only, not yet deployed)
+## Recent — 2026-07-31 (nav icon sizing + `IconStudio` redraw)
+
+- [x] **Enlarged nav/sidebar icons** and **redrew `IconStudio`** (was a genuine rendering
+  bug — malformed disconnected "flap" path, play-triangle collapsed to a round blob under
+  the shared stroke style — not just too small). Nav ranking/bell buttons `h-9 w-9`→
+  `h-10 w-10` (icons `19→23`), Studio pill icon `16→20`, notification badge enlarged and
+  repositioned, Sidebar `IconHome`/`IconCompass` `18→22`. See DECISIONS 2026-07-31.
+- [x] Verified: `tsc`, eslint, `check:vocab`, `check:emoji` clean, `pnpm test` 11/11,
+  `pnpm build` clean (25 routes), zoomed before/after screenshots confirmed the fix.
+
+## Recent — 2026-07-31 (true edge alignment + universal rail, no exceptions)
 
 - [x] **Fixed a real layout bug**: the 3-column shell was centered inside `max-w-[1600px]`,
   so on wide screens both rails sat at the edge of that centered block, not the true browser

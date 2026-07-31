@@ -77,9 +77,9 @@ export async function Nav() {
                 <Link
                   href="/ranking"
                   aria-label={t("ranking")}
-                  className="flex h-9 w-9 items-center justify-center rounded-full text-ink transition hover:bg-panel focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-deep"
+                  className="flex h-10 w-10 items-center justify-center rounded-full text-ink transition hover:bg-panel focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-deep"
                 >
-                  <IconTrophy width={19} height={19} />
+                  <IconTrophy width={23} height={23} />
                 </Link>
                 <NotificationBell
                   unreadCount={unreadCount}
@@ -87,9 +87,9 @@ export async function Nav() {
                 />
                 <Link
                   href={handle ? "/studio" : "/api/become-creator"}
-                  className="ml-1 flex items-center gap-2 rounded-full border border-line-3 bg-white px-4 py-2 text-[13.5px] font-bold text-ink transition-colors hover:border-coral hover:text-coral-deep sm:ml-2"
+                  className="ml-1 flex items-center gap-2 rounded-full border border-line-3 bg-white px-4 py-2.5 text-[14px] font-bold text-ink transition-colors hover:border-coral hover:text-coral-deep sm:ml-2"
                 >
-                  <IconStudio width={16} height={16} />
+                  <IconStudio width={20} height={20} />
                   {t("studio")}
                 </Link>
               </>

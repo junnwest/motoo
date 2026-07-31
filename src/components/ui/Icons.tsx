@@ -378,8 +378,8 @@ export function IconCompass(props: SVGProps<SVGSVGElement>) {
 export function IconStudio(props: SVGProps<SVGSVGElement>) {
   return (
     <Icon {...props}>
-      <rect x="2" y="6" width="20" height="14" rx="3" />
-      <path d="M8 6 11 2h5L13 6M9 12.5v3l5-1.5-5-1.5z" />
+      <rect x="2" y="5" width="14" height="14" rx="2.5" />
+      <path d="m21 8-5 4 5 4V8z" />
     </Icon>
   );
 }

@@ -3,6 +3,19 @@
 Why the project is the way it is. Newest first. Keep entries short: decision,
 rationale, and any constraint it creates.
 
+## 2026-07-31 — Nav/sidebar icons enlarged; `IconStudio` redrawn (was broken)
+Follow-up to the nav restructure: "enlarge all icons... revise them, some of them look
+broken." A 3x-zoomed screenshot of the nav cluster confirmed `IconStudio` was a genuine
+rendering bug, not just small — its "flap" path was a disconnected malformed shape and the
+play-triangle collapsed into a round blob under the shared `Icon` wrapper's `strokeWidth={2}`
++ round joins. Redrawn from scratch as a simple camera/clapperboard glyph (`rect` body +
+`path` viewfinder triangle) that survives the round-join stroke style. Sizes bumped across
+the board: nav ranking/bell buttons `h-9 w-9`→`h-10 w-10` with icons `19→23`, Studio pill
+icon `16→20` (button padding `py-2`→`py-2.5`), notification badge `h-4 min-w-4`→`h-[18px]
+min-w-[18px]`, Sidebar `IconHome`/`IconCompass` `18→22`. Verified via zoomed before/after
+screenshots, not just `tsc`, per this session's standing lesson that icon/layout fixes need
+visual confirmation.
+
 ## 2026-07-31 — Rails pinned to the true viewport edge; rail is now universal, no exception
 Two more corrections, same session, against the same "three independent columns" spec.
 - **Real bug, not a taste call**: `ConsumerShell`'s flex row was wrapped in `mx-auto
