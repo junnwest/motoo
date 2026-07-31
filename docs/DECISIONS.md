@@ -3,6 +3,30 @@
 Why the project is the way it is. Newest first. Keep entries short: decision,
 rationale, and any constraint it creates.
 
+## 2026-07-31 — RightRail: two-up grid, smaller thumbnails, instant Follow
+User feedback: single-column 140px-tall cards read as oversized for a 300px-wide
+suggestions rail, and following a discovered creator required a click-through to their
+profile first. Changed `RightRail` (`src/components/RightRail.tsx`) to `grid-cols-2` with
+90px-tall `CreatorCover` thumbnails (was a single column of 140px cards), and added a
+compact `FollowButton` under each card so a fan can follow straight from the rail.
+- **`StreamerCard.id` added** (`src/lib/streamers.ts`) — the type had no streamer ID, only
+  `handle`; `toggleFollow` needs the real ID. The one call site (`getExploreStreamers`)
+  already queries the full Prisma row, so this was a passthrough, not a new query.
+- **`FollowButton` gained a `compact` prop** — same toggle logic and optimistic-update
+  behavior as the profile-page button, just a smaller pill sized for a grid card instead of
+  a page header.
+- **Card structure**: `<Link>` wraps only the thumbnail+caption (navigates to the profile);
+  `FollowButton` sits outside it as a sibling, not nested inside the anchor, so the button
+  click doesn't also trigger navigation.
+- **`initialFollowing` is always `false`** on this rail — `discover` is already filtered to
+  exclude held/followed creators before render, so there's no already-following state to
+  represent here.
+- **`toggleFollow`'s revalidation widened** (`src/lib/follows.ts`): it previously only
+  revalidated `/s/[handle]` and `/home`, which predates the rail being universal. Now
+  revalidates every ConsumerShell page (`/explore`, `/ranking`, `/notifications`,
+  `/profile`, `/settings` too) so a follow from the rail is reflected in the Sidebar's
+  following list no matter which page it happened on.
+
 ## 2026-07-31 — Nav/sidebar icons enlarged; `IconStudio` redrawn (was broken)
 Follow-up to the nav restructure: "enlarge all icons... revise them, some of them look
 broken." A 3x-zoomed screenshot of the nav cluster confirmed `IconStudio` was a genuine

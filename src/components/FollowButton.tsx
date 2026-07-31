@@ -14,11 +14,13 @@ export function FollowButton({
   handle,
   initialFollowing,
   signedIn,
+  compact = false,
 }: {
   streamerId: string;
   handle: string;
   initialFollowing: boolean;
   signedIn: boolean;
+  compact?: boolean;
 }) {
   const t = useTranslations("profile");
   const [following, setFollowing] = useState(initialFollowing);
@@ -57,11 +59,19 @@ export function FollowButton({
       onClick={onClick}
       disabled={pending}
       aria-pressed={following}
-      className={`rounded-[12px] border px-4 py-3 text-[14.5px] font-bold transition-colors disabled:opacity-60 ${
-        following
-          ? "border-line-3 bg-white text-ink hover:border-coral/50"
-          : "border-ink bg-ink text-cream hover:bg-ink/90"
-      }`}
+      className={
+        compact
+          ? `w-full rounded-[8px] border px-2 py-1.5 text-[12px] font-bold transition-colors disabled:opacity-60 ${
+              following
+                ? "border-line-3 bg-white text-ink hover:border-coral/50"
+                : "border-ink bg-ink text-cream hover:bg-ink/90"
+            }`
+          : `rounded-[12px] border px-4 py-3 text-[14.5px] font-bold transition-colors disabled:opacity-60 ${
+              following
+                ? "border-line-3 bg-white text-ink hover:border-coral/50"
+                : "border-ink bg-ink text-cream hover:bg-ink/90"
+            }`
+      }
     >
       {following ? t("following") : t("follow")}
     </button>

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { CreatorCover } from "@/components/CreatorCover";
+import { FollowButton } from "@/components/FollowButton";
 import { getHoldingsForBacker } from "@/lib/mochi";
 import { getFollowList } from "@/lib/follows";
 import { getExploreStreamers } from "@/lib/streamers";
@@ -20,9 +21,11 @@ import { ALL_CATEGORIES } from "@/lib/creatorTaxonomy";
  * make the right edge flicker in and out exactly like the bug this was meant
  * to fix.
  *
- * Item style matches Spotify's own shelf items (DECISIONS 2026-07-31,
- * corrected): a bare rounded image, caption below, unboxed — no card, no
- * border, no fill.
+ * Two-up grid, small thumbnails, an instant Follow button per card
+ * (DECISIONS 2026-07-31): the rail is 300px wide, so a single-column shelf
+ * of 140px-tall images read as oversized for a suggestions list. Cards are
+ * strictly discover-only (already-followed/held creators are filtered out
+ * before this renders), so `initialFollowing` is always false.
  */
 export async function RightRail({ backerId }: { backerId: string }) {
   const t = await getTranslations("home");
@@ -63,26 +66,37 @@ export async function RightRail({ backerId }: { backerId: string }) {
           {t("discoverEmpty")}
         </p>
       ) : (
-        <div className="flex flex-col gap-5">
+        <div className="grid grid-cols-2 gap-x-3 gap-y-5">
           {discover.map((s) => (
-            <Link key={s.handle} href={`/s/${s.handle}`} className="group block">
-              <CreatorCover
-                handle={s.handle}
-                displayName={s.displayName}
-                className="h-[140px] w-full rounded-[12px] transition-opacity group-hover:opacity-90"
-                markClass="text-[36px]"
-              />
-              <div className="mt-2.5">
-                <div className="truncate text-[14px] font-extrabold text-ink">
-                  {s.displayName}
+            <div key={s.handle}>
+              <Link href={`/s/${s.handle}`} className="group block">
+                <CreatorCover
+                  handle={s.handle}
+                  displayName={s.displayName}
+                  className="h-[90px] w-full rounded-[10px] transition-opacity group-hover:opacity-90"
+                  markClass="text-[22px]"
+                />
+                <div className="mt-2">
+                  <div className="truncate text-[13px] font-extrabold text-ink">
+                    {s.displayName}
+                  </div>
+                  <div className="mt-0.5 truncate text-[11px] text-muted">
+                    {ALL_CATEGORIES.includes(s.category)
+                      ? tax(`categories.${s.category}`)
+                      : s.category}
+                  </div>
                 </div>
-                <div className="mt-0.5 truncate text-[12px] text-muted">
-                  {ALL_CATEGORIES.includes(s.category)
-                    ? tax(`categories.${s.category}`)
-                    : s.category}
-                </div>
+              </Link>
+              <div className="mt-2">
+                <FollowButton
+                  streamerId={s.id}
+                  handle={s.handle}
+                  initialFollowing={false}
+                  signedIn
+                  compact
+                />
               </div>
-            </Link>
+            </div>
           ))}
         </div>
       )}

@@ -6,6 +6,17 @@ Living status of the build. Update the checkboxes as work lands. See
 [`DECISIONS.md`](./DECISIONS.md) for why things are the way they are and
 [`DEPLOYMENT.md`](./DEPLOYMENT.md) for infra state.
 
+## Recent — 2026-07-31 (RightRail: two-up grid + instant Follow)
+
+- [x] **`RightRail` redesigned**: `grid-cols-2` (was single column), thumbnails shrunk
+  90px tall (was 140px), and a compact `FollowButton` added under each card so a fan can
+  follow a discovered creator without leaving the rail. `StreamerCard` gained an `id`
+  field (needed by `toggleFollow`); `FollowButton` gained a `compact` size variant.
+  `toggleFollow`'s revalidation widened to every ConsumerShell page, not just
+  `/s/[handle]` and `/home`. See DECISIONS 2026-07-31.
+- [x] Verified: `tsc`, eslint, `check:vocab`, `check:emoji` clean, `pnpm test` 11/11,
+  `pnpm build` clean (23 routes), browser-checked the new grid + follow buttons.
+
 ## Recent — 2026-07-31 (nav icon sizing + `IconStudio` redraw)
 
 - [x] **Enlarged nav/sidebar icons** and **redrew `IconStudio`** (was a genuine rendering

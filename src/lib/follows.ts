@@ -61,7 +61,16 @@ export async function toggleFollow(
     await prisma.follow.create({ data: { streamerId, backerId: backer.id } });
   }
 
+  // Sidebar's following list and RightRail's discovery pool (which excludes
+  // already-followed creators) render on every ConsumerShell page, not just
+  // /home — revalidate them all so an instant-follow from the rail is
+  // reflected regardless of which page it happened on.
   revalidatePath(`/s/${handle}`);
   revalidatePath("/home");
+  revalidatePath("/explore");
+  revalidatePath("/ranking");
+  revalidatePath("/notifications");
+  revalidatePath("/profile");
+  revalidatePath("/settings");
   return { ok: true, following: !existing };
 }

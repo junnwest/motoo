@@ -3,6 +3,7 @@ import type { TrustGrades, TrustMetrics, Grade } from "./grades";
 import { gradeRank } from "./grades";
 
 export interface StreamerCard {
+  id: string;
   handle: string;
   displayName: string;
   creatorType: string | null;
@@ -18,6 +19,7 @@ export interface StreamerCard {
 
 function reportToCard(
   streamer: {
+    id: string;
     handle: string;
     displayName: string;
     creatorType: string | null;
@@ -32,6 +34,7 @@ function reportToCard(
   const metrics = report?.metrics as TrustMetrics | undefined;
   const grades = report?.grades as TrustGrades | undefined;
   return {
+    id: streamer.id,
     handle: streamer.handle,
     displayName: streamer.displayName,
     creatorType: streamer.creatorType,
