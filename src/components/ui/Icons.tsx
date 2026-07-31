@@ -370,7 +370,7 @@ export function IconCompass(props: SVGProps<SVGSVGElement>) {
   return (
     <Icon {...props}>
       <circle cx="12" cy="12" r="9" />
-      <path d="m15 9-2 6-6 2 2-6z" />
+      <path d="M16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88Z" />
     </Icon>
   );
 }

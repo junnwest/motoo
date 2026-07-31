@@ -3,6 +3,24 @@
 Why the project is the way it is. Newest first. Keep entries short: decision,
 rationale, and any constraint it creates.
 
+## 2026-07-31 — `IconCompass` was genuinely lopsided; Sidebar nav gets an active state
+Two more icon/nav fixes reported after the previous icon-sizing pass.
+- **`IconCompass` root cause found**: its needle path (`m15 9-2 6-6 2 2-6z`) was not
+  symmetric about the circle's own center (12,12) — one tip sat 4.24 units out, the
+  opposite tip 7.07 units out, nearly grazing the r9 circle edge. A lopsided, off-center
+  needle inside a centered circle is what read as "broken," not just small. Replaced with
+  the standard, properly-centered compass-needle coordinates (tips at exactly 6 units from
+  center each, waist at 3 units each — verified symmetric and margined by rendering it
+  standalone at 200px before shipping, since the sidebar-sized render alone wasn't enough
+  to convince eyeballing at 22px).
+- **Sidebar 홈/둘러보기 now show which page you're on**: split them into a new client
+  component (`src/components/SidebarNavLinks.tsx`) using `usePathname()` — `Sidebar` itself
+  is an async server component fetching the following list, so it can't call the hook
+  directly. Active link gets `bg-panel` + `text-coral-deep` (icon included, via
+  `currentColor`); `aria-current="page"` set for a11y. `/explore` matches by prefix (covers
+  filtered subroutes), `/home` is exact. Scoped to the two nav links only — the following
+  list below wasn't asked for and is a different kind of item (content, not navigation).
+
 ## 2026-07-31 — RightRail: two-up grid, smaller thumbnails, instant Follow
 User feedback: single-column 140px-tall cards read as oversized for a 300px-wide
 suggestions rail, and following a discovered creator required a click-through to their

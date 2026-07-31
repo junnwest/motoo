@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { CreatorCover } from "@/components/CreatorCover";
-import { IconCompass, IconHome } from "@/components/ui/Icons";
+import { SidebarNavLinks } from "@/components/SidebarNavLinks";
 import { getFollowList } from "@/lib/follows";
 import { ALL_CATEGORIES } from "@/lib/creatorTaxonomy";
 
@@ -22,14 +22,7 @@ export async function Sidebar({ backerId }: { backerId: string }) {
 
   return (
     <aside className="sticky top-16 hidden max-h-[calc(100vh-64px)] w-[260px] flex-none overflow-y-auto border-r border-line px-3 py-6 lg:block">
-      <nav className="flex flex-col gap-0.5">
-        <SidebarLink href="/home" icon={<IconHome width={22} height={22} />}>
-          {tn("home")}
-        </SidebarLink>
-        <SidebarLink href="/explore" icon={<IconCompass width={22} height={22} />}>
-          {tn("explore")}
-        </SidebarLink>
-      </nav>
+      <SidebarNavLinks homeLabel={tn("home")} exploreLabel={tn("explore")} />
 
       <div className="mb-2 mt-6 px-3 text-[12px] font-bold uppercase tracking-[0.08em] text-muted">
         {t("followingTitle")}
@@ -69,25 +62,5 @@ export async function Sidebar({ backerId }: { backerId: string }) {
         </ul>
       )}
     </aside>
-  );
-}
-
-function SidebarLink({
-  href,
-  icon,
-  children,
-}: {
-  href: string;
-  icon: React.ReactNode;
-  children: React.ReactNode;
-}) {
-  return (
-    <Link
-      href={href}
-      className="flex items-center gap-3 rounded-[10px] px-3 py-2.5 text-[14.5px] font-bold text-ink transition-colors hover:bg-panel"
-    >
-      {icon}
-      {children}
-    </Link>
   );
 }

@@ -6,6 +6,17 @@ Living status of the build. Update the checkboxes as work lands. See
 [`DECISIONS.md`](./DECISIONS.md) for why things are the way they are and
 [`DEPLOYMENT.md`](./DEPLOYMENT.md) for infra state.
 
+## Recent — 2026-07-31 (compass icon fix + Sidebar active-page state)
+
+- [x] **`IconCompass` fixed for real**: the needle path was asymmetric about the circle's
+  center (not just small), causing one tip to nearly touch the circle edge. Replaced with
+  properly-centered coordinates, verified by rendering it standalone at 200px.
+- [x] **Sidebar nav shows the active page**: 홈/둘러보기 now highlight (accent color +
+  panel background) when you're on that page, via a new client component
+  (`SidebarNavLinks.tsx`) using `usePathname()`. See DECISIONS 2026-07-31.
+- [x] Verified: `tsc`, eslint, `check:vocab`, `check:emoji` clean, `pnpm test` 11/11,
+  `pnpm build` clean (23 routes), browser-checked both active states on `/home`/`/explore`.
+
 ## Recent — 2026-07-31 (RightRail: two-up grid + instant Follow)
 
 - [x] **`RightRail` redesigned**: `grid-cols-2` (was single column), thumbnails shrunk
