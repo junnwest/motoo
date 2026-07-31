@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { auth } from "@/auth";
 import { ConsumerShell } from "@/components/ConsumerShell";
 import { Footer } from "@/components/Footer";
+import { Section } from "@/components/ui/Section";
 import { getCurrentBacker } from "@/lib/session";
 import { IdentityForm } from "./SettingsForm";
 import { PasswordForm } from "./PasswordForm";
@@ -30,30 +31,20 @@ export default async function SettingsPage() {
           </h1>
           <p className="mt-2 text-[15.5px] text-body">{t("subtitle")}</p>
 
-          <section className="mt-10 rounded-[20px] border border-line-2 bg-card p-6">
-            <h2 className="text-[17px] font-extrabold text-ink">
-              {t("identityTitle")}
-            </h2>
-            <div className="mt-5">
-              <IdentityForm
-                initialNickname={backer.nickname}
-                initialHandle={backer.handle ?? ""}
-              />
-            </div>
-          </section>
+          <Section title={t("identityTitle")} className="mt-10">
+            <IdentityForm
+              initialNickname={backer.nickname}
+              initialHandle={backer.handle ?? ""}
+            />
+          </Section>
 
-          <section className="mt-6 rounded-[20px] border border-line-2 bg-card p-6">
-            <h2 className="text-[17px] font-extrabold text-ink">
-              {t("passwordTitle")}
-            </h2>
-            <div className="mt-5">
-              {backer.passwordHash ? (
-                <PasswordForm />
-              ) : (
-                <p className="text-[14px] text-muted">{t("oauthOnly")}</p>
-              )}
-            </div>
-          </section>
+          <Section title={t("passwordTitle")} className="mt-6">
+            {backer.passwordHash ? (
+              <PasswordForm />
+            ) : (
+              <p className="text-[14px] text-muted">{t("oauthOnly")}</p>
+            )}
+          </Section>
         </main>
       </ConsumerShell>
       <Footer variant="fan" />

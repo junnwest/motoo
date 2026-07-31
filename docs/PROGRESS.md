@@ -1,10 +1,20 @@
 # motoo — Progress Tracker
 
-_Last updated: 2026-07-30_
+_Last updated: 2026-07-31_
 
 Living status of the build. Update the checkboxes as work lands. See
 [`DECISIONS.md`](./DECISIONS.md) for why things are the way they are and
 [`DEPLOYMENT.md`](./DEPLOYMENT.md) for infra state.
+
+## Recent — 2026-07-31 (Spotify-referenced section panels · local only, not yet deployed)
+
+- [x] **Every section now wraps in a rounded, flat-fill panel** (new `src/components/ui/
+  Section.tsx`) — `/home`, `/profile`, `/ranking`, `/settings`. Reference pulled directly
+  from Spotify's own web player (inspected live CSS, not guessed): a flat fill one step off
+  the page background at 8px radius, zero border — adapted to motoo's own rounder corner
+  language (20px) rather than copied pixel-for-pixel. See DECISIONS 2026-07-31.
+- [x] Verified: `tsc`, eslint, `check:vocab`, `check:emoji` clean, `pnpm test` 11/11,
+  `pnpm build` clean (23 routes), browser-checked all four pages.
 
 ## Recent — 2026-07-30 (full nav restructure: Sidebar, Ranking, Profile, Settings · local only, not yet deployed)
 

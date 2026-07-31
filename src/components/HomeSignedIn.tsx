@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { Mochi } from "@/components/Mochi";
 import { CreatorCover } from "@/components/CreatorCover";
 import { ItemThumbnail } from "@/components/ItemThumbnail";
+import { Section } from "@/components/ui/Section";
 import {
   IconClock,
   IconSearch,
@@ -38,6 +39,10 @@ import { ALL_CATEGORIES } from "@/lib/creatorTaxonomy";
  * short how-it-works primer (there's no "status" to show yet), but news from
  * followed creators still renders below it if there is any — following is
  * free, so it shouldn't be starved just because the user hasn't bought yet.
+ *
+ * Every section is wrapped in a flat-fill rounded panel (`Section`,
+ * DECISIONS 2026-07-31 — Spotify-referenced), replacing the old bare
+ * heading-then-grid layout.
  */
 export async function HomeSignedIn({
   backerId,
@@ -91,58 +96,58 @@ export async function HomeSignedIn({
 
       <div className="mt-8 flex flex-col gap-10 xl:flex-row xl:gap-12">
         {/* ── Middle: mochi status (default view) or the how-it-works primer ─ */}
-        <div className="min-w-0 flex-1">
+        <div className="flex min-w-0 flex-1 flex-col gap-6">
           {hasMochi ? (
             <>
-              <SectionHead title={t("statusTitle")} first />
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 2xl:grid-cols-3">
-                {holdings.map((h) => {
-                  const r = rankByStreamer.get(h.streamerId);
-                  return (
-                    <Link
-                      key={h.id}
-                      href={`/s/${h.streamer.handle}`}
-                      className="flex items-center gap-3 rounded-[18px] border border-line-2 bg-card p-4 transition-shadow hover:shadow-card"
-                    >
-                      <CreatorCover
-                        handle={h.streamer.handle}
-                        displayName={h.streamer.displayName}
-                        className="h-12 w-12 flex-none rounded-full"
-                        markClass="text-[18px]"
-                      />
-                      <span className="min-w-0 flex-1">
-                        <span className="block truncate text-[14.5px] font-bold text-ink">
-                          {h.streamer.displayName}
-                        </span>
-                        <span className="mt-1 flex items-center gap-1.5 text-[13.5px] font-extrabold text-ink">
-                          <Mochi width={14} height={11} />
-                          {t("balance", { count: h.balance })}
-                        </span>
-                        {r && (
-                          <span className="mt-1 flex items-center gap-1 text-[12px] font-semibold text-coral-deep">
-                            <IconTrophy width={12} height={12} />
-                            {tr("rankOf", {
-                              rank: r.rank,
-                              total: r.totalSupporters,
-                            })}
+              <Section title={t("statusTitle")}>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 2xl:grid-cols-3">
+                  {holdings.map((h) => {
+                    const r = rankByStreamer.get(h.streamerId);
+                    return (
+                      <Link
+                        key={h.id}
+                        href={`/s/${h.streamer.handle}`}
+                        className="flex items-center gap-3 rounded-[16px] border border-line-2 bg-card p-4 transition-shadow hover:shadow-card"
+                      >
+                        <CreatorCover
+                          handle={h.streamer.handle}
+                          displayName={h.streamer.displayName}
+                          className="h-12 w-12 flex-none rounded-full"
+                          markClass="text-[18px]"
+                        />
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-[14.5px] font-bold text-ink">
+                            {h.streamer.displayName}
                           </span>
-                        )}
-                      </span>
-                    </Link>
-                  );
-                })}
-              </div>
+                          <span className="mt-1 flex items-center gap-1.5 text-[13.5px] font-extrabold text-ink">
+                            <Mochi width={14} height={11} />
+                            {t("balance", { count: h.balance })}
+                          </span>
+                          {r && (
+                            <span className="mt-1 flex items-center gap-1 text-[12px] font-semibold text-coral-deep">
+                              <IconTrophy width={12} height={12} />
+                              {tr("rankOf", {
+                                rank: r.rank,
+                                total: r.totalSupporters,
+                              })}
+                            </span>
+                          )}
+                        </span>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </Section>
 
               {/* Spend: what this balance actually buys, right now. */}
               {affordable.length > 0 && (
-                <>
-                  <SectionHead title={t("affordableTitle")} />
+                <Section title={t("affordableTitle")}>
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     {affordable.map(({ item, streamer, balance }) => (
                       <Link
                         key={item.id}
                         href={`/s/${streamer.handle}#market`}
-                        className="flex gap-3 rounded-[18px] border border-line-2 bg-card p-4 transition-shadow hover:shadow-card"
+                        className="flex gap-3 rounded-[16px] border border-line-2 bg-card p-4 transition-shadow hover:shadow-card"
                       >
                         <ItemThumbnail
                           thumbnailKey={item.thumbnailKey}
@@ -167,17 +172,16 @@ export async function HomeSignedIn({
                       </Link>
                     ))}
                   </div>
-                </>
+                </Section>
               )}
 
               {pending.length > 0 && (
-                <>
-                  <SectionHead title={t("progressTitle", { count: pending.length })} />
+                <Section title={t("progressTitle", { count: pending.length })}>
                   <div className="flex flex-col gap-3">
                     {pending.map((o) => (
                       <div
                         key={o.id}
-                        className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-[16px] border border-line-2 bg-card p-4"
+                        className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-[14px] border border-line-2 bg-card p-4"
                       >
                         <span className="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-coral-chip text-coral-deep">
                           <IconClock width={18} height={18} />
@@ -200,15 +204,12 @@ export async function HomeSignedIn({
                       </div>
                     ))}
                   </div>
-                </>
+                </Section>
               )}
             </>
           ) : (
-            <div className="rounded-[24px] border border-line-2 bg-card p-7 sm:p-9">
-              <h2 className="text-[20px] font-extrabold tracking-[-0.02em] text-ink">
-                {t("startTitle")}
-              </h2>
-              <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-3">
+            <Section title={t("startTitle")}>
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
                 <Step
                   icon={<IconSearch width={20} height={20} />}
                   title={t("step1Title")}
@@ -225,18 +226,17 @@ export async function HomeSignedIn({
                   body={t("step3Body")}
                 />
               </div>
-            </div>
+            </Section>
           )}
 
           {updates.length > 0 && (
-            <>
-              <SectionHead title={t("newsTitle")} />
+            <Section title={t("newsTitle")}>
               <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {updates.map((u) => (
                   <li key={u.id}>
                     <Link
                       href={`/s/${u.streamer.handle}`}
-                      className="flex h-full flex-col rounded-[16px] border border-line-2 bg-card p-4 transition-shadow hover:shadow-card"
+                      className="flex h-full flex-col rounded-[14px] border border-line-2 bg-card p-4 transition-shadow hover:shadow-card"
                     >
                       <div className="flex items-center gap-2 text-[13px] text-muted">
                         <span className="font-bold text-ink">
@@ -254,76 +254,44 @@ export async function HomeSignedIn({
                   </li>
                 ))}
               </ul>
-            </>
+            </Section>
           )}
         </div>
 
         {/* ── Right: suggestions — bigger single-column blocks ─────────── */}
         {discover.length > 0 && (
           <aside className="xl:w-[320px] xl:flex-none">
-            <SectionHead title={t("discoverTitle")} href="/explore" more={t("seeAll")} first />
-            <div className="flex flex-col gap-4">
-              {discover.map((s) => (
-                <Link
-                  key={s.handle}
-                  href={`/s/${s.handle}`}
-                  className="group overflow-hidden rounded-[18px] border border-line-2 bg-card transition-shadow hover:shadow-card"
-                >
-                  <CreatorCover
-                    handle={s.handle}
-                    displayName={s.displayName}
-                    className="h-[120px] w-full"
-                    markClass="text-[36px]"
-                  />
-                  <div className="p-4">
-                    <div className="truncate text-[15px] font-extrabold text-ink">
-                      {s.displayName}
+            <Section title={t("discoverTitle")} href="/explore" more={t("seeAll")}>
+              <div className="flex flex-col gap-4">
+                {discover.map((s) => (
+                  <Link
+                    key={s.handle}
+                    href={`/s/${s.handle}`}
+                    className="group overflow-hidden rounded-[14px] border border-line-2 bg-card transition-shadow hover:shadow-card"
+                  >
+                    <CreatorCover
+                      handle={s.handle}
+                      displayName={s.displayName}
+                      className="h-[120px] w-full"
+                      markClass="text-[36px]"
+                    />
+                    <div className="p-4">
+                      <div className="truncate text-[15px] font-extrabold text-ink">
+                        {s.displayName}
+                      </div>
+                      <div className="mt-0.5 truncate text-[12.5px] text-muted">
+                        {ALL_CATEGORIES.includes(s.category)
+                          ? tax(`categories.${s.category}`)
+                          : s.category}
+                      </div>
                     </div>
-                    <div className="mt-0.5 truncate text-[12.5px] text-muted">
-                      {ALL_CATEGORIES.includes(s.category)
-                        ? tax(`categories.${s.category}`)
-                        : s.category}
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
+                  </Link>
+                ))}
+              </div>
+            </Section>
           </aside>
         )}
       </div>
-    </div>
-  );
-}
-
-/** Section header with an optional "see all" link on the right. */
-function SectionHead({
-  title,
-  href,
-  more,
-  first = false,
-}: {
-  title: string;
-  href?: string;
-  more?: string;
-  first?: boolean;
-}) {
-  return (
-    <div
-      className={`mb-4 flex items-baseline justify-between gap-4 ${
-        first ? "mt-0" : "mt-10"
-      }`}
-    >
-      <h2 className="text-[19px] font-extrabold tracking-[-0.02em] text-ink sm:text-[21px]">
-        {title}
-      </h2>
-      {href && more && (
-        <Link
-          href={href}
-          className="flex-none text-[13.5px] font-bold text-coral-deep hover:underline"
-        >
-          {more} →
-        </Link>
-      )}
     </div>
   );
 }

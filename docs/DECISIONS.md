@@ -3,6 +3,31 @@
 Why the project is the way it is. Newest first. Keep entries short: decision,
 rationale, and any constraint it creates.
 
+## 2026-07-31 — Sections wrap in flat-fill rounded panels (Spotify-referenced)
+Owner asked to look at Spotify's own web player directly and use it as reference. Inspected
+its live CSS via computed styles, not vibes: the sidebar panel ("Create your first
+playlist") measures `background: rgb(31,31,31)` on a black page, `border-radius: 8px`,
+`padding: 16px 20px`, **zero border** — the "box" reads entirely from a flat fill one step
+off the page background, never a stroke. Main-content shelves (Trending songs, Popular
+artists) are the opposite: no box at all, just a heading and a row floating on black.
+- **New `src/components/ui/Section.tsx`**: the same structure adapted to motoo's own
+  proportions, not copied pixel-for-pixel — `bg-cream-warm-2` (one step off the `cream`
+  page bg) at `rounded-[20px]`, no border. 20px rather than Spotify's 8px because motoo's
+  existing corner language runs rounder everywhere else (16–24px on every card); matching
+  Section-to-Section beat matching Section-to-a-black-theme-app.
+- **Applied to every section** on `/home`, `/profile`, `/ranking`, `/settings` — replacing
+  bare heading-then-grid layouts and (on Settings) the old bordered-white-card style.
+  `title` is optional so a single-list page (`/ranking`) can wrap its content without a
+  redundant heading duplicating the page's own `<h1>`.
+- **Individual item cards inside a Section keep their existing white `bg-card` + border** —
+  not flattened to match Spotify's borderless shelf items. The ask was "wrap sections in
+  boxes," not "redesign every card"; flattening every nested item would have been a much
+  larger, unrequested scope. Net result is a three-tier hierarchy (cream page → tinted
+  Section panel → white item card) that reads clearly even though Spotify's own hierarchy
+  only has two tiers.
+- Bonus, unplanned: Settings' form inputs (`bg-white`) now sit on the tinted panel instead
+  of a same-white card, so they pop more than before — better contrast, no rule to un-write.
+
 ## 2026-07-30 — Full nav restructure: persistent Sidebar, Ranking, Profile, Settings
 Owner-driven redesign, decided via a round of clarifying questions before any code (five
 forks: what ranking ranks, whether Profile absorbs `/me/mochi`, follow/holding coupling,
