@@ -3,6 +3,37 @@
 Why the project is the way it is. Newest first. Keep entries short: decision,
 rationale, and any constraint it creates.
 
+## 2026-07-30 — Notifications + Follow: the home rail merges paid and free support
+Two new models. **`Follow`** (streamerId+backerId, unique) is a free, in-app "keep me
+posted" relationship — distinct from `MochiHolding` (money) and the dormant
+`Streamer.followerCount` (a Phase-1 seeded off-platform number, never rendered).
+**`Notification`** (backerId, type, title/body/link, read) is queued for four events:
+order fulfilled, order cancelled, a held/followed creator adds an item, a held creator
+raises their mochi price.
+- **The home rail now merges holdings + follows** (`getRailCreators` in `src/lib/home.ts`):
+  a row shows a balance if the user holds mochi, or a 팔로잉 chip if they only follow.
+  Extends the 2026-07-29 rail decision — and **changes its trigger**: the two-column
+  layout now fires on "supports anyone" (holds mochi OR follows), not "holds mochi",
+  because following is free and should be the low-friction way to fill the home. News
+  (`getUpdatesForBacker`) sources from the same merged set.
+- **Notification creation lives in `src/lib/notify.ts`, called from `studio/actions.ts`
+  after the triggering mutation commits** — deliberately NOT inside mochi.ts's
+  transactions. `notify()`/`notifyMany()` swallow their own errors: a failed insert must
+  never roll back or fail the order/item/price action that triggered it. Same principle
+  as keeping home.ts out of mochi.ts's tested surface.
+- **Recipients**: order events notify just the buyer. A new item notifies everyone with a
+  stake in the creator (holds mochi in them OR follows them — `getStakeholderBackerIds`).
+  A price raise notifies holders only (`getHolderBackerIds`) — a bare follower has no
+  balance at stake in the price. Editing an existing item never re-notifies (only the
+  create branch of `upsertItem` fires it), so a typo fix doesn't spam stakeholders.
+- **UI**: a bell in `Nav` (consumer host only, mirroring 홈/내 모찌) with an unread-count
+  badge and a dropdown of the latest 6, plus a full `/notifications` page (mark-all-read,
+  mark-on-click). `FollowButton` on the profile header is a free toggle beside the paid
+  모찌 보내기 CTA — optimistic, reverts on failure, hidden for signed-out visitors (signup
+  happens through the buy-mochi CTA, not here).
+- **Home widened 1440 → 1600** to match `Nav`'s own max-width (they'd drifted apart);
+  feed grids gained a `2xl` column so the extra width holds more cards, not more padding.
+
 ## 2026-07-29 — The home's left rail is a *content* rail, and the fix was mostly data
 `/home` got a sticky left rail (응원 중인 크리에이터: total balance + per-creator balances) and
 widened 1100 → 1440.

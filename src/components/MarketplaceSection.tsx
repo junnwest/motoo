@@ -42,7 +42,7 @@ export function MarketplaceSection({
   const t = useTranslations("marketplace");
 
   return (
-    <section>
+    <section id="market" className="scroll-mt-24">
       <h2 className="text-[24px] font-extrabold tracking-[-0.02em] text-ink">
         {t("marketTitle")}
       </h2>

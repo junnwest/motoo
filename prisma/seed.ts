@@ -197,6 +197,8 @@ async function main() {
   // Captured for post-loop holdings/orders so the flagship demo looks alive.
   type CreatorRef = {
     streamerId: string;
+    handle: string;
+    displayName: string;
     pricePerMochiKrw: number;
     items: { id: string; priceMochi: number }[];
   };
@@ -263,8 +265,10 @@ async function main() {
         active: true,
       },
     });
-    const creatorRef = {
+    const creatorRef: CreatorRef = {
       streamerId: streamer.id,
+      handle: s.handle,
+      displayName: s.displayName,
       pricePerMochiKrw,
       items: items.map((it) => ({ id: it.id, priceMochi: it.priceMochi })),
     };
@@ -548,6 +552,77 @@ async function main() {
         },
       });
     }
+
+    // The demo fan also *follows* two more creators with no mochi — the rail's
+    // free half (Follow), distinct from the three paid holdings above, so the
+    // home shows both row kinds (a balance vs a 팔로잉 chip).
+    const followedOnly = allCreators
+      .filter(
+        (c) =>
+          c.streamerId !== flagship!.streamerId &&
+          !alsoSupported.some((s) => s.streamerId === c.streamerId),
+      )
+      .slice(0, 2);
+    for (const c of followedOnly) {
+      await prisma.follow.create({
+        data: { streamerId: c.streamerId, backerId: demo.id },
+      });
+    }
+    // A few pool fans follow the flagship too, so a real "새 아이템" notification
+    // (fired from the Studio) reaches more than just the demo fan.
+    for (const b of holders.slice(0, 4)) {
+      await prisma.follow.create({
+        data: { streamerId: flagship.streamerId, backerId: b.id },
+      });
+    }
+
+    // Notification history for the demo fan — one per type, a mix of read and
+    // unread, staggered so the bell/`/notifications` show a real timeline
+    // instead of a single seeded row. `second` always exists here (10 seeded
+    // creators, alsoSupported takes 3), but guarded rather than assumed.
+    const newItemNotice = second
+      ? {
+          backerId: demo.id,
+          type: "new_item" as const,
+          title: `${second.displayName}님이 새 아이템을 추가했어요`,
+          body: "노래 신청",
+          link: `/s/${second.handle}#market`,
+          read: false,
+          createdAt: new Date(2026, 6, 27, 14, 5),
+        }
+      : null;
+    await prisma.notification.createMany({
+      data: [
+        {
+          backerId: demo.id,
+          type: "order_fulfilled",
+          title: `${flagship.displayName}님이 주문을 완료했어요`,
+          body: "커피한잔",
+          link: "/me/mochi",
+          read: false,
+          createdAt: new Date(2026, 6, 28, 20, 10),
+        },
+        ...(newItemNotice ? [newItemNotice] : []),
+        {
+          backerId: demo.id,
+          type: "price_raised",
+          title: `${flagship.displayName}님이 모찌 가격을 인상했어요`,
+          body: `개당 ${flagship.pricePerMochiKrw.toLocaleString("ko-KR")}원으로 올랐어요. 보유 중인 모찌 가치는 그대로예요.`,
+          link: `/s/${flagship.handle}`,
+          read: true,
+          createdAt: new Date(2026, 6, 20, 9, 30),
+        },
+        {
+          backerId: demo.id,
+          type: "order_cancelled",
+          title: `${flagship.displayName}님이 주문을 취소하고 모찌를 환불했어요`,
+          body: "실시간 샤라웃",
+          link: "/me/mochi",
+          read: true,
+          createdAt: new Date(2026, 6, 15, 11, 0),
+        },
+      ],
+    });
 
     // A few orders across statuses so the orders view is populated.
     const orderBuyers = [demo, ...holders.slice(0, 4)];

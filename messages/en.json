@@ -28,7 +28,9 @@
     "becomeCreator": "Become a creator",
     "logout": "Log out",
     "greeting": "{name}",
-    "home": "Home"
+    "home": "Home",
+    "notifications": "Notifications",
+    "notificationsEmpty": "No notifications yet"
   },
   "footer": {
     "fanTagline": "The warmest way to back a creator you love.",
@@ -253,7 +255,9 @@
     "notFoundTitle": "Creator not found",
     "notFoundBody": "Check the address or find them again from Explore.",
     "backToExplore": "To Explore →",
-    "sponsorReadiness": "Sponsor readiness"
+    "sponsorReadiness": "Sponsor readiness",
+    "follow": "Follow",
+    "following": "Following"
   },
   "backing": {
     "title": "Back {name}",
@@ -869,6 +873,13 @@
     "orderHistory": "Order history",
     "affordableTitle": "You can use these right now",
     "itemPrice": "{count} mochi",
-    "ofBalance": "/ you hold {count}"
+    "ofBalance": "/ you hold {count}",
+    "railFollowing": "Following"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "subtitle": "Updates from the creators you support, gathered in one place.",
+    "markAllRead": "Mark all as read",
+    "empty": "No notifications yet. Follow a creator or send mochi to start hearing from them here."
   }
 }

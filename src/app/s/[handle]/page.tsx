@@ -12,9 +12,11 @@ import { CreatorFacet } from "@/components/CreatorFacet";
 import { BackerWall } from "@/components/BackerWall";
 import { BuyMochi } from "@/components/BuyMochi";
 import { MarketplaceSection } from "@/components/MarketplaceSection";
+import { FollowButton } from "@/components/FollowButton";
 import { getStreamerProfile } from "@/lib/streamers";
 import { getCurrentBacker } from "@/lib/session";
 import { getHolding } from "@/lib/mochi";
+import { isFollowing } from "@/lib/follows";
 import { formatPercent } from "@/lib/format";
 import { isCreatorType, ALL_CATEGORIES } from "@/lib/creatorTaxonomy";
 import type { Grade } from "@/lib/grades";
@@ -61,7 +63,10 @@ export default async function StreamerProfilePage({
 
   // Phase 2: mochi issuance + marketplace (from the profile query) + the
   // viewer's holding balance (depends on both the streamer and the account).
-  const holding = backer ? await getHolding(streamer.id, backer.id) : null;
+  const [holding, following] = await Promise.all([
+    backer ? getHolding(streamer.id, backer.id) : null,
+    backer ? isFollowing(streamer.id, backer.id) : false,
+  ]);
   const balance = holding?.balance ?? 0;
   const issuance = streamer.mochiIssuance
     ? {
@@ -156,9 +161,17 @@ export default async function StreamerProfilePage({
               ))}
             </div>
           </div>
-          <ButtonLink href="#buy-mochi" size="lg">
-            <Mochi width={18} height={14} /> {tc("sendMochi")}
-          </ButtonLink>
+          <div className="flex flex-none gap-2.5">
+            <FollowButton
+              streamerId={streamer.id}
+              handle={streamer.handle}
+              initialFollowing={following}
+              signedIn={!!backer}
+            />
+            <ButtonLink href="#buy-mochi" size="lg">
+              <Mochi width={18} height={14} /> {tc("sendMochi")}
+            </ButtonLink>
+          </div>
         </div>
 
         {/* headline stats */}

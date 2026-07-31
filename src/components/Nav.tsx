@@ -5,6 +5,8 @@ import { auth } from "@/auth";
 import { BrandLogo } from "./BrandLogo";
 import { SignupButton } from "./SignupButton";
 import { UserMenu, type MenuItem } from "./UserMenu";
+import { NotificationBell } from "./NotificationBell";
+import { getNotificationsForBacker, getUnreadCount } from "@/lib/notify";
 
 /**
  * Top navigation — one bar for every page, section, and user type.
@@ -34,6 +36,16 @@ export async function Nav() {
   const host = (await headers()).get("host") ?? "";
   const onStudioHost = host.startsWith("studio.");
 
+  // Notifications are fan-side (order/item/price events) — surfaced on the
+  // consumer host only, matching 홈/내 모찌/둘러보기 above.
+  const showBell = authed && !onStudioHost;
+  const [notifications, unreadCount] = showBell
+    ? await Promise.all([
+        getNotificationsForBacker(session!.user!.id!, 6),
+        getUnreadCount(session!.user!.id!),
+      ])
+    : [[], 0];
+
   // Context-aware dropdown items. Studio host surfaces console actions; the
   // consumer app surfaces fan actions + the creator entry point.
   const items: MenuItem[] = onStudioHost
@@ -59,13 +71,30 @@ export async function Nav() {
         <BrandLogo href={authed && !onStudioHost ? "/home" : "/"} />
 
         {authed ? (
-          <UserMenu
-            name={name}
-            initial={initial}
-            subtitle={handle ? `@${handle}` : undefined}
-            items={items}
-            logoutLabel={t("logout")}
-          />
+          <div className="flex items-center gap-1.5 sm:gap-2.5">
+            {showBell && (
+              <NotificationBell
+                items={notifications.map((n) => ({
+                  id: n.id,
+                  title: n.title,
+                  body: n.body,
+                  link: n.link,
+                  read: n.read,
+                  createdAt: n.createdAt.toISOString(),
+                }))}
+                unreadCount={unreadCount}
+                seeAllLabel={t("notifications")}
+                emptyLabel={t("notificationsEmpty")}
+              />
+            )}
+            <UserMenu
+              name={name}
+              initial={initial}
+              subtitle={handle ? `@${handle}` : undefined}
+              items={items}
+              logoutLabel={t("logout")}
+            />
+          </div>
         ) : (
           <div className="flex items-center gap-3 sm:gap-4">
             <Link

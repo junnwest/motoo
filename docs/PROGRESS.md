@@ -1,10 +1,31 @@
 # motoo — Progress Tracker
 
-_Last updated: 2026-07-29_
+_Last updated: 2026-07-30_
 
 Living status of the build. Update the checkboxes as work lands. See
 [`DECISIONS.md`](./DECISIONS.md) for why things are the way they are and
 [`DEPLOYMENT.md`](./DEPLOYMENT.md) for infra state.
+
+## Recent — 2026-07-30 (notifications + follow list + home widened · local only, not yet deployed)
+
+- [x] **Notifications**: new `Notification` model + `src/lib/notify.ts` (best-effort,
+  called after the triggering action commits — never inside mochi.ts's tested
+  transactions). Fires on: order fulfilled, order cancelled, a held/followed creator
+  adds an item (stakeholders only, create-only so edits don't re-notify), a held
+  creator raises their mochi price (holders only). Bell in `Nav` with an unread badge
+  + dropdown (latest 6) → full `/notifications` page (mark-all-read, mark-on-click).
+- [x] **Follow list**: new `Follow` model (free, distinct from `MochiHolding` and the
+  dormant `Streamer.followerCount`). `FollowButton` on the profile header, optimistic
+  toggle. **The home rail now merges holdings + follows** — a row shows a balance or a
+  팔로잉 chip — and the two-column layout now triggers on "supports anyone" (holds OR
+  follows), not "holds mochi", since following is free. News sources from the same
+  merged set. See DECISIONS 2026-07-30.
+- [x] **Home widened 1440 → 1600** to match `Nav`'s max-width; feed grids gained a
+  `2xl` column so the width holds more content, not more whitespace.
+- [x] Verified: `tsc`, eslint, `check:vocab`, `check:emoji` clean, `pnpm test` 11/11,
+  **`pnpm build` clean** (all 21 routes compile, including the two new ones), browser-
+  verified the bell dropdown, mark-all-read, follow toggle (with live rail update), and
+  the wide layout at 1920px.
 
 ## Recent — 2026-07-29 (signed-in home + design de-slopping · local only, not yet deployed)
 

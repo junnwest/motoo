@@ -31,7 +31,8 @@ stay in the tree, dormant.
 | Route | Page |
 | --- | --- |
 | `/` | Marketing landing (logged-out only; signed-in users are routed to `/home`) |
-| `/home` | **The app home.** A rail of the creators you support (live balances) beside a feed: items you can afford right now → in-flight orders → their latest posts → discovery. Adaptive — a user with no mochi yet gets a discovery-led single column with a how-it-works primer |
+| `/home` | **The app home.** A rail of every creator you support — held (balance) or followed (free) — beside a feed: items you can afford right now → in-flight orders → their latest posts → discovery. Adaptive — a user who supports no one yet gets a discovery-led single column with a how-it-works primer |
+| `/notifications` | Full notification history (order fulfilled/cancelled, a supported creator adds an item or raises their price) — mark-all-read. A bell in the nav surfaces the latest few |
 | `/explore` | Creators grid — the dedicated browse page (filters, search, sort) |
 | `/s/[handle]` | Creator profile: **buy mochi** module + **marketplace** (spend mochi on items) |
 | `/me/mochi` | "My mochi": per-creator holdings + order/redemption history |
@@ -69,6 +70,10 @@ real 본인인증 (NICE/PASS/간편인증), Kakao login. Mocks stand in behind p
   `src/**` or `messages/*.json`). Emoji render in the OS emoji font, so they shift per
   platform and can't take brand color.
 - Dormant Phase-1 invariants (founding number, grades) remain in the schema, unused.
+- **Notifications are best-effort, never money-adjacent**: `src/lib/notify.ts` is called
+  from server actions after their triggering mutation commits, not from inside
+  `mochi.ts`'s transactions, and swallows its own errors — a failed insert can never
+  roll back or fail the order/item/price action that triggered it.
 
 ## Getting started
 

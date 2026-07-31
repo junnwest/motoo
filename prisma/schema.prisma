@@ -141,6 +141,7 @@ model Streamer {
   mochiHoldings    MochiHolding[]
   marketplaceItems MarketplaceItem[]
   orders           Order[]
+  follows          Follow[]
 
   @@index([status])
   @@index([category])
@@ -205,6 +206,8 @@ model Backer {
   ownedStreamer Streamer?      @relation("CreatorOwner")
   mochiHoldings MochiHolding[]
   orders        Order[]
+  follows       Follow[]
+  notifications Notification[]
 }
 
 model Backing {
@@ -400,4 +403,50 @@ model Order {
   @@index([streamerId])
   @@index([backerId])
   @@index([itemId])
+}
+
+// A free, in-app "I want to hear from this creator" relationship — distinct from
+// MochiHolding (money) and Streamer.followerCount (a dormant Phase-1 seeded
+// number for an off-platform follower count, never rendered). Following costs
+// nothing, so it's the wider of the two "creators you support" relationships and
+// is what fills the home rail for a user who hasn't bought mochi from everyone
+// they're interested in yet.
+model Follow {
+  id         String   @id @default(cuid())
+  streamerId String
+  streamer   Streamer @relation(fields: [streamerId], references: [id], onDelete: Cascade)
+  backerId   String
+  backer     Backer   @relation(fields: [backerId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@unique([streamerId, backerId])
+  @@index([streamerId])
+  @@index([backerId])
+}
+
+// What triggers a Notification. Kept to events with a clear, unambiguous
+// audience (see src/lib/notify.ts for exactly who receives each type).
+enum NotificationType {
+  order_fulfilled // creator marked your order done
+  order_cancelled // creator cancelled your order; mochi was refunded
+  new_item // a creator you hold mochi in or follow added a marketplace item
+  price_raised // a creator you hold mochi in raised their mochi price (new tier)
+}
+
+// A notification queued for one Backer. Created outside the money-invariant
+// transactions in mochi.ts (see src/lib/notify.ts) — best-effort, never allowed
+// to fail the action that triggered it.
+model Notification {
+  id        String           @id @default(cuid())
+  backerId  String
+  backer    Backer           @relation(fields: [backerId], references: [id], onDelete: Cascade)
+  type      NotificationType
+  title     String
+  body      String?
+  link      String? // where "전체 보기"/clicking the row goes, e.g. /me/mochi
+  read      Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  @@index([backerId, read])
+  @@index([backerId, createdAt])
 }

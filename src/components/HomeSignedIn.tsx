@@ -9,12 +9,17 @@ import { ItemThumbnail } from "@/components/ItemThumbnail";
 import { ButtonLink } from "@/components/ui/Button";
 import {
   IconClock,
+  IconHeart,
   IconSearch,
   IconSend,
   IconWallet,
 } from "@/components/ui/Icons";
-import { getHoldingsForBacker, getOrdersForBacker } from "@/lib/mochi";
-import { getAffordableItems, getUpdatesForBacker } from "@/lib/home";
+import { getOrdersForBacker } from "@/lib/mochi";
+import {
+  getAffordableItems,
+  getRailCreators,
+  getUpdatesForBacker,
+} from "@/lib/home";
 import {
   getExploreStreamers,
   type StreamerCard as CardData,
@@ -24,17 +29,18 @@ import { ALL_CATEGORIES } from "@/lib/creatorTaxonomy";
 
 /**
  * The signed-in app home, served at `/home`. Adaptive by design
- * (DECISIONS 2026-07-29):
+ * (DECISIONS 2026-07-29, extended 2026-07-30):
  *
- * - **Holds mochi** → two columns: a sticky rail of the creators they support
- *   (balances, always reachable) beside the main feed — balances, what they can
- *   spend on right now, in-flight orders, news, then discovery.
- * - **Holds nothing** (every new signup) → single column, discovery-led with a
- *   short primer, because the rail and the feed would both be empty on day one.
+ * - **Supports someone** (holds mochi in them OR follows them, for free) →
+ *   two columns: a sticky rail of every creator they support beside a feed —
+ *   what they can spend on right now → in-flight orders → news → discovery.
+ * - **Supports no one** (every new signup) → single column, discovery-led
+ *   with a short primer, because the rail and the feed would both be empty.
  *
  * The rail is a **content** rail, not navigation: fan-side has only four
  * destinations, which isn't enough to justify persistent chrome, but "who I
- * support" is real, grows with the user, and is the thing worth keeping onscreen.
+ * support" is real, grows with the user (and following is free, so it grows
+ * fast), and is the thing worth keeping onscreen.
  *
  * `/explore` stays the dedicated browse page; this never replaces it.
  */
@@ -49,8 +55,8 @@ export async function HomeSignedIn({
   const tax = await getTranslations("creatorTaxonomy");
 
   let trending: CardData[] = [];
-  const [holdings, orders, updates, affordable] = await Promise.all([
-    getHoldingsForBacker(backerId),
+  const [rail, orders, updates, affordable] = await Promise.all([
+    getRailCreators(backerId),
     getOrdersForBacker(backerId),
     getUpdatesForBacker(backerId),
     getAffordableItems(backerId),
@@ -62,16 +68,16 @@ export async function HomeSignedIn({
   }
 
   const pending = orders.filter((o) => o.status === "pending");
-  const hasMochi = holdings.length > 0;
-  const totalMochi = holdings.reduce((sum, h) => sum + h.balance, 0);
-  // Held creators are already onscreen; don't recommend someone the user is
-  // demonstrably already supporting.
-  const heldHandles = new Set(holdings.map((h) => h.streamer.handle));
+  const hasSupport = rail.length > 0;
+  const totalMochi = rail.reduce((sum, c) => sum + (c.balance ?? 0), 0);
+  // Anyone already on the rail (held OR followed) is off the discovery strip —
+  // recommending someone the user demonstrably already supports reads as generated.
+  const railHandles = new Set(rail.map((c) => c.handle));
   const discover = trending
-    .filter((s) => !heldHandles.has(s.handle))
-    .slice(0, hasMochi ? 3 : 8);
+    .filter((s) => !railHandles.has(s.handle))
+    .slice(0, hasSupport ? 3 : 8);
 
-  if (!hasMochi) {
+  if (!hasSupport) {
     return (
       <>
         <Nav />
@@ -134,10 +140,10 @@ export async function HomeSignedIn({
     <>
       <Nav />
 
-      <main className="mx-auto max-w-[1440px] px-6 py-10 sm:px-10 sm:py-14">
-        <div className="flex flex-col gap-10 lg:flex-row lg:gap-12">
-          {/* ── Rail: who you support ──────────────────────────────────── */}
-          <aside className="lg:sticky lg:top-24 lg:h-fit lg:w-[276px] lg:flex-none">
+      <main className="mx-auto max-w-[1600px] px-6 py-10 sm:px-10 sm:py-14">
+        <div className="flex flex-col gap-10 xl:flex-row xl:gap-12">
+          {/* ── Rail: who you support (held + followed, merged) ─────────── */}
+          <aside className="xl:sticky xl:top-24 xl:h-fit xl:w-[300px] xl:flex-none">
             <div className="rounded-[20px] border border-line-2 bg-card p-5">
               <div className="text-[13px] font-bold uppercase tracking-[0.08em] text-muted">
                 {t("railTitle")}
@@ -148,36 +154,43 @@ export async function HomeSignedIn({
                   {totalMochi}
                 </span>
                 <span className="text-[13px] text-muted">
-                  {t("railTotal", { count: holdings.length })}
+                  {t("railTotal", { count: rail.length })}
                 </span>
               </div>
 
               <ul className="mt-4 flex flex-col gap-1">
-                {holdings.map((h) => (
-                  <li key={h.id}>
+                {rail.map((c) => (
+                  <li key={c.streamerId}>
                     <Link
-                      href={`/s/${h.streamer.handle}`}
+                      href={`/s/${c.handle}`}
                       className="flex items-center gap-3 rounded-[12px] px-2 py-2 transition-colors hover:bg-panel"
                     >
                       <CreatorCover
-                        handle={h.streamer.handle}
-                        displayName={h.streamer.displayName}
+                        handle={c.handle}
+                        displayName={c.displayName}
                         className="h-9 w-9 flex-none rounded-full"
                         markClass="text-[15px]"
                       />
                       <span className="min-w-0 flex-1">
                         <span className="block truncate text-[14px] font-bold text-ink">
-                          {h.streamer.displayName}
+                          {c.displayName}
                         </span>
                         <span className="block truncate text-[12px] text-muted">
-                          {ALL_CATEGORIES.includes(h.streamer.category)
-                            ? tax(`categories.${h.streamer.category}`)
-                            : h.streamer.category}
+                          {ALL_CATEGORIES.includes(c.category)
+                            ? tax(`categories.${c.category}`)
+                            : c.category}
                         </span>
                       </span>
-                      <span className="flex-none text-[13px] font-extrabold text-coral-deep">
-                        {h.balance}
-                      </span>
+                      {c.balance !== null ? (
+                        <span className="flex-none text-[13px] font-extrabold text-coral-deep">
+                          {c.balance}
+                        </span>
+                      ) : (
+                        <span className="flex flex-none items-center gap-1 rounded-full bg-panel px-2 py-1 text-[11px] font-bold text-muted-2">
+                          <IconHeart width={11} height={11} />
+                          {t("railFollowing")}
+                        </span>
+                      )}
                     </Link>
                   </li>
                 ))}
@@ -214,7 +227,7 @@ export async function HomeSignedIn({
             {affordable.length > 0 && (
               <>
                 <SectionHead title={t("affordableTitle")} first />
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
                   {affordable.map(({ item, streamer, balance }) => (
                     <Link
                       key={item.id}
@@ -255,9 +268,9 @@ export async function HomeSignedIn({
                   more={t("seeAll")}
                   first={affordable.length === 0}
                 />
-                <ul className="flex flex-col gap-3">
+                <div className="grid grid-cols-1 gap-3 2xl:grid-cols-2">
                   {pending.map((o) => (
-                    <li
+                    <div
                       key={o.id}
                       className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-[16px] border border-line-2 bg-card p-4"
                     >
@@ -279,16 +292,16 @@ export async function HomeSignedIn({
                       <span className="rounded-full bg-coral-chip px-2.5 py-1 text-[12px] font-semibold text-coral-deep">
                         {t("statusPending")}
                       </span>
-                    </li>
+                    </div>
                   ))}
-                </ul>
+                </div>
               </>
             )}
 
             {updates.length > 0 && (
               <>
                 <SectionHead title={t("newsTitle")} />
-                <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 2xl:grid-cols-3">
                   {updates.map((u) => (
                     <li key={u.id}>
                       <Link
