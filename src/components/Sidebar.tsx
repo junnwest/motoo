@@ -38,7 +38,7 @@ export async function Sidebar({ backerId }: { backerId: string }) {
             <li key={c.streamerId}>
               <Link
                 href={`/s/${c.handle}`}
-                className="flex items-center gap-2.5 rounded-[10px] px-3 py-2 transition-colors hover:bg-panel"
+                className="flex items-center gap-2.5 rounded-[10px] px-3 py-2 transition-colors hover:bg-cream-warm"
               >
                 <CreatorCover
                   handle={c.handle}

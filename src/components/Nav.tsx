@@ -77,7 +77,7 @@ export async function Nav() {
                 <Link
                   href="/ranking"
                   aria-label={t("ranking")}
-                  className="flex h-10 w-10 items-center justify-center rounded-full text-ink transition hover:bg-panel focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-deep"
+                  className="flex h-10 w-10 items-center justify-center rounded-full text-ink transition hover:bg-cream-warm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-deep"
                 >
                   <IconTrophy width={23} height={23} />
                 </Link>

@@ -6,6 +6,18 @@ Living status of the build. Update the checkboxes as work lands. See
 [`DECISIONS.md`](./DECISIONS.md) for why things are the way they are and
 [`DEPLOYMENT.md`](./DEPLOYMENT.md) for infra state.
 
+## Recent — 2026-07-31 (fixed invisible nav hover/active box)
+
+- [x] **`bg-panel` was invisible against the page**: `--color-panel` is the exact same hex
+  as `--color-cream` (page background), so every nav hover/active box (Sidebar links,
+  following-list rows, Nav's ranking icon, NotificationBell) rendered with zero contrast.
+  Switched those specifically to `bg-cream-warm` (already used this way by `UserMenu`'s
+  dropdown rows) — left the `panel` token itself alone since ~20 other places rely on it
+  matching the page background on purpose (inset panels on white cards). See DECISIONS
+  2026-07-31.
+- [x] Verified: `tsc`, eslint, `check:vocab`, `check:emoji` clean, `pnpm test` 11/11,
+  `pnpm build` clean (23 routes), browser-checked the hover box now visibly appears.
+
 ## Recent — 2026-07-31 (compass icon fix + Sidebar active-page state)
 
 - [x] **`IconCompass` fixed for real**: the needle path was asymmetric about the circle's

@@ -3,6 +3,24 @@
 Why the project is the way it is. Newest first. Keep entries short: decision,
 rationale, and any constraint it creates.
 
+## 2026-07-31 — `bg-panel` is literally the same color as the page background
+User: "I wish there was a box behind the buttons that appear on hover and stays on
+click" — about the Sidebar active-state work from minutes earlier. Root cause:
+`--color-panel: #fbf6ef` in `globals.css` is byte-identical to `--color-cream` (the page
+background). Every `hover:bg-panel`/`bg-panel` on a nav item sitting directly on the page
+background (Sidebar links, the following-list rows, Nav's ranking icon button,
+NotificationBell) was rendering a real DOM box with zero visible contrast — not a missing
+feature, an invisible one.
+- **Not fixing the `panel` token itself** — it's used ~20 other places as an intentional
+  "inset panel on a white card" fill (`bg-card` container, `bg-panel` inset), where matching
+  the page background is the point (BackingFlow, BuyMochi, profile order rows, etc.).
+  Changing it would fix this bug and silently break all of those.
+  - Switched the nav-hover family to `bg-cream-warm` instead — already a real, visibly
+  distinct token, and already proven as this exact "hover row on the page background"
+  treatment by `UserMenu`'s dropdown rows (`hover:bg-cream-warm`). No new color invented.
+- Touched: `SidebarNavLinks.tsx` (hover + the just-added active state), `Sidebar.tsx`
+  (following-list row hover), `Nav.tsx` (ranking icon button), `NotificationBell.tsx`.
+
 ## 2026-07-31 — `IconCompass` was genuinely lopsided; Sidebar nav gets an active state
 Two more icon/nav fixes reported after the previous icon-sizing pass.
 - **`IconCompass` root cause found**: its needle path (`m15 9-2 6-6 2 2-6z`) was not
