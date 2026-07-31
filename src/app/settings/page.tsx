@@ -31,14 +31,17 @@ export default async function SettingsPage() {
           </h1>
           <p className="mt-2 text-[15.5px] text-body">{t("subtitle")}</p>
 
-          <Section title={t("identityTitle")} className="mt-10">
+          {/* boxed: a form-group, not a content shelf — the Spotify reference
+              (DECISIONS 2026-07-31) that keeps other Sections bare doesn't
+              apply to a settings form the same way. */}
+          <Section title={t("identityTitle")} boxed className="mt-10">
             <IdentityForm
               initialNickname={backer.nickname}
               initialHandle={backer.handle ?? ""}
             />
           </Section>
 
-          <Section title={t("passwordTitle")} className="mt-6">
+          <Section title={t("passwordTitle")} boxed className="mt-6">
             {backer.passwordHash ? (
               <PasswordForm />
             ) : (

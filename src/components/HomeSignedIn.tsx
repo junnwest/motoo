@@ -96,7 +96,7 @@ export async function HomeSignedIn({
 
       <div className="mt-8 flex flex-col gap-10 xl:flex-row xl:gap-12">
         {/* ── Middle: mochi status (default view) or the how-it-works primer ─ */}
-        <div className="flex min-w-0 flex-1 flex-col gap-6">
+        <div className="flex min-w-0 flex-1 flex-col gap-9">
           {hasMochi ? (
             <>
               <Section title={t("statusTitle")}>

@@ -3,30 +3,30 @@
 Why the project is the way it is. Newest first. Keep entries short: decision,
 rationale, and any constraint it creates.
 
-## 2026-07-31 — Sections wrap in flat-fill rounded panels (Spotify-referenced)
-Owner asked to look at Spotify's own web player directly and use it as reference. Inspected
-its live CSS via computed styles, not vibes: the sidebar panel ("Create your first
-playlist") measures `background: rgb(31,31,31)` on a black page, `border-radius: 8px`,
-`padding: 16px 20px`, **zero border** — the "box" reads entirely from a flat fill one step
-off the page background, never a stroke. Main-content shelves (Trending songs, Popular
-artists) are the opposite: no box at all, just a heading and a row floating on black.
-- **New `src/components/ui/Section.tsx`**: the same structure adapted to motoo's own
-  proportions, not copied pixel-for-pixel — `bg-cream-warm-2` (one step off the `cream`
-  page bg) at `rounded-[20px]`, no border. 20px rather than Spotify's 8px because motoo's
-  existing corner language runs rounder everywhere else (16–24px on every card); matching
-  Section-to-Section beat matching Section-to-a-black-theme-app.
-- **Applied to every section** on `/home`, `/profile`, `/ranking`, `/settings` — replacing
-  bare heading-then-grid layouts and (on Settings) the old bordered-white-card style.
-  `title` is optional so a single-list page (`/ranking`) can wrap its content without a
-  redundant heading duplicating the page's own `<h1>`.
-- **Individual item cards inside a Section keep their existing white `bg-card` + border** —
-  not flattened to match Spotify's borderless shelf items. The ask was "wrap sections in
-  boxes," not "redesign every card"; flattening every nested item would have been a much
-  larger, unrequested scope. Net result is a three-tier hierarchy (cream page → tinted
-  Section panel → white item card) that reads clearly even though Spotify's own hierarchy
-  only has two tiers.
-- Bonus, unplanned: Settings' form inputs (`bg-white`) now sit on the tinted panel instead
-  of a same-white card, so they pop more than before — better contrast, no rule to un-write.
+## 2026-07-31 — Sections are bare, not boxed (Spotify-referenced, corrected)
+Owner asked to look at Spotify's own web player directly. First pass got this wrong: I
+inspected the CSS of Spotify's **sidebar promo widget** ("Create your first playlist" —
+`background: rgb(31,31,31)`, `border-radius: 8px`, no border) and generalized that into "how
+Spotify boxes sections," then applied a flat-fill panel to every `/home`/`/profile`/
+`/ranking` section. The owner caught it — that's a sidebar widget's style, not the home
+page's. A real logged-in screenshot (Korean UI, provided directly) confirmed: Spotify's
+actual content shelves (시작하기, 최근, 금요일의 새 음악을 소개합니다!) are **not boxed at
+all** — a bold heading floats directly on the page background, followed by a bare row of
+individually-shaped item cards. The only genuinely boxed panel on that page is the transient
+queue drawer, a utility surface, not a content shelf.
+- **`src/components/ui/Section.tsx` now defaults to bare** (`boxed` prop, default `false`) —
+  just a heading + optional "see more" link, no fill/radius/padding of its own. Matches what
+  the reference screenshots actually show, not the sidebar widget I mis-generalized from.
+- **`/home`, `/profile`, `/ranking` stayed bare** — individual item cards (white `bg-card` +
+  border) are the only visual boxes, exactly mirroring Spotify's individually-shaped shelf
+  items. Bumped the inter-section gap (`gap-6` → `gap-9`) since a bare heading needs more
+  breathing room than a boxed one did.
+- **`/settings` opted back into `boxed`** — deliberately, not an oversight: it's a form/
+  settings group, not a content shelf, and the reference screenshot is a music home page, not
+  an account-settings page. Same instinct that made the queue drawer a real exception on
+  Spotify's own page: utility surfaces can box even when content shelves don't.
+- Palette unchanged throughout — motoo's own cream/coral tokens, not Spotify's black/green;
+  only the *structural* pattern (bare shelf vs. boxed utility) was the reference.
 
 ## 2026-07-30 — Full nav restructure: persistent Sidebar, Ranking, Profile, Settings
 Owner-driven redesign, decided via a round of clarifying questions before any code (five

@@ -6,15 +6,17 @@ Living status of the build. Update the checkboxes as work lands. See
 [`DECISIONS.md`](./DECISIONS.md) for why things are the way they are and
 [`DEPLOYMENT.md`](./DEPLOYMENT.md) for infra state.
 
-## Recent — 2026-07-31 (Spotify-referenced section panels · local only, not yet deployed)
+## Recent — 2026-07-31 (Spotify-referenced sections, corrected to bare · local only, not yet deployed)
 
-- [x] **Every section now wraps in a rounded, flat-fill panel** (new `src/components/ui/
-  Section.tsx`) — `/home`, `/profile`, `/ranking`, `/settings`. Reference pulled directly
-  from Spotify's own web player (inspected live CSS, not guessed): a flat fill one step off
-  the page background at 8px radius, zero border — adapted to motoo's own rounder corner
-  language (20px) rather than copied pixel-for-pixel. See DECISIONS 2026-07-31.
+- [x] **Sections are bare, not boxed** — a first pass wrongly generalized Spotify's sidebar
+  *widget* CSS into a whole-section panel; a real logged-in screenshot (owner-provided) showed
+  Spotify's actual content shelves have no box at all, just a heading + a row of individually-
+  shaped item cards. `src/components/ui/Section.tsx` now defaults to bare (`boxed` prop,
+  default off); `/home`/`/profile`/`/ranking` stayed bare, `/settings` opted back into
+  `boxed` deliberately (it's a form group, not a content shelf). Palette untouched throughout.
+  See DECISIONS 2026-07-31.
 - [x] Verified: `tsc`, eslint, `check:vocab`, `check:emoji` clean, `pnpm test` 11/11,
-  `pnpm build` clean (23 routes), browser-checked all four pages.
+  `pnpm build` clean (23 routes), browser-checked all four pages against the real reference.
 
 ## Recent — 2026-07-30 (full nav restructure: Sidebar, Ranking, Profile, Settings · local only, not yet deployed)
 

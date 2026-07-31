@@ -1,23 +1,26 @@
 import Link from "next/link";
 
 /**
- * A section wrapped in a rounded, flat-fill panel — reference: Spotify's own
- * web player, whose sidebar panels ("Create your first playlist") measure out
- * to `background: rgb(31,31,31)` on a black page, `border-radius: 8px`,
- * `padding: 16px 20px`, **no border at all**. The "box" reads from a flat
- * color one step off the page background, not a stroke.
+ * A section heading, bare by default — reference: Spotify's own logged-in web
+ * player (screenshotted directly, not guessed). Its content shelves (시작하기,
+ * 최근, 금요일의 새 음악을 소개합니다!) are NOT boxed: a bold heading floats
+ * directly on the page background, followed by a bare row of individually-
+ * shaped item cards. The only genuinely boxed panel on that page is the
+ * transient queue drawer — a distinct utility surface, not a content shelf.
+ * An earlier version of this component boxed every section; that was reading
+ * too much from Spotify's *sidebar promo widget* CSS and not enough from what
+ * its actual home page does. See DECISIONS 2026-07-31 (corrected).
  *
- * Adapted, not copied: motoo's page is light (cream, not black), and the
- * brand's existing corner language runs rounder (16–24px on every other card)
- * — so this uses `cream-warm-2` as the "one step off cream" fill and 20px
- * radius, matching Section to Section rather than Section to a black-theme
- * app pixel-for-pixel. Same borderless-flat-panel structure, motoo's own
- * proportions. See DECISIONS 2026-07-31.
+ * `boxed` opts back into a flat-fill panel (`cream-warm-2`, no border) for
+ * pages that are a form/settings group rather than a content shelf — that's a
+ * different UI idiom than what the Spotify reference shows, kept only where
+ * it earns its keep (e.g. Settings).
  */
 export function Section({
   title,
   href,
   more,
+  boxed = false,
   className = "",
   children,
 }: {
@@ -27,12 +30,14 @@ export function Section({
   title?: string;
   href?: string;
   more?: string;
+  /** Opt into the flat-fill panel look — see the component doc above. */
+  boxed?: boolean;
   className?: string;
   children: React.ReactNode;
 }) {
   return (
     <section
-      className={`rounded-[20px] bg-cream-warm-2 p-6 sm:p-7 ${className}`}
+      className={`${boxed ? "rounded-[20px] bg-cream-warm-2 p-6 sm:p-7" : ""} ${className}`}
     >
       {title && (
         <div className="mb-4 flex items-baseline justify-between gap-4">
