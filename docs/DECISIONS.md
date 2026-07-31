@@ -27,6 +27,19 @@ queue drawer, a utility surface, not a content shelf.
   Spotify's own page: utility surfaces can box even when content shelves don't.
 - Palette unchanged throughout — motoo's own cream/coral tokens, not Spotify's black/green;
   only the *structural* pattern (bare shelf vs. boxed utility) was the reference.
+- **Second correction, same session**: removing the section box wasn't enough — every item
+  *inside* each section still had `border border-line-2 bg-card`, so the page still read as
+  "lots of white bordered boxes," just one nesting level shallower. The owner caught this
+  too ("it still looks different"). Fixed against the same real screenshot: Spotify's own
+  item-level treatment has **no border anywhere** — compact rows (recently-played pills) get
+  a flat fill only, and image-forward shelf items (최근, 금요일의 새 음악을…) drop the card
+  entirely — bare rounded image, caption below it on the page background, no fill at all.
+  - Compact rows (holdings, affordable items, pending, news, order history, ranking rows) →
+    dropped `border-line-2`, kept `bg-card`, added `shadow-soft` (hover: `shadow-card`) for
+    resting-state definition instead of a stroke.
+  - The `새로운 크리에이터` discover cards (biggest offender) → dropped the card wrapper
+    entirely. `CreatorCover`'s own `rounded-[12px]` + `overflow-hidden` now does the
+    clipping directly (no `Link` wrapper box needed); caption sits below, unboxed.
 
 ## 2026-07-30 — Full nav restructure: persistent Sidebar, Ranking, Profile, Settings
 Owner-driven redesign, decided via a round of clarifying questions before any code (five

@@ -15,6 +15,12 @@ Living status of the build. Update the checkboxes as work lands. See
   default off); `/home`/`/profile`/`/ranking` stayed bare, `/settings` opted back into
   `boxed` deliberately (it's a form group, not a content shelf). Palette untouched throughout.
   See DECISIONS 2026-07-31.
+- [x] **Second pass, same session**: item-level cards still had `border-line-2` everywhere,
+  so it still read as boxed even with the section wrapper gone. Fixed against the real
+  screenshot: compact rows (holdings/affordable/pending/news/history/ranking) dropped the
+  border for a flat `bg-card` fill + `shadow-soft`; the discover cards on `/home` dropped the
+  card treatment entirely — bare rounded image (`CreatorCover`'s own radius + clip), caption
+  below on the page background.
 - [x] Verified: `tsc`, eslint, `check:vocab`, `check:emoji` clean, `pnpm test` 11/11,
   `pnpm build` clean (23 routes), browser-checked all four pages against the real reference.
 

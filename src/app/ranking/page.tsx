@@ -44,7 +44,7 @@ export default async function RankingPage() {
                   <li key={r.streamerId}>
                     <Link
                       href={`/s/${r.handle}`}
-                      className="flex items-center gap-4 rounded-[14px] border border-line-2 bg-card p-4 transition-shadow hover:shadow-card"
+                      className="flex items-center gap-4 rounded-[14px] bg-card p-4 shadow-soft transition-shadow hover:shadow-card"
                     >
                       <CreatorCover
                         handle={r.handle}

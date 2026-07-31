@@ -85,7 +85,7 @@ export default async function ProfilePage() {
                 {holdings.map((h) => (
                   <div
                     key={h.id}
-                    className="flex flex-col rounded-[16px] border border-line-2 bg-card p-5"
+                    className="flex flex-col rounded-[16px] bg-card p-5 shadow-soft"
                   >
                     <div className="flex items-center gap-3">
                       <CreatorCover
@@ -141,7 +141,7 @@ export default async function ProfilePage() {
                 {orders.map((o) => (
                   <li
                     key={o.id}
-                    className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-[14px] border border-line-2 bg-card p-4"
+                    className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-[14px] bg-card p-4 shadow-soft"
                   >
                     <Avatar
                       name={o.streamer.displayName}

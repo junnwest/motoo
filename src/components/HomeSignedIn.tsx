@@ -40,9 +40,14 @@ import { ALL_CATEGORIES } from "@/lib/creatorTaxonomy";
  * followed creators still renders below it if there is any — following is
  * free, so it shouldn't be starved just because the user hasn't bought yet.
  *
- * Every section is wrapped in a flat-fill rounded panel (`Section`,
- * DECISIONS 2026-07-31 — Spotify-referenced), replacing the old bare
- * heading-then-grid layout.
+ * Item cards follow Spotify's own two treatments (DECISIONS 2026-07-31,
+ * corrected against a real logged-in screenshot): compact rows (holdings,
+ * affordable items, pending, news) get a flat `bg-card` fill with **no
+ * border** — a soft shadow does the separating, the way Spotify's own
+ * "recently played" pills have a fill but no stroke. The discover cards on
+ * the right drop the card treatment entirely: a bare rounded image with the
+ * caption sitting below it on the page background, unboxed — Spotify's
+ * "최근"/"금요일의 새 음악을 소개합니다!" shelf-item look.
  */
 export async function HomeSignedIn({
   backerId,
@@ -107,7 +112,7 @@ export async function HomeSignedIn({
                       <Link
                         key={h.id}
                         href={`/s/${h.streamer.handle}`}
-                        className="flex items-center gap-3 rounded-[16px] border border-line-2 bg-card p-4 transition-shadow hover:shadow-card"
+                        className="flex items-center gap-3 rounded-[16px] bg-card p-4 shadow-soft transition-shadow hover:shadow-card"
                       >
                         <CreatorCover
                           handle={h.streamer.handle}
@@ -147,7 +152,7 @@ export async function HomeSignedIn({
                       <Link
                         key={item.id}
                         href={`/s/${streamer.handle}#market`}
-                        className="flex gap-3 rounded-[16px] border border-line-2 bg-card p-4 transition-shadow hover:shadow-card"
+                        className="flex gap-3 rounded-[16px] bg-card p-4 shadow-soft transition-shadow hover:shadow-card"
                       >
                         <ItemThumbnail
                           thumbnailKey={item.thumbnailKey}
@@ -181,7 +186,7 @@ export async function HomeSignedIn({
                     {pending.map((o) => (
                       <div
                         key={o.id}
-                        className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-[14px] border border-line-2 bg-card p-4"
+                        className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-[14px] bg-card p-4 shadow-soft"
                       >
                         <span className="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-coral-chip text-coral-deep">
                           <IconClock width={18} height={18} />
@@ -236,7 +241,7 @@ export async function HomeSignedIn({
                   <li key={u.id}>
                     <Link
                       href={`/s/${u.streamer.handle}`}
-                      className="flex h-full flex-col rounded-[14px] border border-line-2 bg-card p-4 transition-shadow hover:shadow-card"
+                      className="flex h-full flex-col rounded-[14px] bg-card p-4 shadow-soft transition-shadow hover:shadow-card"
                     >
                       <div className="flex items-center gap-2 text-[13px] text-muted">
                         <span className="font-bold text-ink">
@@ -262,20 +267,16 @@ export async function HomeSignedIn({
         {discover.length > 0 && (
           <aside className="xl:w-[320px] xl:flex-none">
             <Section title={t("discoverTitle")} href="/explore" more={t("seeAll")}>
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-5">
                 {discover.map((s) => (
-                  <Link
-                    key={s.handle}
-                    href={`/s/${s.handle}`}
-                    className="group overflow-hidden rounded-[14px] border border-line-2 bg-card transition-shadow hover:shadow-card"
-                  >
+                  <Link key={s.handle} href={`/s/${s.handle}`} className="group">
                     <CreatorCover
                       handle={s.handle}
                       displayName={s.displayName}
-                      className="h-[120px] w-full"
-                      markClass="text-[36px]"
+                      className="h-[160px] w-full rounded-[12px] transition-opacity group-hover:opacity-90"
+                      markClass="text-[40px]"
                     />
-                    <div className="p-4">
+                    <div className="mt-2.5">
                       <div className="truncate text-[15px] font-extrabold text-ink">
                         {s.displayName}
                       </div>
