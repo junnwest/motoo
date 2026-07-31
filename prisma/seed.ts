@@ -194,6 +194,22 @@ async function main() {
     },
   });
 
+  // Kenneth's local dev account. `pnpm db:seed` wipes every Backer (see the
+  // deleteMany() at the top), which silently dropped this account's login,
+  // holdings, and follows three times in one session before it earned a seed
+  // entry — restores automatically on every reseed from here on.
+  // Login: orangeandmustard@gmail.com / motoo1234
+  const kenneth = await prisma.backer.create({
+    data: {
+      email: "orangeandmustard@gmail.com",
+      nickname: "creator1",
+      handle: "orangemustard",
+      passwordHash:
+        "ecb1fa79647da2cb5cf74f6a7e619d9d:b025824cbdefe064e917bce0b88e59c99ec4b45a8cc4a682a3a8603b8772467a5b51f19a075ec80691470ffbde4bf507550e89014225ba8f7521a04cd90fc6d4",
+      ...grandfathered,
+    },
+  });
+
   // Captured for post-loop holdings/orders so the flagship demo looks alive.
   type CreatorRef = {
     streamerId: string;
@@ -573,6 +589,34 @@ async function main() {
     for (const b of holders.slice(0, 4)) {
       await prisma.follow.create({
         data: { streamerId: flagship.streamerId, backerId: b.id },
+      });
+    }
+
+    // Kenneth's account: 3 holdings + 2 follows, mirroring the manual state
+    // that used to get lost on every reseed.
+    const kennethHoldings = [
+      { handle: "creatorA", balance: 38 },
+      { handle: "creatorE", balance: 25 },
+      { handle: "creatorG", balance: 12 },
+    ];
+    for (const { handle, balance } of kennethHoldings) {
+      const held = allCreators.find((c) => c.handle === handle);
+      if (!held) continue;
+      await prisma.mochiHolding.create({
+        data: {
+          streamerId: held.streamerId,
+          backerId: kenneth.id,
+          balance,
+          purchasedTotal: balance + 15,
+          krwPaidTotal: (balance + 15) * held.pricePerMochiKrw,
+        },
+      });
+    }
+    for (const handle of ["creatorC", "creatorD"]) {
+      const followed = allCreators.find((c) => c.handle === handle);
+      if (!followed) continue;
+      await prisma.follow.create({
+        data: { streamerId: followed.streamerId, backerId: kenneth.id },
       });
     }
 

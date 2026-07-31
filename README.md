@@ -96,7 +96,9 @@ account. In dev, `src/lib/session.ts` falls back to the demo fan/creator when no
 signed in.
 
 > `pnpm db:seed` starts with `deleteMany()` — it wipes **all** accounts, including any you
-> signed up with locally. Re-seed knowingly.
+> signed up with locally. Re-seed knowingly. If you want a personal account that survives
+> reseeds, add it to `prisma/seed.ts` next to `demo`/`creatorAccount` — see how
+> `orangeandmustard@gmail.com` (Kenneth's) is seeded.
 
 ## Scripts
 

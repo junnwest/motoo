@@ -51,7 +51,9 @@ pnpm dev                                       # http://localhost:3000
 Dev logins: fan `demo@motoo.dev` / `motoo` (holds mochi in 4 creators, so `/home` shows its
 populated state); **creator `creator@motoo.dev` / `motoo`** (a user who owns `@creatorA`).
 Both land on `/home`; the creator gets a **스튜디오** nav link. `pnpm db:seed` starts with
-`deleteMany()` — it wipes every account, including ones you signed up with locally. In dev, `src/lib/session.ts` falls back to the demo fan (`getCurrentBacker`) and demo
+`deleteMany()` — it wipes every account, including ones you signed up with locally. If you
+need a personal account that survives reseeds, add it to `prisma/seed.ts` the way
+`orangeandmustard@gmail.com` is (Kenneth's). In dev, `src/lib/session.ts` falls back to the demo fan (`getCurrentBacker`) and demo
 creator (`getCurrentCreator`) when nobody's signed in. New signups are forced through
 `/onboarding` before the app; existing/seeded accounts are grandfathered.
 
