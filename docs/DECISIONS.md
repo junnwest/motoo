@@ -3,6 +3,29 @@
 Why the project is the way it is. Newest first. Keep entries short: decision,
 rationale, and any constraint it creates.
 
+## 2026-08-01 — Studio nav gets its own "motoo" pill back to the consumer app
+The Studio host's nav was sparse next to the consumer nav's icon cluster + Studio pill +
+avatar — just a bare avatar circle, and no one-click way back to the consumer app (the
+Studio pill's whole job on the consumer side). Both share one `Nav` component
+(`src/components/Nav.tsx`), branching on `onStudioHost` — no separate Studio nav to
+maintain, so the fix lives entirely there.
+- Added a `onStudioHost`-only pill, same classes/position as the consumer Studio pill
+  (`border-line-3 bg-white ... rounded-full`), Mochi icon (matching `BrandLogo`'s own use of
+  it as the brand mark) + `t("backToMotoo")` ("motoo"), linking to `/home`. Mirrors the
+  Studio pill's own pattern exactly — same visual language, opposite direction.
+  `showConsumerChrome` stays false on the Studio host (ranking/notifications are
+  consumer-only concepts — creators never receive notifications; `notify()`/`notifyMany()`
+  in `studio/actions.ts` only ever target `holderIds`/`stakeholderIds`, i.e. fans), so this
+  pill is deliberately the only addition, not a wholesale clone of the consumer chrome.
+- **Dev-only quirk, not a bug**: clicking it while on `studio.localhost` doesn't visibly
+  cross hosts — `src/proxy.ts`'s own comment documents that a studio→apex hop is "pure prod
+  behavior," and dev serves the target page inline under the same `studio.*` hostname
+  instead of redirecting (avoids a same-origin loop from how Next pins the dev origin).
+  Confirmed in the browser: content is correct (real `/home`), just the URL bar doesn't
+  change host in dev. In production this is a real 307 cross-host redirect via
+  `crossHost()`, landing on the actual apex nav (ranking/bell/Studio pill, no `backToMotoo`
+  pill — `onStudioHost` correctly flips false there).
+
 ## 2026-08-01 — Trust Report removed from the website; not part of 1.0.0
 User: remove Trust Report entirely — it's the original (shelved) thesis, not the mochi-
 marketplace product being shipped for 1.0.0. This was a bigger job than one feature toggle:

@@ -6,6 +6,7 @@ import { BrandLogo } from "./BrandLogo";
 import { SignupButton } from "./SignupButton";
 import { UserMenu, type MenuItem } from "./UserMenu";
 import { NotificationBell } from "./NotificationBell";
+import { Mochi } from "./Mochi";
 import { IconStudio, IconTrophy } from "@/components/ui/Icons";
 import { getUnreadCount } from "@/lib/notify";
 
@@ -25,7 +26,11 @@ import { getUnreadCount } from "@/lib/notify";
  * ConsumerShell); 내 모찌 moved into Profile.
  *
  * Host-aware: the Studio host keeps its own console-context dropdown
- * (설정/공개 프로필/둘러보기) and none of the new consumer-only chrome.
+ * (설정/공개 프로필/둘러보기) and none of the consumer-only ranking/notification
+ * chrome — but mirrors the consumer nav's pill-button pattern with its own
+ * "motoo" pill (same position/style as the consumer Studio pill, just
+ * pointing the other way) so there's always a one-click way back to the
+ * consumer app (DECISIONS 2026-08-01).
  */
 export async function Nav() {
   const t = await getTranslations("nav");
@@ -93,6 +98,15 @@ export async function Nav() {
                   {t("studio")}
                 </Link>
               </>
+            )}
+            {onStudioHost && (
+              <Link
+                href="/home"
+                className="flex items-center gap-2 rounded-full border border-line-3 bg-white px-4 py-2.5 text-[14px] font-bold text-ink transition-colors hover:border-coral hover:text-coral-deep"
+              >
+                <Mochi width={16} height={13} />
+                {t("backToMotoo")}
+              </Link>
             )}
             <UserMenu
               name={name}

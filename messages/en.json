@@ -21,6 +21,7 @@
     "applyAsCreator": "Apply as creator",
     "dashboard": "Dashboard",
     "studio": "Studio",
+    "backToMotoo": "motoo",
     "becomeCreator": "Become a creator",
     "logout": "Log out",
     "greeting": "{name}",

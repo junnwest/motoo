@@ -6,6 +6,18 @@ Living status of the build. Update the checkboxes as work lands. See
 [`DECISIONS.md`](./DECISIONS.md) for why things are the way they are and
 [`DEPLOYMENT.md`](./DEPLOYMENT.md) for infra state.
 
+## Recent — 2026-08-01 (Studio nav: added a "motoo" pill back to the consumer app)
+
+- [x] **Studio host's nav now has a `backToMotoo` pill**, same style/position as the
+  consumer nav's Studio pill, mirrored the other direction — one click from
+  `studio.themotoo.com` back to `/home` on the apex. Both hosts share one `Nav` component;
+  no separate Studio nav to maintain. Ranking/notification icons deliberately not added to
+  the Studio side — those are consumer-only concepts (creators don't receive
+  notifications). See DECISIONS 2026-08-01.
+- [x] Verified: `tsc`, eslint, `check:vocab`, `check:emoji` clean, `pnpm test` 11/11,
+  `pnpm build` clean, browser-tested on `studio.localhost` (pill renders, click reaches
+  `/home` content) and confirmed the real consumer host's nav is unaffected.
+
 ## Recent — 2026-08-01 (Trust Report removed — not part of 1.0.0)
 
 - [x] **Trust Report is fully gone from the website**: `GradeBadge`, `SampleReport.tsx`,
