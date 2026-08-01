@@ -174,6 +174,10 @@ model Backer {
   email           String   @unique
   nickname        String
   handle          String?  @unique // public fan @handle, chosen at onboarding
+  // Profile picture: a small square JPEG data URL the user uploads in /settings
+  // (motoo has no object storage — see src/lib/imageUpload.ts). Null = the
+  // initials monogram. Deliberately NOT carried in the JWT: a data URL would
+  // blow past the 4KB session-cookie limit.
   avatarUrl       String?
   currencyBalance Int      @default(0) // legacy Phase-1 global mochi; dormant — Phase 2 uses per-creator MochiHolding
   role            Role     @default(backer)
@@ -371,6 +375,10 @@ model MarketplaceItem {
   priceMochi    Int // price in mochi units
   itemType      MarketplaceItemType
   thumbnailKey  String? // curated thumbnail slug (see lib/itemThumbnails); null = itemType default
+  // Creator-uploaded 16:9 cover photo, stored as a small JPEG data URL (motoo
+  // has no object storage — see src/lib/imageUpload.ts). Null = fall back to the
+  // curated thumbnailKey tile. Size is capped on write, not just on the client.
+  coverImage    String?
   fulfillment   FulfillmentMode     @default(request) // instant = auto-complete; request = creator acts
   stock         Int? // null = unlimited; otherwise remaining stock is stock - redeemedCount
   redeemedCount Int                 @default(0)

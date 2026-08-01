@@ -21,12 +21,17 @@ import { formatCount } from "@/lib/format";
 
 export default async function FanLandingPage() {
   // "/" is the public marketing landing for logged-OUT visitors only. Everyone
-  // signed in goes to the app home (/home) — NOT /explore, which is a browse
-  // page and read as a subpage when used as the landing surface (DECISIONS
-  // 2026-07-29). Creators reach their Studio via a nav link (one identity).
+  // signed in is routed to their own landing surface — NOT /explore, which is a
+  // browse page and read as a subpage when used as the landing surface
+  // (DECISIONS 2026-07-29).
+  //
+  // A creator (a user who owns a Studio) lands in the **Studio**; a fan lands
+  // on /home. `/studio` is forwarded to the studio subdomain by src/proxy.ts,
+  // so this is one hop either way. Accounts are still additive — the Studio
+  // nav's motoo pill goes straight back to /home, which stays fully reachable.
   // (Non-onboarded users are caught by the onboarding middleware before this.)
   const session = await auth();
-  if (session?.user) redirect("/home");
+  if (session?.user) redirect(session.user.creator ? "/studio" : "/home");
 
   const t = await getTranslations("fanLanding");
   const tc = await getTranslations("common");
@@ -64,7 +69,9 @@ export default async function FanLandingPage() {
 
           {/* Role CTAs — the choice at first glance (fan vs creator) */}
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <ButtonLink href="/signup" variant="primary" size="lg">
+            {/* Both role CTAs go through their route handler so picking one
+                clears the other's remembered intent (see /api/fan-signup). */}
+            <ButtonLink href="/api/fan-signup" variant="primary" size="lg">
               {ta("startAsFan")}
             </ButtonLink>
             <ButtonLink href="/api/become-creator" variant="dark" size="lg">
@@ -276,7 +283,7 @@ export default async function FanLandingPage() {
             {t("finalCtaBody")}
           </p>
           <div className="flex justify-center">
-            <ButtonLink href="/signup" variant="dark" size="lg">
+            <ButtonLink href="/api/fan-signup" variant="dark" size="lg">
               {tc("signup")}
             </ButtonLink>
           </div>

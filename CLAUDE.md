@@ -7,10 +7,16 @@ fully dormant, no remaining UI surface. See DECISIONS 2026-08-01.)
 
 **Accounts are additive:** everyone is a **user (fan)**; a **creator** is just a user who
 *also owns a Studio* (a `Streamer`). No separate account type, no mode toggle — creator
-status = `session.user.creator` (their Studio handle, or null). Signed-in users land on
-**`/home`** (a single column: mochi status with rank, per `src/lib/ranking.ts` → affordable
-items → pending orders → news); `/` stays the logged-out marketing landing and `/explore`
-stays the browse page. Every signed-in consumer page gets `ConsumerShell`'s two persistent
+status = `session.user.creator` (their Studio handle, or null). `/` is the signed-in routing
+fork and the only place it lives: a **fan lands on `/home`** (a single column: mochi status
+with rank, per `src/lib/ranking.ts` → affordable items → pending orders → news), a
+**creator lands in the Studio** (`/studio`, forwarded to the subdomain). `/home` stays
+reachable for creators — it's a default landing, not a mode. `/` is the logged-out marketing
+landing and `/explore` stays the browse page. Signup forks the same way: **`/api/fan-signup`**
+(후원자) clears the creator intent, **`/api/become-creator`** (크리에이터) sets it — every
+role CTA must go through one of them, never straight to `/signup`, or a stale 7-day
+`creatorIntent` cookie appends creator onboarding to a fan signup.
+Every signed-in consumer page gets `ConsumerShell`'s two persistent
 rails: a left **Sidebar** (홈/둘러보기 + the following list — Follow only, never merged with
 `MochiHolding`) and a right **RightRail** (discovery suggestions, live supporter counts,
 instant follow). Both are collapsible with state persisted across navigation
@@ -21,7 +27,9 @@ leaderboard by lifetime mochi purchased (`getSupporterLeaderboard`, `src/lib/ran
 their `/s/[handle]` page; buying mochi is its own focused page, `/s/[handle]/buy`. A bell
 icon surfaces `/notifications` (order/item/price events, best-effort via `src/lib/notify.ts`,
 never inside `mochi.ts`'s transactions). `/profile` (identity + holdings + history) and
-`/settings` (nickname/handle/password) round out the avatar dropdown. New users go through
+`/settings` (profile picture / nickname / handle / password) round out the avatar dropdown.
+`/s/[handle]` is the one ConsumerShell page that **fills its column and boxes each section**
+rather than using the shared 900px cap (DECISIONS 2026-08-01). New users go through
 `/onboarding` (nickname, unique `@handle`, 본인인증, terms), enforced by `src/proxy.ts` (the
 edge middleware).
 
@@ -41,12 +49,21 @@ in `src/proxy.ts` or it'll bounce to the apex. Dev: `studio.localhost:PORT`. See
 ## Hard constraints
 - **Not a financial product.** No investment/return vocabulary in user-facing copy (spec §2).
   Run `pnpm check:vocab` after touching copy. Mochi = prepaid marketplace credit:
-  non-transferable, unspent-refundable, no resale/return.
+  non-transferable, **non-refundable** (legally-mandated exceptions only — e.g. a minor's
+  payment), no resale/return. See DECISIONS 2026-08-01.
 - **Money logic is tested.** Run `pnpm test` (node:test via tsx, needs `pnpm db:up`)
   after touching `src/lib/mochi.ts` — it asserts the buy/redeem/cancel invariants
   and the concurrency guards (no oversell, no negative balance).
 - Money is **integer KRW**, never floats.
 - Korean-first, **no hardcoded strings** — all copy in `messages/*.json` (next-intl).
+  Fans are **팬 / 후원자** — **백커 is retired** and `pnpm check:vocab` now fails on it
+  (its `RETIRED` list, separate from the regulatory `STRICT` one). Korean headings/titles in
+  narrow cards want `break-keep`, or Hangul wraps mid-word.
+- **Uploaded images are data URLs in Postgres**, not files — there is no object storage.
+  `src/lib/imageUpload.ts` owns the budgets; `ImagePicker` crops/re-encodes in the browser;
+  `parseImageDataUrl` is the server gate (jpeg/png/webp only — never svg — and a hard byte
+  cap). Keep budgets small: avatars inline into the nav on every page. Same treatment as
+  `thumbnailKey`: anything malformed becomes null rather than an error.
 - **No emoji in the UI, anywhere.** Every user-visible glyph is a line icon from
   `src/components/ui/Icons.tsx`. Emoji render in the OS emoji font, so they shift per
   platform and can't take brand color. Run `pnpm check:emoji` after touching copy or

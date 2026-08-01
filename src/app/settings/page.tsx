@@ -6,6 +6,7 @@ import { Footer } from "@/components/Footer";
 import { Section } from "@/components/ui/Section";
 import { getCurrentBacker } from "@/lib/session";
 import { IdentityForm } from "./SettingsForm";
+import { AvatarForm } from "./AvatarForm";
 import { PasswordForm } from "./PasswordForm";
 
 /**
@@ -34,7 +35,11 @@ export default async function SettingsPage() {
           {/* boxed: a form-group, not a content shelf — the Spotify reference
               (DECISIONS 2026-07-31) that keeps other Sections bare doesn't
               apply to a settings form the same way. */}
-          <Section title={t("identityTitle")} boxed className="mt-10">
+          <Section title={t("avatarTitle")} boxed className="mt-10">
+            <AvatarForm initialAvatar={backer.avatarUrl} />
+          </Section>
+
+          <Section title={t("identityTitle")} boxed className="mt-6">
             <IdentityForm
               initialNickname={backer.nickname}
               initialHandle={backer.handle ?? ""}

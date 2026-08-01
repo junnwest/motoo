@@ -73,6 +73,7 @@ export default async function StreamerProfilePage({
     priceMochi: i.priceMochi,
     itemType: i.itemType,
     thumbnailKey: i.thumbnailKey,
+    coverImage: i.coverImage,
     fulfillment: i.fulfillment,
     stock: i.stock,
     redeemedCount: i.redeemedCount,
@@ -97,9 +98,12 @@ export default async function StreamerProfilePage({
   return (
     <>
       <ConsumerShell>
-      {/* Header */}
+      {/* Header. Unlike the other ConsumerShell pages, this one is NOT capped
+          at 900px (DECISIONS 2026-08-01): the rails already narrow the middle
+          column, and a second cap inside them left the market grid stranded in
+          whitespace. The page fills its column and boxes each section instead. */}
       <section className="border-b border-line bg-cream-warm px-6 py-12 sm:px-10">
-        <div className="mx-auto flex max-w-[900px] flex-col gap-6 sm:flex-row sm:items-center">
+        <div className="flex w-full flex-col gap-6 sm:flex-row sm:items-center">
           <Avatar name={streamer.displayName} size={92} src={streamer.avatarUrl} />
           <div className="flex-1">
             <div className="flex flex-wrap items-center gap-3">
@@ -154,8 +158,9 @@ export default async function StreamerProfilePage({
           </div>
         </div>
 
-        {/* headline stats */}
-        <div className="mx-auto mt-8 grid max-w-[900px] grid-cols-2 gap-3">
+        {/* headline stats — kept to a stat-row width rather than stretched
+            across the full column, which would read as two empty banners. */}
+        <div className="mt-8 grid w-full grid-cols-2 gap-3 sm:max-w-[440px]">
           {headlineStats.map((s) => (
             <div
               key={s.label}
@@ -170,20 +175,24 @@ export default async function StreamerProfilePage({
         </div>
       </section>
 
-      <div className="mx-auto flex max-w-[900px] flex-col gap-14 px-6 py-14 sm:px-10">
+      {/* Each section is its own bordered panel so the page reads as distinct
+          blocks rather than one continuous scroll. Inner item cards drop to
+          `bg-panel` — the established "inset panel on a white card" treatment
+          (DECISIONS 2026-07-31) — so boxes don't nest as card-on-card. */}
+      <div className="flex w-full flex-col gap-6 px-6 py-10 sm:px-10 sm:py-12">
         {/* Ranking (30%) + Marketplace (70%), side by side (DECISIONS
             2026-08-01) — 모찌 보내기 now routes to its own page
             (/s/[handle]/buy) instead of an in-page anchor, freeing this
             column for the supporter leaderboard next to the market instead of
             stacked above it. Stacks to one column on narrow viewports. */}
-        <div className="grid grid-cols-1 gap-8 sm:grid-cols-10">
-          <div className="sm:col-span-3">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-10">
+          <div className="rounded-[20px] border border-line-2 bg-card p-6 lg:col-span-3">
             <SupporterLeaderboard
               entries={leaderboard.entries}
               totalSupporters={leaderboard.totalSupporters}
             />
           </div>
-          <div className="sm:col-span-7">
+          <div className="rounded-[20px] border border-line-2 bg-card p-6 lg:col-span-7">
             <MarketplaceSection
               handle={streamer.handle}
               balance={balance}
@@ -194,7 +203,7 @@ export default async function StreamerProfilePage({
         </div>
 
         {/* Updates */}
-        <div>
+        <div className="rounded-[20px] border border-line-2 bg-card p-6">
           <h2 className="mb-4 text-[20px] font-extrabold tracking-[-0.02em]">
             {t("updatesTitle")}
           </h2>
@@ -207,7 +216,7 @@ export default async function StreamerProfilePage({
                 return (
                   <li
                     key={u.id}
-                    className="rounded-[16px] border border-line-2 bg-card p-4"
+                    className="rounded-[16px] border border-line-2 bg-panel p-4"
                   >
                     {locked ? (
                       <>

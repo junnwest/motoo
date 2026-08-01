@@ -7,6 +7,7 @@ import {
   MOCHI_MIN_COUNT,
   MOCHI_PRESET_PRICE,
   MOCHI_PRESETS,
+  MOCHI_RECOMMENDED_PRESET,
   presetToIssuance,
   validateIssuance,
 } from "@/lib/issuance";
@@ -34,6 +35,10 @@ const inputClass =
  * edits). Pass `currentPrice` in the Studio: the price can then only ratchet up,
  * a raise shows the discard warning, and — because presets are fixed at 100원 —
  * presets hide once the current price has moved above 100 (edit via custom).
+ *
+ * `MOCHI_RECOMMENDED_PRESET` (50만원) carries a 추천 badge and is what a fresh
+ * setup starts on, so a creator opening their Studio has a sensible issuance
+ * already chosen instead of having to guess a number cold.
  */
 export function MochiIssuancePicker({
   minPrice = MOCHI_MIN_PRICE,
@@ -56,7 +61,7 @@ export function MochiIssuancePicker({
   const presetsUsable = MOCHI_PRESET_PRICE >= minPrice;
 
   const [mode, setMode] = useState<Mode>(
-    defaultMode ?? (presetsUsable ? "s" : "custom"),
+    defaultMode ?? (presetsUsable ? MOCHI_RECOMMENDED_PRESET : "custom"),
   );
   const [customPrice, setCustomPrice] = useState(
     defaultPrice ?? String(minPrice),
@@ -97,18 +102,26 @@ export function MochiIssuancePicker({
           {MOCHI_PRESETS.map((p) => {
             const iss = presetToIssuance(p.totalKrw);
             const selected = mode === p.key;
+            const recommended = p.key === MOCHI_RECOMMENDED_PRESET;
             return (
               <button
                 key={p.key}
                 type="button"
                 onClick={() => setMode(p.key)}
                 aria-pressed={selected}
-                className={`flex flex-col items-start rounded-[14px] border px-4 py-3 text-left transition ${
+                className={`relative flex flex-col items-start rounded-[14px] border px-4 py-3 text-left transition ${
                   selected
                     ? "border-coral bg-coral-chip"
-                    : "border-line-3 bg-white hover:border-coral/50"
+                    : recommended
+                      ? "border-coral/45 bg-white hover:border-coral/70"
+                      : "border-line-3 bg-white hover:border-coral/50"
                 }`}
               >
+                {recommended ? (
+                  <span className="absolute -top-2 right-2 rounded-full bg-coral px-2 py-[1px] text-[10.5px] font-bold text-white">
+                    {t("recommended")}
+                  </span>
+                ) : null}
                 <span className="text-[15px] font-extrabold text-ink">
                   {t(`presets.${p.key}`)}
                 </span>

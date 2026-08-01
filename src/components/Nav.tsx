@@ -9,6 +9,7 @@ import { NotificationBell } from "./NotificationBell";
 import { Mochi } from "./Mochi";
 import { IconStudio, IconTrophy } from "@/components/ui/Icons";
 import { getUnreadCount } from "@/lib/notify";
+import { getAvatarUrl } from "@/lib/session";
 
 /**
  * Top navigation (DECISIONS 2026-07-30 restructure).
@@ -49,9 +50,12 @@ export async function Nav() {
   const onStudioHost = host.startsWith("studio.");
 
   const showConsumerChrome = authed && !onStudioHost;
-  const unreadCount = showConsumerChrome
-    ? await getUnreadCount(session!.user!.id!)
-    : 0;
+  // Both are per-account reads the JWT can't carry: the unread count changes
+  // constantly, and the avatar is a data URL far past the cookie size limit.
+  const [unreadCount, avatarUrl] = await Promise.all([
+    showConsumerChrome ? getUnreadCount(session!.user!.id!) : 0,
+    authed && session?.user?.id ? getAvatarUrl(session.user.id) : null,
+  ]);
 
   // Studio-host dropdown stays as it was; the consumer dropdown is now
   // identity-only (Profile/Settings/My channel) — everything else moved out
@@ -73,7 +77,10 @@ export async function Nav() {
       <nav className="flex h-16 w-full items-center justify-between px-5 sm:px-8">
         {/* Signed in on the consumer app, the brand goes to the app home;
             everywhere else it goes to "/" (marketing landing / Studio root). */}
-        <BrandLogo href={authed && !onStudioHost ? "/home" : "/"} />
+        <BrandLogo
+          href={authed && !onStudioHost ? "/home" : "/"}
+          studio={onStudioHost}
+        />
 
         {authed ? (
           <div className="flex items-center gap-1.5 sm:gap-2.5">
@@ -111,6 +118,7 @@ export async function Nav() {
             <UserMenu
               name={name}
               initial={initial}
+              avatarUrl={avatarUrl}
               subtitle={handle ? `@${handle}` : undefined}
               items={items}
               logoutLabel={t("logout")}

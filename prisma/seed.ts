@@ -60,8 +60,8 @@ const STREAMERS: StreamerSeed[] = [
 ];
 
 const TIER_TEMPLATES = [
-  { name: "새싹 응원", priceKrw: 3000, description: "가볍게 마음을 전하는 첫 응원", perks: ["백커 월 등록", "파운딩 배지"] },
-  { name: "단골 서포터", priceKrw: 6000, description: "단골 팬만의 혜택을 누려요", perks: ["백커 전용 소식", "디스코드 서포터 역할", "월간 추첨 참여"] },
+  { name: "새싹 응원", priceKrw: 3000, description: "가볍게 마음을 전하는 첫 응원", perks: ["팬 월 등록", "파운딩 배지"] },
+  { name: "단골 서포터", priceKrw: 6000, description: "단골 팬만의 혜택을 누려요", perks: ["팬 전용 소식", "디스코드 서포터 역할", "월간 추첨 참여"] },
   { name: "핵심 팬", priceKrw: 12000, description: "가장 가까이에서 함께하는 핵심 팬", perks: ["Q&A 우선 참여", "손편지·굿즈 우선권", "비공개 라이브 초대"] },
 ];
 
@@ -318,7 +318,7 @@ async function main() {
           tierId: tiers[t].id,
           streamerId: streamer.id,
           title: TIER_TEMPLATES[t].perks[0],
-          description: `${tiers[t].name} 백커에게 제공되는 퍼크`,
+          description: `${tiers[t].name} 팬에게 제공되는 퍼크`,
           promisedBy: new Date(2026, 5 + t, 20),
           status: t === 0 ? "delivered" : t === 1 ? "in_progress" : "promised",
           backersOwed: 0,
@@ -445,7 +445,7 @@ async function main() {
         },
         {
           streamerId: streamer.id,
-          title: "[백커 전용] 다음 오프라인 모임 안내",
+          title: "[팬 전용] 다음 오프라인 모임 안내",
           body: "핵심 팬 여러분을 위한 오프라인 모임을 준비 중이에요. 곧 자세히 안내드릴게요!",
           visibility: "backers",
           publishedAt: new Date(2026, 5, 28),

@@ -8,7 +8,8 @@ users buy it and spend it in that creator's marketplace. Price ratchets up in ti
 spec and [`design-handoff/`](./design-handoff/) for the visual system.
 
 > **motoo is not a financial product.** Mochi is prepaid support credit, not an
-> investment — non-transferable, unspent-refundable, no resale/return, no securities. See
+> investment — non-transferable, non-refundable (legally-mandated exceptions only), no
+> resale/return, no securities. See
 > §2 of the product doc. A CI-style check (`pnpm check:vocab`) guards against banned
 > investment vocabulary in user-facing copy.
 
@@ -31,17 +32,17 @@ remaining UI.
 
 | Route | Page |
 | --- | --- |
-| `/` | Marketing landing (logged-out only; signed-in users are routed to `/home`) |
+| `/` | Marketing landing (logged-out only). Signed-in, it's the routing fork: **fans → `/home`, creators → the Studio** |
 | `/home` | **The app home.** A single column: mochi status (balance + rank per creator) → items you can afford right now → in-flight orders → news. Adaptive — holds no mochi yet → a how-it-works primer instead of the status column. Flanked by `ConsumerShell`'s two persistent, collapsible rails (Sidebar left, RightRail right) — not page-local |
 | `/ranking` | Your rank among each held creator's supporters, by lifetime mochi purchased |
 | `/notifications` | Full notification history (order fulfilled/cancelled, a supported creator adds an item or raises their price) — mark-all-read. A bell icon in the nav shows the unread count |
 | `/profile` | Identity + mochi holdings + order history (absorbs the old `/me/mochi`, which now redirects here) |
-| `/settings` | Nickname/handle + password change (apex-only; distinct from the Studio host's own `/settings`) |
+| `/settings` | **Profile picture** + nickname/handle + password change (apex-only; distinct from the Studio host's own `/settings`) |
 | `/explore` | Creators grid — the dedicated browse page (filters, search, sort — all by live support, no Trust Report signals) |
-| `/s/[handle]` | Creator profile: **marketplace** (spend mochi on items) beside a live **supporter leaderboard** (ranked by lifetime mochi purchased), plus updates |
+| `/s/[handle]` | Creator profile: **marketplace** (spend mochi on items) beside a live **supporter leaderboard** (ranked by lifetime mochi purchased), plus updates. The one ConsumerShell page that fills its column and boxes each section instead of using the shared 900px cap |
 | `/s/[handle]/buy` | Focused **buy-mochi** flow, its own page (routed from the profile's 모찌 보내기 button) — no ConsumerShell chrome, just a way back to the profile |
 | `/me/mochi` | "My mochi": per-creator holdings + order/redemption history |
-| `/login` · `/signup` | Real auth — social-first (Kakao/Naver/Google) + email; password policy + confirm. One **회원가입** button opens a 후원자/크리에이터 role modal (login stays unified) |
+| `/login` · `/signup` | Real auth — social-first (Kakao/Naver/Google) + email; password policy + confirm. One **회원가입** button opens a 후원자/크리에이터 role modal (login stays unified). Role CTAs route through `/api/fan-signup` or `/api/become-creator`, which *set* the creator intent either way — never link straight to `/signup` |
 | `/onboarding` | New-user gate: nickname, unique `@handle`, **본인인증** (age/identity), terms |
 | `studio.themotoo.com/` | The **Studio** (creator console, own subdomain): single-view dashboard (no sidebar) — overview + mochi issuance (ratcheting tiers) + orders + market items, with per-section ⓘ help. Internally the `/studio` route group; apex `/studio` 308s here. Its nav mirrors the consumer Studio pill with a **motoo pill** back to the consumer app |
 | `studio.themotoo.com/settings` | Creator-profile settings — display name, bio, type→category, platform links (handle read-only) |
@@ -49,7 +50,8 @@ remaining UI.
 
 **Account model:** a creator is a `Backer` (the account/user table) that owns a `Streamer`
 via `Streamer.ownerId`. Creator status = `session.user.creator` (Studio handle or null).
-Signed-in users land on `/home`; a persistent **Studio pill** in the nav (always visible)
+Fans land on `/home` and creators land in the Studio, but `/home` stays reachable either
+way — it's a default landing, not a mode. A persistent **Studio pill** in the nav (always visible)
 routes a creator straight to the console or a fan into the become-a-creator flow, mirrored
 on the Studio host by a **motoo pill** back to the consumer app. Every signed-in consumer
 page also gets `ConsumerShell`'s two persistent rails — a left **Sidebar** (홈/둘러보기 +
@@ -73,7 +75,12 @@ real 본인인증 (NICE/PASS/간편인증), Kakao login. Mocks stand in behind p
 - **Mochi is money**: `src/lib/mochi.ts` uses row-locked conditional updates so concurrent
   redemptions can't oversell stock or drive a holding negative. `pnpm test` proves it
   (buy/redeem/cancel invariants + concurrency guards).
-- **Not a financial product**: no investment vocabulary in copy (`pnpm check:vocab`).
+- **Not a financial product**: no investment vocabulary in copy (`pnpm check:vocab`). The
+  same check also fails on **retired product vocabulary** — 백커 is gone; fans are 팬/후원자.
+- **Uploaded images never become files**: there's no object storage, so profile pictures and
+  item cover photos are browser-downscaled JPEG **data URLs** in ordinary String columns
+  (`src/lib/imageUpload.ts`). `parseImageDataUrl` bounds what can land there — jpeg/png/webp
+  only (never svg) and a hard byte cap, coercing anything else to null.
 - **No emoji in the UI**: every user-visible glyph is a line icon from
   `src/components/ui/Icons.tsx` (`pnpm check:emoji` fails the build on any pictograph in
   `src/**` or `messages/*.json`). Emoji render in the OS emoji font, so they shift per

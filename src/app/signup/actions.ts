@@ -57,7 +57,9 @@ export async function signupUser(
   }
 
   try {
-    await signIn("credentials", { email, password, redirectTo: "/" });
+    // /home is the signed-in landing surface; the onboarding middleware still
+    // intercepts a brand-new account and routes it through /onboarding first.
+    await signIn("credentials", { email, password, redirectTo: "/home" });
   } catch (e) {
     if (!(e instanceof AuthError)) throw e; // rethrow the NEXT_REDIRECT signal
   }

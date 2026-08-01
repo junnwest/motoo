@@ -187,16 +187,19 @@ export async function HomeSignedIn({
           <Section title={t("startTitle")}>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
               <Step
+                href="/explore"
                 icon={<IconSearch width={20} height={20} />}
                 title={t("step1Title")}
                 body={t("step1Body")}
               />
               <Step
+                href="/explore"
                 icon={<IconSend width={20} height={20} />}
                 title={t("step2Title")}
                 body={t("step2Body")}
               />
               <Step
+                href="/explore"
                 icon={<IconWallet width={20} height={20} />}
                 title={t("step3Title")}
                 body={t("step3Body")}
@@ -237,22 +240,39 @@ export async function HomeSignedIn({
   );
 }
 
+/**
+ * One step of the zero-holdings primer, and a real entry point — every step is
+ * a link, not decoration. With no mochi held anywhere, all three steps (find a
+ * creator → send mochi → spend it in their market) start in the same place, so
+ * they all lead to /explore; the icon reads as the affordance, hence the hover
+ * lift on the tile and the arrow on the title.
+ */
 function Step({
+  href,
   icon,
   title,
   body,
 }: {
+  href: string;
   icon: React.ReactNode;
   title: string;
   body: string;
 }) {
   return (
-    <div>
-      <span className="flex h-10 w-10 items-center justify-center rounded-[12px] bg-coral-chip text-coral-deep">
+    <Link href={href} className="group block rounded-[12px]">
+      <span className="flex h-10 w-10 items-center justify-center rounded-[12px] bg-coral-chip text-coral-deep transition group-hover:bg-coral group-hover:text-white">
         {icon}
       </span>
-      <div className="mt-3 text-[15.5px] font-extrabold text-ink">{title}</div>
+      <div className="mt-3 flex items-center gap-1 text-[15.5px] font-extrabold text-ink">
+        {title}
+        <span
+          aria-hidden="true"
+          className="text-coral-deep opacity-0 transition group-hover:translate-x-0.5 group-hover:opacity-100"
+        >
+          →
+        </span>
+      </div>
       <p className="mt-1 text-[14px] leading-relaxed text-body">{body}</p>
-    </div>
+    </Link>
   );
 }

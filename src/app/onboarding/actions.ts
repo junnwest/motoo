@@ -75,7 +75,9 @@ export type CompleteOnboardingInput = z.input<typeof completeSchema>;
 /**
  * Finalize onboarding: requires a server-verified identity + terms agreement.
  * Persists nickname/handle/consent + onboardedAt, refreshes the JWT (so the
- * middleware stops redirecting), and returns the user to the home page.
+ * middleware stops redirecting), and drops the user straight onto the app home
+ * (/home) — not "/", which only bounces a signed-in user to /home anyway and
+ * costs an extra round trip through the marketing landing to do it.
  */
 export async function completeOnboarding(
   input: CompleteOnboardingInput,
@@ -131,5 +133,5 @@ export async function completeOnboarding(
     }
     redirect("/creator/onboarding");
   }
-  redirect("/");
+  redirect("/home");
 }

@@ -108,6 +108,7 @@ export default async function CreatorDashboardHome() {
     priceMochi: item.priceMochi,
     itemType: item.itemType,
     thumbnailKey: item.thumbnailKey,
+    coverImage: item.coverImage,
     fulfillment: item.fulfillment,
     stock: item.stock,
     redeemedCount: item.redeemedCount,

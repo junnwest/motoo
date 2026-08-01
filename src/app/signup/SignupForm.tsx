@@ -172,7 +172,7 @@ export function SignupForm({
       <p className="mt-2 text-center text-[14px] text-muted">
         {creatorMode ? (
           <Link
-            href="/api/become-creator?clear=1"
+            href="/api/fan-signup"
             className="font-semibold text-coral-deep hover:underline"
           >
             {t("plainSignupLink")}

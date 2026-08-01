@@ -20,6 +20,15 @@ export const MOCHI_PRESETS = [
 ] as const;
 export type MochiPresetKey = (typeof MOCHI_PRESETS)[number]["key"];
 
+/**
+ * The preset we recommend to a creator opening their Studio: 50만원 (5,000 mochi
+ * at 100원). Big enough that a market of a few items is actually reachable,
+ * small enough that it isn't an intimidating obligation on day one — issuance is
+ * a fulfillment duty, not a fundraising target (DECISIONS 2026-07-14). Picked by
+ * default in the issuance picker and badged as 추천.
+ */
+export const MOCHI_RECOMMENDED_PRESET: MochiPresetKey = "m";
+
 /** Convert a preset's total into a (price, count) issuance pair. */
 export function presetToIssuance(totalKrw: number): {
   pricePerMochiKrw: number;

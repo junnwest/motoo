@@ -3,6 +3,124 @@
 Why the project is the way it is. Newest first. Keep entries short: decision,
 rationale, and any constraint it creates.
 
+## 2026-08-01 — Mochi is non-refundable; user-uploaded images; creators land in the Studio
+Second feedback pass the same day. The two structural decisions here are the refund policy
+and how uploaded images are stored.
+
+- **Mochi is non-refundable by default.** Owner's call, reversing the "unspent-refundable"
+  line that had been in the pitch since 2026-07-09: the only refunds are the ones the law
+  compels (a minor's payment being the named example). `marketplace.disclosure` rewritten in
+  both locales, and the constraint updated in `CLAUDE.md` + `README.md` so future work
+  doesn't reintroduce the old promise.
+  - **The "not a security" argument survives, and gets stronger.** The 2026-07-14 entry
+    leaned on *non-transferable + refund-at-paid ⇒ no buy-low-refund-high*. Removing the
+    refund removes the last cash-out path entirely, so there is even less of a speculation
+    story. What it does NOT change: mochi still isn't investment/return vocabulary, and
+    `pnpm check:vocab` still gates that.
+  - **Flagged, not resolved**: Korean 전자상거래법 §17 gives consumers a withdrawal right
+    (청약철회) on unused prepaid content that a flat "no refunds" line can sit awkwardly
+    against, and 선불전자지급수단 rules add their own. The owner framed the exceptions as
+    "enforced by law," which is exactly the right shape — but the actual 환불·청약철회 policy
+    page is still a placeholder, and that's where the real carve-outs have to be written
+    before this goes near real money. `MochiHolding.krwPaidTotal` stays: it's now the ledger
+    for the *legal-exception* path rather than a general refund flow.
+- **Uploaded images are data URLs in Postgres** (`Backer.avatarUrl`,
+  `MarketplaceItem.coverImage` — new). motoo has no object storage, and item thumbnails /
+  creator covers are code-defined precisely to avoid it (2026-07-19, 2026-07-29). But a
+  profile picture and a cover photo have to be *the user's own* image, so the browser
+  center-crops and re-encodes the picked file to a small JPEG (`ImagePicker` +
+  `src/lib/imageUpload.ts`) and the resulting `data:` URL goes in an ordinary String column.
+  Chosen over a Supabase Storage bucket (which the plan does include) because it needs no
+  bucket, no service key, and no dev/prod drift — it works the moment `db:push` runs.
+  - **Budgets are enforced on both sides and deliberately small**: avatars 192×192 / 60KB
+    hard cap (they inline into the nav on *every* page), covers 640×360 / 140KB (a market
+    grid can show 20 at once). The client encoder steps JPEG quality down until it fits;
+    `parseImageDataUrl` is what actually bounds the column, coercing anything malformed or
+    oversized to null — same "never trust the client" treatment `thumbnailKey` already had.
+    It accepts only `image/jpeg|png|webp`, so `data:image/svg+xml` (a script-execution
+    vector) can't be stored.
+  - **The avatar is deliberately NOT in the JWT** — a data URL would blow past the 4KB
+    session-cookie limit. `Nav` reads it with a one-column query (`getAvatarUrl`) alongside
+    the unread-count query it already ran.
+  - **A cover replaces the curated tile rather than sitting next to it**: an item card shows
+    the photo full-bleed at 16:9 when there is one, and the `thumbnailKey` tile only when
+    there isn't. The picker's label says so, so the tile reads as a fallback, not a rival.
+- **The creator profile page fills its column and boxes its sections.** Reverses two earlier
+  decisions *for this page only*: the 900px cap from 2026-07-31 ("one content width") and
+  the bare-section treatment from the Spotify pass. Rationale from the owner: the rails
+  already narrow the middle column, so a second cap inside them stranded the market grid in
+  whitespace. 후원자 랭킹 / 마켓 / 소식 are now three `rounded-[20px] border bg-card` panels,
+  and the item rows inside them drop to `bg-panel` — the existing "inset panel on a white
+  card" pattern — so boxes don't nest card-on-card. Headline stats stay capped at 440px:
+  stretching two numbers across the full column reads as two empty banners, not as "filled."
+  Other ConsumerShell pages keep the 900px standard; this is a scoped exception, not a
+  reversal of the rule.
+- **A creator's landing surface is the Studio.** `/` now sends `session.user.creator` to
+  `/studio` (forwarded to the subdomain by `proxy.ts`) and everyone else to `/home`. Login
+  and a bare domain visit both route through `/`, so the fork lives in exactly one place.
+  This does **not** weaken the additive-account model (2026-07-12): `/home` stays fully
+  reachable and the Studio nav's motoo pill goes straight there — it's a default landing,
+  not a mode.
+- **`motoo studio` wordmark on the Studio host** — both hosts share one `Nav`, so the
+  wordmark is what tells you which product you're in at a glance. "studio" is set in the
+  muted weight so it reads as a qualifier rather than two words competing.
+- **Creator setup is skippable (`나중에 하기` → `/home`)** — opening a Studio is additive, so
+  a user who bails still has a working fan account. Nothing is persisted on the way out, and
+  the nav's Studio pill routes a non-creator straight back into the flow.
+- **Korean titles use `break-keep`.** Found by screenshotting the reworked profile page:
+  boxing the market section narrowed the item cards enough that Korean titles broke
+  mid-word (실시간 샤/라웃). The browser's default `word-break: normal` treats a Hangul
+  syllable as a break opportunity; `keep-all` is the correct CJK rule. Applied to the item
+  titles on both the fan-facing and Studio cards — a class of bug that only shows up in a
+  screenshot, never in `tsc` or a DOM assertion.
+
+## 2026-08-01 — Fan signup no longer inherits creator intent; 백커 retired for 팬
+Five reported fixes from one pass through the signup flow; the first three share a root
+cause.
+- **`creatorIntent` was sticky, so a fan signup ended in creator onboarding.**
+  `/api/become-creator` drops a 7-day `creatorIntent` cookie and `/onboarding` persists it
+  onto the Backer row so the combined signup → onboarding → Studio-setup flow survives an
+  OAuth round-trip. Nothing ever cleared it: a visitor who clicked 크리에이터로 시작하기
+  once and then signed up as a 후원자 was still handed `/creator/onboarding` at the end of
+  fan onboarding. Fixed with **`/api/fan-signup`** — the mirror of `/api/become-creator`:
+  it deletes the cookie and redirects to `/signup`. Every 후원자 entry point now routes
+  through it (`SignupModal`'s fan card, both landing CTAs, the signup page's
+  "plain signup" escape hatch, which previously used `/api/become-creator?clear=1`). The
+  principle: picking a role *sets* the intent one way or the other; neither branch may be
+  reached by leftover state. The creator flow itself is untouched — this excludes creator
+  onboarding from the *fan* path only.
+- **That same stale intent explains "signup shows up again after onboarding."**
+  `completeOnboarding` sent the fan to `/creator/onboarding`, whose own guard falls through
+  to `/api/become-creator` → `/signup` if the session isn't resolved yet — so a fan finished
+  onboarding and landed back on the signup page. With the intent fixed the detour is gone,
+  and the terminal redirect is now **`/home` directly** (was `"/"`, which only bounces a
+  signed-in user to `/home` anyway — an extra round trip through the marketing landing to
+  reach the same place). Same change in `/onboarding`'s already-onboarded guard and
+  `signupUser`'s `redirectTo`.
+- **50만원 is the recommended issuance.** `MOCHI_RECOMMENDED_PRESET` (`"m"`) in
+  `src/lib/issuance.ts` is now what a fresh setup starts on (was `"s"`, 10만원 — the first
+  item in the list, not a recommendation) and carries a 추천 badge plus a persistent coral
+  outline in `MochiIssuancePicker`. Rationale: big enough that a market of a few items is
+  reachable, small enough not to read as an intimidating obligation on day one — issuance
+  is a fulfillment duty, not a fundraising target (see 2026-07-14). The badge renders in
+  the Studio editor too; the recommendation doesn't stop being true after setup.
+- **The zero-holdings home primer is now three real links.** "모찌는 이렇게 쓰여요" rendered
+  three icon+title+body blocks that looked like entry points and did nothing — the first
+  thing a brand-new signup sees on `/home`. Each step is a `<Link>` now, with a hover lift
+  on the icon tile and an arrow on the title. **All three go to `/explore`**: with no mochi
+  held anywhere, find-a-creator → send-mochi → spend-in-their-market all necessarily start
+  in the same place, so three different destinations would be invented, not real.
+- **백커 is retired; the word is 팬.** Swept from `messages/ko.json` (explore's filter/sort
+  labels, the landing's spotlight stat) and `prisma/seed.ts` (tier perks, perk
+  descriptions, a seeded update title), with the parallel English strings aligned to
+  "Fans"/"Fan count". This finishes the sweep the 2026-08-01 Backer Wall entry deliberately
+  scoped to one page. **Now build-gated**: `scripts/check-banned-vocab.ts` gained a
+  `RETIRED` list (distinct from the regulatory `STRICT` list — this is a naming rule, not a
+  §2 one) that fails on any 백커 in a message catalog, so it can't drift back a fourth time.
+  The legacy `/s/[handle]/back` flow's copy was swept too, which leaves it saying "팬 월"
+  where it used to say "백커 월" — the Backer Wall is a deleted feature and that flow is
+  already orphaned, so this is a literal word swap, not an endorsement of the phrase.
+
 ## 2026-08-01 — Studio nav gets its own "motoo" pill back to the consumer app
 The Studio host's nav was sparse next to the consumer nav's icon cluster + Studio pill +
 avatar — just a bare avatar circle, and no one-click way back to the consumer app (the

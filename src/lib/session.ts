@@ -21,6 +21,20 @@ export async function getCurrentBacker() {
 }
 
 /**
+ * Just the profile picture for one account. A separate one-column read because
+ * the nav renders on every page and the avatar can't ride in the JWT — it's a
+ * data URL (see `Backer.avatarUrl`), which would blow past the session-cookie
+ * size limit. Returns null for the monogram fallback.
+ */
+export async function getAvatarUrl(backerId: string): Promise<string | null> {
+  const row = await prisma.backer.findUnique({
+    where: { id: backerId },
+    select: { avatarUrl: true },
+  });
+  return row?.avatarUrl ?? null;
+}
+
+/**
  * Resolve the creator profile (Streamer) operated by the current account, if any.
  * A creator account is a Backer (role=streamer) that owns a Streamer via
  * Streamer.owner. Returns null for plain users.

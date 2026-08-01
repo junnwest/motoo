@@ -8,19 +8,22 @@ export type MenuItem = { label: string; href: string };
 
 /**
  * Avatar + click-to-open account dropdown. The only interactive cluster on the
- * right of the nav: an initials monogram that toggles a menu holding every link
- * (Explore, My mochi, Studio/become-creator or Studio settings, …) plus logout.
- * Closes on outside-click, Escape, or selecting an item.
+ * right of the nav: the user's profile picture (or an initials monogram when
+ * they haven't set one) toggling a menu holding every link (Explore, My mochi,
+ * Studio/become-creator or Studio settings, …) plus logout. Closes on
+ * outside-click, Escape, or selecting an item.
  */
 export function UserMenu({
   name,
   initial,
+  avatarUrl,
   subtitle,
   items,
   logoutLabel,
 }: {
   name: string;
   initial: string;
+  avatarUrl?: string | null;
   subtitle?: string;
   items: MenuItem[];
   logoutLabel: string;
@@ -52,9 +55,16 @@ export function UserMenu({
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label={name}
-        className="flex h-9 w-9 items-center justify-center rounded-full bg-coral text-[14px] font-bold text-white shadow-sm ring-1 ring-black/5 transition hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-deep"
+        className={`flex h-9 w-9 items-center justify-center overflow-hidden rounded-full text-[14px] font-bold text-white shadow-sm ring-1 ring-black/5 transition hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-deep ${
+          avatarUrl ? "bg-sand" : "bg-coral"
+        }`}
       >
-        {initial}
+        {avatarUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={avatarUrl} alt="" className="h-full w-full object-cover" />
+        ) : (
+          initial
+        )}
       </button>
 
       {open && (

@@ -8,8 +8,12 @@ import { Mochi } from "./Mochi";
 
 /**
  * Sign-up role chooser. A single 회원가입 entry opens this instead of forking the
- * CTA into two: the user picks 후원자 (support) → /signup or 크리에이터 (create) →
- * /api/become-creator (the combined signup → onboarding → Studio-setup flow).
+ * CTA into two: the user picks 후원자 (support) → /api/fan-signup or 크리에이터
+ * (create) → /api/become-creator (the combined signup → onboarding →
+ * Studio-setup flow). Both go through a route handler rather than straight to
+ * /signup so the choice actually *sets* the creator intent one way or the other
+ * — otherwise a stale cookie from an earlier 크리에이터 click would silently
+ * append creator onboarding to a fan signup.
  * Closes on backdrop click, Escape, or picking a card.
  */
 export function SignupModal({
@@ -84,7 +88,7 @@ export function SignupModal({
           {/* Supporter */}
           <Link
             ref={cardRef}
-            href="/signup"
+            href="/api/fan-signup"
             onClick={onClose}
             className="group flex flex-col items-center rounded-[18px] border border-line-2 bg-panel px-4 py-6 text-center transition hover:border-coral hover:bg-card hover:shadow-[0_8px_24px_rgba(33,28,24,0.08)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-deep"
           >

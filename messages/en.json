@@ -118,7 +118,7 @@
       "dashboardBody": "Track your backings, following, and upcoming perks in your dashboard."
     },
     "spotlightEyebrow": "creator of the week",
-    "spotlightBackers": "backers",
+    "spotlightBackers": "fans",
     "spotlightMochi": "mochi received",
     "mochiExplainerTitle": "Mochi is <accent>support</accent> — not an investment.",
     "mochiExplainerBody": "There is no refund of value, resale, or financial return. What you receive is the creator's gratitude, supporter perks, and your ranking as a fan. It is never shown as a balance or a value.",
@@ -192,10 +192,10 @@
     "subtitle": "Ranked by real support. Never by money raised.",
     "searchPlaceholder": "Search creators or categories",
     "filterCategory": "Category",
-    "filterBackers": "Backers",
+    "filterBackers": "Fans",
     "sortLabel": "Sort",
     "sort": {
-      "backers": "Backer count",
+      "backers": "Fan count",
       "newest": "Newest"
     },
     "backerCountRanges": {
@@ -406,6 +406,7 @@
     "goalSummary": "Total {total} KRW · {goal} mochi · {price} KRW each",
     "submit": "Open my market",
     "submitting": "Opening…",
+    "later": "Do this later",
     "errors": {
       "emailTaken": "That email is already in use.",
       "handleTaken": "That profile address is already taken.",
@@ -519,8 +520,11 @@
       "edit": "Edit",
       "delete": "Delete",
       "cancel": "Cancel",
+      "cover": {
+        "label": "Cover photo (optional)"
+      },
       "thumbnails": {
-        "label": "Thumbnail",
+        "label": "Thumbnail (used when there's no cover photo)",
         "groups": {
           "default": "Type default",
           "participate": "Voting & input",
@@ -710,7 +714,7 @@
       "instant": "Instant",
       "request": "Request"
     },
-    "disclosure": "Mochi is prepaid credit for use only in this creator's market. It is non-transferable and non-resellable, and any unused mochi is refundable.",
+    "disclosure": "Mochi is prepaid credit for use only in this creator's market. It is non-transferable, non-resellable, and non-refundable once purchased. The only exceptions are cases the law requires, such as a payment made by a minor.",
     "errors": {
       "login": "Please log in to continue.",
       "notOnSale": "Mochi isn't on sale right now.",
@@ -809,6 +813,7 @@
       "custom": "Custom"
     },
     "presetSub": "{count} mochi · {price} KRW each",
+    "recommended": "Recommended",
     "customPrice": "Price per mochi (KRW)",
     "customCount": "Number of mochi",
     "floorHint": "At least 100 KRW each, 10 mochi, and 50,000 KRW total.",
@@ -879,6 +884,9 @@
   "settings": {
     "title": "Settings",
     "subtitle": "Manage your account.",
+    "avatarTitle": "Profile picture",
+    "avatarLabel": "Your picture",
+    "cancel": "Cancel",
     "identityTitle": "Basic info",
     "nicknameLabel": "Nickname",
     "handleLabel": "@handle",
@@ -898,8 +906,20 @@
     "errors": {
       "generic": "Something went wrong. Please try again.",
       "handleTaken": "That handle is already taken.",
+      "imageRejected": "We couldn't save that picture. Please try a smaller image.",
       "weakPassword": "8+ characters, including a letter and a number.",
       "wrongPassword": "Current password is incorrect."
+    }
+  },
+  "imagePicker": {
+    "choose": "Choose a photo",
+    "replace": "Replace photo",
+    "remove": "Remove",
+    "processing": "Processing…",
+    "hint": "JPG, PNG or WEBP. Cropped and resized automatically before saving.",
+    "errors": {
+      "tooLarge": "That image is too large. Please choose another photo.",
+      "failed": "We couldn't read that image. Please choose another photo."
     }
   }
 }

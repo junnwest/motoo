@@ -19,6 +19,8 @@ type MarketItem = {
   priceMochi: number;
   itemType: ItemType;
   thumbnailKey: string | null;
+  /** Creator-uploaded 16:9 photo; when set it replaces the curated tile. */
+  coverImage: string | null;
   fulfillment: Fulfillment;
   stock: number | null;
   redeemedCount: number;
@@ -43,10 +45,12 @@ export function MarketplaceSection({
 
   return (
     <section id="market" className="scroll-mt-24">
-      <h2 className="text-[24px] font-extrabold tracking-[-0.02em] text-ink">
+      {/* Sized to match the neighbouring boxed sections (ranking / updates),
+          which all share a 20px section heading. */}
+      <h2 className="text-[20px] font-extrabold tracking-[-0.02em] text-ink">
         {t("marketTitle")}
       </h2>
-      <p className="mt-1.5 text-[15px] text-body">{t("marketSubtitle")}</p>
+      <p className="mt-1 text-[13px] text-muted">{t("marketSubtitle")}</p>
 
       {items.length === 0 ? (
         <p className="mt-6 rounded-[16px] border border-dashed border-line-3 bg-cream-warm/50 px-5 py-10 text-center text-[15px] text-muted">
@@ -113,15 +117,29 @@ function ItemCard({
   }
 
   return (
-    <div className="flex flex-col rounded-[16px] border border-line-2 bg-card p-5">
-      <div className="flex items-start gap-3">
-        <ItemThumbnail
-          thumbnailKey={item.thumbnailKey}
-          itemType={item.itemType}
-          size={48}
+    <div className="flex flex-col overflow-hidden rounded-[16px] border border-line-2 bg-panel">
+      {item.coverImage ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={item.coverImage}
+          alt=""
+          className="aspect-[16/9] w-full object-cover"
         />
+      ) : null}
+      <div className="flex flex-1 flex-col p-5">
+      <div className="flex items-start gap-3">
+        {item.coverImage ? null : (
+          <ItemThumbnail
+            thumbnailKey={item.thumbnailKey}
+            itemType={item.itemType}
+            size={48}
+          />
+        )}
         <div className="flex min-w-0 flex-1 items-start justify-between gap-3">
-          <h3 className="text-[16px] font-extrabold tracking-[-0.02em] text-ink">
+          {/* break-keep: without it Korean wraps mid-word (실시간 샤/라웃) once the
+              card narrows, which it does now that the market sits inside a
+              boxed section. keep-all is the correct CJK line-break rule. */}
+          <h3 className="text-[16px] font-extrabold tracking-[-0.02em] text-ink break-keep">
             {item.title}
           </h3>
           <div className="flex flex-none flex-col items-end gap-1">
@@ -241,6 +259,7 @@ function ItemCard({
             {t(`errors.${error}`)}
           </p>
         )}
+      </div>
       </div>
     </div>
   );

@@ -13,7 +13,7 @@ export default async function OnboardingPage() {
   // was removed by a dev reseed). Clear it instead of bouncing to /login, which
   // the middleware would send right back here → redirect loop.
   if (!backer) redirect("/api/session-reset");
-  if (backer.onboardedAt) redirect("/");
+  if (backer.onboardedAt) redirect("/home");
 
   // Durably capture "become a creator" intent the moment the user first reaches
   // onboarding — the creatorIntent cookie is still fresh here (minutes after

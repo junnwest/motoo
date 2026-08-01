@@ -8,6 +8,7 @@ import { getCurrentCreator } from "@/lib/session";
 import { fulfillOrder, cancelOrder } from "@/lib/mochi";
 import { validateIssuance } from "@/lib/issuance";
 import { isThumbnailKey } from "@/lib/itemThumbnails";
+import { ITEM_COVER_SPEC, parseImageDataUrl } from "@/lib/imageUpload";
 import {
   notify,
   notifyMany,
@@ -199,6 +200,14 @@ const itemSchema = z.object({
     .nullable()
     .optional()
     .transform((v) => (v && isThumbnailKey(v) ? v : null)),
+  // Uploaded cover photo (a small JPEG data URL). Same "coerce, never trust"
+  // treatment as thumbnailKey: anything malformed or over the byte cap becomes
+  // null rather than landing in the row.
+  coverImage: z
+    .string()
+    .nullable()
+    .optional()
+    .transform((v) => parseImageDataUrl(v, ITEM_COVER_SPEC)),
   fulfillment: z.nativeEnum(FulfillmentMode),
   stock: positiveInt.nullable(),
   active: z.boolean(),
@@ -212,6 +221,7 @@ export async function upsertItem(input: {
   priceMochi: number;
   itemType: MarketplaceItemType;
   thumbnailKey?: string | null;
+  coverImage?: string | null;
   fulfillment: FulfillmentMode;
   stock: number | null;
   active: boolean;
@@ -229,6 +239,7 @@ export async function upsertItem(input: {
       priceMochi,
       itemType,
       thumbnailKey,
+      coverImage,
       fulfillment,
       stock,
       active,
@@ -251,6 +262,7 @@ export async function upsertItem(input: {
           priceMochi,
           itemType,
           thumbnailKey,
+          coverImage,
           fulfillment,
           stock,
           active,
@@ -269,6 +281,7 @@ export async function upsertItem(input: {
           priceMochi,
           itemType,
           thumbnailKey,
+          coverImage,
           fulfillment,
           stock,
           active,

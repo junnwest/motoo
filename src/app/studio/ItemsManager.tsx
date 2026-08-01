@@ -7,16 +7,24 @@ import { MarketplaceItemType, FulfillmentMode } from "@prisma/client";
 import { Button } from "@/components/ui/Button";
 import { Mochi } from "@/components/Mochi";
 import { ItemThumbnail } from "@/components/ItemThumbnail";
+import { ImagePicker } from "@/components/ui/ImagePicker";
 import { formatCount } from "@/lib/format";
 import { suggestionsForType } from "@/lib/itemSuggestions";
 import { THUMBNAIL_GROUPS } from "@/lib/itemThumbnails";
+import { ITEM_COVER_SPEC } from "@/lib/imageUpload";
 import { InfoTooltip } from "./InfoTooltip";
 import { upsertItem, deleteItem } from "./actions";
 
 /** Seed values for a new item, e.g. from a suggestion chip. */
 type ItemDraft = Pick<
   DashboardItem,
-  "title" | "description" | "priceMochi" | "itemType" | "thumbnailKey" | "fulfillment"
+  | "title"
+  | "description"
+  | "priceMochi"
+  | "itemType"
+  | "thumbnailKey"
+  | "coverImage"
+  | "fulfillment"
 >;
 
 const EMPTY_DRAFT: ItemDraft = {
@@ -25,6 +33,7 @@ const EMPTY_DRAFT: ItemDraft = {
   priceMochi: 10,
   itemType: MarketplaceItemType.digital,
   thumbnailKey: null,
+  coverImage: null,
   fulfillment: FulfillmentMode.request,
 };
 
@@ -35,6 +44,7 @@ export type DashboardItem = {
   priceMochi: number;
   itemType: MarketplaceItemType;
   thumbnailKey: string | null;
+  coverImage: string | null;
   fulfillment: FulfillmentMode;
   stock: number | null;
   redeemedCount: number;
@@ -193,6 +203,9 @@ function SuggestionPanel({
                         priceMochi: s.priceMochi,
                         itemType: s.itemType,
                         thumbnailKey: s.thumbnailKey,
+                        // Suggestions seed a curated tile, never a photo — a
+                        // cover is the creator's own to add.
+                        coverImage: null,
                         fulfillment: s.fulfillment,
                       })
                     }
@@ -238,16 +251,27 @@ function ItemCard({
   const remaining = item.stock === null ? null : item.stock - item.redeemedCount;
 
   return (
-    <div className="flex h-full flex-col rounded-[16px] border border-line-2 bg-card p-5">
-      <div className="flex items-start gap-3">
-        <ItemThumbnail
-          thumbnailKey={item.thumbnailKey}
-          itemType={item.itemType}
-          size={44}
+    <div className="flex h-full flex-col overflow-hidden rounded-[16px] border border-line-2 bg-card">
+      {item.coverImage ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={item.coverImage}
+          alt=""
+          className="aspect-[16/9] w-full object-cover"
         />
+      ) : null}
+      <div className="flex flex-1 flex-col p-5">
+      <div className="flex items-start gap-3">
+        {item.coverImage ? null : (
+          <ItemThumbnail
+            thumbnailKey={item.thumbnailKey}
+            itemType={item.itemType}
+            size={44}
+          />
+        )}
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-[17px] font-extrabold tracking-[-0.02em] text-ink">
+            <h3 className="text-[17px] font-extrabold tracking-[-0.02em] text-ink break-keep">
               {item.title}
             </h3>
             <span className="rounded-full bg-panel px-2.5 py-0.5 text-[12px] font-semibold text-muted-2">
@@ -296,6 +320,7 @@ function ItemCard({
         >
           {t("items.delete")}
         </Button>
+      </div>
       </div>
     </div>
   );
@@ -453,6 +478,9 @@ function ItemForm({
   const [thumbnailKey, setThumbnailKey] = useState<string | null>(
     seed.thumbnailKey ?? null,
   );
+  const [coverImage, setCoverImage] = useState<string | null>(
+    seed.coverImage ?? null,
+  );
   const [fulfillment, setFulfillment] = useState<FulfillmentMode>(
     seed.fulfillment ?? FulfillmentMode.request,
   );
@@ -476,6 +504,7 @@ function ItemForm({
         priceMochi: Math.trunc(Number(price)),
         itemType,
         thumbnailKey,
+        coverImage,
         fulfillment,
         stock: trimmedStock === "" ? null : Math.trunc(Number(trimmedStock)),
         active,
@@ -523,6 +552,17 @@ function ItemForm({
             className={`${inputClass} resize-y`}
           />
         </div>
+
+        {/* Cover photo first: when set it's what a fan actually sees on the
+            item card, and the curated tile below becomes the fallback. */}
+        <ImagePicker
+          value={coverImage}
+          onChange={setCoverImage}
+          spec={ITEM_COVER_SPEC}
+          shape="cover"
+          label={t("items.cover.label")}
+          disabled={isPending}
+        />
 
         <ThumbnailPicker
           value={thumbnailKey}

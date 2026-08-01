@@ -6,6 +6,80 @@ Living status of the build. Update the checkboxes as work lands. See
 [`DECISIONS.md`](./DECISIONS.md) for why things are the way they are and
 [`DEPLOYMENT.md`](./DEPLOYMENT.md) for infra state.
 
+## Recent — 2026-08-01 (uploads, non-refundable mochi, creator-page layout, Studio landing)
+
+- [x] **User-uploaded images**, stored as small JPEG **data URLs in Postgres** (no object
+  storage in this project — see DECISIONS 2026-08-01). New `src/lib/imageUpload.ts`
+  (budgets + `parseImageDataUrl` server gate) and `src/components/ui/ImagePicker.tsx`
+  (client-side center-crop + quality-stepped re-encode), shared by both surfaces:
+  - **Profile picture** (`/settings` → 프로필 사진, `Backer.avatarUrl`) — renders in the nav,
+    `/profile`, and the supporter leaderboard. Read via a one-column query, **not** the JWT.
+  - **Marketplace item cover photo** (`MarketplaceItem.coverImage`, new column) — set in the
+    Studio item form; a cover replaces the curated thumbnail tile on both the Studio card and
+    the fan-facing market card.
+- [x] **Mochi is non-refundable by default** — `marketplace.disclosure` rewritten (both
+  locales), constraint updated in `CLAUDE.md`/`README.md`. Legally-compelled exceptions only
+  (a minor's payment). See DECISIONS for the 전자상거래법 §17 caveat still open on the policy page.
+- [x] **`/s/[handle]` fills its column and boxes its sections** — dropped the 900px cap on
+  this page and wrapped 후원자 랭킹 / 마켓 / 소식 in bordered panels (inner rows → `bg-panel`).
+  A scoped exception to the "one content width / bare sections" rules, not a reversal.
+- [x] **Creators land in the Studio** — `/` routes `session.user.creator` to `/studio`, fans
+  to `/home`. `/home` stays reachable; accounts are still additive.
+- [x] **`motoo studio` wordmark** on the Studio host (`BrandLogo studio` prop).
+- [x] **`나중에 하기`** on creator setup → `/home`.
+- [x] **Fixed while verifying**: Korean item titles wrapped mid-word (실시간 샤/라웃) once the
+  market moved inside a boxed section and the cards narrowed. Added `break-keep`
+  (`word-break: keep-all`, the correct CJK rule) to both item-card titles.
+- [x] Verified: `tsc`, `check:vocab`, `check:emoji` clean, eslint unchanged (same 2
+  pre-existing errors), `pnpm test` 11/11, `pnpm build` clean (25 routes), `prisma db push`
+  applied. The image gate was unit-checked directly: valid JPEG passes; remote URL,
+  `text/html`, `image/svg+xml`, and oversized payloads all rejected.
+- [x] **Browser-verified with headless Chromium** (Playwright driving the real dev server,
+  logged in as both the seeded fan and the seeded creator, screenshots reviewed at 1440 and
+  1920):
+  - Uploaded a real PNG through `ImagePicker` on `/settings` — the browser-side crop/encode
+    ran, the circular preview appeared, 저장 persisted it, and the **nav avatar updated in
+    place** (no navigation) via `router.refresh()`. Confirmed again in reverse by clearing it.
+  - The avatar then rendered in the nav, `/profile`, and the supporter leaderboard.
+  - Uploaded a cover in the Studio item form, saved, and confirmed the photo renders
+    full-bleed 16:9 with the thumbnail tile correctly suppressed — on both the Studio card
+    and the fan-facing market card.
+  - `/s/creatorA` fills the middle column at 1920 (the 900px cap only ever bound above
+    ~1500px) with all three sections boxed; `motoo studio` on the studio host vs plain
+    `motoo` on the consumer host; fan login → `/home` vs creator login → studio subdomain;
+    the new non-refundable disclosure and the 나중에 하기 button both render; the 50만원
+    preset comes up selected with its 추천 badge.
+  - No page errors. One **pre-existing** console warning on the creator's cross-host hop:
+    Next's RSC prefetch to `/studio` is blocked by CORS (different origin) and falls back to
+    a full browser navigation, which succeeds. Same mechanism as clicking the Studio pill —
+    the #12 change just puts it on the login path too.
+  - Dev DB left clean afterwards (0 avatars, 0 covers, test item deleted).
+
+## Recent — 2026-08-01 (signup-flow fixes + 백커 → 팬)
+
+- [x] **Fan signup no longer ends in creator onboarding.** The `creatorIntent` cookie set
+  by `/api/become-creator` lives 7 days and nothing cleared it, so a 후원자 signup made
+  after any creator-CTA click was still routed to `/creator/onboarding`. New
+  **`/api/fan-signup`** (mirror of `/api/become-creator`) clears it; every 후원자 entry
+  point goes through it. See DECISIONS 2026-08-01.
+- [x] **Post-onboarding lands on `/home`**, not `/` (which only bounced there anyway). The
+  reported "back to the signup page" was the stale-intent detour above falling through
+  `/creator/onboarding` → `/api/become-creator` → `/signup`.
+- [x] **50만원 is the recommended mochi issuance** — `MOCHI_RECOMMENDED_PRESET` is selected
+  by default on a fresh Studio setup (was 10만원) and badged 추천 with a coral outline.
+- [x] **`/home`'s "모찌는 이렇게 쓰여요" steps are clickable** — all three link to
+  `/explore` (the only place any of them can start with zero holdings), with a hover state
+  and an arrow so they read as entry points.
+- [x] **백커 → 팬 everywhere** in `messages/*.json` + `prisma/seed.ts`, and **build-gated**:
+  `pnpm check:vocab` gained a `RETIRED` list that now fails on 백커.
+- [x] Verified: `tsc`, `check:vocab`, `check:emoji` clean, eslint unchanged (same 2
+  pre-existing errors before/after), `pnpm test` 11/11, `pnpm build` clean (25 routes,
+  `/api/fan-signup` new). Live-server checked: `/api/fan-signup` 307s to `/signup` with an
+  expiring `creatorIntent` (become-creator still sets it), creator onboarding renders 50만원
+  `aria-pressed="true"` + the 추천 badge, the zero-holdings `/home` primer renders three
+  `<a href="/explore">` steps, `/explore` renders 팬 수/팬 수순 with zero 백커, and both
+  landing CTAs point at `/api/fan-signup`.
+
 ## Recent — 2026-08-01 (Studio nav: added a "motoo" pill back to the consumer app)
 
 - [x] **Studio host's nav now has a `backToMotoo` pill**, same style/position as the
@@ -400,7 +474,8 @@ Living status of the build. Update the checkboxes as work lands. See
 2. **Phase 4 accounts** ✅ — auth-aware app, fan onboarding (본인인증 gate), and the **additive creator model** (a user who *also* owns a Studio). See below.
 3. **Deployment** ✅ — **live at [themotoo.com](https://themotoo.com)** (Vercel + Supabase Seoul). Custom domain wired (Squarespace DNS → Vercel), OAuth callbacks set, auto-deploy on push to `main`.
 4. **Consumer home** ✅ — signed-in users land on **`/home`** (balances → pending orders → news → discovery), adaptive for users with no mochi yet. `/` stays the marketing landing; `/explore` stays the browse page.
-5. **Next** — design tier 2/3: the landing still repeats one section template five times, Latin eyebrows (`DISCOVER`, `HOW MOCHI WORKS`), English `STRONG`/`EMERGING` badges, unstyled native `<select>`s on explore, and Phase-1 vocabulary (백커·퍼크·트러스트 리포트) still on explore. Then real PG + real 본인인증 (both need a business registration + contract).
+5. **Next** — design tier 2/3: the landing still repeats one section template five times, Latin eyebrows (`DISCOVER`, `HOW MOCHI WORKS`), English `STRONG`/`EMERGING` badges, unstyled native `<select>`s on explore, and leftover Phase-1 vocabulary (퍼크) still on explore
+(백커 and 트러스트 리포트 are both retired now). Then real PG + real 본인인증 (both need a business registration + contract).
 
 ---
 

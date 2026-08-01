@@ -36,7 +36,7 @@ export async function SupporterLeaderboard({
           {entries.map((e) => (
             <li
               key={e.backerId}
-              className="flex items-center gap-2.5 rounded-[12px] bg-card px-3 py-2.5 shadow-soft"
+              className="flex items-center gap-2.5 rounded-[12px] bg-panel px-3 py-2.5"
             >
               <span className="flex h-6 w-6 flex-none items-center justify-center rounded-full bg-coral-chip text-[11.5px] font-extrabold text-coral-deep">
                 {e.rank}

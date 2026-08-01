@@ -118,7 +118,7 @@
       "dashboardBody": "내 대시보드에서 후원 내역·팔로잉·예정된 퍼크를 모아 봐요."
     },
     "spotlightEyebrow": "이주의 크리에이터",
-    "spotlightBackers": "백커",
+    "spotlightBackers": "팬",
     "spotlightMochi": "받은 모찌",
     "mochiExplainerTitle": "모찌는 <accent>응원</accent>이에요 — 투자가 아니에요.",
     "mochiExplainerBody": "환급·재판매·수익이 없어요. 받는 건 크리에이터의 감사, 단골 혜택, 그리고 팬으로서의 순위예요. 잔액이나 가치로 표시되지 않아요.",
@@ -192,10 +192,10 @@
     "subtitle": "실제 응원을 기준으로 정렬됩니다. 모금액 순위는 없습니다.",
     "searchPlaceholder": "크리에이터·카테고리 검색",
     "filterCategory": "카테고리",
-    "filterBackers": "백커 수",
+    "filterBackers": "팬 수",
     "sortLabel": "정렬",
     "sort": {
-      "backers": "백커 수순",
+      "backers": "팬 수순",
       "newest": "최신순"
     },
     "backerCountRanges": {
@@ -262,9 +262,9 @@
       "selected": "선택됨"
     },
     "display": {
-      "title": "백커 월에 어떻게 표시할까요?",
+      "title": "팬 월에 어떻게 표시할까요?",
       "public": "실명(닉네임) 공개",
-      "publicNote": "백커 월에 내 닉네임이 보여요.",
+      "publicNote": "팬 월에 내 닉네임이 보여요.",
       "nickname": "다른 이름으로",
       "nicknameNote": "원하는 표시 이름을 직접 정해요.",
       "nicknamePlaceholder": "표시할 이름",
@@ -302,10 +302,10 @@
     "processing": "응원을 기록하는 중…",
     "success": {
       "eyebrow": "응원 완료",
-      "title": "당신은 이제 {name}의 파운딩 백커예요",
+      "title": "당신은 이제 {name}의 파운딩 팬이에요",
       "foundingLabel": "당신의 파운딩 번호",
-      "body": "백커 월에 기록되었어요. 이 번호는 영원히 당신의 것입니다.",
-      "viewWall": "백커 월에서 확인하기 →",
+      "body": "팬 월에 기록되었어요. 이 번호는 영원히 당신의 것입니다.",
+      "viewWall": "팬 월에서 확인하기 →",
       "backToProfile": "프로필로 돌아가기"
     },
     "errors": {
@@ -406,6 +406,7 @@
     "goalSummary": "총 {total}원 · 모찌 {goal}개 · 개당 {price}원",
     "submit": "마켓 열기",
     "submitting": "여는 중…",
+    "later": "나중에 하기",
     "errors": {
       "emailTaken": "이미 사용 중인 이메일이에요.",
       "handleTaken": "이미 사용 중인 프로필 주소예요.",
@@ -519,8 +520,11 @@
       "edit": "수정",
       "delete": "삭제",
       "cancel": "취소",
+      "cover": {
+        "label": "커버 사진 (선택)"
+      },
       "thumbnails": {
-        "label": "썸네일",
+        "label": "썸네일 (커버 사진이 없을 때 사용해요)",
         "groups": {
           "default": "유형 기본",
           "participate": "투표·참여",
@@ -710,7 +714,7 @@
       "instant": "즉시",
       "request": "요청 접수"
     },
-    "disclosure": "모찌는 이 크리에이터의 마켓에서만 쓰는 선불 이용권이에요. 양도·재판매가 되지 않으며, 사용하지 않은 모찌는 환불받을 수 있어요.",
+    "disclosure": "모찌는 이 크리에이터의 마켓에서만 쓰는 선불 이용권이에요. 양도·재판매가 되지 않고, 구매한 모찌는 환불되지 않아요. 미성년자 결제처럼 법령이 환불을 정한 경우에만 예외로 처리돼요.",
     "errors": {
       "login": "로그인이 필요해요. 다시 로그인해 주세요.",
       "notOnSale": "지금은 모찌를 판매하지 않아요.",
@@ -809,6 +813,7 @@
       "custom": "직접 설정"
     },
     "presetSub": "모찌 {count}개 · 개당 {price}원",
+    "recommended": "추천",
     "customPrice": "모찌 1개 가격 (원)",
     "customCount": "발행 수량 (개)",
     "floorHint": "개당 100원 이상 · 10개 이상 · 총 5만원 이상 발행할 수 있어요.",
@@ -879,6 +884,9 @@
   "settings": {
     "title": "설정",
     "subtitle": "계정 정보를 관리해요.",
+    "avatarTitle": "프로필 사진",
+    "avatarLabel": "내 사진",
+    "cancel": "취소",
     "identityTitle": "기본 정보",
     "nicknameLabel": "닉네임",
     "handleLabel": "@핸들",
@@ -898,8 +906,20 @@
     "errors": {
       "generic": "문제가 생겼어요. 다시 시도해 주세요.",
       "handleTaken": "이미 사용 중인 핸들이에요.",
+      "imageRejected": "사진을 저장하지 못했어요. 더 작은 이미지로 다시 시도해 주세요.",
       "weakPassword": "8자 이상, 영문과 숫자를 함께 써주세요.",
       "wrongPassword": "현재 비밀번호가 맞지 않아요."
+    }
+  },
+  "imagePicker": {
+    "choose": "사진 선택",
+    "replace": "사진 변경",
+    "remove": "삭제",
+    "processing": "처리 중…",
+    "hint": "JPG·PNG·WEBP. 자동으로 잘라내고 크기를 줄여서 저장해요.",
+    "errors": {
+      "tooLarge": "이미지가 너무 커요. 다른 사진을 선택해 주세요.",
+      "failed": "이미지를 읽지 못했어요. 다른 사진을 선택해 주세요."
     }
   }
 }

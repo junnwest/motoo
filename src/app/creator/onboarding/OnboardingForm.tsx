@@ -3,7 +3,7 @@
 import { useCallback, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { Eyebrow } from "@/components/ui/Eyebrow";
-import { Button } from "@/components/ui/Button";
+import { Button, ButtonLink } from "@/components/ui/Button";
 import {
   MochiIssuancePicker,
   type IssuanceSelection,
@@ -218,6 +218,20 @@ export function CreatorSetupForm({
       >
         {pending ? t("submitting") : t("submit")}
       </Button>
+
+      {/* Opening a Studio is additive — the account already exists and works as
+          a fan account without one. So this step is genuinely skippable: leave
+          for /home and come back any time via the nav's Studio pill, which
+          routes a non-creator right back into this flow. Nothing is persisted
+          on the way out (a half-filled form isn't a Studio). */}
+      <ButtonLink
+        href="/home"
+        variant="ghost"
+        size="md"
+        className="w-full justify-center"
+      >
+        {t("later")}
+      </ButtonLink>
     </form>
   );
 }

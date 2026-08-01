@@ -35,6 +35,11 @@ const STRICT = [
 // warnings so a human can eyeball them, but they don't fail the build.
 const CONTEXTUAL = ["return", "profit", "yield", "stake", "\\bshare\\b"];
 
+// Retired product vocabulary — not a regulatory issue, a naming one. These are
+// Phase-1 transliterations that kept resurfacing in copy long after the concept
+// they named was gone, so the checker holds the line. 백커 → 팬.
+const RETIRED: [term: string, use: string][] = [["백커", "팬"]];
+
 // Key paths (dotted) permitted to contain the strict negation language.
 const ALLOWLIST = ["disclosure", "mochiExplainer", "fanDisclosure"];
 
@@ -80,18 +85,36 @@ function main() {
   const files = readdirSync(MESSAGES_DIR).filter((f) => f.endsWith(".json"));
   const strictFindings: Finding[] = [];
   const contextualFindings: Finding[] = [];
+  const retiredFindings: Finding[] = [];
 
   for (const file of files) {
     const raw = readFileSync(join(MESSAGES_DIR, file), "utf8");
     const entries = flatten(JSON.parse(raw));
     strictFindings.push(...scan(STRICT, entries, file));
     contextualFindings.push(...scan(CONTEXTUAL, entries, file));
+    retiredFindings.push(
+      ...scan(
+        RETIRED.map(([term]) => term),
+        entries,
+        file,
+      ),
+    );
   }
 
   if (contextualFindings.length) {
     console.log("\n⚠  Contextual matches (review, non-blocking):");
     for (const f of contextualFindings) {
       console.log(`   ${f.file} · ${f.key} · "${f.term}" → ${f.value}`);
+    }
+  }
+
+  if (retiredFindings.length) {
+    console.error("\n✗ RETIRED vocabulary found in user-facing copy:");
+    for (const f of retiredFindings) {
+      const use = RETIRED.find(([term]) => term === f.term)?.[1];
+      console.error(
+        `   ${f.file} · ${f.key} · "${f.term}" (use "${use}") → ${f.value}`,
+      );
     }
   }
 
@@ -103,6 +126,9 @@ function main() {
     console.error(
       `\n${strictFindings.length} violation(s). Use: back / support / perk / reward / record.\n`,
     );
+  }
+
+  if (strictFindings.length || retiredFindings.length) {
     process.exit(1);
   }
 
