@@ -2,11 +2,9 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { ConsumerShell } from "@/components/ConsumerShell";
 import { Footer } from "@/components/Footer";
-import { Eyebrow } from "@/components/ui/Eyebrow";
 import { ButtonLink } from "@/components/ui/Button";
 import { Mochi } from "@/components/Mochi";
 import { Avatar } from "@/components/ui/Placeholder";
-import { GradeBadge } from "@/components/GradeBadge";
 import { IconLock, IconSearch } from "@/components/ui/Icons";
 import { CreatorFacet } from "@/components/CreatorFacet";
 import { SupporterLeaderboard } from "@/components/SupporterLeaderboard";
@@ -17,9 +15,8 @@ import { getCurrentBacker } from "@/lib/session";
 import { getHolding } from "@/lib/mochi";
 import { isFollowing } from "@/lib/follows";
 import { getSupporterLeaderboard } from "@/lib/ranking";
-import { formatPercent } from "@/lib/format";
+import { formatCount } from "@/lib/format";
 import { isCreatorType, ALL_CATEGORIES } from "@/lib/creatorTaxonomy";
-import type { Grade } from "@/lib/grades";
 
 export default async function StreamerProfilePage({
   params,
@@ -58,9 +55,7 @@ export default async function StreamerProfilePage({
     );
   }
 
-  const { streamer, updates, report } = data;
-  const metrics = report?.metrics;
-  const grades = report?.grades;
+  const { streamer, updates } = data;
 
   // Phase 2: mochi issuance + marketplace (from the profile query) + the
   // viewer's holding balance (depends on both the streamer and the account) +
@@ -94,16 +89,8 @@ export default async function StreamerProfilePage({
   const headlineStats = [
     { value: `${leaderboard.totalSupporters}`, label: t("backers") },
     {
-      value: metrics ? formatPercent(metrics.fanSupport.recurringRate) : "—",
-      label: t("recurringRate"),
-    },
-    {
-      value: metrics ? formatPercent(metrics.execution.perkFulfillmentRate) : "—",
-      label: t("fulfillment"),
-    },
-    {
-      value: metrics ? `${metrics.fanLoyalty.coreFanCount}` : "—",
-      label: t("coreFans"),
+      value: formatCount(leaderboard.totalMochiPurchased),
+      label: t("totalMochi"),
     },
   ];
 
@@ -120,7 +107,6 @@ export default async function StreamerProfilePage({
                 {streamer.displayName}
               </h1>
               <span className="text-[14px] text-muted">@{streamer.handle}</span>
-              {report && <GradeBadge grade={grades!.sponsorReadiness} size="sm" />}
             </div>
             <CreatorFacet
               variant="chips"
@@ -169,7 +155,7 @@ export default async function StreamerProfilePage({
         </div>
 
         {/* headline stats */}
-        <div className="mx-auto mt-8 grid max-w-[900px] grid-cols-2 gap-3 sm:grid-cols-4">
+        <div className="mx-auto mt-8 grid max-w-[900px] grid-cols-2 gap-3">
           {headlineStats.map((s) => (
             <div
               key={s.label}
@@ -205,50 +191,6 @@ export default async function StreamerProfilePage({
               items={items}
             />
           </div>
-        </div>
-
-        {/* Trust Report summary */}
-        <div className="rounded-[20px] border border-line-2 bg-card p-6">
-          <Eyebrow className="mb-2">{t("reportSummaryTitle")}</Eyebrow>
-          {report && grades ? (
-            <>
-              <p className="mb-4 text-[13px] text-muted">
-                {t("reportSummarySubtitle")}
-              </p>
-              <div className="mb-4 flex items-center justify-between rounded-[14px] bg-panel p-4">
-                <span className="text-[14px] font-semibold">
-                  {t("sponsorReadiness")}
-                </span>
-                <GradeBadge grade={grades.sponsorReadiness} size="sm" />
-              </div>
-              <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                {(
-                  [
-                    ["fanSupport", grades.fanSupport],
-                    ["fanLoyalty", grades.fanLoyalty],
-                    ["execution", grades.execution],
-                    ["growth", grades.growth],
-                  ] as [string, Grade][]
-                ).map(([key, grade]) => (
-                  <li
-                    key={key}
-                    className="flex items-center justify-between text-[14px]"
-                  >
-                    <span className="text-body">{reportAreaLabel(key)}</span>
-                    <GradeBadge grade={grade} size="sm" showDot={false} />
-                  </li>
-                ))}
-              </ul>
-              <Link
-                href={`/s/${streamer.handle}/report`}
-                className="mt-5 inline-block text-[14px] font-bold text-coral-deep"
-              >
-                {t("viewFullReport")}
-              </Link>
-            </>
-          ) : (
-            <p className="text-[14px] text-body">{t("noReport")}</p>
-          )}
         </div>
 
         {/* Updates */}
@@ -297,14 +239,4 @@ export default async function StreamerProfilePage({
       <Footer variant="fan" />
     </>
   );
-}
-
-function reportAreaLabel(key: string): string {
-  const map: Record<string, string> = {
-    fanSupport: "팬 서포트",
-    fanLoyalty: "팬 충성도",
-    execution: "실행력",
-    growth: "성장",
-  };
-  return map[key] ?? key;
 }

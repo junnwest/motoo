@@ -9,13 +9,12 @@ import {
   IconCheckCircle,
   IconWallet,
   IconTrend,
-  IconLink,
+  IconTag,
   IconAward,
-  IconDocument,
+  IconGift,
 } from "@/components/ui/Icons";
 import { Mochi } from "@/components/Mochi";
 import { Avatar } from "@/components/ui/Placeholder";
-import { SampleReportCard, SampleReportBrowser } from "@/components/SampleReport";
 
 export default async function CreatorLandingPage() {
   const t = await getTranslations("creatorLanding");
@@ -49,7 +48,7 @@ export default async function CreatorLandingPage() {
               <ButtonLink href="/api/become-creator" size="lg">
                 {t("ctaApply")} <span>→</span>
               </ButtonLink>
-              <ButtonLink href="/s/creatorA/report" variant="secondary" size="lg">
+              <ButtonLink href="/explore" variant="secondary" size="lg">
                 {t("ctaSample")}
               </ButtonLink>
             </div>
@@ -63,16 +62,48 @@ export default async function CreatorLandingPage() {
             </div>
           </div>
 
-          {/* Hero visual: trust report card */}
+          {/* Hero visual: a creator's own mochi market */}
           <div className="relative min-h-[420px]">
             <div className="absolute left-6 right-2 top-8 rotate-[-2deg]">
-              <SampleReportCard />
+              <div className="rounded-[24px] border border-line-2 bg-white p-6 shadow-float">
+                <div className="mb-[18px] flex items-center gap-3">
+                  <Avatar name="크리에이터A" size={46} />
+                  <div className="flex-1">
+                    <div className="text-[17px] font-extrabold">@크리에이터A</div>
+                    <div className="font-mono text-[11px] text-muted">
+                      나의 마켓
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1.5 rounded-full bg-coral-chip px-3 py-1.5 text-[13px] font-bold text-coral-deep">
+                    <Mochi width={14} height={11} /> 200원
+                  </div>
+                </div>
+                <div className="flex flex-col gap-2.5">
+                  {[
+                    { title: "실시간 샤라웃", price: 3 },
+                    { title: "멤버 전용 포스트", price: 10 },
+                    { title: "노래 신청", price: 5 },
+                  ].map((item) => (
+                    <div
+                      key={item.title}
+                      className="flex items-center justify-between rounded-[14px] border border-line-2 bg-panel px-4 py-3"
+                    >
+                      <span className="text-[14px] font-semibold">
+                        {item.title}
+                      </span>
+                      <span className="flex items-center gap-1 text-[13px] font-bold text-coral-deep">
+                        <Mochi width={13} height={10} /> {item.price}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
             <div className="absolute right-0 top-0 flex animate-[floaty_5s_ease-in-out_infinite] items-center gap-2 rounded-full bg-ink px-[15px] py-[10px] text-[14px] font-bold text-cream shadow-float">
               <Mochi width={18} height={14} /> +312 응원
             </div>
             <div className="absolute bottom-4 left-0 flex items-center gap-2 rounded-full bg-sage px-[15px] py-[10px] text-[14px] font-bold text-white shadow-float">
-              ✓ 스폰서 준비 완료
+              ✓ 직접 정산
             </div>
           </div>
         </div>
@@ -142,7 +173,7 @@ export default async function CreatorLandingPage() {
           {[
             { n: 1, right: <span className="flex gap-[6px]"><Mochi width={30} height={24} /><Mochi width={30} height={24} /></span> },
             { n: 2, right: <span className="flex h-9 w-9 items-center justify-center rounded-[11px] bg-coral-chip text-coral-deep"><IconAward width={19} height={19} /></span> },
-            { n: 3, right: <span className="flex h-9 w-9 items-center justify-center rounded-[11px] bg-sage-bg text-sage-text"><IconDocument width={18} height={18} /></span> },
+            { n: 3, right: <span className="flex h-9 w-9 items-center justify-center rounded-[11px] bg-sage-bg text-sage-text"><IconGift width={18} height={18} /></span> },
           ].map((s) => (
             <div
               key={s.n}
@@ -162,37 +193,6 @@ export default async function CreatorLandingPage() {
               </p>
             </div>
           ))}
-        </div>
-      </section>
-
-      {/* Trust report showcase */}
-      <section id="report" className="border-t border-line bg-cream-warm px-6 py-[90px] sm:px-14">
-        <div className="mx-auto grid max-w-[1200px] items-center gap-12 lg:grid-cols-[.85fr_1.15fr]">
-          <div>
-            <Eyebrow className="mb-[18px]">{t("reportEyebrow")}</Eyebrow>
-            <h2 className="text-[34px] font-extrabold leading-[1.16] tracking-[-0.03em] sm:text-[46px]">
-              {t("reportTitle")}
-            </h2>
-            <p className="mb-[26px] mt-[22px] text-[17.5px] leading-[1.65] text-muted-3">
-              {t.rich("reportBody", { b: (c) => <b className="text-ink">{c}</b> })}
-            </p>
-            <div className="flex flex-col gap-3">
-              {["reportBullet1", "reportBullet2", "reportBullet3"].map((k) => (
-                <div key={k} className="flex items-center gap-[11px] text-[16px] font-semibold">
-                  <span className="flex h-6 w-6 items-center justify-center rounded-[7px] border border-line-3 bg-white text-sage">
-                    ✓
-                  </span>
-                  {t(k as never)}
-                </div>
-              ))}
-            </div>
-            <div className="mt-[30px]">
-              <ButtonLink href="/s/creatorA/report" variant="dark" size="md">
-                {t("reportCta")}
-              </ButtonLink>
-            </div>
-          </div>
-          <SampleReportBrowser />
         </div>
       </section>
 
@@ -227,7 +227,7 @@ export default async function CreatorLandingPage() {
             { key: "perk", Icon: IconCheckCircle, tile: "bg-sage-bg text-sage-text" },
             { key: "payout", Icon: IconWallet, tile: "bg-coral-chip text-coral-deep" },
             { key: "analytics", Icon: IconTrend, tile: "bg-sage-bg text-sage-text" },
-            { key: "report", Icon: IconLink, tile: "bg-coral-chip text-coral-deep" },
+            { key: "market", Icon: IconTag, tile: "bg-coral-chip text-coral-deep" },
           ].map((f) => (
             <div key={f.key} className="rounded-[18px] border border-line-2 bg-card p-6">
               <div className={`mb-4 flex h-10 w-10 items-center justify-center rounded-[11px] ${f.tile}`}>

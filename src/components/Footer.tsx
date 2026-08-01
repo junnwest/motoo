@@ -54,7 +54,7 @@ export function Footer({ variant = "fan" }: { variant?: "fan" | "creator" }) {
               <FooterCol
                 title={t("colProduct")}
                 links={[
-                  { label: t("product.trustReport"), href: "/creators#report" },
+                  { label: t("product.market"), href: "/creators#features" },
                   {
                     label: t("product.creatorDashboard"),
                     href: "/dashboard",

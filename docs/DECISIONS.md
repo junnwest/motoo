@@ -3,6 +3,49 @@
 Why the project is the way it is. Newest first. Keep entries short: decision,
 rationale, and any constraint it creates.
 
+## 2026-08-01 — Trust Report removed from the website; not part of 1.0.0
+User: remove Trust Report entirely — it's the original (shelved) thesis, not the mochi-
+marketplace product being shipped for 1.0.0. This was a bigger job than one feature toggle:
+Trust Report data (`sponsorReadiness` grades, `fanSupport`/`fanLoyalty`/`execution`/`growth`
+metrics) had leaked into explore ranking, the profile hero, and marketing copy on three
+separate landing pages.
+- **`GradeBadge`, `SampleReport.tsx`, and `/s/[handle]/report` deleted outright** — the
+  report page was already just a `ComingSoon` stub, never real, so nothing to migrate.
+- **`getExploreStreamers`/`StreamerCard` stopped reading the `reports` relation.**
+  `readiness`/`recurringRate`/`fulfillmentRate` are gone; `backerCount` is now a live
+  `MochiHolding` count via Prisma `_count` (same fix pattern as the profile page's headline
+  stat and the Backer Wall replacement, DECISIONS 2026-08-01 earlier entry — this was the
+  same underlying legacy-data bug surfacing a third time). `ExploreSort` narrowed to
+  `"backers" | "newest"` — `"readiness"` and `"recurring"` had no substitute once the
+  report data was gone.
+- **`getStreamerProfile` dropped its `reports` include entirely** — the hero's readiness
+  badge and the whole "Trust Report summary" box are gone. The profile's headline stats
+  (previously 후원자/재후원율/퍼크 이행/핵심 팬, three of four sourced from report metrics)
+  became a 2-stat row: 후원자 (`leaderboard.totalSupporters`) and 총 모찌
+  (`leaderboard.totalMochiPurchased`, a new `aggregate` in `getSupporterLeaderboard`) — both
+  live, neither invented to fill a grid slot.
+- **`/creators` (the creator landing page) got the deepest rewrite** — its entire narrative
+  was "prove your fandom to sponsors via a monthly Trust Report" (hero, insight band, a
+  dedicated report showcase section, one of five feature tiles, the testimonial). Rewrote
+  around the actual 1.0.0 product: issue your own mochi, open your own market, connect
+  directly with fans, no platform custody of funds. The hero's `SampleReportCard` visual
+  became an inline "나의 마켓" (my market) preview card showing real marketplace-item rows
+  instead of report stats. Kept what wasn't report-specific as-is: the payment-directness
+  badges, the mochi-is-support explainer, 4 of 5 feature tiles, proof strip, final CTA
+  structure.
+- **Caught two adjacent "already-removed-feature" copy bugs while auditing**: the fan
+  landing page's hero subtitle, "how mochi works" step 3, and a benefits card all still
+  referenced "백커 월·파운딩 배지" (founding badge / Backer Wall) — the OLD Kickstarter-era
+  concept already replaced by the live supporter ranking in the previous session's Backer
+  Wall fix, just never updated on this page. Fixed alongside the Trust Report sweep since
+  it's the same class of "copy promises a feature that isn't there" problem, found while
+  already auditing the same files.
+- **What's deliberately untouched**: `src/lib/grades.ts` (zero remaining imports, fully
+  inert — left dormant rather than deleted, matching the existing "schema kept" precedent
+  for the shelved thesis) and the legacy `/s/[handle]/back` (`BackingFlow.tsx`) flow, which
+  still references "백커 월"/founding badges in its own copy — a separate, already-orphaned
+  Phase-1 relic (not linked from anywhere live), out of scope for this pass.
+
 ## 2026-08-01 — Buy Mochi moves to its own page; Backer Wall becomes a real ranking
 Three related fixes to the creator profile page, all from the same feedback pass.
 - **모찌 보내기 now routes to `/s/[handle]/buy`**, a focused standalone page (Nav only,

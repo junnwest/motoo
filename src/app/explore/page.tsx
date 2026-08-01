@@ -26,7 +26,7 @@ export default async function ExplorePage({
     backerRange: (typeof sp.backerRange === "string"
       ? sp.backerRange
       : undefined) as ExploreParams["backerRange"],
-    sort: (typeof sp.sort === "string" ? sp.sort : "readiness") as ExploreSort,
+    sort: (typeof sp.sort === "string" ? sp.sort : "backers") as ExploreSort,
   };
 
   const streamers = await getExploreStreamers(params);
@@ -44,10 +44,10 @@ export default async function ExplorePage({
           <ExploreFilters />
         </div>
 
-        {/* trust-signal ranking note — no top-earners leaderboard */}
+        {/* no top-earners leaderboard — ranked by real support, never money raised */}
         <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
           <span className="font-mono text-[12px] tracking-[0.03em] text-muted">
-            {t("readinessNote")}
+            {t("rankingNote")}
           </span>
           <span className="text-[13px] text-muted">
             {t("resultCount", { count: streamers.length })}

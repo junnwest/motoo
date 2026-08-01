@@ -1,15 +1,15 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import type { StreamerCard as StreamerCardData } from "@/lib/streamers";
-import { GradeBadge } from "./GradeBadge";
 import { Avatar } from "./ui/Placeholder";
 import { CreatorCover } from "./CreatorCover";
 import { Mochi } from "./Mochi";
 import { ALL_CATEGORIES, isCreatorType } from "@/lib/creatorTaxonomy";
 
-/** Explore grid card. Surfaces trust signals — never money raised. */
+/** Explore grid card. Ranked by real support signals — never money raised. */
 export function StreamerCard({ streamer }: { streamer: StreamerCardData }) {
   const t = useTranslations("explore");
+  const tc = useTranslations("common");
   const tax = useTranslations("creatorTaxonomy");
   const category = ALL_CATEGORIES.includes(streamer.category)
     ? tax(`categories.${streamer.category}`)
@@ -25,16 +25,11 @@ export function StreamerCard({ streamer }: { streamer: StreamerCardData }) {
       href={`/s/${streamer.handle}`}
       className="group flex flex-col overflow-hidden rounded-[20px] border border-line-2 bg-card shadow-soft transition-shadow hover:shadow-card"
     >
-      <div className="relative">
-        <CreatorCover
-          handle={streamer.handle}
-          displayName={streamer.displayName}
-          className="h-[150px] w-full"
-        />
-        <span className="absolute right-3 top-3">
-          <GradeBadge grade={streamer.readiness} size="sm" />
-        </span>
-      </div>
+      <CreatorCover
+        handle={streamer.handle}
+        displayName={streamer.displayName}
+        className="h-[150px] w-full"
+      />
       <div className="flex flex-1 flex-col p-4">
         <div className="flex items-center gap-[9px]">
           <Avatar name={streamer.displayName} size={34} src={streamer.avatarUrl} />
@@ -48,14 +43,12 @@ export function StreamerCard({ streamer }: { streamer: StreamerCardData }) {
           </div>
         </div>
 
-        {/* One human signal beats a dashboard of percentages on a browse card.
-            The readiness grade already rides on the cover badge. */}
         <p className="mt-[10px] mb-4 text-[12.5px] text-muted">
           {t("cardSupporters", { count: streamer.backerCount })}
         </p>
 
         <div className="mt-auto flex items-center justify-center gap-[7px] rounded-[12px] bg-coral-chip py-[11px] text-[14.5px] font-bold text-coral-deep transition-colors group-hover:bg-coral group-hover:text-white">
-          <Mochi width={17} height={14} /> 응원하기
+          <Mochi width={17} height={14} /> {tc("backThisStreamer")}
         </div>
       </div>
     </Link>

@@ -6,6 +6,29 @@ Living status of the build. Update the checkboxes as work lands. See
 [`DECISIONS.md`](./DECISIONS.md) for why things are the way they are and
 [`DEPLOYMENT.md`](./DEPLOYMENT.md) for infra state.
 
+## Recent — 2026-08-01 (Trust Report removed — not part of 1.0.0)
+
+- [x] **Trust Report is fully gone from the website**: `GradeBadge`, `SampleReport.tsx`,
+  `/s/[handle]/report` deleted; `getExploreStreamers`/`StreamerCard` no longer read the
+  `reports` relation (`backerCount` is now a live `MochiHolding` count, sort narrowed to
+  backers/newest); `getStreamerProfile` dropped its report metrics (profile headline stats
+  now show 후원자/총 모찌, both live via `getSupporterLeaderboard`'s new `totalMochiPurchased`
+  aggregate).
+- [x] **`/creators` landing page rewritten** — its whole pitch was "prove fandom to
+  sponsors via a Trust Report"; rewrote hero/insight/how-it-works/features/testimonial
+  around the real 1.0.0 product (issue mochi, own market, direct payment). Hero visual is
+  now a marketplace-item preview card instead of a sample report mockup.
+  See DECISIONS 2026-08-01.
+- [x] Also fixed two stale "백커 월/파운딩 배지" (old Backer Wall) mentions on the fan
+  landing page, found while auditing — same class of bug as the Trust Report sweep, left
+  over from the earlier Backer Wall → ranking migration.
+- [x] `src/lib/grades.ts` left in place but fully dormant (zero remaining imports) — same
+  "schema kept" precedent as the rest of the shelved thesis. Legacy `/s/[handle]/back` flow
+  also untouched (already orphaned, out of scope).
+- [x] Verified: `tsc`, eslint, `check:vocab`, `check:emoji` clean, `pnpm test` 11/11,
+  `pnpm build` clean (23 routes, `/s/[handle]/report` gone), browser-tested `/`, `/explore`,
+  `/creators`, and a creator profile page end to end.
+
 ## Recent — 2026-08-01 (Buy Mochi → own page; Backer Wall → real supporter ranking)
 
 - [x] **`/s/[handle]/buy`** (new): 모찌 보내기 now routes to a focused standalone page

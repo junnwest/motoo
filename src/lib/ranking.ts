@@ -96,8 +96,12 @@ export type LeaderboardEntry = {
 export async function getSupporterLeaderboard(
   streamerId: string,
   limit = 60,
-): Promise<{ entries: LeaderboardEntry[]; totalSupporters: number }> {
-  const [holdings, totalSupporters] = await Promise.all([
+): Promise<{
+  entries: LeaderboardEntry[];
+  totalSupporters: number;
+  totalMochiPurchased: number;
+}> {
+  const [holdings, totalSupporters, sum] = await Promise.all([
     prisma.mochiHolding.findMany({
       where: { streamerId, purchasedTotal: { gt: 0 } },
       orderBy: { purchasedTotal: "desc" },
@@ -106,6 +110,12 @@ export async function getSupporterLeaderboard(
     }),
     prisma.mochiHolding.count({
       where: { streamerId, purchasedTotal: { gt: 0 } },
+    }),
+    // Sum across ALL supporters, not just the top `limit` shown in `entries`
+    // — used for the profile page's headline stat (DECISIONS 2026-08-01).
+    prisma.mochiHolding.aggregate({
+      where: { streamerId },
+      _sum: { purchasedTotal: true },
     }),
   ]);
 
@@ -126,5 +136,9 @@ export async function getSupporterLeaderboard(
     };
   });
 
-  return { entries, totalSupporters };
+  return {
+    entries,
+    totalSupporters,
+    totalMochiPurchased: sum._sum.purchasedTotal ?? 0,
+  };
 }

@@ -16,7 +16,6 @@ import {
 import { Mochi } from "@/components/Mochi";
 import { StreamerCard } from "@/components/StreamerCard";
 import { CreatorCover } from "@/components/CreatorCover";
-import { GradeBadge } from "@/components/GradeBadge";
 import { getExploreStreamers, type StreamerCard as CardData } from "@/lib/streamers";
 import { formatCount } from "@/lib/format";
 
@@ -35,7 +34,7 @@ export default async function FanLandingPage() {
 
   let trending: CardData[] = [];
   try {
-    trending = (await getExploreStreamers({ sort: "readiness" })).slice(0, 4);
+    trending = (await getExploreStreamers({ sort: "backers" })).slice(0, 4);
   } catch {
     trending = [];
   }
@@ -218,14 +217,8 @@ export default async function FanLandingPage() {
                     {t("spotlightMochi")}
                   </div>
                 </div>
-                <div>
-                  <GradeBadge grade={spotlight.readiness} size="sm" />
-                  <div className="mt-1 text-[13px] text-muted">
-                    {t("spotlightTrust")}
-                  </div>
-                </div>
               </div>
-              <ButtonLink href={`/s/${spotlight.handle}#buy-mochi`} size="lg">
+              <ButtonLink href={`/s/${spotlight.handle}/buy`} size="lg">
                 <Mochi width={18} height={14} /> {tc("sendMochi")}
               </ButtonLink>
             </div>

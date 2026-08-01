@@ -9,16 +9,10 @@
     "sendMochi": "Send mochi",
     "loading": "Loading…",
     "collapse": "Collapse",
-    "expand": "Expand",
-    "grade": {
-      "Emerging": "Emerging",
-      "Strong": "Strong",
-      "Excellent": "Excellent"
-    }
+    "expand": "Expand"
   },
   "nav": {
     "features": "Features",
-    "trustReport": "Trust Report",
     "fees": "Fees",
     "explore": "Explore",
     "whatIsMochi": "What is mochi?",
@@ -37,14 +31,14 @@
   },
   "footer": {
     "fanTagline": "The warmest way to back a creator you love.",
-    "creatorTagline": "Turn your fans' support into proof for sponsors. A trust platform for creators.",
+    "creatorTagline": "Get your fans' support as mochi in your own market. A direct-payout platform for creators.",
     "colProduct": "Product",
     "colCompany": "Company",
     "colExplore": "Explore",
     "colSupport": "Support",
     "colTerms": "Legal",
     "product": {
-      "trustReport": "Trust Report",
+      "market": "Market",
       "creatorDashboard": "Creator dashboard",
       "mochi": "Mochi"
     },
@@ -77,9 +71,7 @@
     "signupTitle": "Sign up",
     "signupBody": "Sign up is coming soon. Naver, Kakao, and Google login are on the way.",
     "applyTitle": "Apply as a creator",
-    "applyBody": "The creator application form is coming soon. After review, your page opens along with sub-merchant setup.",
-    "reportTitle": "Trust Report",
-    "reportBody": "The public Trust Report document is coming soon. For now, see the report summary on the profile."
+    "applyBody": "The creator application form is coming soon. After review, your page opens along with sub-merchant setup."
   },
   "safety": {
     "ageCheck": "Age & adult verification",
@@ -91,7 +83,7 @@
     "heroTitle": "Back the creators you love,",
     "heroTitleAccent": "with mochi",
     "heroTitleTail": ".",
-    "heroSubtitle": "Share your heart and earn supporter-only perks and a founding badge. The more you back, the closer you get.",
+    "heroSubtitle": "Share your heart and earn supporter-only perks. The more you back, the closer you get.",
     "searchPlaceholder": "Search creators or categories",
     "categories": {
       "all": "All",
@@ -110,8 +102,8 @@
       "step1Body": "Discover creators to back by browsing or searching.",
       "step2Title": "Send mochi",
       "step2Body": "Send as much mochi as you like. Payment goes directly to the creator.",
-      "step3Title": "Get perks & badges",
-      "step3Body": "Become a regular with the Backer Wall, perks, and a founding badge."
+      "step3Title": "Use it in the market",
+      "step3Body": "Spend your mochi on items in the creator's own market."
     },
     "benefitsTitle": "Why backing feels good",
     "benefits": {
@@ -119,19 +111,18 @@
       "messageBody": "Send mochi with a message and reach the creator directly.",
       "perksTitle": "Get supporter perks",
       "perksBody": "Enjoy supporter-only perks — Discord channels, raffles, handwritten notes.",
-      "badgeTitle": "Earn a founding badge",
-      "badgeBody": "The earlier you back, the more special your status on the Backer Wall and leaderboard.",
+      "badgeTitle": "Climb the ranking",
+      "badgeBody": "The more you back, the higher you rank on the creator's supporter ranking.",
       "dashboardTitle": "See your support at a glance",
       "dashboardBody": "Track your backings, following, and upcoming perks in your dashboard."
     },
     "spotlightEyebrow": "creator of the week",
     "spotlightBackers": "backers",
     "spotlightMochi": "mochi received",
-    "spotlightTrust": "trust",
     "mochiExplainerTitle": "Mochi is <accent>support</accent> — not an investment.",
-    "mochiExplainerBody": "There is no refund of value, resale, or financial return. What you receive is the creator's gratitude, supporter perks, and your status as a fan (badges and ranking). It is never shown as a balance or a value.",
+    "mochiExplainerBody": "There is no refund of value, resale, or financial return. What you receive is the creator's gratitude, supporter perks, and your ranking as a fan. It is never shown as a balance or a value.",
     "creatorPromptTitle": "Are you a creator?",
-    "creatorPromptBody": "Turn your fans' support into a Trust Report you can show to sponsors.",
+    "creatorPromptBody": "Open your own market and connect directly with your fans.",
     "creatorPromptCta": "Go to the creator page →",
     "finalCtaTitle": "Send your first cheer today.",
     "finalCtaBody": "The warmest way to reach a creator you love.",
@@ -139,46 +130,39 @@
   },
   "creatorLanding": {
     "eyebrow": "motoo for creators",
-    "heroTitle1": "Turn your fans' support",
-    "heroTitle2": "into proof",
-    "heroAccent": "for sponsors",
-    "heroTitleTail": ".",
-    "heroSubtitle": "Turn the support your fans send as mochi into one <b>Trust Report</b> each month. Prove a real fandom to brands, sponsors, and MCNs.",
+    "heroTitle1": "In your own market,",
+    "heroTitle2": "receive your fans'",
+    "heroAccent": "hearts",
+    "heroTitleTail": " as mochi.",
+    "heroSubtitle": "Issue your own mochi and gift it to fans in <b>your own market</b>. Payment settles directly through a licensed PG.",
     "ctaApply": "Apply as a creator",
-    "ctaSample": "View a sample report",
+    "ctaSample": "Browse creators",
     "trustDirect": "Licensed PG direct payment",
     "trustNoFunds": "The platform holds no funds",
     "proofStrip": "Creators with us",
     "insightEyebrow": "why motoo",
-    "insightTitle1": "Sponsors look past view counts to",
-    "insightAccent": "a real fandom",
+    "insightTitle1": "What stays isn't your follower count —",
+    "insightAccent": "it's fans you're directly connected to",
     "insightTitle2": ".",
-    "insightBody": "Smaller creators are strongest in loyal fans — but there was no way to prove it. motoo turns support, loyalty, and execution into a verifiable report.",
+    "insightBody": "Bring support scattered across platforms into one place and connect directly with your fans. motoo builds your own mochi market.",
     "insight": {
-      "card1Title": "Big numbers, but",
-      "card1Body": "Views and followers alone can't show whether a fandom is real.",
-      "card2Title": "Support is scattered",
-      "card2Body": "Support records spread across platforms are never organized in one view.",
-      "card3Title": "Sponsors want proof",
-      "card3Body": "Brands and MCNs demand trustworthy data before a collaboration."
+      "card1Title": "Fees run high",
+      "card1Body": "Steep fees on other support platforms eat into your settlement.",
+      "card2Title": "No brand of your own",
+      "card2Body": "You can't build your own market inside someone else's platform.",
+      "card3Title": "Payouts are slow",
+      "card3Body": "It's hard to know when — or how much — you'll actually get paid."
     },
     "howEyebrow": "how it works",
-    "howTitle": "Three steps from support to proof",
+    "howTitle": "Three steps from support to a market",
     "how": {
       "step1Title": "Fans back you with mochi",
       "step1Body": "Payment goes directly to the creator via a licensed PG. The platform holds no funds.",
-      "step2Title": "Reward your core fans",
-      "step2Body": "Care for regulars with the Backer Wall, founding badges, and perks — loyalty builds.",
-      "step3Title": "Prove it with the Trust Report",
-      "step3Body": "Share your monthly auto-compiled trust report with sponsors."
+      "step2Title": "Fill your market",
+      "step2Body": "List perks and items in your market for fans to use with their mochi.",
+      "step3Title": "Check the supporter ranking",
+      "step3Body": "See your most dedicated fans at a glance, ranked by lifetime purchases."
     },
-    "reportEyebrow": "the trust report",
-    "reportTitle": "One page of trust, proven",
-    "reportBody": "Five areas auto-compiled each month, shown as <b>sponsor readiness</b>. Manage deeply in a private dashboard, share cleanly in a public view.",
-    "reportBullet1": "Fan support · loyalty · execution · growth",
-    "reportBullet2": "Emerging / Strong / Excellent grades",
-    "reportBullet3": "Public & private views · brandable",
-    "reportCta": "See the full sample report →",
     "mochiExplainerTitle": "Mochi is <accent>support</accent> — not an investment.",
     "mochiExplainerBody": "There is no refund of value, resale, or financial return. What you receive is your fans' heart and trust, and the data. Payment is delivered directly to the creator via a licensed PG.",
     "featuresTitle": "Every tool a creator needs",
@@ -191,29 +175,26 @@
       "payoutBody": "PG settlement status, transparently",
       "analyticsTitle": "Analytics",
       "analyticsBody": "Growth, traffic, and viewer insights",
-      "reportTitle": "Shareable report",
-      "reportBody": "To sponsors via link or embed"
+      "marketTitle": "Market management",
+      "marketBody": "Configure the items and prices you sell"
     },
-    "testimonial": "\"Even with a small audience, I can now show how solid our fandom is. The Trust Report landed me my first brand deal.\"",
+    "testimonial": "\"Even with a small audience, I can now show how solid our fandom is. The mochi market let me connect with fans beyond the stream itself.\"",
     "testimonialName": "@CreatorA",
     "testimonialMeta": "Virtual · 120 avg. viewers",
-    "finalCtaTitle": "Prove your fandom, now.",
-    "finalCtaBody": "Apply in 5 minutes; your first report arrives next month.",
+    "finalCtaTitle": "Open your own market, now.",
+    "finalCtaBody": "Apply in 5 minutes — once approved, start issuing mochi right away.",
     "finalCtaFans": "Are you a fan? ↗"
   },
   "explore": {
     "eyebrow": "discover",
     "title": "Explore creators",
-    "subtitle": "Ranked by support, loyalty, and execution. Never by money raised.",
+    "subtitle": "Ranked by real support. Never by money raised.",
     "searchPlaceholder": "Search creators or categories",
     "filterCategory": "Category",
     "filterBackers": "Backers",
-    "filterReadiness": "Sponsor readiness",
     "sortLabel": "Sort",
     "sort": {
-      "readiness": "Sponsor readiness",
       "backers": "Backer count",
-      "recurring": "Recurring rate",
       "newest": "Newest"
     },
     "backerCountRanges": {
@@ -222,7 +203,7 @@
       "50to200": "50–200",
       "over200": "200+"
     },
-    "readinessNote": "Ranked by trust signals · no money-raised leaderboard",
+    "rankingNote": "Ranked by real support · no money-raised leaderboard",
     "cardSupporters": "{count} fans cheering along",
     "empty": {
       "title": "No creators match your filters",
@@ -234,9 +215,7 @@
   },
   "profile": {
     "backers": "backers",
-    "recurringRate": "recurring rate",
-    "fulfillment": "perk fulfillment",
-    "coreFans": "core fans",
+    "totalMochi": "total mochi",
     "tiersTitle": "Backing tiers",
     "tierPerks": "Perks",
     "tierBackers": "{count} backing",
@@ -249,14 +228,9 @@
     "updatesEmpty": "No updates yet.",
     "backerOnly": "Backer-only update",
     "backerOnlyBody": "Back this creator to see it.",
-    "reportSummaryTitle": "Trust Report",
-    "reportSummarySubtitle": "The trust summary shared with sponsors",
-    "viewFullReport": "View full report →",
-    "noReport": "No published Trust Report yet.",
     "notFoundTitle": "Creator not found",
     "notFoundBody": "Check the address or find them again from Explore.",
     "backToExplore": "To Explore →",
-    "sponsorReadiness": "Sponsor readiness",
     "follow": "Follow",
     "following": "Following"
   },

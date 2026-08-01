@@ -1,6 +1,4 @@
 import { prisma } from "./db";
-import type { TrustGrades, TrustMetrics, Grade } from "./grades";
-import { gradeRank } from "./grades";
 
 export interface StreamerCard {
   id: string;
@@ -11,28 +9,20 @@ export interface StreamerCard {
   avatarUrl: string | null;
   avgViewers: number;
   backerCount: number;
-  recurringRate: number;
-  fulfillmentRate: number;
-  readiness: Grade;
   createdAt: Date;
 }
 
-function reportToCard(
-  streamer: {
-    id: string;
-    handle: string;
-    displayName: string;
-    creatorType: string | null;
-    category: string;
-    avatarUrl: string | null;
-    avgViewers: number;
-    createdAt: Date;
-    reports: { metrics: unknown; grades: unknown }[];
-  },
-): StreamerCard {
-  const report = streamer.reports[0];
-  const metrics = report?.metrics as TrustMetrics | undefined;
-  const grades = report?.grades as TrustGrades | undefined;
+function toStreamerCard(streamer: {
+  id: string;
+  handle: string;
+  displayName: string;
+  creatorType: string | null;
+  category: string;
+  avatarUrl: string | null;
+  avgViewers: number;
+  createdAt: Date;
+  _count: { mochiHoldings: number };
+}): StreamerCard {
   return {
     id: streamer.id,
     handle: streamer.handle,
@@ -41,15 +31,12 @@ function reportToCard(
     category: streamer.category,
     avatarUrl: streamer.avatarUrl,
     avgViewers: streamer.avgViewers,
-    backerCount: metrics?.fanSupport.totalBackers ?? 0,
-    recurringRate: metrics?.fanSupport.recurringRate ?? 0,
-    fulfillmentRate: metrics?.execution.perkFulfillmentRate ?? 0,
-    readiness: grades?.sponsorReadiness ?? "Emerging",
+    backerCount: streamer._count.mochiHoldings,
     createdAt: streamer.createdAt,
   };
 }
 
-export type ExploreSort = "readiness" | "backers" | "recurring" | "newest";
+export type ExploreSort = "backers" | "newest";
 
 export interface ExploreParams {
   q?: string;
@@ -60,8 +47,10 @@ export interface ExploreParams {
 }
 
 /**
- * Explore listing. Ranked by TRUST SIGNALS, never money raised (spec §6) —
- * there is deliberately no "top earners" sort option.
+ * Explore listing. `backerCount` is a live `MochiHolding` count — a holding
+ * row only exists once a fan has actually purchased mochi (DECISIONS
+ * 2026-08-01), never a stored/derived metric. Ranked by real support, never
+ * money raised (spec §6) — there is deliberately no "top earners" sort.
  */
 export async function getExploreStreamers(
   params: ExploreParams = {},
@@ -86,11 +75,11 @@ export async function getExploreStreamers(
         : {}),
     },
     include: {
-      reports: { orderBy: { reportNumber: "desc" }, take: 1 },
+      _count: { select: { mochiHoldings: true } },
     },
   });
 
-  let cards = streamers.map(reportToCard);
+  let cards = streamers.map(toStreamerCard);
 
   if (params.backerRange && params.backerRange !== "all") {
     cards = cards.filter((c) => {
@@ -101,21 +90,14 @@ export async function getExploreStreamers(
     });
   }
 
-  const sort = params.sort ?? "readiness";
+  const sort = params.sort ?? "backers";
   cards.sort((a, b) => {
     switch (sort) {
-      case "backers":
-        return b.backerCount - a.backerCount;
-      case "recurring":
-        return b.recurringRate - a.recurringRate;
       case "newest":
         return b.createdAt.getTime() - a.createdAt.getTime();
-      case "readiness":
+      case "backers":
       default:
-        return (
-          gradeRank(b.readiness) - gradeRank(a.readiness) ||
-          b.recurringRate - a.recurringRate
-        );
+        return b.backerCount - a.backerCount;
     }
   });
 
@@ -123,9 +105,11 @@ export async function getExploreStreamers(
 }
 
 /**
- * Full profile with tiers, updates, and published report summary. The
- * supporter leaderboard (live mochi-purchase ranking) is a separate call —
- * `getSupporterLeaderboard` in `@/lib/ranking` — not folded in here.
+ * Full profile with tiers and updates. The supporter leaderboard (live
+ * mochi-purchase ranking) is a separate call — `getSupporterLeaderboard` in
+ * `@/lib/ranking` — not folded in here. No Trust Report data (DECISIONS
+ * 2026-08-01: not part of 1.0.0) — the `reports` relation still exists on
+ * the schema, just unread from here.
  */
 export async function getStreamerProfile(handle: string) {
   const streamer = await prisma.streamer.findUnique({
@@ -137,11 +121,6 @@ export async function getStreamerProfile(handle: string) {
         include: { perks: true },
       },
       updates: { orderBy: { publishedAt: "desc" }, take: 5 },
-      reports: {
-        where: { status: "published" },
-        orderBy: { reportNumber: "desc" },
-        take: 1,
-      },
       // Phase 2: active marketplace items, so the profile page renders the
       // spend module from this one streamer query (no second fetch). Buy
       // (mochiIssuance) moved to its own page/query — getStreamerMarketplace,
@@ -154,18 +133,10 @@ export async function getStreamerProfile(handle: string) {
   });
   if (!streamer || streamer.status !== "approved") return null;
 
-  const report = streamer.reports[0];
   return {
     streamer,
     tiers: streamer.tiers,
     updates: streamer.updates,
-    report: report
-      ? {
-          ...report,
-          metrics: report.metrics as unknown as TrustMetrics,
-          grades: report.grades as unknown as TrustGrades,
-        }
-      : null,
   };
 }
 

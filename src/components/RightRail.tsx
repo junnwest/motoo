@@ -32,7 +32,7 @@ export async function RightRail({ backerId }: { backerId: string }) {
 
   let discover: Awaited<ReturnType<typeof getExploreStreamers>> = [];
   try {
-    const trending = await getExploreStreamers({ sort: "readiness" });
+    const trending = await getExploreStreamers({ sort: "backers" });
     discover = trending.filter((s) => !supportedHandles.has(s.handle)).slice(0, 6);
   } catch {
     discover = [];

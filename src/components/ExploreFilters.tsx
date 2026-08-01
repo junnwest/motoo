@@ -112,10 +112,10 @@ export function ExploreFilters() {
       <select
         aria-label={t("sortLabel")}
         className={selectClass}
-        value={params.get("sort") ?? "readiness"}
+        value={params.get("sort") ?? "backers"}
         onChange={(e) => setParam("sort", e.target.value)}
       >
-        {["readiness", "backers", "recurring", "newest"].map((s) => (
+        {["backers", "newest"].map((s) => (
           <option key={s} value={s}>
             {t(`sort.${s}` as never)}
           </option>
