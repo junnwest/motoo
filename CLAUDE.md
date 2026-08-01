@@ -2,22 +2,28 @@
 
 **motoo** is a Korean creator-support **mochi-marketplace**: each creator issues their own
 mochi, users buy it and spend it in that creator's marketplace. (The original Trust Report
-thesis is shelved for the demo; schema kept.)
+thesis has been removed from the website for 1.0.0 — grades/report schema stays in Prisma,
+fully dormant, no remaining UI surface. See DECISIONS 2026-08-01.)
 
 **Accounts are additive:** everyone is a **user (fan)**; a **creator** is just a user who
 *also owns a Studio* (a `Streamer`). No separate account type, no mode toggle — creator
 status = `session.user.creator` (their Studio handle, or null). Signed-in users land on
-**`/home`** (mochi status with rank, per `src/lib/ranking.ts` → affordable items → pending
-orders → news, beside a suggestion column); `/` stays the logged-out marketing landing and
-`/explore` stays the browse page. Every signed-in consumer page gets a **persistent left
-Sidebar** (`ConsumerShell`: 홈/둘러보기 + the following list — Follow only, never merged
-with `MochiHolding`); a **Studio pill** in the nav (always visible) routes a creator to
-`/studio` or a fan into become-a-creator. A bell icon surfaces `/notifications` (order/
-item/price events, best-effort via `src/lib/notify.ts`, never inside `mochi.ts`'s
-transactions). `/profile` (identity + holdings + history) and `/settings` (nickname/handle/
-password) round out the avatar dropdown. New users go
-through `/onboarding` (nickname, unique `@handle`, 본인인증, terms), enforced by
-`src/proxy.ts` (the edge middleware).
+**`/home`** (a single column: mochi status with rank, per `src/lib/ranking.ts` → affordable
+items → pending orders → news); `/` stays the logged-out marketing landing and `/explore`
+stays the browse page. Every signed-in consumer page gets `ConsumerShell`'s two persistent
+rails: a left **Sidebar** (홈/둘러보기 + the following list — Follow only, never merged with
+`MochiHolding`) and a right **RightRail** (discovery suggestions, live supporter counts,
+instant follow). Both are collapsible with state persisted across navigation
+(`src/lib/usePersistedCollapse.ts`). A **Studio pill** in the nav (always visible) routes a
+creator to `/studio` or a fan into become-a-creator — mirrored on the Studio host by a
+**motoo pill** that routes back to the consumer app. A creator's own supporters get a live
+leaderboard by lifetime mochi purchased (`getSupporterLeaderboard`, `src/lib/ranking.ts`) on
+their `/s/[handle]` page; buying mochi is its own focused page, `/s/[handle]/buy`. A bell
+icon surfaces `/notifications` (order/item/price events, best-effort via `src/lib/notify.ts`,
+never inside `mochi.ts`'s transactions). `/profile` (identity + holdings + history) and
+`/settings` (nickname/handle/password) round out the avatar dropdown. New users go through
+`/onboarding` (nickname, unique `@handle`, 본인인증, terms), enforced by `src/proxy.ts` (the
+edge middleware).
 
 **Two domains, one codebase:** `themotoo.com` = consumer app; **`studio.themotoo.com`** =
 creator console (the `/studio` route group, served at the subdomain root). The split is

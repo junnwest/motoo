@@ -23,34 +23,38 @@ spec and [`design-handoff/`](./design-handoff/) for the visual system.
 **Current direction:** the **mochi-marketplace** is built and deployed — creators
 issue their own mochi, users buy it and spend it in each creator's marketplace. Accounts
 are **additive**: everyone is a user (fan); a **creator** is a user who *also* owns a
-**Studio**. The original **Streamer Trust Report** thesis is shelved; its schema/components
-stay in the tree, dormant.
+**Studio**. The original **Streamer Trust Report** thesis has been removed from the
+website entirely (not part of 1.0.0) — its schema stays in Prisma, fully dormant, no
+remaining UI.
 
 ## What's built
 
 | Route | Page |
 | --- | --- |
 | `/` | Marketing landing (logged-out only; signed-in users are routed to `/home`) |
-| `/home` | **The app home.** Two columns: mochi status (balance + rank per creator) → items you can afford right now → in-flight orders → news, beside a suggestion column (larger single-column blocks). Adaptive — holds no mochi yet → a how-it-works primer instead of the status column. The following list lives in the persistent Sidebar, not here |
+| `/home` | **The app home.** A single column: mochi status (balance + rank per creator) → items you can afford right now → in-flight orders → news. Adaptive — holds no mochi yet → a how-it-works primer instead of the status column. Flanked by `ConsumerShell`'s two persistent, collapsible rails (Sidebar left, RightRail right) — not page-local |
 | `/ranking` | Your rank among each held creator's supporters, by lifetime mochi purchased |
 | `/notifications` | Full notification history (order fulfilled/cancelled, a supported creator adds an item or raises their price) — mark-all-read. A bell icon in the nav shows the unread count |
 | `/profile` | Identity + mochi holdings + order history (absorbs the old `/me/mochi`, which now redirects here) |
 | `/settings` | Nickname/handle + password change (apex-only; distinct from the Studio host's own `/settings`) |
-| `/explore` | Creators grid — the dedicated browse page (filters, search, sort) |
-| `/s/[handle]` | Creator profile: **buy mochi** module + **marketplace** (spend mochi on items) |
+| `/explore` | Creators grid — the dedicated browse page (filters, search, sort — all by live support, no Trust Report signals) |
+| `/s/[handle]` | Creator profile: **marketplace** (spend mochi on items) beside a live **supporter leaderboard** (ranked by lifetime mochi purchased), plus updates |
+| `/s/[handle]/buy` | Focused **buy-mochi** flow, its own page (routed from the profile's 모찌 보내기 button) — no ConsumerShell chrome, just a way back to the profile |
 | `/me/mochi` | "My mochi": per-creator holdings + order/redemption history |
 | `/login` · `/signup` | Real auth — social-first (Kakao/Naver/Google) + email; password policy + confirm. One **회원가입** button opens a 후원자/크리에이터 role modal (login stays unified) |
 | `/onboarding` | New-user gate: nickname, unique `@handle`, **본인인증** (age/identity), terms |
-| `studio.themotoo.com/` | The **Studio** (creator console, own subdomain): single-view dashboard (no sidebar) — overview + mochi issuance (ratcheting tiers) + orders + market items, with per-section ⓘ help. Internally the `/studio` route group; apex `/studio` 308s here. |
+| `studio.themotoo.com/` | The **Studio** (creator console, own subdomain): single-view dashboard (no sidebar) — overview + mochi issuance (ratcheting tiers) + orders + market items, with per-section ⓘ help. Internally the `/studio` route group; apex `/studio` 308s here. Its nav mirrors the consumer Studio pill with a **motoo pill** back to the consumer app |
 | `studio.themotoo.com/settings` | Creator-profile settings — display name, bio, type→category, platform links (handle read-only) |
-| `/creators` → `/api/become-creator` | Creator pitch → become-a-creator (add-on to a user account) |
+| `/creators` → `/api/become-creator` | Creator pitch (issue your own mochi, own your own market) → become-a-creator (add-on to a user account) |
 
 **Account model:** a creator is a `Backer` (the account/user table) that owns a `Streamer`
 via `Streamer.ownerId`. Creator status = `session.user.creator` (Studio handle or null).
 Signed-in users land on `/home`; a persistent **Studio pill** in the nav (always visible)
-routes a creator straight to the console or a fan into the become-a-creator flow. Every
-signed-in consumer page also gets a **persistent left Sidebar** (`ConsumerShell`) — 홈/
-둘러보기 + the following list — that survives navigation rather than being page-local.
+routes a creator straight to the console or a fan into the become-a-creator flow, mirrored
+on the Studio host by a **motoo pill** back to the consumer app. Every signed-in consumer
+page also gets `ConsumerShell`'s two persistent rails — a left **Sidebar** (홈/둘러보기 +
+the following list) and a right **RightRail** (discovery suggestions) — both collapsible,
+state persisted across navigation, surviving page changes rather than being page-local.
 Onboarding is redirect-enforced by `src/proxy.ts`.
 
 Not built (all need a `사업자등록` + paid contract): real PG (Toss/NICE/PortOne),
