@@ -22,10 +22,15 @@ export function LoginForm({ providers }: { providers: EnabledProviders }) {
     e.preventDefault();
     setError(null);
     startTransition(async () => {
-      // On success loginAction throws NEXT_REDIRECT (handled by the framework);
-      // it only ever returns on failure.
       const res = await loginAction(email, password);
-      if (res && !res.ok) setError(res.error);
+      if (!res.ok) {
+        setError(res.error);
+        return;
+      }
+      // Full navigation, not router.push: a soft transition lets Next resolve
+      // "/" without requesting it, so the middleware's onboarding gate and the
+      // page's own fan/creator routing never run. See login/actions.ts.
+      window.location.assign("/");
     });
   }
 

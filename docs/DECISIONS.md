@@ -3,6 +3,30 @@
 Why the project is the way it is. Newest first. Keep entries short: decision,
 rationale, and any constraint it creates.
 
+## 2026-08-02 — Auth transitions navigate for real; a server-action redirect skipped middleware
+The open item from the logout investigation: right after login, a **non-onboarded** user
+landed on `/` (the marketing landing) instead of `/onboarding`. Confirmed pre-existing by
+stashing the logout fix and reproducing on the old code.
+- **Cause, from a network trace**: the action responds `303 … Location: /;push`, and then the
+  client **never requests `/` at all** — Next resolves the destination as part of the action
+  and finishes with a client-side transition. So neither `/`'s own signed-in routing nor the
+  middleware's onboarding gate ever ran. A reload showed the correct `GET /` → 307 →
+  `/onboarding`, which is why the gate itself looked fine in isolation (and in curl).
+- **`revalidatePath("/", "layout")` does not fix it** — tried and traced. The problem isn't a
+  cache we control serving a stale entry, it's that no request is made at all.
+- **Fix**: `loginAction`/`signupUser` now use `signIn(..., { redirect: false })`, return
+  `{ ok: true }`, and the form does `window.location.assign("/")`. A full navigation forces a
+  real document request carrying the fresh session cookie, so middleware runs and the user
+  lands where they should. Same medicine as the logout fix for the same underlying reason:
+  **an auth-state change can't be trusted to a soft transition.**
+- Signup had the identical bug and was fixed the same way — worse there, since a brand-new
+  account is exactly the one that must reach onboarding; it was landing on `/home`.
+- **The failure paths still return rather than navigate**, so bad credentials and a duplicate
+  email still render their inline error instead of reloading the page. Verified.
+- Cost: login/signup now cost one full page load instead of a soft transition. For an auth
+  transition that's the right trade — a clean document is what you want anyway, and it's the
+  same reason logout is a native form POST.
+
 ## 2026-08-02 — The shell has a height floor, so collapsing a rail can't move the footer
 User: collapsing either rail pushes the footer down compared to having both open. Correct,
 and measurable — on `/ranking` the footer moved **176px**, on `/notifications` 22px, on

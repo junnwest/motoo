@@ -42,10 +42,15 @@ export function SignupForm({
     if (!passwordValid) return setError("weakPassword");
     if (password !== confirm) return setError("passwordMismatch");
     startTransition(async () => {
-      // On success signupUser throws NEXT_REDIRECT (handled by the framework);
-      // it only ever returns on failure.
       const res = await signupUser({ nickname, email, password });
-      if (res && !res.ok) setError(res.error);
+      if (!res.ok) {
+        setError(res.error);
+        return;
+      }
+      // Full navigation, not router.push — a soft transition lets Next resolve
+      // "/" without requesting it, so the onboarding gate never runs and a
+      // brand-new account skips onboarding. See signup/actions.ts.
+      window.location.assign("/");
     });
   }
 

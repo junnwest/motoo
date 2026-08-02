@@ -6,6 +6,23 @@ Living status of the build. Update the checkboxes as work lands. See
 [`DECISIONS.md`](./DECISIONS.md) for why things are the way they are and
 [`DEPLOYMENT.md`](./DEPLOYMENT.md) for infra state.
 
+## Recent — 2026-08-02 (login/signup navigate for real, so the onboarding gate runs)
+
+- [x] **Closed the open item from the logout investigation.** A non-onboarded user landed on
+  `/` after login instead of `/onboarding`, and a brand-new signup landed on `/home`. A
+  network trace showed the action's `303 → /;push` was followed by **no request for `/` at
+  all** — Next resolved the destination in the action and finished with a soft transition, so
+  the middleware gate never ran. `revalidatePath` doesn't help; the request isn't cached, it
+  isn't made.
+- [x] **`loginAction` / `signupUser` now return `{ ok: true }`** and the forms do
+  `window.location.assign("/")`. Failure paths still return inline errors rather than
+  navigating.
+- [x] Verified all four destinations: onboarded fan → `/home`, creator → the Studio
+  subdomain, non-onboarded → `/onboarding`, brand-new signup → `/onboarding`. Bad password
+  and duplicate email still show their inline error and stay put. Re-ran the logout leak
+  harness after the change: **0/8**. `tsc`, `check:vocab`, `check:emoji` clean, eslint
+  unchanged, `pnpm test` 11/11, `pnpm build` clean. Test accounts removed from the dev DB.
+
 ## Recent — 2026-08-02 (collapsing a rail no longer moves the footer)
 
 - [x] **`min-h-[calc(100vh-64px)]` on the ConsumerShell row.** A collapsed rail is a

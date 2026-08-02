@@ -61,12 +61,15 @@ in `src/proxy.ts` or it'll bounce to the apex. Dev: `studio.localhost:PORT`. See
   Fans are **팬 / 후원자** — **백커 is retired** and `pnpm check:vocab` now fails on it
   (its `RETIRED` list, separate from the regulatory `STRICT` one). Korean headings/titles in
   narrow cards want `break-keep`, or Hangul wraps mid-word.
-- **Logout must revoke, not just forget.** Sessions are stateless JWTs and Auth.js re-issues
-  the session cookie on *every* authenticated request, so clearing the cookie alone is
-  undone by any request still carrying the old one. `Backer.tokenVersion` is the real gate
-  (bumped by `/api/logout`, checked in the `jwt` callback); logout is a **native form POST**,
-  never a server action, so the browser cancels in-flight fetches. Don't reintroduce a
-  server-action logout. See DECISIONS 2026-08-02.
+- **Auth transitions must be real navigations, never soft ones.** Two separate bugs came from
+  this. *Logout*: sessions are stateless JWTs and Auth.js re-issues the session cookie on
+  *every* authenticated request, so clearing the cookie alone is undone by any request still
+  carrying the old one — `Backer.tokenVersion` is the real gate (bumped by `/api/logout`,
+  checked in the `jwt` callback), and logout is a **native form POST**. *Login/signup*: a
+  server-action `redirectTo` lets Next resolve the destination without requesting it, so the
+  middleware's onboarding gate never runs — both actions return `{ ok: true }` and the form
+  does `window.location.assign("/")`. Don't reintroduce a server-action redirect for either.
+  See DECISIONS 2026-08-02.
 - **Uploaded images are data URLs in Postgres**, not files — there is no object storage.
   `src/lib/imageUpload.ts` owns the budgets; `ImagePicker` crops/re-encodes in the browser;
   `parseImageDataUrl` is the server gate (jpeg/png/webp only — never svg — and a hard byte
