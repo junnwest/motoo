@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { logoutAction } from "@/app/auth-actions";
+import { CreatorBadge } from "./CreatorBadge";
 
 export type MenuItem = { label: string; href: string };
 
@@ -18,6 +19,7 @@ export function UserMenu({
   initial,
   avatarUrl,
   subtitle,
+  creatorLabel,
   items,
   logoutLabel,
 }: {
@@ -25,6 +27,8 @@ export function UserMenu({
   initial: string;
   avatarUrl?: string | null;
   subtitle?: string;
+  /** "크리에이터 등록 완료" — passed only when this account owns a Studio. */
+  creatorLabel?: string;
   items: MenuItem[];
   logoutLabel: string;
 }) {
@@ -76,6 +80,9 @@ export function UserMenu({
             <div className="truncate text-[14px] font-bold text-ink">{name}</div>
             {subtitle && (
               <div className="truncate text-[12px] text-muted">{subtitle}</div>
+            )}
+            {creatorLabel && (
+              <CreatorBadge label={creatorLabel} size="sm" className="mt-1.5" />
             )}
           </div>
 

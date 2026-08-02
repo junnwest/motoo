@@ -7,7 +7,8 @@ fully dormant, no remaining UI surface. See DECISIONS 2026-08-01.)
 
 **Accounts are additive:** everyone is a **user (fan)**; a **creator** is just a user who
 *also owns a Studio* (a `Streamer`). No separate account type, no mode toggle — creator
-status = `session.user.creator` (their Studio handle, or null). `/` is the signed-in routing
+status = `session.user.creator` (their Studio handle, or null), surfaced to the user as a
+**`크리에이터 등록 완료`** badge (`CreatorBadge`) in the avatar dropdown and on `/profile`. `/` is the signed-in routing
 fork and the only place it lives: a **fan lands on `/home`** (a single column: mochi status
 with rank, per `src/lib/ranking.ts` → affordable items → pending orders → news), a
 **creator lands in the Studio** (`/studio`, forwarded to the subdomain). `/home` stays

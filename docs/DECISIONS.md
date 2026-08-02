@@ -3,6 +3,20 @@
 Why the project is the way it is. Newest first. Keep entries short: decision,
 rationale, and any constraint it creates.
 
+## 2026-08-01 — Creator status is shown, not inferred (`크리에이터 등록 완료`)
+Accounts are additive (2026-07-12), which is good for the model but means nothing on a page
+ever *says* you're a creator — the Studio pill looks identical whether you own a Studio or
+are being invited to open one. New shared `CreatorBadge` (`크리에이터 등록 완료`) renders in
+the two places a user looks for who they are: the nav's avatar dropdown header and their own
+`/profile` identity block.
+- **Takes `label` as a prop instead of calling `useTranslations`** — `UserMenu` is a client
+  component with no next-intl of its own (the nav hands it every string), while `/profile` is
+  server-rendered. One component serves both only if the string comes from outside.
+- **Sage, not coral.** It's a settled state, not a call to action; the Studio pill sitting
+  next to it is the thing to click. Same reasoning as the 즉시/요청 fulfillment chips.
+- **Keyed off `session.user.creator`**, the Studio handle already in the JWT — no extra query
+  on either surface. Copy lives in `common` since two namespaces need it.
+
 ## 2026-08-01 — Mochi is non-refundable; user-uploaded images; creators land in the Studio
 Second feedback pass the same day. The two structural decisions here are the refund policy
 and how uploaded images are stored.

@@ -120,6 +120,7 @@ export async function Nav() {
               initial={initial}
               avatarUrl={avatarUrl}
               subtitle={handle ? `@${handle}` : undefined}
+              creatorLabel={handle ? tc("creatorRegistered") : undefined}
               items={items}
               logoutLabel={t("logout")}
             />

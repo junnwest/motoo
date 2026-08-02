@@ -6,6 +6,7 @@ import { Footer } from "@/components/Footer";
 import { ButtonLink } from "@/components/ui/Button";
 import { Mochi } from "@/components/Mochi";
 import { Avatar } from "@/components/ui/Placeholder";
+import { CreatorBadge } from "@/components/CreatorBadge";
 import { CreatorCover } from "@/components/CreatorCover";
 import { Section } from "@/components/ui/Section";
 import { getCurrentBacker } from "@/lib/session";
@@ -30,6 +31,7 @@ export default async function ProfilePage() {
   if (!session?.user) redirect("/");
 
   const t = await getTranslations("myProfile");
+  const tc = await getTranslations("common");
   const tm = await getTranslations("myMochi");
   const tax = await getTranslations("creatorTaxonomy");
   const backer = await getCurrentBacker();
@@ -44,7 +46,9 @@ export default async function ProfilePage() {
     <>
       <ConsumerShell>
         <main className="mx-auto max-w-[900px] px-6 py-12 sm:px-10 sm:py-16">
-          {/* Identity */}
+          {/* Identity. Accounts are additive, so owning a Studio is the only
+              thing that distinguishes a creator — surfaced here (and in the nav
+              dropdown) rather than left implicit. */}
           <div className="flex flex-wrap items-center gap-5">
             <Avatar name={backer.nickname} src={backer.avatarUrl} size={72} />
             <div className="min-w-0 flex-1">
@@ -53,6 +57,12 @@ export default async function ProfilePage() {
               </h1>
               {backer.handle && (
                 <p className="text-[14px] text-muted">@{backer.handle}</p>
+              )}
+              {session.user.creator && (
+                <CreatorBadge
+                  label={tc("creatorRegistered")}
+                  className="mt-2"
+                />
               )}
             </div>
             <ButtonLink href="/settings" variant="secondary" size="md">

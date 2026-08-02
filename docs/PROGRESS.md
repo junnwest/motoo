@@ -6,6 +6,16 @@ Living status of the build. Update the checkboxes as work lands. See
 [`DECISIONS.md`](./DECISIONS.md) for why things are the way they are and
 [`DEPLOYMENT.md`](./DEPLOYMENT.md) for infra state.
 
+## Recent — 2026-08-01 (creator status badge)
+
+- [x] **`크리에이터 등록 완료`** — new shared `CreatorBadge`, shown in the nav's avatar
+  dropdown and on `/profile` for accounts that own a Studio. Additive accounts meant nothing
+  on either surface said you were a creator. Keyed off `session.user.creator` (already in the
+  JWT), copy in `common`. See DECISIONS 2026-08-01.
+- [x] Verified: `tsc`, `check:vocab`, `check:emoji` clean, eslint unchanged, `pnpm test`
+  11/11, `pnpm build` clean. Browser-checked both account types — the creator gets the badge
+  in both places, the fan gets it in neither, no page errors.
+
 ## Recent — 2026-08-01 (uploads, non-refundable mochi, creator-page layout, Studio landing)
 
 - [x] **User-uploaded images**, stored as small JPEG **data URLs in Postgres** (no object
