@@ -6,8 +6,9 @@ import { BrandLogo } from "./BrandLogo";
 import { SignupButton } from "./SignupButton";
 import { UserMenu, type MenuItem } from "./UserMenu";
 import { NotificationBell } from "./NotificationBell";
+import { StudioPill } from "./StudioPill";
 import { Mochi } from "./Mochi";
-import { IconStudio, IconTrophy } from "@/components/ui/Icons";
+import { IconTrophy } from "@/components/ui/Icons";
 import { getUnreadCount } from "@/lib/notify";
 import { getAvatarUrl } from "@/lib/session";
 
@@ -97,13 +98,17 @@ export async function Nav() {
                   unreadCount={unreadCount}
                   label={t("notifications")}
                 />
-                <Link
-                  href={handle ? "/studio" : "/api/become-creator"}
-                  className="ml-1 flex items-center gap-2 rounded-full border border-line-3 bg-white px-4 py-2.5 text-[14px] font-bold text-ink transition-colors hover:border-coral hover:text-coral-deep sm:ml-2"
-                >
-                  <IconStudio width={20} height={20} />
-                  {t("studio")}
-                </Link>
+                <StudioPill
+                  studioHandle={handle}
+                  label={t("studio")}
+                  gate={{
+                    title: t("studioGate.title"),
+                    body: t("studioGate.body"),
+                    confirm: t("studioGate.confirm"),
+                    cancel: t("studioGate.cancel"),
+                    close: tc("close"),
+                  }}
+                />
               </>
             )}
             {onStudioHost && (

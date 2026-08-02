@@ -6,6 +6,23 @@ Living status of the build. Update the checkboxes as work lands. See
 [`DECISIONS.md`](./DECISIONS.md) for why things are the way they are and
 [`DEPLOYMENT.md`](./DEPLOYMENT.md) for infra state.
 
+## Recent — 2026-08-02 (Studio pill gate + creator-setup heading)
+
+- [x] **A fan clicking 스튜디오 now gets an explanation, not a form.** New `StudioPill`
+  client component: a creator keeps a direct `<Link href="/studio">`, a fan gets a modal
+  saying they aren't registered as a creator, with 크리에이터 등록하기 / 나중에 하기.
+  Scoped to this pill — the explicitly-labelled creator CTAs still go straight through.
+- [x] **New shared `ui/Modal`** (portal + Escape + backdrop + ✕). The portal is required, not
+  stylistic — the nav's `backdrop-blur` would otherwise trap a `fixed` overlay.
+  `SignupModal` predates it and was left as-is.
+- [x] **Creator-setup heading hierarchy un-inverted** — 크리에이터 시작하기 is now the H1 and
+  나만의 모찌 마켓을 열어보세요 the supporting line (was the other way round). Message keys
+  renamed to match (`eyebrow` dropped, new `tagline`).
+- [x] Verified: `tsc`, `check:vocab`, `check:emoji` clean, eslint unchanged, `pnpm test`
+  11/11, `pnpm build` clean. Browser-checked as both account types: the fan's pill opens the
+  modal without navigating, Escape / 나중에 하기 / ✕ all dismiss it, 크리에이터 등록하기
+  reaches `/creator/onboarding`, the creator's pill is still a plain link, no page errors.
+
 ## Recent — 2026-08-01 (creator status badge)
 
 - [x] **`크리에이터 등록 완료`** — new shared `CreatorBadge`, shown in the nav's avatar

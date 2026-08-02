@@ -3,6 +3,35 @@
 Why the project is the way it is. Newest first. Keep entries short: decision,
 rationale, and any constraint it creates.
 
+## 2026-08-02 — The Studio pill asks before it enrolls; creator-setup heading un-inverted
+Two fixes to the same moment: a fan clicking 스튜디오.
+- **The pill used to drop a fan straight into `/creator/onboarding`** — a full setup form
+  (display name, handle, type, category, bio, issuance) with no explanation of why clicking a
+  button named after a *place* produced a form for becoming a *thing*. It read as a bug.
+  Non-creators now get a short modal instead: you aren't registered as a creator, the Studio
+  needs that, here's the button to do it (`나중에 하기` to back out). The pill renders as a
+  `<button>` for a fan and stays a plain `<Link href="/studio">` for a creator — the fast path
+  for someone who already has a console is untouched.
+  - **Scoped to this pill deliberately.** The explicit creator entry points — the landing's
+    크리에이터로 시작하기, `/creators`, the signup role modal's 크리에이터 card — already
+    state the intent in their own label, so a confirmation there would be friction, not
+    clarity. They still go straight to `/api/become-creator`.
+- **New `src/components/ui/Modal.tsx`** — portal + Escape + backdrop-click + ✕, extracted so
+  the second modal in the nav doesn't re-derive the portal trick. **The portal is
+  load-bearing**: the nav header's `backdrop-blur` creates a containing block that would
+  otherwise anchor a `fixed` overlay to the header instead of the viewport (the bug
+  `SignupModal` hit in DECISIONS 2026-07-24). It takes `closeLabel` as a prop rather than
+  reaching for next-intl, so it works from any namespace. `SignupModal` predates it and still
+  has its own copy of the logic — left alone rather than refactored, since it works and
+  wasn't what was reported.
+- **Creator-setup heading hierarchy un-inverted.** The page led with a small mono eyebrow
+  ("크리에이터 시작하기") above a much louder pitch line ("나만의 모찌 마켓을 열어보세요"),
+  so the loudest text on screen didn't say where you were — which is exactly what made the
+  unexplained jump disorienting. Swapped: what the page *is* becomes the H1, what it *gets
+  you* becomes a coral supporting line above the existing detail text. Message keys renamed
+  to match their new roles (`eyebrow` → gone, `title` → 크리에이터 시작하기, new `tagline`)
+  rather than leaving keys whose names contradict their contents.
+
 ## 2026-08-01 — Creator status is shown, not inferred (`크리에이터 등록 완료`)
 Accounts are additive (2026-07-12), which is good for the model but means nothing on a page
 ever *says* you're a creator — the Studio pill looks identical whether you own a Studio or

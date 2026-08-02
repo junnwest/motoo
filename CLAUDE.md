@@ -21,9 +21,10 @@ Every signed-in consumer page gets `ConsumerShell`'s two persistent
 rails: a left **Sidebar** (홈/둘러보기 + the following list — Follow only, never merged with
 `MochiHolding`) and a right **RightRail** (discovery suggestions, live supporter counts,
 instant follow). Both are collapsible with state persisted across navigation
-(`src/lib/usePersistedCollapse.ts`). A **Studio pill** in the nav (always visible) routes a
-creator to `/studio` or a fan into become-a-creator — mirrored on the Studio host by a
-**motoo pill** that routes back to the consumer app. A creator's own supporters get a live
+(`src/lib/usePersistedCollapse.ts`). A **Studio pill** in the nav (always visible) links a
+creator straight to `/studio`; a fan gets a modal explaining they aren't registered as a
+creator yet, with enrolling as the deliberate next step (never a silent jump into creator
+setup) — mirrored on the Studio host by a **motoo pill** that routes back to the consumer app. A creator's own supporters get a live
 leaderboard by lifetime mochi purchased (`getSupporterLeaderboard`, `src/lib/ranking.ts`) on
 their `/s/[handle]` page; buying mochi is its own focused page, `/s/[handle]/buy`. A bell
 icon surfaces `/notifications` (order/item/price events, best-effort via `src/lib/notify.ts`,

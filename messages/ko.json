@@ -10,6 +10,7 @@
     "loading": "불러오는 중…",
     "collapse": "접기",
     "expand": "펼치기",
+    "close": "닫기",
     "creatorRegistered": "크리에이터 등록 완료"
   },
   "nav": {
@@ -22,6 +23,12 @@
     "applyAsCreator": "크리에이터 신청",
     "dashboard": "대시보드",
     "studio": "스튜디오",
+    "studioGate": {
+      "title": "아직 크리에이터로 등록하지 않았어요",
+      "body": "motoo 스튜디오는 크리에이터로 등록한 계정만 이용할 수 있어요. 등록하면 나만의 모찌를 발행하고, 팬들이 이용할 마켓을 열 수 있어요.",
+      "confirm": "크리에이터 등록하기",
+      "cancel": "나중에 하기"
+    },
     "backToMotoo": "motoo",
     "becomeCreator": "크리에이터 되기",
     "logout": "로그아웃",
@@ -375,8 +382,8 @@
     "signupBenefit3": "응원한 크리에이터를 한곳에서 관리해요"
   },
   "creatorOnboarding": {
-    "eyebrow": "크리에이터 시작하기",
-    "title": "나만의 모찌 마켓을 열어보세요",
+    "title": "크리에이터 시작하기",
+    "tagline": "나만의 모찌 마켓을 열어보세요",
     "subtitle": "모찌를 발행하고, 팬들이 모찌로 마켓의 아이템을 이용할 수 있어요. 5분이면 시작할 수 있어요.",
     "sectionAccount": "계정",
     "sectionProfile": "크리에이터 프로필",

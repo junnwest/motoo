@@ -10,6 +10,7 @@
     "loading": "Loading…",
     "collapse": "Collapse",
     "expand": "Expand",
+    "close": "Close",
     "creatorRegistered": "Registered creator"
   },
   "nav": {
@@ -22,6 +23,12 @@
     "applyAsCreator": "Apply as creator",
     "dashboard": "Dashboard",
     "studio": "Studio",
+    "studioGate": {
+      "title": "You're not registered as a creator yet",
+      "body": "motoo Studio is only available to accounts registered as a creator. Once you register you can issue your own mochi and open a market for your fans.",
+      "confirm": "Register as a creator",
+      "cancel": "Do this later"
+    },
     "backToMotoo": "motoo",
     "becomeCreator": "Become a creator",
     "logout": "Log out",
@@ -375,8 +382,8 @@
     "signupBenefit3": "Manage every creator you support in one place"
   },
   "creatorOnboarding": {
-    "eyebrow": "Start as a creator",
-    "title": "Open your own mochi market",
+    "title": "Start as a creator",
+    "tagline": "Open your own mochi market",
     "subtitle": "Issue your mochi and let fans use it on items in your market. You can start in five minutes.",
     "sectionAccount": "Account",
     "sectionProfile": "Creator profile",
