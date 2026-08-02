@@ -1,16 +1,15 @@
 "use server";
 
-import { signIn, signOut } from "@/auth";
+import { signIn } from "@/auth";
 import { AuthError } from "next-auth";
 import {
   getEnabledOAuthProviders,
   type OAuthProvider,
 } from "@/lib/auth-providers";
 
-/** Sign the current user out and return to the home page. Used by the Nav. */
-export async function logoutAction() {
-  await signOut({ redirectTo: "/" });
-}
+// Logout deliberately is NOT a server action — it's a native form POST to
+// /api/logout, so the browser performs a real navigation and cancels the
+// current document's in-flight RSC fetches. See src/app/api/logout/route.ts.
 
 /**
  * Kick off an OAuth sign-in for a social provider. Only proceeds when the

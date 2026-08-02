@@ -86,6 +86,38 @@ export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
   callbacks: {
     ...authConfig.callbacks,
     async jwt({ token, user, trigger }) {
+      // ── Revocation gate ────────────────────────────────────────────────
+      // Sessions are stateless JWTs, so signing out can only ask the browser to
+      // drop the cookie — the token itself stays valid until it expires. That
+      // made logout unreliable in a way users actually hit: any request still
+      // carrying the old cookie (an in-flight RSC fetch, a queued prefetch) got
+      // a working session back, and Auth.js re-issues the cookie on *every*
+      // authenticated request, so the browser got silently signed back in.
+      // Reproduced 3/8 logouts. See DECISIONS 2026-08-02.
+      //
+      // Logout increments `tokenVersion`; a token carrying a stale version is
+      // rejected here. Returning null ends the session, so a straggling request
+      // is rejected instead of re-planting the cookie — and a token captured
+      // before logout stops working immediately instead of lasting until its
+      // 30-day expiry.
+      //
+      // A counter, not an issued-at cutoff: `iat` has second granularity, so a
+      // cutoff would either reject a token minted in the same second as the
+      // logout (breaking log-out-then-straight-back-in) or let stragglers
+      // through for up to a second (which is exactly the window being closed).
+      //
+      // Skipped on sign-in (`user` is set), where the token is being minted by
+      // this very call and `token.ver` is assigned below.
+      if (!user && token.backerId) {
+        const row = await prisma.backer.findUnique({
+          where: { id: token.backerId as string },
+          select: { tokenVersion: true },
+        });
+        // No row = the account is gone (e.g. a dev reseed). That already
+        // self-heals via /api/session-reset, so don't also kill it here.
+        if (row && token.ver !== row.tokenVersion) return null;
+      }
+
       // On sign-in, ensure a Backer exists (OAuth users are provisioned lazily).
       if (user?.email) {
         const email = user.email.toLowerCase();
@@ -99,6 +131,7 @@ export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
           },
         });
         token.backerId = backer.id;
+        token.ver = backer.tokenVersion; // revocation stamp, checked above
         token.role = backer.role;
         token.nickname = backer.nickname;
         token.onboarded = !!backer.onboardedAt;

@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { logoutAction } from "@/app/auth-actions";
 import { CreatorBadge } from "./CreatorBadge";
 
 export type MenuItem = { label: string; href: string };
@@ -101,7 +100,12 @@ export function UserMenu({
           </div>
 
           <div className="border-t border-line py-1.5">
-            <form action={logoutAction}>
+            {/* A native POST to a route handler, NOT a server action: a server
+                action logout finishes as a client-side transition, leaving the
+                current document's in-flight RSC fetches alive across the
+                sign-out — and one landing afterwards re-planted the session
+                cookie. A real navigation cancels them. See src/app/api/logout. */}
+            <form action="/api/logout" method="post">
               <button
                 type="submit"
                 role="menuitem"

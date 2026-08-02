@@ -6,6 +6,29 @@ Living status of the build. Update the checkboxes as work lands. See
 [`DECISIONS.md`](./DECISIONS.md) for why things are the way they are and
 [`DEPLOYMENT.md`](./DEPLOYMENT.md) for infra state.
 
+## Recent — 2026-08-02 (logout actually revokes the session)
+
+- [x] **Fixed a real auth bug**: logging out didn't end the session. Reproduced 3/8 logouts —
+  a request still carrying the old cookie (in-flight RSC fetch / prefetch) landing after the
+  sign-out got a valid session back, and Auth.js re-issues the session cookie on every
+  authenticated request, so the browser was silently signed back in. A token replayed after
+  logout also still worked, for its full 30-day life.
+- [x] **`Backer.tokenVersion` (new column)** — logout increments it, the `jwt` callback
+  rejects stale tokens. A counter rather than an issued-at cutoff, so there's no same-second
+  race between logging out and back in. Costs one indexed SELECT per authenticated request.
+  **Deploying this logs everyone out once** (existing tokens carry no version) — intended.
+- [x] **Logout is now a native POST to `/api/logout`**, not a server action, so the browser
+  does a real navigation and cancels the old document's in-flight fetches.
+- [x] Verified: replayed token now 307s / renders signed-out and the cookie the server still
+  writes is inert; **0 leaks in 14** login→immediate-logout→회원가입 cycles (0 login
+  failures); onboarding gate, `completeOnboarding` and `createStudio` (both
+  `unstable_update` paths) still work. `tsc`, `check:vocab`, `check:emoji` clean, eslint
+  unchanged, `pnpm test` 11/11, `pnpm build` clean. Dev DB restored after testing.
+- [ ] **Known, pre-existing, not fixed**: right after login a non-onboarded user lands on `/`
+  instead of `/onboarding`. The gate itself works (any later navigation redirects; curl shows
+  `/` → 307 → `/onboarding`) — it's the client transition straight after the login action.
+  Confirmed pre-existing by stashing the fix. See DECISIONS 2026-08-02.
+
 ## Recent — 2026-08-02 (Studio pill gate + creator-setup heading)
 
 - [x] **A fan clicking 스튜디오 now gets an explanation, not a form.** New `StudioPill`

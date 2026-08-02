@@ -183,6 +183,14 @@ model Backer {
   role            Role     @default(backer)
   passwordHash    String? // dev credentials login only
   createdAt       DateTime @default(now())
+  // Session revocation counter. Sessions are stateless JWTs, so signing out can
+  // only ask the browser to drop the cookie — the token itself stays valid until
+  // it expires, and any request still carrying it gets a working session back
+  // (Auth.js re-issues the cookie on every authenticated request). Logout
+  // increments this; a token carrying a stale version is rejected. An exact
+  // counter rather than an issued-at cutoff, so there's no same-second race
+  // between logging out and logging straight back in. See DECISIONS 2026-08-02.
+  tokenVersion    Int      @default(0)
 
   // Onboarding — every new user completes this once (creators use /creator/onboarding).
   // Middleware redirects a signed-in, non-onboarded fan to /onboarding.

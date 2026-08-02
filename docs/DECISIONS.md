@@ -3,6 +3,65 @@
 Why the project is the way it is. Newest first. Keep entries short: decision,
 rationale, and any constraint it creates.
 
+## 2026-08-02 — Logout actually revokes the session (`Backer.tokenVersion`)
+Reported as "after logging out then clicking 회원가입 I'm occasionally logged back in."
+Reproduced **3 of 8 logouts**, then pinned down deterministically. It was not cosmetic.
+
+**Root cause.** Sessions are stateless JWTs, so `signOut()` can only ask the browser to drop
+the cookie — it cannot invalidate the token. Three facts combine badly:
+1. **Auth.js re-issues the session cookie on every authenticated request.** Every
+   `GET /home?_rsc` came back with a fresh `Set-Cookie`. (`session.updateAge` does not turn
+   this off — tested; v5 re-issues on every `auth()` call regardless.)
+2. The logout response carries a `SET` *and* a `DELETE` for the cookie, in that order.
+   Correct on its own.
+3. **A token replayed after logout still worked.** Verified by hand: `/home` → 200, rendered
+   signed-in, and the server re-planted the cookie.
+
+So any request still carrying the old cookie — an in-flight RSC fetch, a queued prefetch —
+landing after the delete got a valid session back *and* re-wrote the cookie. Intermittent
+purely because it depends on whether such a request happens to be in flight: adding a settle
+wait before logging out gave 0/10 leaks, while the real timing (land on `/home`, click the
+avatar, click 로그아웃) leaked repeatedly. The deeper half is worse than the annoyance — a
+token captured before logout kept working until its 30-day expiry.
+
+**Fix, in two layers that cover each other's gap:**
+- **`Backer.tokenVersion` (new).** Logout increments it; the `jwt` callback rejects a token
+  whose `ver` no longer matches and returns null, ending the session. A straggler is now
+  rejected instead of being handed a session, and a captured token dies at logout.
+  - **A counter, not an issued-at cutoff.** `iat` has second granularity, so a
+    `sessionsValidAfter` timestamp would either reject a token minted in the same second as
+    the logout (breaking log-out-then-straight-back-in) or let stragglers through for a
+    whole second — which is exactly the window being closed. A counter has no timing window.
+  - Cost: one indexed `SELECT` per authenticated request. The `jwt` callback already ran on
+    every request; it just used to short-circuit for onboarded users. The **edge middleware
+    is unaffected** — it uses the Prisma-free `auth.config.ts` and only decodes the JWT, so
+    a revoked token could still satisfy the onboarding gate for one request. That gate is
+    routing, not authorization; every page-level `auth()` does the real check.
+  - **This logs everyone out once on deploy.** Existing tokens carry no `ver`, so they fail
+    the check. That's intended — it also revokes any session leaked by this bug.
+  - Logging out revokes **all** of that account's sessions, not just the current device.
+    There's no per-device session state to scope it to, and for a payments product the safe
+    direction is the right default.
+- **Logout is a native form POST to `/api/logout`, not a server action.** A server action
+  logout finishes as a client-side transition, leaving the current document and its in-flight
+  RSC fetches alive across the sign-out. A real navigation makes the browser tear the
+  document down and cancel them. Neither layer suffices alone: the navigation can't help a
+  request already on the wire, and the version bump can't stop a stale RSC *render* that was
+  already produced.
+
+**Verified**: replayed pre-logout token now 307s and renders signed-out, and the cookie the
+server still writes is inert (fails to authenticate on `/home` and `/explore`; the check
+re-runs against the DB every request, so it can't come back). 0 leaks in 14 login→immediate
+logout→회원가입 cycles, 0 login failures. Onboarding gate, `completeOnboarding`, and
+`createStudio` (both `unstable_update` paths) all still work.
+
+**Found while testing, NOT fixed (pre-existing — confirmed by stashing the fix and
+re-testing):** immediately after login, a non-onboarded user lands on `/` (the marketing
+landing) instead of being bounced to `/onboarding`. The middleware gate itself is fine —
+any subsequent navigation redirects correctly, and curl shows `/` → 307 → `/onboarding`. It's
+the client-side transition right after the login server action that doesn't honour it. Out of
+scope for this fix; worth a separate look.
+
 ## 2026-08-02 — The Studio pill asks before it enrolls; creator-setup heading un-inverted
 Two fixes to the same moment: a fan clicking 스튜디오.
 - **The pill used to drop a fan straight into `/creator/onboarding`** — a full setup form
