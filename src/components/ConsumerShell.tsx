@@ -39,7 +39,14 @@ export async function ConsumerShell({
   return (
     <>
       <Nav />
-      <div className="flex w-full items-start">
+      {/* min-h matches the rails' own `calc(100vh-64px)`. A *collapsed* rail is
+          a fixed-height strip (it has to be, or its divider line stops short —
+          DECISIONS 2026-07-31), while an expanded one is content-sized with a
+          max-height. Without a floor here, collapsing a rail on a short page
+          made it the tallest item in the row and shoved the footer down by up
+          to ~176px. With the floor, the row is never shorter than the strip, so
+          the footer sits in the same place whatever the rails are doing. */}
+      <div className="flex w-full items-start min-h-[calc(100vh-64px)]">
         {backerId && <Sidebar backerId={backerId} />}
         <div className="min-w-0 flex-1">{children}</div>
         {backerId && <RightRail backerId={backerId} />}

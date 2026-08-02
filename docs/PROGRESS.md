@@ -6,6 +6,20 @@ Living status of the build. Update the checkboxes as work lands. See
 [`DECISIONS.md`](./DECISIONS.md) for why things are the way they are and
 [`DEPLOYMENT.md`](./DEPLOYMENT.md) for infra state.
 
+## Recent — 2026-08-02 (collapsing a rail no longer moves the footer)
+
+- [x] **`min-h-[calc(100vh-64px)]` on the ConsumerShell row.** A collapsed rail is a
+  fixed-height strip (it must be, or its divider stops short — DECISIONS 2026-07-31) while an
+  expanded one is content-sized, so on short pages the collapsed strip became the tallest
+  item in the row and dragged the footer down: measured **176px** on `/ranking`, 22px on
+  `/notifications`, 0px on `/profile` (its content already exceeded the height, which is why
+  it looked intermittent).
+- [x] Verified: 0px footer movement across all four rail combinations on `/home`, `/explore`,
+  `/ranking`, `/notifications`, `/profile`, `/settings`, screenshots checked both states.
+  `/s/[handle]` still shifts 20px **upward** — genuine content reflow at a wider column, not
+  the bug. `tsc`, `check:vocab`, `check:emoji` clean, eslint unchanged, `pnpm test` 11/11,
+  `pnpm build` clean.
+
 ## Recent — 2026-08-02 (logout actually revokes the session)
 
 - [x] **Fixed a real auth bug**: logging out didn't end the session. Reproduced 3/8 logouts —

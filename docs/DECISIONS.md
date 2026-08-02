@@ -3,6 +3,33 @@
 Why the project is the way it is. Newest first. Keep entries short: decision,
 rationale, and any constraint it creates.
 
+## 2026-08-02 — The shell has a height floor, so collapsing a rail can't move the footer
+User: collapsing either rail pushes the footer down compared to having both open. Correct,
+and measurable — on `/ranking` the footer moved **176px**, on `/notifications` 22px, on
+`/profile` 0px.
+- **Cause**: the two rail states are sized differently on purpose. A *collapsed* rail is
+  `h-[calc(100vh-64px)]` — a fixed height it needs, or its divider line stops short (the
+  2026-07-31 fix). An *expanded* rail is `max-h-[calc(100vh-64px)]`, i.e. content-sized. With
+  `items-start` on the shell row, the row is as tall as its tallest child, so on any page
+  whose content is shorter than the viewport the collapsed strip became the tallest thing in
+  the row and dragged the footer down with it. `/profile` showed 0px precisely because its
+  content already exceeds that height — which is why it looked intermittent.
+- **Fix**: `min-h-[calc(100vh-64px)]` on the shell row, matching the strip's own height. The
+  row is never shorter than a collapsed rail, so the rails can't be the tallest child and the
+  footer's position depends only on content. Measured 0px movement across all four rail
+  combinations on `/home`, `/explore`, `/ranking`, `/notifications`, `/profile`, `/settings`.
+- **Chose the floor over shrinking the collapsed strip** — dropping the strip's fixed height
+  would move the footer back but reintroduce the stop-short divider the 2026-07-31 entry
+  fixed. The floor satisfies both, at the cost of short pages now putting the footer at the
+  bottom of the viewport instead of floating mid-screen (the ordinary sticky-footer look).
+- **`/s/[handle]` still moves 20px and that's correct, not a miss**: collapsing a rail widens
+  the middle column, so its content reflows into *less* height — the footer moves **up**, the
+  opposite direction, and it's genuine reflow rather than chrome forcing the row.
+- **Left alone**: an *expanded* rail's divider still ends where its content ends, so the two
+  rails' lines are different lengths when open. Pre-existing, cosmetic, and a different thing
+  from what was reported; fixing it means giving expanded rails a fixed height too, which
+  changes their scroll behaviour.
+
 ## 2026-08-02 — Logout actually revokes the session (`Backer.tokenVersion`)
 Reported as "after logging out then clicking 회원가입 I'm occasionally logged back in."
 Reproduced **3 of 8 logouts**, then pinned down deterministically. It was not cosmetic.
