@@ -23,6 +23,23 @@ const { auth } = NextAuth(authConfig);
 const STUDIO_PREFIX = "studio.";
 
 /**
+ * The production apex, and the host it actually canonicalizes to.
+ *
+ * Vercel serves the consumer app on **www** and 308s the bare apex to it, so
+ * stripping `studio.` off the request host lands on a redirect rather than the
+ * real page: `studio.themotoo.com/explore` → `themotoo.com/explore` (307) →
+ * `www.themotoo.com/explore` (308). Sending cross-host hops straight to the
+ * canonical host makes that one redirect instead of two — it's on every click
+ * of the Studio nav's motoo pill.
+ *
+ * Hardcoded, like `splitEnabled` below: the split only ever activates on this
+ * domain (or localhost), so there's nothing to derive it from. Everything else
+ * — dev, previews — keeps the plain host-derived value.
+ */
+const PROD_APEX = "themotoo.com";
+const PROD_CANONICAL_APEX = "www.themotoo.com";
+
+/**
  * Canonical Studio pages served on the subdomain (root-relative). Extend this
  * when new routes are added under src/app/studio. Everything else on the studio
  * host is treated as a consumer page and redirected to the apex.
@@ -62,8 +79,13 @@ export default auth((req) => {
   const canSplit = splitEnabled(host);
   const onStudioHost = host.startsWith(STUDIO_PREFIX);
 
-  // Sibling hosts (port preserved for localhost dev).
-  const apexHost = host.replace(/^studio\./, "");
+  // Sibling hosts (port preserved for localhost dev). The apex is normalized to
+  // the canonical host so a studio→apex hop is one redirect, not two (see
+  // PROD_CANONICAL_APEX). In dev this resolves to bare `localhost:PORT` and is
+  // left alone — there's no www there.
+  const strippedApex = host.replace(/^studio\./, "");
+  const apexHost =
+    strippedApex === PROD_APEX ? PROD_CANONICAL_APEX : strippedApex;
   const studioHost = STUDIO_PREFIX + host.replace(/^www\./, "");
   const proto =
     req.headers.get("x-forwarded-proto") ??
