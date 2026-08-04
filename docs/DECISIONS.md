@@ -3,6 +3,28 @@
 Why the project is the way it is. Newest first. Keep entries short: decision,
 rationale, and any constraint it creates.
 
+## 2026-08-03 — Cross-host hops target the canonical host, not the bare apex
+Prompted by "there are consumer pages under the studio domain — aren't these duplicates?"
+- **They aren't**, and that was checked against production rather than argued from the code:
+  `studio.themotoo.com/{explore,home,profile,login,s/[handle]}` all 307 to the apex. The
+  duplicates are visible only in dev.
+- **The dev carve-out (`isProd ? crossHost(...) : NextResponse.next()`) is still required.**
+  Its comment predates `crossHost`, which hand-builds an absolute `Location` precisely to
+  dodge Next's dev-server relativization — so it was worth re-testing whether the carve-out
+  had become vestigial. It hasn't: removing it produced `Location: /explore`, relative,
+  which the browser resolves against `studio.localhost` into an infinite loop. `crossHost`'s
+  trick works toward the *studio* host (a different origin from the dev binding) but cannot
+  work toward the apex, because the apex **is** the dev binding. Reverted.
+- **What the question did surface**: Vercel serves the app on **www** and 308s the bare apex
+  to it, so `host.replace(/^studio\./, "")` landed on a redirect, making every cross-host hop
+  two redirects — on every click of the Studio nav's motoo pill. `src/proxy.ts` now maps the
+  stripped apex to `PROD_CANONICAL_APEX`. Measured after deploy: hops 2 → 1.
+- **The domain is hardcoded**, matching `splitEnabled()` immediately below it. The split only
+  ever activates on this domain or localhost, so there is nothing to derive a canonical host
+  from; dev (`studio.localhost` → `localhost:PORT`) and Vercel previews (split disabled
+  entirely) keep the plain host-derived value. Host math was verified for all six host shapes
+  before shipping, since this branch only executes in production.
+
 ## 2026-08-02 — Auth transitions navigate for real; a server-action redirect skipped middleware
 The open item from the logout investigation: right after login, a **non-onboarded** user
 landed on `/` (the marketing landing) instead of `/onboarding`. Confirmed pre-existing by
@@ -1021,7 +1043,10 @@ handoff is shelved (schema/components kept, not featured).
 
 ## 2026-07-09 — Mochi supply = "capped as a soft goal"
 > Evolved by the **2026-07-15 ratcheting price tiers** entry above — the soft goal is now
-> per-tier availability and the price ratchets up. The "not a security" stance below still holds.
+> per-tier availability and the price ratchets up. **"unspent-refundable" below is also
+> superseded**: mochi is non-refundable as of the 2026-08-01 entry, legally-mandated
+> exceptions only. The "not a security" stance below still holds (more so, in fact — there
+> is now no cash-out path at all).
 
 A creator sets quantity × price as a **target** (e.g. 100 × ₩200 = ₩20,000). Mochi is
 prepaid credit spendable only in that creator's marketplace. **Non-transferable,

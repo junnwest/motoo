@@ -40,7 +40,12 @@ creator console (the `/studio` route group, served at the subdomain root). The s
 host-based routing in `src/proxy.ts`; the session cookie is shared across `.themotoo.com`
 (`AUTH_COOKIE_DOMAIN`, prod only) so one login works on both. Auth/onboarding/become-creator
 all live on the apex. **Adding a Studio route?** Add its path to the `isStudioPage` allowlist
-in `src/proxy.ts` or it'll bounce to the apex. Dev: `studio.localhost:PORT`. See DECISIONS 2026-07-24.
+in `src/proxy.ts` or it'll bounce to the apex. Consumer paths on the studio host 307 to
+`PROD_CANONICAL_APEX` (**www**, not the bare apex — that would add a second redirect).
+**In dev they're served inline instead**, and must stay that way: the dev apex is bare
+`localhost:PORT`, which is Next's own dev binding, so a redirect there gets flattened to a
+relative `Location` and loops. Dev: `studio.localhost:PORT`. See DECISIONS 2026-07-24 and
+2026-08-03.
 
 ## Read these first (resume point)
 - **[docs/PROGRESS.md](docs/PROGRESS.md)** — living status: what's done, in progress, next. **Start here.**

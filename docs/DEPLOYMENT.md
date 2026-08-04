@@ -20,12 +20,13 @@ preview deploys per PR.
 | Prisma `directUrl` + `vercel.json` (icn1) | ✅ done |
 | Supabase project (Seoul, Data API off) | ✅ created — ref `nrfhwhefabahsfzuyxqu` |
 | Push code to GitHub `junnwest/motoo` | ✅ done (main, via HTTPS remote) |
-| Schema push + seed to Supabase | ✅ done 2026-07-19 (via `.env.production.local` DIRECT_URL) |
+| Schema push + seed to Supabase | ✅ done 2026-07-19 (via `.env.production.local` DIRECT_URL); re-pushed 2026-08-01/02 for `MarketplaceItem.coverImage` + `Backer.tokenVersion` — see "Schema changes" below, it's a **manual pre-deploy step** |
 | Vercel project + env vars + deploy | ✅ done 2026-07-20 (project `motoo`, auto-deploy on `main`) |
 | Custom domain `themotoo.com` | ✅ done — Squarespace DNS → Vercel (A `76.76.21.21` + CNAME `www`), Let's Encrypt TLS; **www is primary**, apex 308-redirects |
 | Studio subdomain `studio.themotoo.com` | ✅ done 2026-07-24 — Squarespace `studio` CNAME → `cname.vercel-dns.com`, added on the same Vercel project; serves the creator console (host-split in `src/proxy.ts`) |
 | Production OAuth callbacks | ✅ Google + Naver added for `themotoo.com` (studio host redirects login to the apex — **no** studio callbacks) |
 | Verify deployed site | ✅ `/explore` + `/s/[handle]` render 200 against Supabase, no console errors |
+| Cross-host redirects | ✅ 2026-08-03 — `studio.themotoo.com/*` consumer paths 307 straight to **www** (one hop; previously two via the bare apex) |
 
 > **Note (Hobby plan):** function-region selection via `vercel.json` (`icn1`) is a Pro
 > feature — on Hobby it's likely ignored, so functions run in Vercel's default US region
@@ -84,8 +85,27 @@ git push origin main
 3. Deploy. Region is pinned to `icn1` via `vercel.json`.
 4. After the first deploy, every push to `main` auto-deploys; PRs get preview URLs.
 
-## Schema changes after deploy
+## Schema changes — push the DB **before** the code
 
-For the Phase-2 pivot the schema will change. For this demo DB, re-running
-`prisma db push` against the direct connection is fine (data is reseedable). If we
-harden later, switch to `prisma migrate deploy` in the Vercel build.
+**The Vercel build does not run `prisma db push`.** It only runs `prisma generate`
+(via `postinstall`), so a deploy carrying a new column ships code that queries a
+column the database doesn't have — Prisma throws and every page touching that model
+500s. Apply the schema first, then push to `main`:
+
+```powershell
+# from the repo root, BEFORE `git push`
+npx -y dotenv-cli -e .env.production.local -- npx prisma db push --skip-generate
+# expect: "Your database is now in sync with your Prisma schema."
+```
+
+`dotenv-cli` scopes the production credentials to that one child process. If you set
+`DATABASE_URL` in your shell by hand instead, **close the window afterwards** —
+`pnpm db:seed` opens with `deleteMany()` and would wipe production from that shell.
+
+Additive, nullable columns are safe (that's all we've shipped so far). Without
+`--accept-data-loss`, Prisma refuses anything destructive rather than guessing. Data
+here is reseedable; if that stops being true, switch to `prisma migrate deploy` in the
+Vercel build so this stops being a manual step.
+
+Applied this way so far: `MarketplaceItem.coverImage` and `Backer.tokenVersion`
+(2026-08-01/02).

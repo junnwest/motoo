@@ -1,10 +1,29 @@
 # motoo — Progress Tracker
 
-_Last updated: 2026-08-01_
+_Last updated: 2026-08-03_
 
 Living status of the build. Update the checkboxes as work lands. See
 [`DECISIONS.md`](./DECISIONS.md) for why things are the way they are and
 [`DEPLOYMENT.md`](./DEPLOYMENT.md) for infra state.
+
+## Recent — 2026-08-03 (studio→apex hops go straight to the canonical host)
+
+- [x] **Cross-host redirects are one hop, not two.** Vercel serves the consumer app on **www**
+  and 308s the bare apex to it, so stripping `studio.` off the request host landed on a
+  redirect rather than the page: `studio.themotoo.com/explore` → `themotoo.com/explore`
+  (307) → `www.themotoo.com/explore` (308). `src/proxy.ts` now normalizes the apex to
+  `PROD_CANONICAL_APEX`. Verified live: **hops=1** on every consumer path.
+- [x] **Investigated first, and it was a non-issue**: consumer pages *appear* to exist on the
+  studio host in dev (`studio.localhost:3001/explore`). Production has always 307'd them to
+  the apex — checked live for `/explore`, `/home`, `/profile`, `/login`, `/s/[handle]`. The
+  dev behaviour is the documented carve-out, and it's still required: removing it and
+  re-testing produced a relative `Location: /explore`, i.e. an infinite same-host loop,
+  because Next's dev server flattens any absolute Location matching its own binding.
+  `isStudioPage`'s allowlist also still matches the built Studio routes exactly.
+- [x] Verified: host math checked for all six host shapes (prod apex/www/studio, dev
+  apex/studio, Vercel preview), dev carve-out re-confirmed loop-free, `tsc`, `check:vocab`,
+  `check:emoji` clean, eslint unchanged, `pnpm test` 11/11, `pnpm build` clean, and the
+  production chain re-measured after deploy.
 
 ## Recent — 2026-08-02 (login/signup navigate for real, so the onboarding gate runs)
 
@@ -601,7 +620,9 @@ See [`DEPLOYMENT.md`](./DEPLOYMENT.md) for the exact steps and env-var list.
 
 The product for the demo: a creator issues their own mochi, users buy it and spend
 it in that creator's marketplace. Mochi = prepaid marketplace credit, **capped as a
-soft goal**, non-transferable, unspent-refundable, no resale/return (see DECISIONS).
+soft goal**, non-transferable, **non-refundable** (legally-mandated exceptions only, as of
+2026-08-01 — this section originally said "unspent-refundable"), no resale/return (see
+DECISIONS).
 
 Verified: `pnpm db:push` + `db:seed` succeed; all Phase 2 routes render 200 with real
 data; the buy → redeem → cancel-refund invariants hold end-to-end against Postgres
