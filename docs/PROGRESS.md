@@ -6,6 +6,50 @@ Living status of the build. Update the checkboxes as work lands. See
 [`DECISIONS.md`](./DECISIONS.md) for why things are the way they are and
 [`DEPLOYMENT.md`](./DEPLOYMENT.md) for infra state.
 
+## Open items — read this first when resuming
+
+Nothing is half-finished; `main` is green and deployed. These are the known gaps, each
+deliberate. Ordered by what would hurt most if ignored.
+
+**Needs a real answer before money moves**
+- [ ] **The 환불·청약철회 policy page is still a placeholder** (`/terms`, `/privacy` too). User-
+  facing copy now says 구매한 모찌는 환불되지 않아요 with "legally-mandated exceptions
+  only" — but the exceptions are nowhere written down. 전자상거래법 §17 gives consumers a
+  withdrawal right on unused prepaid content that a flat no-refunds line sits awkwardly
+  against, and 선불전자지급수단 rules add their own. **This is the one open item that is a
+  liability rather than a nicety.** See DECISIONS 2026-08-01.
+- [ ] Real PG (Toss/NICE/PortOne), real 본인인증, Kakao login — all blocked on 사업자등록.
+  Mocks stand in behind `PaymentProvider` / `VerificationProvider`.
+
+**Known rough edges, consciously left**
+- [ ] **Expanded rails' dividers end where their content ends**, so the left and right lines
+  are different lengths when open (collapsed ones run full height). Fixing it means giving
+  expanded rails a fixed height, which changes their scroll behaviour. DECISIONS 2026-08-02.
+- [ ] **The edge middleware doesn't check `tokenVersion`** — it's Prisma-free by design, so a
+  revoked token can still satisfy the *onboarding routing* gate for one request. Every
+  page-level `auth()` does the real check, so this is routing, not authorization.
+- [ ] `SignupModal` predates `src/components/ui/Modal.tsx` and still carries its own copy of
+  the portal / Escape / scroll-lock logic. Works; just duplicated.
+- [ ] Legacy `/s/[handle]/back` flow is still routable and orphaned (linked from nowhere),
+  and its copy references retired concepts. `src/lib/grades.ts` likewise has zero imports.
+- [ ] **2 pre-existing eslint errors**, constant all session — treat as the baseline, not as
+  something you broke: `src/app/onboarding/OnboardingForm.tsx:37` (set-state-in-effect; the
+  same rule `usePersistedCollapse` and `FollowButton` were rewritten to satisfy) and
+  `design-handoff/image-slot.js:1` (parse error in a non-source asset).
+
+**Maintenance**
+- [ ] **Prisma 7 will drop `package.json#prisma`** — every `db push` warns about it. We only
+  keep `{"seed": "tsx prisma/seed.ts"}` there, so migrating to `prisma.config.ts` is small.
+- [ ] **Schema pushes to prod are manual** and easy to forget — the Vercel build runs
+  `prisma generate` but not `db push`. Automating via `prisma migrate deploy` in the build
+  would remove the footgun. See DEPLOYMENT → "Schema changes".
+- [ ] Vercel Hobby likely ignores `vercel.json`'s `icn1`, so functions run in the US while
+  the DB is in Seoul (cross-Pacific latency per query). Revisit on Pro.
+
+**Design tier 2/3** (unchanged, see "Current focus" below): the landing repeats one section
+template five times, Latin eyebrows (`DISCOVER`, `HOW MOCHI WORKS`), English
+`STRONG`/`EMERGING` badges, unstyled native `<select>`s on explore, and 퍼크 still on explore.
+
 ## Recent — 2026-08-03 (studio→apex hops go straight to the canonical host)
 
 - [x] **Cross-host redirects are one hop, not two.** Vercel serves the consumer app on **www**
@@ -704,10 +748,11 @@ Until then, `PAYMENT_PROVIDER=mock` grants mochi without moving real money.
 
 ---
 
-## Frontend polish 🎨 (planned)
+## Frontend polish 🎨 (ongoing, owner-driven)
 
-- [ ] Fix copy/phrasing issues (list to be provided)
-- [ ] Fix design issues (list to be provided)
+Kenneth supplies these as numbered lists of fixes; several rounds have landed (see the
+2026-08-01 → 2026-08-03 Recent entries). What's left is consolidated in **"Open items"** at
+the top of this file — don't track it here as well, it just drifts.
 
 ---
 
