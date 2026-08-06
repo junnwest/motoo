@@ -1,7 +1,71 @@
 # motoo — Decision Log
 
 Why the project is the way it is. Newest first. Keep entries short: decision,
-rationale, and any constraint it creates.
+rationale, and any constraint it creates. **Adding an entry? Add its row to the index too.**
+
+## Index
+
+Every decision, newest first. **Read the one entry you need, not this file** — it is ~87KB.
+To pull a single entry, grep its heading with trailing context, e.g.
+`rg -A 40 '^## 2026-08-02 — Logout' docs/DECISIONS.md`.
+
+| Date | Decision |
+| --- | --- |
+| 2026-08-03 | Cross-host hops target the canonical host, not the bare apex |
+| 2026-08-02 | Auth transitions navigate for real; a server-action redirect skipped middleware |
+| 2026-08-02 | The shell has a height floor, so collapsing a rail can't move the footer |
+| 2026-08-02 | Logout actually revokes the session (`Backer.tokenVersion`) |
+| 2026-08-02 | The Studio pill asks before it enrolls; creator-setup heading un-inverted |
+| 2026-08-01 | Creator status is shown, not inferred (`크리에이터 등록 완료`) |
+| 2026-08-01 | Mochi is non-refundable; user-uploaded images; creators land in the Studio |
+| 2026-08-01 | Fan signup no longer inherits creator intent; 백커 retired for 팬 |
+| 2026-08-01 | Studio nav gets its own "motoo" pill back to the consumer app |
+| 2026-08-01 | Trust Report removed from the website; not part of 1.0.0 |
+| 2026-08-01 | Buy Mochi moves to its own page; Backer Wall becomes a real ranking |
+| 2026-07-31 | One content width and heading style for every ConsumerShell page |
+| 2026-07-31 | Collapsed rail's border line was stopping short, right below the arrow |
+| 2026-07-31 | Both rails are foldable, persisted, same mechanic mirrored |
+| 2026-07-31 | `bg-panel` is literally the same color as the page background |
+| 2026-07-31 | `IconCompass` was genuinely lopsided; Sidebar nav gets an active state |
+| 2026-07-31 | RightRail: two-up grid, smaller thumbnails, instant Follow |
+| 2026-07-31 | Nav/sidebar icons enlarged; `IconStudio` redrawn (was broken) |
+| 2026-07-31 | Rails pinned to the true viewport edge; rail is now universal, no exception |
+| 2026-07-31 | Three independent columns; only the middle changes per page |
+| 2026-07-31 | Sections are bare, not boxed (Spotify-referenced, corrected) |
+| 2026-07-30 | Full nav restructure: persistent Sidebar, Ranking, Profile, Settings |
+| 2026-07-30 | Notifications + Follow: the home rail merges paid and free support |
+| 2026-07-29 | The home's left rail is a *content* rail, and the fix was mostly data |
+| 2026-07-29 | The app home is `/home`; `/` stays the marketing landing |
+| 2026-07-29 | No emoji in the UI, anywhere (build-gated) |
+| 2026-07-29 | Creator cover art is generated, not uploaded |
+| 2026-07-24 | Unified navbar + avatar dropdown (one bar everywhere) |
+| 2026-07-24 | Signup role modal; login stays unified |
+| 2026-07-24 | Landing funnels to signup, not browse |
+| 2026-07-24 | Design language: line icons over emoji, circles over floating mochis |
+| 2026-07-24 | Studio on its own subdomain (studio.themotoo.com) |
+| 2026-07-20 | Studio settings entry lives in content, not the navbar |
+| 2026-07-20 | Section guidance as info tooltips, not inline subtitles |
+| 2026-07-20 | Single-view Studio dashboard (no sidebar) |
+| 2026-07-19 | Marketplace item fulfillment modes (instant vs request) |
+| 2026-07-19 | Item thumbnails are curated + code-defined, not uploads |
+| 2026-07-19 | Suggested items keyed on creator type |
+| 2026-07-14 | Mochi issuance: ratcheting price tiers (prepaid credit, not a security) |
+| 2026-07-15 | Creator taxonomy: type (primary) → category (dependent) |
+| 2026-07-12 | Additive creator model (user base + Studio) |
+| 2026-07-11 | Role-aware home; marketing demoted, not deleted |
+| 2026-07-11 | Fan onboarding + identity verification as an abstraction |
+| 2026-07-11 | Auth split for edge middleware + self-healing sessions |
+| 2026-07-10 | Phase 3 follow-ups: order history, self-signup, tests |
+| 2026-07-10 | Phase 2 build: retire backing, per-creator holdings, creator auth |
+| 2026-07-09 | Pivot to the mochi-marketplace model |
+| 2026-07-09 | Mochi supply = "capped as a soft goal" |
+| 2026-07-09 | Marketplace items are guidelines; fulfillment off-platform in v1 |
+| 2026-07-09 | Database: Supabase Pro (Seoul), not Neon |
+| 2026-07-09 | Hosting: Vercel; pipeline-first sequencing |
+| 2026-07-08 | Two separate landing pages |
+| 2026-07-08 | `FoundingMembership` table for the founding-number invariant |
+| 2026-07-08 | Prisma pinned to v6 (not v7) |
+| 2026-07-08 | Korean-first, i18n-ready; integer KRW; mock PG |
 
 ## 2026-08-03 — Cross-host hops target the canonical host, not the bare apex
 Prompted by "there are consumer pages under the studio domain — aren't these duplicates?"

@@ -15,8 +15,9 @@ spec and [`design-handoff/`](./design-handoff/) for the visual system.
 
 ## 📍 Where things stand
 
-- **[docs/PROGRESS.md](./docs/PROGRESS.md)** — living status tracker (what's done, in progress, next)
-- **[docs/DECISIONS.md](./docs/DECISIONS.md)** — decision log with rationale
+- **[docs/PROGRESS.md](./docs/PROGRESS.md)** — open items, current focus, what's blocked (short by design)
+- **[docs/DECISIONS.md](./docs/DECISIONS.md)** — decision log with rationale (indexed; read one entry, not the file)
+- **[docs/CHANGELOG.md](./docs/CHANGELOG.md)** — what shipped, newest first
 - **[docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md)** — deploy runbook + infra state (Vercel + Supabase Seoul)
 
 **Live at [themotoo.com](https://themotoo.com)** (consumer app) + **[studio.themotoo.com](https://studio.themotoo.com)** (creator console) — same Vercel project + codebase, host-split in `src/proxy.ts` with a session cookie shared across `.themotoo.com`. Supabase Seoul; auto-deploys on push to `main`.

@@ -48,9 +48,13 @@ relative `Location` and loops. Dev: `studio.localhost:PORT`. See DECISIONS 2026-
 2026-08-03.
 
 ## Read these first (resume point)
-- **[docs/PROGRESS.md](docs/PROGRESS.md)** — living status: what's done, in progress, next. **Start here** — its
-  "Open items" section at the top is the full list of known gaps, each deliberate.
-- **[docs/DECISIONS.md](docs/DECISIONS.md)** — why things are the way they are.
+- **[docs/PROGRESS.md](docs/PROGRESS.md)** — **start here, read all of it.** ~8KB by design: open items,
+  current focus, and what's blocked. Nothing historical.
+- **[docs/DECISIONS.md](docs/DECISIONS.md)** — why things are the way they are. **Read the index at the top,
+  then grep the one entry you need** — the file is ~90KB and reading it whole wastes a
+  quarter of the context window.
+- **[docs/CHANGELOG.md](docs/CHANGELOG.md)** — what shipped, newest first. **Not a resume point**; open it
+  only to answer a specific "when/how did X land?".
 - **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)** — Vercel + Supabase (Seoul) runbook + state.
 - [motoo-product-description.md](motoo-product-description.md) — original spec · [design-handoff/](design-handoff/) — visual system.
 
