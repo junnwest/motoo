@@ -1,6 +1,9 @@
+import { getTranslations } from "next-intl/server";
 import { Nav } from "@/components/Nav";
 import { Sidebar } from "@/components/Sidebar";
 import { RightRail } from "@/components/RightRail";
+import { MobileTabBar } from "@/components/MobileTabBar";
+import { getUnreadCount } from "@/lib/notify";
 import { auth } from "@/auth";
 
 /**
@@ -35,6 +38,11 @@ export async function ConsumerShell({
 }) {
   const session = await auth();
   const backerId = session?.user?.id;
+  const [t, tmp, unreadCount] = await Promise.all([
+    getTranslations("nav"),
+    getTranslations("myProfile"),
+    backerId ? getUnreadCount(backerId) : 0,
+  ]);
 
   return (
     <>
@@ -48,9 +56,28 @@ export async function ConsumerShell({
           the footer sits in the same place whatever the rails are doing. */}
       <div className="flex w-full items-start min-h-[calc(100vh-64px)]">
         {backerId && <Sidebar backerId={backerId} />}
-        <div className="min-w-0 flex-1">{children}</div>
+        {/* The `main` landmark and the skip link's target for every consumer
+            page, declared once here instead of per page (several pages had no
+            landmark at all, and the ones that did nested their own <main>).
+            pb below `lg` clears the fixed MobileTabBar, which would otherwise
+            sit on top of the last ~56px of every page; zero from `lg` up,
+            where the bar is hidden and the Sidebar takes over. */}
+        <main id="main" className="min-w-0 flex-1 pb-[72px] lg:pb-0">
+          {children}
+        </main>
         {backerId && <RightRail backerId={backerId} />}
       </div>
+      {backerId && (
+        <MobileTabBar
+          unreadCount={unreadCount}
+          labels={{
+            home: t("home"),
+            explore: t("explore"),
+            notifications: t("notifications"),
+            profile: tmp("title"),
+          }}
+        />
+      )}
     </>
   );
 }

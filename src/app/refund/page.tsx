@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
+import { SUPPORT_EMAIL, supportMailto } from "@/lib/support";
 
 /**
  * The 환불·청약철회 policy. Ordered as a reader hits the questions: who is
@@ -27,7 +28,7 @@ export default async function RefundPage() {
   return (
     <>
       <Nav />
-      <section className="mx-auto w-full max-w-[720px] flex-1 px-6 py-16">
+      <main id="main" className="mx-auto w-full max-w-[720px] flex-1 px-6 py-16">
         <h1 className="break-keep text-[28px] font-extrabold tracking-[-0.02em] text-ink">
           {t("title")}
         </h1>
@@ -52,6 +53,22 @@ export default async function RefundPage() {
                   {t(`${s.id}.note`)}
                 </p>
               ) : null}
+              {/* The policy body names 고객센터; this is the address that
+                  actually is it. Kept as its own line rather than interpolated
+                  into the body so the counsel-sensitive copy stays untouched,
+                  and so it simply disappears if SUPPORT_EMAIL is ever unset
+                  instead of rendering "고객센터()로 신청해 주세요". */}
+              {s.id === "howTo" && SUPPORT_EMAIL ? (
+                <p className="mt-3 text-[15px] leading-[1.7] text-body">
+                  {t("howTo.contact")}{" "}
+                  <a
+                    href={supportMailto()!}
+                    className="font-semibold text-coral-deep underline"
+                  >
+                    {SUPPORT_EMAIL}
+                  </a>
+                </p>
+              ) : null}
             </div>
           ))}
         </div>
@@ -62,7 +79,7 @@ export default async function RefundPage() {
         >
           ← {t("back")}
         </Link>
-      </section>
+      </main>
       <Footer variant="fan" />
     </>
   );

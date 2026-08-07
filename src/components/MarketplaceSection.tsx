@@ -6,6 +6,8 @@ import { useTranslations } from "next-intl";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { Mochi } from "@/components/Mochi";
 import { ItemThumbnail } from "@/components/ItemThumbnail";
+import { Textarea } from "@/components/ui/Field";
+import { InlineMessage } from "@/components/ui/InlineMessage";
 import { formatCount } from "@/lib/format";
 import { redeemItemAction } from "@/app/s/[handle]/marketplace-actions";
 
@@ -85,6 +87,7 @@ function ItemCard({
   item: MarketItem;
 }) {
   const t = useTranslations("marketplace");
+  const tc = useTranslations("common");
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [open, setOpen] = useState(false);
@@ -200,29 +203,34 @@ function ItemCard({
           </ButtonLink>
         ) : open ? (
           <div>
-            <textarea
+            <Textarea
               value={note}
               disabled={pending}
               onChange={(e) => setNote(e.target.value)}
               placeholder={t("notePlaceholder")}
+              aria-label={t("notePlaceholder")}
               rows={3}
-              className="w-full resize-none rounded-[12px] border border-line-3 bg-white px-4 py-3 text-[15px] outline-none focus:border-coral/60"
             />
             <div className="mt-2 flex gap-2">
+              {/* Was a bare ✕ with no accessible name — screen readers
+                  announced "✕, button" (WCAG 4.1.2). The glyph stays; the name
+                  is now carried by aria-label. */}
               <Button
                 type="button"
                 variant="ghost"
                 className="flex-none"
+                aria-label={tc("close")}
                 disabled={pending}
                 onClick={() => setOpen(false)}
               >
-                ✕
+                <span aria-hidden="true">✕</span>
               </Button>
               <Button
                 type="button"
                 variant="primary"
                 className="w-full"
-                disabled={pending || soldOut || needMore}
+                loading={pending}
+                disabled={soldOut || needMore}
                 onClick={confirm}
               >
                 {pending ? t("redeeming") : t("redeem")}
@@ -255,9 +263,9 @@ function ItemCard({
           </p>
         )}
         {error && (
-          <p className="mt-2 text-[14px] font-semibold text-live">
+          <InlineMessage tone="error" className="mt-2">
             {t(`errors.${error}`)}
-          </p>
+          </InlineMessage>
         )}
       </div>
       </div>

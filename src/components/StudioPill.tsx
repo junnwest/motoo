@@ -6,8 +6,10 @@ import { Modal } from "@/components/ui/Modal";
 import { ButtonLink, Button } from "@/components/ui/Button";
 import { IconStudio } from "@/components/ui/Icons";
 
+// whitespace-nowrap: at 375px the header ran out of room and "스튜디오" wrapped
+// mid-word inside the pill, breaking it across two lines.
 const PILL_CLASS =
-  "ml-1 flex items-center gap-2 rounded-full border border-line-3 bg-white px-4 py-2.5 text-[14px] font-bold text-ink transition-colors hover:border-coral hover:text-coral-deep sm:ml-2";
+  "ml-1 flex items-center gap-2 whitespace-nowrap rounded-full border border-line-3 bg-white px-3 py-2.5 text-[14px] font-bold text-ink transition-colors hover:border-coral hover:text-coral-deep sm:ml-2 sm:px-4";
 
 /**
  * The nav's 스튜디오 pill.

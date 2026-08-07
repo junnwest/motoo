@@ -13,7 +13,7 @@ export default async function LoginPage() {
   return (
     <>
       <Nav />
-      <section className="mx-auto flex w-full max-w-[420px] flex-1 flex-col justify-center px-6 py-20">
+      <main id="main" className="mx-auto flex w-full max-w-[420px] flex-1 flex-col justify-center px-6 py-20">
         <div className="rounded-[20px] border border-line-2 bg-card p-8 shadow-[0_10px_40px_rgba(0,0,0,.04)]">
           <div className="mb-6 flex flex-col items-center text-center">
             <Mochi width={40} height={33} float />
@@ -38,7 +38,7 @@ export default async function LoginPage() {
             size="md"
           />
         </div>
-      </section>
+      </main>
       <Footer variant="fan" />
     </>
   );

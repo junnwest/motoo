@@ -31,7 +31,14 @@ function SummaryRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-function Section({
+/**
+ * Studio-local section shell. Named distinctly from components/ui/Section,
+ * which it is NOT a variant of: that one is a bare content-shelf heading for
+ * consumer pages; this is a console row with a top divider, a subtitle, an
+ * action slot and an optional fill. Two components called Section with
+ * different contracts was a trap for whoever imported the wrong one.
+ */
+function StudioSection({
   id,
   title,
   subtitle,
@@ -233,7 +240,7 @@ export default async function CreatorDashboardHome() {
           </div>
         </section>
 
-        <Section
+        <StudioSection
           id="mochi"
           title={t("mochi.title")}
           divider={false}
@@ -251,13 +258,13 @@ export default async function CreatorDashboardHome() {
           }
         >
           <MochiSettingsForm issuance={issuance} />
-        </Section>
+        </StudioSection>
       </div>
 
       {/* Row 2 — orders + market items. Market items get the wider column
           (more room for suggestions + item cards) than the orders table. */}
       <div className="grid grid-cols-1 gap-10 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)] xl:items-start">
-        <Section
+        <StudioSection
           id="orders"
           title={t("orders.title")}
           action={
@@ -268,7 +275,7 @@ export default async function CreatorDashboardHome() {
           }
         >
           <OrdersTable orders={orders} />
-        </Section>
+        </StudioSection>
 
         {/* ItemsManager renders its own section header so the "새 아이템" button
             can sit at the header's right (it owns the create-form state). */}

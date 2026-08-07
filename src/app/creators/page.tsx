@@ -24,7 +24,7 @@ export default async function CreatorLandingPage() {
       <Nav />
 
       {/* Hero */}
-      <section className="relative overflow-hidden px-6 py-16 sm:px-14 sm:py-[74px]">
+      <section id="main" className="relative overflow-hidden px-6 py-16 sm:px-14 sm:py-[74px]">
         <div className="pointer-events-none absolute -right-20 -top-28 h-[620px] w-[620px] rounded-full bg-[radial-gradient(circle_at_40%_40%,rgba(240,163,140,.30),rgba(240,163,140,0)_62%)]" />
         <div className="relative mx-auto grid max-w-[1200px] items-center gap-12 lg:grid-cols-[1.05fr_.95fr]">
           <div>

@@ -8,7 +8,7 @@ export default async function PrivacyPage() {
   return (
     <>
       <Nav />
-      <section className="mx-auto w-full max-w-[720px] flex-1 px-6 py-16">
+      <main id="main" className="mx-auto w-full max-w-[720px] flex-1 px-6 py-16">
         <h1 className="text-[28px] font-extrabold tracking-[-0.02em] text-ink">
           {t("privacyTitle")}
         </h1>
@@ -21,7 +21,7 @@ export default async function PrivacyPage() {
         >
           ← {t("back")}
         </Link>
-      </section>
+      </main>
       <Footer variant="fan" />
     </>
   );

@@ -22,7 +22,7 @@ export default async function CreatorSetupPage() {
   return (
     <>
       <Nav />
-      <section className="mx-auto w-full max-w-[640px] flex-1 px-6 py-14 sm:py-20">
+      <main id="main" className="mx-auto w-full max-w-[640px] flex-1 px-6 py-14 sm:py-20">
         {/* Hierarchy: what this page IS ("크리에이터 시작하기") is the H1; what it
             gets you ("나만의 모찌 마켓을 열어보세요") supports it. It used to be
             inverted — a mono eyebrow naming the page above a much louder pitch
@@ -43,7 +43,7 @@ export default async function CreatorSetupPage() {
           defaultName={user.nickname}
           defaultHandle={user.handle ?? ""}
         />
-      </section>
+      </main>
       <Footer variant="fan" />
     </>
   );

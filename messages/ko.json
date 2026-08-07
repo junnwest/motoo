@@ -1,4 +1,7 @@
 {
+  "a11y": {
+    "skipToContent": "본문으로 건너뛰기"
+  },
   "common": {
     "brand": "motoo",
     "login": "로그인",
@@ -73,6 +76,18 @@
     },
     "businessInfo": "(주)모투 · 통신판매중개업자 · 결제는 각 크리에이터(판매자)와 직접 이루어지며 플랫폼은 자금을 보유하지 않습니다.",
     "fanDisclosure": "모찌는 응원이며 투자·환급·재판매·수익이 없습니다 · 결제는 각 크리에이터(판매자)와 직접 이루어집니다."
+  },
+  "errorPage": {
+    "title": "문제가 생겼어요",
+    "body": "잠시 문제가 있었어요. 다시 시도해 보시고, 계속 이 화면이 보이면 알려주세요.",
+    "retry": "다시 시도",
+    "home": "홈으로",
+    "studioTitle": "스튜디오를 불러오지 못했어요",
+    "studioBody": "잠시 문제가 있었어요. 다시 시도해 보세요. 마켓과 주문 정보는 그대로예요.",
+    "reference": "오류 코드",
+    "notFoundTitle": "페이지를 찾을 수 없어요",
+    "notFoundBody": "주소가 바뀌었거나 사라진 페이지예요. 홈에서 다시 찾아보세요.",
+    "notFoundCta": "홈으로 →"
   },
   "stub": {
     "loginTitle": "로그인",
@@ -691,14 +706,15 @@
     "backToProfile": "프로필로 돌아가기",
     "buyTitle": "모찌 구매",
     "buySubtitle": "{name} 님의 모찌를 구매해 마켓에서 사용하세요.",
-    "pricePerMochi": "모찌 1개 {price}원",
+    "pricePerMochi": "모찌 1개 {price, number}원",
     "quantityLabel": "구매 수량",
+    "quantityMaxHint": "한 번에 최대 {max, number}개까지 살 수 있어요.",
     "youPay": "결제 금액",
     "notOnSale": "지금은 모찌를 판매하지 않아요.",
     "myBalance": "내 모찌 잔액",
-    "buyButton": "{amount}원 결제하기",
+    "buyButton": "{amount, number}원 결제하기",
     "buying": "결제 중…",
-    "bought": "{count}개의 모찌를 받았어요!",
+    "bought": "{count, number}개의 모찌를 받았어요!",
     "goalProgress": "발행 목표의 {percent}% 달성",
     "marketTitle": "마켓",
     "marketSubtitle": "모찌로 이용할 수 있는 아이템이에요.",
@@ -729,6 +745,10 @@
       "notOnSale": "지금은 모찌를 판매하지 않아요.",
       "outOfStock": "품절된 아이템이에요.",
       "insufficient": "모찌 잔액이 부족해요.",
+      "quantityMax": "한 번에 살 수 있는 수량을 넘었어요. 수량을 줄여 주세요.",
+      "amountMax": "한 번에 결제할 수 있는 금액을 넘었어요. 수량을 줄여 주세요.",
+      "verifyRequired": "본인인증이 필요해요. 인증을 마친 뒤 다시 시도해 주세요.",
+      "guardianRequired": "만 19세 미만은 법정대리인 동의가 있어야 모찌를 살 수 있어요.",
       "generic": "처리하지 못했어요. 잠시 후 다시 시도해 주세요."
     },
     "followNudge": "{name}님을 팔로우하고 소식을 받아보세요"
@@ -819,6 +839,7 @@
       "body": "위 기준과 별개로, 법령이 환불을 정한 경우에는 그 법령에 따라 처리해요. 법정대리인의 동의 없이 이루어진 미성년자의 결제가 대표적인 예예요."
     },
     "howTo": {
+      "contact": "문의:",
       "title": "5. 신청 방법",
       "body": "고객센터로 신청해 주세요. 구매 내역과 신청 사유를 확인한 뒤 결과를 알려드리고, 청약철회가 확정되면 법령이 정한 기한인 3영업일 이내에 대금을 돌려드려요. 결제 수단에 따라 실제 입금까지 며칠이 더 걸릴 수 있어요."
     },

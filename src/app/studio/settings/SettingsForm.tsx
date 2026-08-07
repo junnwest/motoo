@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
+import { Input, Select, Textarea } from "@/components/ui/Field";
 import {
   CREATOR_TYPES,
   CATEGORIES_BY_TYPE,
@@ -35,10 +36,6 @@ const LINK_FIELDS = [
   { key: "discordUrl", label: "discord" },
   { key: "fanCafeUrl", label: "fanCafe" },
 ] as const;
-
-const inputClass =
-  "w-full rounded-[12px] border border-line-3 bg-white px-4 py-3 text-[15px] outline-none focus:border-coral/60";
-const labelClass = "mb-1.5 block text-[13px] font-semibold text-muted-2";
 
 export function SettingsForm({ initial }: { initial: ProfileValues }) {
   const t = useTranslations("creatorDashboard"); // settings.* + saveError
@@ -108,100 +105,70 @@ export function SettingsForm({ initial }: { initial: ProfileValues }) {
           {to("sectionProfile")}
         </h2>
         <div className="flex flex-col gap-4">
-          <div>
-            <label htmlFor="s-name" className={labelClass}>
-              {to("displayName")}
-            </label>
-            <input
-              id="s-name"
-              type="text"
-              required
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
-              placeholder={to("displayNamePlaceholder")}
-              className={inputClass}
-            />
-          </div>
+          <Input
+            label={to("displayName")}
+            type="text"
+            required
+            value={displayName}
+            onChange={(e) => setDisplayName(e.target.value)}
+            placeholder={to("displayNamePlaceholder")}
+          />
 
-          <div>
-            <label htmlFor="s-handle" className={labelClass}>
-              {to("handle")}
-            </label>
-            <input
-              id="s-handle"
-              type="text"
-              value={`@${initial.handle}`}
-              readOnly
-              disabled
-              className={`${inputClass} cursor-not-allowed bg-panel text-muted`}
-            />
-            <p className="mt-1.5 text-[13px] text-muted">
-              {t("settings.handleReadonly")}
-            </p>
-          </div>
+          <Input
+            label={to("handle")}
+            hint={t("settings.handleReadonly")}
+            type="text"
+            value={`@${initial.handle}`}
+            readOnly
+            disabled
+            className="cursor-not-allowed bg-panel text-muted"
+          />
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <label htmlFor="s-type" className={labelClass}>
-                {to("creatorType")}
-              </label>
-              <select
-                id="s-type"
-                value={creatorType}
-                onChange={(e) => onTypeChange(e.target.value)}
-                required
-                className={inputClass}
-              >
-                <option value="" disabled>
-                  {to("typePlaceholder")}
+            <Select
+              label={to("creatorType")}
+              value={creatorType}
+              onChange={(e) => onTypeChange(e.target.value)}
+              required
+            >
+              <option value="" disabled>
+                {to("typePlaceholder")}
+              </option>
+              {CREATOR_TYPES.map((ty) => (
+                <option key={ty} value={ty}>
+                  {tax(`types.${ty}`)}
                 </option>
-                {CREATOR_TYPES.map((ty) => (
-                  <option key={ty} value={ty}>
-                    {tax(`types.${ty}`)}
-                  </option>
-                ))}
-              </select>
-            </div>
+              ))}
+            </Select>
 
-            <div>
-              <label htmlFor="s-category" className={labelClass}>
-                {to("category")}
-              </label>
-              <select
-                id="s-category"
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                required
-                disabled={!creatorType}
-                className={`${inputClass} disabled:bg-panel disabled:text-muted`}
-              >
-                <option value="" disabled>
-                  {creatorType
-                    ? to("categoryPlaceholder")
-                    : to("categoryTypeFirst")}
+            <Select
+              label={to("category")}
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              required
+              disabled={!creatorType}
+              className="disabled:bg-panel disabled:text-muted"
+            >
+              <option value="" disabled>
+                {creatorType
+                  ? to("categoryPlaceholder")
+                  : to("categoryTypeFirst")}
+              </option>
+              {categoryOptions.map((c) => (
+                <option key={c} value={c}>
+                  {tax(`categories.${c}`)}
                 </option>
-                {categoryOptions.map((c) => (
-                  <option key={c} value={c}>
-                    {tax(`categories.${c}`)}
-                  </option>
-                ))}
-              </select>
-            </div>
+              ))}
+            </Select>
           </div>
 
-          <div>
-            <label htmlFor="s-bio" className={labelClass}>
-              {to("bio")}
-            </label>
-            <textarea
-              id="s-bio"
-              rows={3}
-              value={bio}
-              onChange={(e) => setBio(e.target.value)}
-              placeholder={to("bioPlaceholder")}
-              className={`${inputClass} resize-none`}
-            />
-          </div>
+          <Textarea
+            label={to("bio")}
+            rows={3}
+            value={bio}
+            onChange={(e) => setBio(e.target.value)}
+            placeholder={to("bioPlaceholder")}
+          />
         </div>
       </section>
 
@@ -212,22 +179,17 @@ export function SettingsForm({ initial }: { initial: ProfileValues }) {
         </h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {LINK_FIELDS.map((f) => (
-            <div key={f.key}>
-              <label htmlFor={`s-${f.key}`} className={labelClass}>
-                {t(`settings.links.${f.label}` as never)}
-              </label>
-              <input
-                id={`s-${f.key}`}
-                type="url"
-                inputMode="url"
-                value={links[f.key]}
-                onChange={(e) =>
-                  setLinks((prev) => ({ ...prev, [f.key]: e.target.value }))
-                }
-                placeholder={t("settings.linkPlaceholder")}
-                className={inputClass}
-              />
-            </div>
+            <Input
+              key={f.key}
+              label={t(`settings.links.${f.label}` as never)}
+              type="url"
+              inputMode="url"
+              value={links[f.key]}
+              onChange={(e) =>
+                setLinks((prev) => ({ ...prev, [f.key]: e.target.value }))
+              }
+              placeholder={t("settings.linkPlaceholder")}
+            />
           ))}
         </div>
       </section>

@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { createPortal } from "react-dom";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { Modal } from "@/components/ui/Modal";
 import { Mochi } from "./Mochi";
 
 /**
@@ -15,6 +14,12 @@ import { Mochi } from "./Mochi";
  * — otherwise a stale cookie from an earlier 크리에이터 click would silently
  * append creator onboarding to a fan signup.
  * Closes on backdrop click, Escape, or picking a card.
+ *
+ * The portal / Escape / scroll-lock / close-button machinery used to be
+ * duplicated here — this component predates `ui/Modal`, which was extracted
+ * from it. It now composes that instead, so there is one implementation of the
+ * dialog shell (and, in particular, one place for the focus handling Stage 3
+ * hardens).
  */
 export function SignupModal({
   open,
@@ -24,54 +29,17 @@ export function SignupModal({
   onClose: () => void;
 }) {
   const t = useTranslations("auth");
-  const cardRef = useRef<HTMLAnchorElement>(null);
 
-  useEffect(() => {
-    if (!open) return;
-    function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
-    }
-    document.addEventListener("keydown", onKey);
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    cardRef.current?.focus();
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = prevOverflow;
-    };
-  }, [open, onClose]);
-
-  if (!open || typeof document === "undefined") return null;
-
-  // Portal to <body>: the nav header uses backdrop-blur, which creates a
-  // containing block that would otherwise anchor this `fixed` overlay to the
-  // header instead of the viewport.
-  return createPortal(
-    <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="signup-modal-title"
+  return (
+    <Modal
+      open={open}
+      onClose={onClose}
+      titleId="signup-modal-title"
+      closeLabel={t("close")}
+      // The role chooser is wider than the shell's 420px default and carries
+      // its own roomier padding.
+      className="!max-w-[460px] p-7 sm:p-9"
     >
-      <button
-        type="button"
-        aria-label={t("close")}
-        onClick={onClose}
-        className="absolute inset-0 cursor-default bg-ink/40 backdrop-blur-[2px]"
-      />
-
-      <div className="relative w-full max-w-[460px] rounded-[24px] border border-line-2 bg-card p-7 shadow-[0_24px_70px_rgba(33,28,24,0.28)] sm:p-9">
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label={t("close")}
-          className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full text-muted transition hover:bg-cream-warm hover:text-ink"
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-            <path d="M18 6 6 18M6 6l12 12" />
-          </svg>
-        </button>
-
         <div className="text-center">
           <h2
             id="signup-modal-title"
@@ -87,7 +55,6 @@ export function SignupModal({
         <div className="mt-7 grid grid-cols-2 gap-3.5">
           {/* Supporter */}
           <Link
-            ref={cardRef}
             href="/api/fan-signup"
             onClick={onClose}
             className="group flex flex-col items-center rounded-[18px] border border-line-2 bg-panel px-4 py-6 text-center transition hover:border-coral hover:bg-card hover:shadow-[0_8px_24px_rgba(33,28,24,0.08)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-deep"
@@ -133,8 +100,6 @@ export function SignupModal({
             {t("goLogin")}
           </Link>
         </p>
-      </div>
-    </div>,
-    document.body,
+    </Modal>
   );
 }

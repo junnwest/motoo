@@ -64,7 +64,7 @@ export default async function BuyMochiPage({
   return (
     <>
       <Nav />
-      <main className="mx-auto max-w-[480px] px-6 py-14 sm:py-20">
+      <main id="main" className="mx-auto max-w-[480px] px-6 py-14 sm:py-20">
         <Link
           href={`/s/${handle}`}
           className="inline-flex items-center gap-1 text-[13.5px] font-semibold text-muted hover:text-ink"

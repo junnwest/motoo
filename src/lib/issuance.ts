@@ -10,6 +10,45 @@ export const MOCHI_MIN_PRICE = 100; // 원 per mochi
 export const MOCHI_MIN_COUNT = 10; // mochi issued
 export const MOCHI_MIN_TOTAL = 50_000; // 원, total face value (price × count)
 
+/**
+ * Ceilings on a SINGLE purchase by one fan. These are about the *buy* side, not
+ * the issuance side — a creator may issue 10,000 mochi, but nobody takes all of
+ * it in one transaction.
+ *
+ * Why they exist at all: `quantity` used to be an unbounded positive integer, so
+ * a hand-crafted request could ask for millions. With `PAYMENT_PROVIDER=mock`
+ * (which unconditionally succeeds) that meant free mochi; with a real PG it
+ * means an unbounded charge. Either way the resulting `purchasedTotal`,
+ * `lifetimeSold` and leaderboard values are permanently wrong, so this is
+ * enforced server-side in `buyMochi` and never trusted from the client.
+ *
+ * Also an integer-overflow guard: `pricePerMochiKrw * quantity` and
+ * `MochiIssuance.soldQuantity` are Postgres `Int` (Int4, max 2,147,483,647).
+ * Capping the KRW total at 1,000,000 keeps every product of the two comfortably
+ * inside that range.
+ *
+ * The two coincide exactly at the 100원 price floor (10,000 × 100 = 1,000,000);
+ * above the floor, the KRW ceiling is what binds. Product knobs, not invariants —
+ * raise them here and both the action and the buy UI follow.
+ */
+export const MOCHI_MAX_PURCHASE_QTY = 10_000; // mochi units in one purchase
+export const MOCHI_MAX_PURCHASE_KRW = 1_000_000; // 원 charged in one purchase
+
+export type PurchaseLimitError = "quantityMax" | "amountMax";
+
+/**
+ * Return the first violated purchase ceiling, or null if the purchase is within
+ * limits. Mirrors `validateIssuance` — same shape, opposite end of the range.
+ */
+export function validatePurchase(
+  quantity: number,
+  amountKrw: number,
+): PurchaseLimitError | null {
+  if (quantity > MOCHI_MAX_PURCHASE_QTY) return "quantityMax";
+  if (amountKrw > MOCHI_MAX_PURCHASE_KRW) return "amountMax";
+  return null;
+}
+
 // Standard presets: "issue N원 worth at 100원 each". Price is fixed at the
 // minimum; the count is derived (totalKrw / price).
 export const MOCHI_PRESET_PRICE = 100;

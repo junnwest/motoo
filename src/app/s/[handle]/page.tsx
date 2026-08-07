@@ -1,11 +1,11 @@
-import Link from "next/link";
+import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { ConsumerShell } from "@/components/ConsumerShell";
 import { Footer } from "@/components/Footer";
 import { ButtonLink } from "@/components/ui/Button";
 import { Mochi } from "@/components/Mochi";
 import { Avatar } from "@/components/ui/Placeholder";
-import { IconLock, IconSearch } from "@/components/ui/Icons";
+import { IconLock } from "@/components/ui/Icons";
 import { CreatorFacet } from "@/components/CreatorFacet";
 import { SupporterLeaderboard } from "@/components/SupporterLeaderboard";
 import { MarketplaceSection } from "@/components/MarketplaceSection";
@@ -34,26 +34,11 @@ export default async function StreamerProfilePage({
     getCurrentBacker(),
   ]);
 
-  if (!data) {
-    return (
-      <>
-        <ConsumerShell>
-        <section className="mx-auto flex max-w-[600px] flex-col items-center px-6 py-32 text-center">
-          <IconSearch width={44} height={44} className="mb-4 text-muted" />
-          <h1 className="text-[26px] font-extrabold">{t("notFoundTitle")}</h1>
-          <p className="mt-3 text-[16px] text-body">{t("notFoundBody")}</p>
-          <Link
-            href="/explore"
-            className="mt-8 rounded-[12px] bg-ink px-5 py-3 text-[14px] font-bold text-cream"
-          >
-            {t("backToExplore")}
-          </Link>
-        </section>
-        </ConsumerShell>
-        <Footer variant="fan" />
-      </>
-    );
-  }
+  // A real 404, not a 200 with "not found" in the body. The inline version this
+  // replaces meant every typo'd or deleted handle was indexable as a live page
+  // and indistinguishable from a success in any monitoring. The copy moved
+  // verbatim to ./not-found.tsx, which Next renders with the right status.
+  if (!data) notFound();
 
   const { streamer, updates } = data;
 

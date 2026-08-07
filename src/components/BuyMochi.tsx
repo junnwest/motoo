@@ -7,10 +7,16 @@ import { useTranslations } from "next-intl";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { Mochi } from "@/components/Mochi";
+import { Input } from "@/components/ui/Field";
+import { InlineMessage } from "@/components/ui/InlineMessage";
 import { IconHeart } from "@/components/ui/Icons";
 import { formatKrw, formatCount } from "@/lib/format";
 import { buyMochiAction } from "@/app/s/[handle]/marketplace-actions";
 import { toggleFollow } from "@/lib/follows";
+import {
+  MOCHI_MAX_PURCHASE_QTY,
+  MOCHI_MAX_PURCHASE_KRW,
+} from "@/lib/issuance";
 
 type Issuance = {
   pricePerMochiKrw: number;
@@ -68,6 +74,22 @@ export function BuyMochi({
   const onSale = issuance !== null && issuance.active;
 
   const price = issuance?.pricePerMochiKrw ?? 0;
+
+  /**
+   * The most this fan may buy in one go: the unit ceiling, and whatever the KRW
+   * ceiling works out to at this creator's price — whichever binds first. Mirrors
+   * `validatePurchase` on the server, which is what actually enforces it; this
+   * only keeps the UI from offering a quantity that would bounce.
+   */
+  const maxQuantity = Math.max(
+    1,
+    Math.min(
+      MOCHI_MAX_PURCHASE_QTY,
+      price > 0 ? Math.floor(MOCHI_MAX_PURCHASE_KRW / price) : MOCHI_MAX_PURCHASE_QTY,
+    ),
+  );
+  const atMax = quantity >= maxQuantity;
+
   const total = quantity * price;
   const percent =
     issuance && issuance.goalQuantity > 0
@@ -127,10 +149,13 @@ export function BuyMochi({
             {t("pricePerMochi", { price })}
           </p>
 
-          {/* quantity stepper */}
-          <label className="mb-1.5 mt-4 block text-[13px] font-semibold text-muted-2">
+          {/* Quantity stepper. A <span>, not a <label>: the group is − / field /
+              +, so there's no single control this could point `htmlFor` at, and
+              a label with no target is worse than none. The field carries the
+              same text as its aria-label. */}
+          <span className="mb-1.5 mt-4 block text-[13px] font-semibold text-muted-2">
             {t("quantityLabel")}
-          </label>
+          </span>
           <div className="flex items-center gap-2">
             <Button
               type="button"
@@ -142,28 +167,45 @@ export function BuyMochi({
             >
               −
             </Button>
-            <input
+            <Input
               type="number"
               min={1}
+              max={maxQuantity}
               value={quantity}
               disabled={pending}
+              aria-label={t("quantityLabel")}
               onChange={(e) => {
                 const n = Math.trunc(Number(e.target.value));
-                setQuantity(Number.isFinite(n) && n >= 1 ? n : 1);
+                // Clamp on the way in — typing past the cap silently snaps back
+                // to it rather than letting the buy button submit a doomed value.
+                setQuantity(
+                  Number.isFinite(n) && n >= 1 ? Math.min(n, maxQuantity) : 1,
+                );
               }}
-              className="w-full rounded-[12px] border border-line-3 bg-white px-4 py-3 text-center text-[15px] outline-none focus:border-coral/60"
+              // The stepper's − / + sit either side, so the field itself is the
+              // flex child that grows; the label above is rendered separately.
+              fieldClassName="w-full"
+              className="text-center"
             />
             <Button
               type="button"
               variant="secondary"
               aria-label="+"
               className="!px-4"
-              disabled={pending}
-              onClick={() => setQuantity((q) => q + 1)}
+              disabled={pending || atMax}
+              onClick={() => setQuantity((q) => Math.min(maxQuantity, q + 1))}
             >
               +
             </Button>
           </div>
+          {atMax && (
+            // The raw number, not formatCount() — a limit has to be exact, and
+            // its compact form ("5.0k") is both imprecise and Latin-glyphed in
+            // Korean copy. ICU formats the number arg with locale grouping.
+            <p className="mt-1.5 text-[12px] text-muted">
+              {t("quantityMaxHint", { max: maxQuantity })}
+            </p>
+          )}
 
           {/* you pay */}
           <div className="mt-4 flex items-center justify-between">
@@ -194,7 +236,7 @@ export function BuyMochi({
                 variant="primary"
                 size="lg"
                 className="w-full"
-                disabled={pending}
+                loading={pending}
                 onClick={submit}
               >
                 {pending ? t("buying") : t("buyButton", { amount: total })}
@@ -230,9 +272,9 @@ export function BuyMochi({
             </div>
           )}
           {error && (
-            <p className="mt-3 text-[14px] font-semibold text-live">
+            <InlineMessage tone="error" className="mt-3">
               {t(`errors.${error}`)}
-            </p>
+            </InlineMessage>
           )}
 
           {/* non-financial disclosure — the refund terms it summarises live at /refund */}

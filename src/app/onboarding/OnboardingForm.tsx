@@ -5,11 +5,9 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
 import { Eyebrow } from "@/components/ui/Eyebrow";
+import { Field, Input } from "@/components/ui/Field";
+import { InlineMessage } from "@/components/ui/InlineMessage";
 import { checkHandle, verifyIdentity, completeOnboarding } from "./actions";
-
-const labelClass = "mb-1.5 block text-[13px] font-semibold text-muted-2";
-const inputClass =
-  "w-full rounded-[12px] border border-line-3 bg-white px-4 py-3 text-[15px] outline-none transition focus:border-coral/60";
 
 type HandleState = "idle" | "checking" | "available" | "taken" | "invalid";
 
@@ -89,28 +87,23 @@ export function OnboardingForm({
       {/* Profile */}
       <section className="flex flex-col gap-4">
         <Eyebrow>{t("sectionProfile")}</Eyebrow>
-        <div>
-          <label htmlFor="ob-nickname" className={labelClass}>
-            {t("nickname")}
-          </label>
-          <input
-            id="ob-nickname"
-            type="text"
-            value={nickname}
-            onChange={(e) => setNickname(e.target.value)}
-            placeholder={t("nicknamePlaceholder")}
-            maxLength={40}
-            className={inputClass}
-          />
-        </div>
-        <div>
-          <label htmlFor="ob-handle" className={labelClass}>
-            {t("handle")}
-          </label>
+        <Input
+          label={t("nickname")}
+          type="text"
+          value={nickname}
+          onChange={(e) => setNickname(e.target.value)}
+          placeholder={t("nicknamePlaceholder")}
+          maxLength={40}
+        />
+        {/* The @ prefix sits inside the border, so this keeps its own wrapper
+            and uses Field only for the label + id wiring (same as /settings). */}
+        <Field label={t("handle")}>
+          {(a11y) => (
+          <>
           <div className="flex items-center rounded-[12px] border border-line-3 bg-white pl-3 transition focus-within:border-coral/60">
             <span className="text-[15px] text-muted">@</span>
             <input
-              id="ob-handle"
+              {...a11y}
               type="text"
               value={handle}
               onChange={(e) => setHandle(e.target.value.toLowerCase())}
@@ -121,6 +114,7 @@ export function OnboardingForm({
             />
           </div>
           <p
+            role="status"
             className={`mt-1.5 text-[13px] ${
               handleState === "available"
                 ? "text-sage"
@@ -139,7 +133,9 @@ export function OnboardingForm({
                     ? t("handleInvalid")
                     : t("handleHint")}
           </p>
-        </div>
+          </>
+          )}
+        </Field>
       </section>
 
       {/* Identity verification */}
@@ -207,9 +203,7 @@ export function OnboardingForm({
       </section>
 
       {error && (
-        <p className="text-[13px] font-semibold text-live">
-          {t(`errors.${error}`)}
-        </p>
+        <InlineMessage tone="error">{t(`errors.${error}`)}</InlineMessage>
       )}
 
       <Button

@@ -19,7 +19,7 @@ export function ComingSoon({
   return (
     <>
       <Nav />
-      <section className="mx-auto flex max-w-[560px] flex-1 flex-col items-center px-6 py-28 text-center">
+      <main id="main" className="mx-auto flex max-w-[560px] flex-1 flex-col items-center px-6 py-28 text-center">
         <div className="mb-5 flex gap-2">
           <Mochi width={40} height={33} float />
           <Mochi width={52} height={42} float floatDelay={0.4} />
@@ -32,7 +32,7 @@ export function ComingSoon({
         >
           ← {variant === "creator" ? "motoo for creators" : "motoo"}
         </Link>
-      </section>
+      </main>
       <Footer variant={variant} />
     </>
   );

@@ -4,13 +4,11 @@ import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Field";
+import { InlineMessage } from "@/components/ui/InlineMessage";
 import { SocialButtons } from "@/components/SocialButtons";
 import type { EnabledProviders } from "@/lib/auth-providers";
 import { signupUser } from "./actions";
-
-const labelClass = "mb-1.5 block text-[13px] font-semibold text-muted-2";
-const inputClass =
-  "w-full rounded-[12px] border border-line-3 bg-white px-4 py-3 text-[15px] outline-none transition focus:border-coral/60";
 
 export function SignupForm({
   providers,
@@ -64,92 +62,65 @@ export function SignupForm({
     <div>
       {/* Email / password */}
       <form onSubmit={submit} className="flex flex-col gap-4">
-        <div>
-          <label htmlFor="nickname" className={labelClass}>
-            {t("nickname")}
-          </label>
-          <input
-            id="nickname"
-            type="text"
-            autoComplete="nickname"
-            value={nickname}
-            onChange={(e) => setNickname(e.target.value)}
-            placeholder={t("nicknamePlaceholder")}
-            required
-            className={inputClass}
-          />
-        </div>
+        <Input
+          label={t("nickname")}
+          type="text"
+          autoComplete="nickname"
+          value={nickname}
+          onChange={(e) => setNickname(e.target.value)}
+          placeholder={t("nicknamePlaceholder")}
+          required
+        />
 
-        <div>
-          <label htmlFor="email" className={labelClass}>
-            {t("email")}
-          </label>
-          <input
-            id="email"
-            type="email"
-            autoComplete="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className={inputClass}
-          />
-        </div>
+        <Input
+          label={t("email")}
+          type="email"
+          autoComplete="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
 
-        <div>
-          <label htmlFor="password" className={labelClass}>
-            {t("password")}
-          </label>
-          <input
-            id="password"
-            type="password"
-            autoComplete="new-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder={t("passwordPlaceholder")}
-            required
-            className={inputClass}
-          />
-          <div className="mt-2 flex flex-wrap gap-x-3.5 gap-y-1 text-[12px]">
-            {reqs.map(([ok, label]) => (
-              <span
-                key={label}
-                className={`flex items-center gap-1 ${
-                  ok ? "text-sage" : "text-muted"
-                }`}
-              >
-                <span className="text-[11px]">{ok ? "✓" : "○"}</span>
-                {label}
-              </span>
-            ))}
-          </div>
-        </div>
+        <Input
+          label={t("password")}
+          type="password"
+          autoComplete="new-password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder={t("passwordPlaceholder")}
+          required
+          // As `hint`, the live requirement checklist is picked up by
+          // aria-describedby — so a screen reader hears which rules are still
+          // unmet when the field is focused, instead of only seeing them.
+          hint={
+            <span className="mt-0.5 flex flex-wrap gap-x-3.5 gap-y-1 text-[12px]">
+              {reqs.map(([ok, label]) => (
+                <span
+                  key={label}
+                  className={`flex items-center gap-1 ${
+                    ok ? "text-sage" : "text-muted"
+                  }`}
+                >
+                  <span className="text-[11px]">{ok ? "✓" : "○"}</span>
+                  {label}
+                </span>
+              ))}
+            </span>
+          }
+        />
 
-        <div>
-          <label htmlFor="confirm" className={labelClass}>
-            {t("passwordConfirm")}
-          </label>
-          <input
-            id="confirm"
-            type="password"
-            autoComplete="new-password"
-            value={confirm}
-            onChange={(e) => setConfirm(e.target.value)}
-            placeholder={t("passwordConfirmPlaceholder")}
-            required
-            className={`${inputClass} ${
-              mismatch ? "border-live focus:border-live" : ""
-            }`}
-          />
-          {mismatch && (
-            <p className="mt-1.5 text-[12.5px] font-medium text-live">
-              {t("passwordMismatch")}
-            </p>
-          )}
-        </div>
+        <Input
+          label={t("passwordConfirm")}
+          type="password"
+          autoComplete="new-password"
+          value={confirm}
+          onChange={(e) => setConfirm(e.target.value)}
+          placeholder={t("passwordConfirmPlaceholder")}
+          required
+          error={mismatch ? t("passwordMismatch") : undefined}
+        />
 
-        {error && (
-          <p className="text-[13px] font-medium text-live">{t(error)}</p>
-        )}
+        {error && <InlineMessage tone="error">{t(error)}</InlineMessage>}
 
         <Button
           type="submit"

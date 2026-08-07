@@ -50,7 +50,7 @@ export default async function FanLandingPage() {
       <Nav />
 
       {/* Hero */}
-      <section className="relative overflow-hidden bg-cream-warm px-6 py-16 text-center sm:px-14 sm:py-[78px]">
+      <section id="main" className="relative overflow-hidden bg-cream-warm px-6 py-16 text-center sm:px-14 sm:py-[78px]">
         {/* Soft decorative circles (same shape as the final CTA), not floating mochis */}
         <div className="absolute left-[8%] top-10 h-16 w-16 rounded-[46%_46%_48%_48%/52%_52%_48%_48%] bg-coral-soft/45" />
         <div className="absolute right-[12%] top-28 h-11 w-11 rounded-[46%_46%_48%_48%/52%_52%_48%_48%] bg-white/60" />

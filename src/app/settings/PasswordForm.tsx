@@ -3,6 +3,8 @@
 import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Field";
+import { InlineMessage } from "@/components/ui/InlineMessage";
 import { changePassword } from "./actions";
 
 export function PasswordForm() {
@@ -29,30 +31,20 @@ export function PasswordForm() {
 
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-4">
-      <label className="block">
-        <span className="mb-1.5 block text-[13px] font-semibold text-muted-2">
-          {t("currentPasswordLabel")}
-        </span>
-        <input
-          type="password"
-          value={currentPassword}
-          onChange={(e) => setCurrentPassword(e.target.value)}
-          className="w-full rounded-[12px] border border-line-3 bg-white px-4 py-3 text-[15px] outline-none focus:border-coral/60"
-        />
-      </label>
+      <Input
+        type="password"
+        label={t("currentPasswordLabel")}
+        value={currentPassword}
+        onChange={(e) => setCurrentPassword(e.target.value)}
+      />
 
-      <label className="block">
-        <span className="mb-1.5 block text-[13px] font-semibold text-muted-2">
-          {t("newPasswordLabel")}
-        </span>
-        <input
-          type="password"
-          value={newPassword}
-          onChange={(e) => setNewPassword(e.target.value)}
-          className="w-full rounded-[12px] border border-line-3 bg-white px-4 py-3 text-[15px] outline-none focus:border-coral/60"
-        />
-        <p className="mt-1.5 text-[12.5px] text-muted">{t("passwordHint")}</p>
-      </label>
+      <Input
+        type="password"
+        label={t("newPasswordLabel")}
+        hint={t("passwordHint")}
+        value={newPassword}
+        onChange={(e) => setNewPassword(e.target.value)}
+      />
 
       <Button
         type="submit"
@@ -64,13 +56,11 @@ export function PasswordForm() {
         {pending ? t("saving") : t("changePassword")}
       </Button>
 
-      {result?.ok && (
-        <p className="text-[13.5px] font-semibold text-sage">{t("saved")}</p>
-      )}
+      {result?.ok && <InlineMessage tone="success">{t("saved")}</InlineMessage>}
       {result?.ok === false && (
-        <p className="text-[13.5px] font-semibold text-live">
+        <InlineMessage tone="error">
           {t(`errors.${result.error}` as never)}
-        </p>
+        </InlineMessage>
       )}
     </form>
   );

@@ -3,6 +3,8 @@
 import { useEffect, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
+import { Field, Input } from "@/components/ui/Field";
+import { InlineMessage } from "@/components/ui/InlineMessage";
 import { checkHandle } from "@/app/onboarding/actions";
 import { updateIdentity } from "./actions";
 
@@ -57,44 +59,45 @@ export function IdentityForm({
 
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-4">
-      <label className="block">
-        <span className="mb-1.5 block text-[13px] font-semibold text-muted-2">
-          {t("nicknameLabel")}
-        </span>
-        <input
-          value={nickname}
-          onChange={(e) => setNickname(e.target.value)}
-          maxLength={40}
-          className="w-full rounded-[12px] border border-line-3 bg-white px-4 py-3 text-[15px] outline-none focus:border-coral/60"
-        />
-      </label>
+      <Input
+        label={t("nicknameLabel")}
+        value={nickname}
+        onChange={(e) => setNickname(e.target.value)}
+        maxLength={40}
+      />
 
-      <label className="block">
-        <span className="mb-1.5 block text-[13px] font-semibold text-muted-2">
-          {t("handleLabel")}
-        </span>
-        <div className="flex items-center gap-2 rounded-[12px] border border-line-3 bg-white px-4 py-3 focus-within:border-coral/60">
-          <span className="text-[15px] text-muted">@</span>
-          <input
-            value={handle}
-            onChange={(e) => setHandle(e.target.value.toLowerCase())}
-            maxLength={20}
-            className="w-full text-[15px] outline-none"
-          />
-        </div>
-        {handle !== initialHandle && (
-          <p
-            className={`mt-1.5 text-[12.5px] font-medium ${
-              handleStatus === "ok" ? "text-sage" : "text-muted"
-            }`}
-          >
-            {handleStatus === "checking" && t("handleChecking")}
-            {handleStatus === "ok" && t("handleAvailable")}
-            {handleStatus === "taken" && t("handleTaken")}
-            {handleStatus === "invalid" && t("handleInvalid")}
-          </p>
+      {/* The @ prefix lives inside the border, so this one keeps its own
+          bordered wrapper and uses Field only for the label/status wiring —
+          `Input` owns the border and can't host a sibling inside it. */}
+      <Field label={t("handleLabel")}>
+        {(a11y) => (
+          <>
+            <div className="flex items-center gap-2 rounded-[12px] border border-line-3 bg-white px-4 py-3 transition focus-within:border-coral/60">
+              <span className="text-[15px] text-muted">@</span>
+              <input
+                {...a11y}
+                value={handle}
+                onChange={(e) => setHandle(e.target.value.toLowerCase())}
+                maxLength={20}
+                className="w-full text-[15px] outline-none"
+              />
+            </div>
+            {handle !== initialHandle && (
+              <p
+                role="status"
+                className={`mt-1.5 text-[12.5px] font-medium ${
+                  handleStatus === "ok" ? "text-sage" : "text-muted"
+                }`}
+              >
+                {handleStatus === "checking" && t("handleChecking")}
+                {handleStatus === "ok" && t("handleAvailable")}
+                {handleStatus === "taken" && t("handleTaken")}
+                {handleStatus === "invalid" && t("handleInvalid")}
+              </p>
+            )}
+          </>
         )}
-      </label>
+      </Field>
 
       <Button
         type="submit"
@@ -106,13 +109,11 @@ export function IdentityForm({
         {pending ? t("saving") : t("save")}
       </Button>
 
-      {result?.ok && (
-        <p className="text-[13.5px] font-semibold text-sage">{t("saved")}</p>
-      )}
+      {result?.ok && <InlineMessage tone="success">{t("saved")}</InlineMessage>}
       {result?.ok === false && (
-        <p className="text-[13.5px] font-semibold text-live">
+        <InlineMessage tone="error">
           {t(`errors.${result.error}` as never)}
-        </p>
+        </InlineMessage>
       )}
     </form>
   );

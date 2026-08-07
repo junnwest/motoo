@@ -1,29 +1,43 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Mochi } from "./Mochi";
+import { supportMailto } from "@/lib/support";
 
-function FooterCol({
-  title,
-  links,
-}: {
-  title: string;
-  links: { label: string; href: string; underline?: boolean }[];
-}) {
+type FooterLink = {
+  label: string;
+  /** null = no destination configured; the link is dropped, never rendered dead. */
+  href: string | null;
+  underline?: boolean;
+  /** mailto/external — rendered as <a>, since next/link is for app routes. */
+  external?: boolean;
+};
+
+function FooterCol({ title, links }: { title: string; links: FooterLink[] }) {
+  // Every link here used to be rendered unconditionally, including six with
+  // href="#". A dead link labelled 고객센터 is worse than an absent one: it
+  // reads as a working channel, and /refund points users at it. Anything
+  // without a destination is now dropped instead.
+  const live = links.filter((l): l is FooterLink & { href: string } => !!l.href);
+  if (live.length === 0) return null;
+
   return (
     <div>
       <div className="mb-[14px] font-mono text-[11px] tracking-[0.1em] text-dark-mono">
         {title}
       </div>
       <div className="flex flex-col gap-[10px] text-[14px] text-dark-text-2">
-        {links.map((l) => (
-          <Link
-            key={l.label}
-            href={l.href}
-            className={`hover:text-cream ${l.underline ? "underline" : ""}`}
-          >
-            {l.label}
-          </Link>
-        ))}
+        {live.map((l) => {
+          const className = `hover:text-cream ${l.underline ? "underline" : ""}`;
+          return l.external ? (
+            <a key={l.label} href={l.href} className={className}>
+              {l.label}
+            </a>
+          ) : (
+            <Link key={l.label} href={l.href} className={className}>
+              {l.label}
+            </Link>
+          );
+        })}
       </div>
     </div>
   );
@@ -55,9 +69,12 @@ export function Footer({ variant = "fan" }: { variant?: "fan" | "creator" }) {
                 title={t("colProduct")}
                 links={[
                   { label: t("product.market"), href: "/creators#features" },
+                  // `/dashboard` 404'd — that route has never existed. The
+                  // creator console is /studio (forwarded to the studio
+                  // subdomain by src/proxy.ts).
                   {
                     label: t("product.creatorDashboard"),
-                    href: "/dashboard",
+                    href: "/studio",
                   },
                   { label: t("product.mochi"), href: "/#what-is-mochi" },
                   { label: tNav("forFans"), href: "/" },
@@ -75,21 +92,22 @@ export function Footer({ variant = "fan" }: { variant?: "fan" | "creator" }) {
               />
             )}
 
+            {/* 고객센터 is the only one of these with a real destination, and
+                only once SUPPORT_EMAIL is set (src/lib/support.ts). 소개 /
+                공지사항 / 자주 묻는 질문 / 안전·신뢰 have no pages yet, so they
+                are omitted rather than pointed at "#". */}
             <FooterCol
               title={variant === "creator" ? t("colCompany") : t("colSupport")}
-              links={
-                variant === "creator"
-                  ? [
-                      { label: t("company.about"), href: "#" },
-                      { label: t("company.help"), href: "#" },
-                      { label: t("company.notice"), href: "#" },
-                    ]
-                  : [
-                      { label: t("support.help"), href: "#" },
-                      { label: t("support.faq"), href: "#" },
-                      { label: t("support.safety"), href: "#" },
-                    ]
-              }
+              links={[
+                {
+                  label:
+                    variant === "creator"
+                      ? t("company.help")
+                      : t("support.help"),
+                  href: supportMailto(),
+                  external: true,
+                },
+              ]}
             />
 
             <FooterCol

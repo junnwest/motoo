@@ -27,7 +27,7 @@ export default async function RankingPage() {
   return (
     <>
       <ConsumerShell>
-        <main className="mx-auto max-w-[900px] px-6 py-12 sm:px-10 sm:py-16">
+        <div className="mx-auto max-w-[900px] px-6 py-12 sm:px-10 sm:py-16">
           <h1 className="text-[28px] font-extrabold tracking-[-0.03em] text-ink sm:text-[34px]">
             {t("title")}
           </h1>
@@ -72,7 +72,7 @@ export default async function RankingPage() {
               </ul>
             )}
           </Section>
-        </main>
+        </div>
       </ConsumerShell>
       <Footer variant="fan" />
     </>

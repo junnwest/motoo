@@ -11,6 +11,8 @@ import {
   presetToIssuance,
   validateIssuance,
 } from "@/lib/issuance";
+import { Input } from "@/components/ui/Field";
+import { InlineMessage } from "@/components/ui/InlineMessage";
 
 export type IssuanceSelection = {
   price: number;
@@ -22,10 +24,6 @@ export type IssuanceSelection = {
 };
 
 type Mode = "s" | "m" | "l" | "custom";
-
-const labelClass = "mb-1.5 block text-[13px] font-semibold text-muted-2";
-const inputClass =
-  "w-full rounded-[12px] border border-line-3 bg-white px-4 py-3 text-[15px] outline-none focus:border-coral/60";
 
 /**
  * Shared mochi issuance picker — standard presets (issue N원 at 100원 each) or a
@@ -155,36 +153,24 @@ export function MochiIssuancePicker({
 
       {showCustomInputs ? (
         <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div>
-            <label htmlFor="mip-price" className={labelClass}>
-              {t("customPrice")}
-            </label>
-            <input
-              id="mip-price"
-              type="number"
-              min={minPrice}
-              step={1}
-              inputMode="numeric"
-              value={customPrice}
-              onChange={(e) => setCustomPrice(e.target.value)}
-              className={inputClass}
-            />
-          </div>
-          <div>
-            <label htmlFor="mip-count" className={labelClass}>
-              {t("customCount")}
-            </label>
-            <input
-              id="mip-count"
-              type="number"
-              min={MOCHI_MIN_COUNT}
-              step={1}
-              inputMode="numeric"
-              value={customCount}
-              onChange={(e) => setCustomCount(e.target.value)}
-              className={inputClass}
-            />
-          </div>
+          <Input
+            label={t("customPrice")}
+            type="number"
+            min={minPrice}
+            step={1}
+            inputMode="numeric"
+            value={customPrice}
+            onChange={(e) => setCustomPrice(e.target.value)}
+          />
+          <Input
+            label={t("customCount")}
+            type="number"
+            min={MOCHI_MIN_COUNT}
+            step={1}
+            inputMode="numeric"
+            value={customCount}
+            onChange={(e) => setCustomCount(e.target.value)}
+          />
         </div>
       ) : null}
 
@@ -206,9 +192,9 @@ export function MochiIssuancePicker({
       </div>
 
       {error ? (
-        <p className="mt-2 text-[13px] font-medium text-live">
+        <InlineMessage tone="error" className="mt-2">
           {t(`errors.${error}`)}
-        </p>
+        </InlineMessage>
       ) : null}
     </div>
   );

@@ -36,16 +36,71 @@ export function Modal({
 
   useEffect(() => {
     if (!open) return;
-    function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
+    const card = cardRef.current;
+
+    // Remember where focus came from so it can go back — without this, closing
+    // a dialog drops focus to <body> and a keyboard user restarts from the top
+    // of the page (WCAG 2.4.3, Focus Order).
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+
+    /** Tabbable descendants, in DOM order. Recomputed per keypress so it stays
+     *  correct when the dialog's own content changes (a field appearing, a
+     *  button becoming enabled). */
+    function tabbables(): HTMLElement[] {
+      if (!card) return [];
+      return Array.from(
+        card.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter((el) => el.offsetParent !== null || el === document.activeElement);
     }
+
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        onClose();
+        return;
+      }
+      if (e.key !== "Tab") return;
+
+      // Focus trap (WCAG 2.1.2). Previously Tab walked straight out of the
+      // dialog and into the page behind it, which is still scroll-locked and
+      // visually dimmed — a keyboard user could end up interacting with
+      // controls they can't see.
+      const items = tabbables();
+      if (items.length === 0) {
+        e.preventDefault(); // nothing to focus: keep it here regardless
+        return;
+      }
+      const first = items[0];
+      const last = items[items.length - 1];
+      const active = document.activeElement;
+
+      if (e.shiftKey && (active === first || active === card)) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && active === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+
     document.addEventListener("keydown", onKey);
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    cardRef.current?.focus();
+
+    // Open on the first *meaningful* control, skipping the ✕ (which is first in
+    // DOM order). Landing on "close" makes the opening keystroke of every
+    // dialog a dismissal; landing on the card itself costs a wasted Tab. The
+    // ✕ is the fallback when the dialog has nothing else to focus.
+    const items = tabbables();
+    const firstMeaningful =
+      items.find((el) => !el.hasAttribute("data-modal-close")) ?? items[0];
+    (firstMeaningful ?? card)?.focus();
+
     return () => {
       document.removeEventListener("keydown", onKey);
       document.body.style.overflow = prevOverflow;
+      previouslyFocused?.focus?.();
     };
   }, [open, onClose]);
 
@@ -74,6 +129,7 @@ export function Modal({
           type="button"
           onClick={onClose}
           aria-label={closeLabel}
+          data-modal-close
           className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full text-muted transition hover:bg-cream-warm hover:text-ink"
         >
           <svg

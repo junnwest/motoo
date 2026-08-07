@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/Button";
 import { Mochi } from "@/components/Mochi";
 import { ItemThumbnail } from "@/components/ItemThumbnail";
 import { ImagePicker } from "@/components/ui/ImagePicker";
+import { FIELD_LABEL_CLASS, Input, Select, Textarea } from "@/components/ui/Field";
+import { InlineMessage } from "@/components/ui/InlineMessage";
 import { formatCount } from "@/lib/format";
 import { suggestionsForType } from "@/lib/itemSuggestions";
 import { THUMBNAIL_GROUPS } from "@/lib/itemThumbnails";
@@ -57,10 +59,6 @@ const ITEM_TYPES: MarketplaceItemType[] = [
   MarketplaceItemType.physical,
   MarketplaceItemType.session,
 ];
-
-const labelClass = "mb-1.5 block text-[13px] font-semibold text-muted-2";
-const inputClass =
-  "w-full rounded-[12px] border border-line-3 bg-white px-4 py-3 text-[15px] outline-none focus:border-coral/60";
 
 export function ItemsManager({
   items,
@@ -352,7 +350,7 @@ function ThumbnailPicker({
 
   return (
     <div>
-      <span className={labelClass}>{t("items.thumbnails.label")}</span>
+      <span className={FIELD_LABEL_CLASS}>{t("items.thumbnails.label")}</span>
       <div className="flex flex-col gap-3 rounded-[12px] border border-line-3 bg-white p-3">
         {/* Default (itemType-derived) swatch. */}
         <div>
@@ -421,7 +419,7 @@ function FulfillmentPicker({
 
   return (
     <div>
-      <span className={labelClass}>{t("items.fulfillment.label")}</span>
+      <span className={FIELD_LABEL_CLASS}>{t("items.fulfillment.label")}</span>
       <div className="grid grid-cols-2 gap-2">
         {modes.map((mode) => {
           const selected = value === mode;
@@ -524,34 +522,23 @@ function ItemForm({
       className="rounded-[16px] border border-line-2 bg-panel p-5"
     >
       <div className="flex flex-col gap-4">
-        <div>
-          <label htmlFor="item-title" className={labelClass}>
-            {t("items.name")}
-          </label>
-          <input
-            id="item-title"
-            type="text"
-            required
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder={t("items.namePlaceholder")}
-            className={inputClass}
-          />
-        </div>
+        <Input
+          label={t("items.name")}
+          type="text"
+          required
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder={t("items.namePlaceholder")}
+        />
 
-        <div>
-          <label htmlFor="item-description" className={labelClass}>
-            {t("items.description")}
-          </label>
-          <textarea
-            id="item-description"
-            rows={3}
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder={t("items.descriptionPlaceholder")}
-            className={`${inputClass} resize-y`}
-          />
-        </div>
+        <Textarea
+          label={t("items.description")}
+          resize="y"
+          rows={3}
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          placeholder={t("items.descriptionPlaceholder")}
+        />
 
         {/* Cover photo first: when set it's what a fan actually sees on the
             item card, and the curated tile below becomes the fallback. */}
@@ -573,57 +560,37 @@ function ItemForm({
         <FulfillmentPicker value={fulfillment} onChange={setFulfillment} />
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <div>
-            <label htmlFor="item-price" className={labelClass}>
-              {t("items.price")}
-            </label>
-            <input
-              id="item-price"
-              type="number"
-              min={1}
-              step={1}
-              inputMode="numeric"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              className={inputClass}
-            />
-          </div>
+          <Input
+            label={t("items.price")}
+            type="number"
+            min={1}
+            step={1}
+            inputMode="numeric"
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
+          />
 
-          <div>
-            <label htmlFor="item-type" className={labelClass}>
-              {t("items.type")}
-            </label>
-            <select
-              id="item-type"
-              value={itemType}
-              onChange={(e) =>
-                setItemType(e.target.value as MarketplaceItemType)
-              }
-              className={inputClass}
-            >
-              {ITEM_TYPES.map((type) => (
-                <option key={type} value={type}>
-                  {t(`items.types.${type}`)}
-                </option>
-              ))}
-            </select>
-          </div>
+          <Select
+            label={t("items.type")}
+            value={itemType}
+            onChange={(e) => setItemType(e.target.value as MarketplaceItemType)}
+          >
+            {ITEM_TYPES.map((type) => (
+              <option key={type} value={type}>
+                {t(`items.types.${type}`)}
+              </option>
+            ))}
+          </Select>
 
-          <div>
-            <label htmlFor="item-stock" className={labelClass}>
-              {t("items.stock")}
-            </label>
-            <input
-              id="item-stock"
-              type="number"
-              min={0}
-              step={1}
-              inputMode="numeric"
-              value={stock}
-              onChange={(e) => setStock(e.target.value)}
-              className={inputClass}
-            />
-          </div>
+          <Input
+            label={t("items.stock")}
+            type="number"
+            min={0}
+            step={1}
+            inputMode="numeric"
+            value={stock}
+            onChange={(e) => setStock(e.target.value)}
+          />
         </div>
 
         <label className="flex cursor-pointer items-center gap-3">
@@ -646,9 +613,7 @@ function ItemForm({
             {t("items.cancel")}
           </Button>
           {error ? (
-            <span className="text-[13px] font-semibold text-live">
-              {t("saveError")}
-            </span>
+            <InlineMessage tone="error">{t("saveError")}</InlineMessage>
           ) : null}
         </div>
       </div>

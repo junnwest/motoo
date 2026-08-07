@@ -21,7 +21,7 @@ export default async function CreatorDashboardLayout({
 
       {/* Single-view body — no sidebar; the dashboard is one scroll. */}
       <div className="mx-auto max-w-[1680px] px-6 py-10 lg:px-10">
-        <main className="min-w-0">{children}</main>
+        <main id="main" className="min-w-0">{children}</main>
       </div>
     </div>
   );

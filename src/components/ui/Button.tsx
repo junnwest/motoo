@@ -5,7 +5,40 @@ type Variant = "primary" | "secondary" | "dark" | "ghost" | "onCoral";
 type Size = "md" | "lg";
 
 const base =
-  "inline-flex items-center justify-center gap-2 font-bold rounded-[14px] transition-transform duration-150 active:scale-[.98] focus-visible:outline-2 focus-visible:outline-offset-2";
+  "inline-flex items-center justify-center gap-2 font-bold rounded-[14px] transition-transform duration-150 active:scale-[.98] focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-60 disabled:active:scale-100";
+
+/**
+ * Pending spinner. `currentColor` so it inherits each variant's text color
+ * rather than needing a per-variant rule, and `aria-hidden` because the busy
+ * state is announced via `aria-busy` on the button itself.
+ */
+function Spinner() {
+  return (
+    <svg
+      className="animate-spin"
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+    >
+      <circle
+        cx="12"
+        cy="12"
+        r="9"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        opacity="0.25"
+      />
+      <path
+        d="M21 12a9 9 0 0 0-9-9"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
 
 const variants: Record<Variant, string> = {
   primary:
@@ -34,13 +67,32 @@ export function Button({
   variant = "primary",
   size = "md",
   className = "",
+  loading = false,
+  disabled,
+  children,
   ...props
-}: CommonProps & ComponentProps<"button">) {
+}: CommonProps & {
+  /**
+   * In-flight state. Shows a spinner, disables the button, and sets
+   * `aria-busy` so the wait is announced rather than only drawn.
+   *
+   * Callers were doing `disabled={pending}` and swapping the label
+   * ("결제하기" → "결제 중…"), which left no visual motion and nothing for a
+   * screen reader. Keep swapping the label if it's useful — this adds the
+   * affordance the label alone can't provide.
+   */
+  loading?: boolean;
+} & ComponentProps<"button">) {
   return (
     <button
       className={`${base} ${variants[variant]} ${sizes[size]} ${className}`}
+      disabled={disabled || loading}
+      aria-busy={loading || undefined}
       {...props}
-    />
+    >
+      {loading && <Spinner />}
+      {children}
+    </button>
   );
 }
 

@@ -1,4 +1,7 @@
 {
+  "a11y": {
+    "skipToContent": "Skip to content"
+  },
   "common": {
     "brand": "motoo",
     "login": "Log in",
@@ -73,6 +76,18 @@
     },
     "businessInfo": "motoo Inc. · Telecom sales intermediary · Payment is made directly with each creator (seller); the platform does not hold funds.",
     "fanDisclosure": "Mochi is support — no investment, refund of value, resale, or financial return · Payment is made directly with each creator (seller)."
+  },
+  "errorPage": {
+    "title": "Something went wrong",
+    "body": "We hit a problem. Try again, and let us know if you keep seeing this.",
+    "retry": "Try again",
+    "home": "Go home",
+    "studioTitle": "We couldn't load your Studio",
+    "studioBody": "We hit a problem. Try again — your market and orders are untouched.",
+    "reference": "Error code",
+    "notFoundTitle": "Page not found",
+    "notFoundBody": "This page has moved or no longer exists. Try starting from home.",
+    "notFoundCta": "Go home →"
   },
   "stub": {
     "loginTitle": "Log in",
@@ -691,14 +706,15 @@
     "backToProfile": "Back to profile",
     "buyTitle": "Buy mochi",
     "buySubtitle": "Buy {name}'s mochi to use it in their market.",
-    "pricePerMochi": "₩{price} per mochi",
+    "pricePerMochi": "₩{price, number} per mochi",
     "quantityLabel": "Quantity",
+    "quantityMaxHint": "Up to {max, number} per purchase.",
     "youPay": "You pay",
     "notOnSale": "Mochi isn't on sale right now.",
     "myBalance": "My mochi balance",
-    "buyButton": "Pay ₩{amount}",
+    "buyButton": "Pay ₩{amount, number}",
     "buying": "Processing…",
-    "bought": "You got {count} mochi!",
+    "bought": "You got {count, number} mochi!",
     "goalProgress": "{percent}% of the issuance goal",
     "marketTitle": "Market",
     "marketSubtitle": "Items you can use your mochi on.",
@@ -729,6 +745,10 @@
       "notOnSale": "Mochi isn't on sale right now.",
       "outOfStock": "This item is sold out.",
       "insufficient": "Not enough mochi.",
+      "quantityMax": "That's more than one purchase allows. Please lower the quantity.",
+      "amountMax": "That's more than one payment allows. Please lower the quantity.",
+      "verifyRequired": "Identity verification is required. Please verify and try again.",
+      "guardianRequired": "Under 19s need a guardian's consent before buying mochi.",
       "generic": "We couldn't process that. Please try again shortly."
     },
     "followNudge": "Follow {name} to hear from them"
@@ -819,6 +839,7 @@
       "body": "Separately from the above, where the law requires a refund we process it accordingly. A payment made by a minor without their legal guardian's consent is the principal example."
     },
     "howTo": {
+      "contact": "Contact:",
       "title": "5. How to request",
       "body": "Contact support. We confirm the purchase and the grounds for the request, tell you the outcome, and — where a withdrawal is confirmed — return the payment within the statutory 3 business days. Depending on your payment method, the money may take a few days more to appear."
     },

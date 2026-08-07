@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useCallback } from "react";
 import { IconSearch } from "@/components/ui/Icons";
+import { Select } from "@/components/ui/Field";
 import {
   CREATOR_TYPES,
   CATEGORIES_BY_TYPE,
@@ -47,9 +48,6 @@ export function ExploreFilters() {
       ? CATEGORIES_BY_TYPE[activeType]
       : ALL_CATEGORIES;
 
-  const selectClass =
-    "rounded-[12px] border border-line-3 bg-white px-3 py-[10px] text-[14px] font-medium text-ink outline-none focus:border-coral";
-
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
       <form
@@ -66,9 +64,9 @@ export function ExploreFilters() {
         />
       </form>
 
-      <select
+      <Select
         aria-label={t("filterType")}
-        className={selectClass}
+        size="sm"
         value={activeType}
         onChange={(e) => setType(e.target.value)}
       >
@@ -78,11 +76,11 @@ export function ExploreFilters() {
             {tax(`types.${ty}`)}
           </option>
         ))}
-      </select>
+      </Select>
 
-      <select
+      <Select
         aria-label={t("filterCategory")}
-        className={selectClass}
+        size="sm"
         value={params.get("category") ?? "all"}
         onChange={(e) => setParam("category", e.target.value)}
       >
@@ -92,11 +90,11 @@ export function ExploreFilters() {
             {tax(`categories.${c}`)}
           </option>
         ))}
-      </select>
+      </Select>
 
-      <select
+      <Select
         aria-label={t("filterBackers")}
-        className={selectClass}
+        size="sm"
         value={params.get("backerRange") ?? "all"}
         onChange={(e) => setParam("backerRange", e.target.value)}
       >
@@ -107,11 +105,11 @@ export function ExploreFilters() {
               : t(`backerCountRanges.${r}` as never)}
           </option>
         ))}
-      </select>
+      </Select>
 
-      <select
+      <Select
         aria-label={t("sortLabel")}
-        className={selectClass}
+        size="sm"
         value={params.get("sort") ?? "backers"}
         onChange={(e) => setParam("sort", e.target.value)}
       >
@@ -120,7 +118,7 @@ export function ExploreFilters() {
             {t(`sort.${s}` as never)}
           </option>
         ))}
-      </select>
+      </Select>
     </div>
   );
 }

@@ -18,7 +18,10 @@ export function NotificationBell({
     <Link
       href="/notifications"
       aria-label={label}
-      className="relative flex h-10 w-10 items-center justify-center rounded-full text-ink transition hover:bg-cream-warm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-deep"
+      // Hidden below `lg`, where the MobileTabBar carries 알림 (with the same
+      // unread badge). Showing both put two identical controls on a 375px
+      // header that was already wrapping.
+      className="relative hidden h-10 w-10 items-center justify-center rounded-full text-ink transition hover:bg-cream-warm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-deep lg:flex"
     >
       <IconBell width={23} height={23} />
       {unreadCount > 0 && (

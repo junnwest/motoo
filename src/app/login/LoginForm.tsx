@@ -3,13 +3,11 @@
 import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Field";
+import { InlineMessage } from "@/components/ui/InlineMessage";
 import { SocialButtons } from "@/components/SocialButtons";
 import type { EnabledProviders } from "@/lib/auth-providers";
 import { loginAction } from "./actions";
-
-const labelClass = "mb-1.5 block text-[13px] font-semibold text-muted-2";
-const inputClass =
-  "w-full rounded-[12px] border border-line-3 bg-white px-4 py-3 text-[15px] outline-none transition focus:border-coral/60";
 
 export function LoginForm({ providers }: { providers: EnabledProviders }) {
   const t = useTranslations("auth");
@@ -37,45 +35,31 @@ export function LoginForm({ providers }: { providers: EnabledProviders }) {
   return (
     <div>
       <form onSubmit={submit} className="flex flex-col gap-4">
-        <div>
-        <label htmlFor="email" className={labelClass}>
-          {t("email")}
-        </label>
-        <input
-          id="email"
+        <Input
+          label={t("email")}
           type="email"
           autoComplete="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className={inputClass}
         />
-      </div>
 
-      <div>
-        <label htmlFor="password" className={labelClass}>
-          {t("password")}
-        </label>
-        <input
-          id="password"
+        <Input
+          label={t("password")}
           type="password"
           autoComplete="current-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-          className={inputClass}
         />
-      </div>
 
-      {error && (
-        <p className="text-[13px] font-medium text-live">{t("invalid")}</p>
-      )}
+        {error && <InlineMessage tone="error">{t("invalid")}</InlineMessage>}
 
       <Button
         type="submit"
         variant="primary"
         size="lg"
-        disabled={pending}
+        loading={pending}
         className="mt-1 w-full"
       >
         {pending ? t("loggingIn") : t("loginButton")}

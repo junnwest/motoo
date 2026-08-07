@@ -45,7 +45,7 @@ export default async function ProfilePage() {
   return (
     <>
       <ConsumerShell>
-        <main className="mx-auto max-w-[900px] px-6 py-12 sm:px-10 sm:py-16">
+        <div className="mx-auto max-w-[900px] px-6 py-12 sm:px-10 sm:py-16">
           {/* Identity. Accounts are additive, so owning a Studio is the only
               thing that distinguishes a creator — surfaced here (and in the nav
               dropdown) rather than left implicit. */}
@@ -182,7 +182,7 @@ export default async function ProfilePage() {
               </ul>
             )}
           </Section>
-        </main>
+        </div>
       </ConsumerShell>
       <Footer variant="fan" />
     </>

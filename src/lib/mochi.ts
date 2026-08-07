@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "./db";
 import { getPaymentProvider } from "./payments";
+import { validatePurchase } from "./issuance";
 
 /**
  * Phase 2 — mochi-marketplace core.
@@ -16,10 +17,48 @@ import { getPaymentProvider } from "./payments";
  *   - A holding's balance never goes negative: a redemption checks balance inside
  *     the transaction before debiting.
  *   - Cancelling an order refunds the exact mochi spent and frees the stock.
+ *   - A purchase is bounded on BOTH ends: the issuance floors (src/lib/issuance.ts)
+ *     bound what a creator may issue; MOCHI_MAX_PURCHASE_* bound what one fan may
+ *     buy in a single transaction.
+ *   - Only an identity-verified buyer can purchase, and a minor needs recorded
+ *     guardian consent (see `assertCanPurchase`).
  *
  * NOT a financial product: the goal is a creator-side target, never sold as a
  * "raise". Banned-vocabulary check (pnpm check:vocab) guards user-facing copy.
  */
+
+/**
+ * Gate the buyer before any money moves.
+ *
+ * Korea gates payments on 본인인증 through a 본인확인기관, not a self-reported
+ * birthdate — `Backer.verifiedAt` / `ageVerified` are written server-side by a
+ * VerificationProvider (src/lib/verification) and never by the client.
+ *
+ * This lives here, in the tested money surface, rather than only in the server
+ * action. `/onboarding` already hard-requires `verifiedAt` before an account can
+ * reach the app, so in practice every buyer arriving through the UI is verified;
+ * this closes the action-level path and makes the rule testable. The `/refund`
+ * 법령 carve-out promises a minor's payment is refundable, and the product can't
+ * honour a rule it never evaluates.
+ *
+ * A minor is not blocked outright — a minor **with recorded guardian consent**
+ * may transact, which is what `guardianConsent` exists to record. The flow that
+ * collects it is not built yet (see docs/PROGRESS.md), so today a minor is
+ * always stopped here; that's the correct failure, not a placeholder.
+ */
+async function assertCanPurchase(backerId: string): Promise<void> {
+  const backer = await prisma.backer.findUnique({
+    where: { id: backerId },
+    select: { verifiedAt: true, ageVerified: true, guardianConsent: true },
+  });
+  if (!backer) throw new Error("BACKER_NOT_FOUND");
+  if (!backer.verifiedAt) throw new Error("NOT_VERIFIED");
+  // Adults pass. A minor needs guardian consent explicitly recorded as true —
+  // `null` (never asked) and `false` (asked, not granted) both stop here.
+  if (!backer.ageVerified && backer.guardianConsent !== true) {
+    throw new Error("GUARDIAN_CONSENT_REQUIRED");
+  }
+}
 
 export interface BuyMochiInput {
   backerId: string;
@@ -50,12 +89,23 @@ export async function buyMochi(input: BuyMochiInput): Promise<BuyMochiResult> {
     throw new Error("INVALID_QUANTITY");
   }
 
+  // Buyer eligibility before anything else — no lookup, no charge, no credit for
+  // an unverified account or a minor without guardian consent.
+  await assertCanPurchase(input.backerId);
+
   const issuance = await prisma.mochiIssuance.findUnique({
     where: { streamerId: input.streamerId },
   });
   if (!issuance || !issuance.active) throw new Error("MOCHI_NOT_ON_SALE");
 
   const amountKrw = issuance.pricePerMochiKrw * quantity; // integer KRW
+
+  // Purchase ceilings — server-authoritative, checked BEFORE the PG is called so
+  // an over-limit request is never charged. The client caps its own input too,
+  // but that's a courtesy; this is the enforcement.
+  const limitError = validatePurchase(quantity, amountKrw);
+  if (limitError === "quantityMax") throw new Error("QUANTITY_TOO_LARGE");
+  if (limitError === "amountMax") throw new Error("AMOUNT_TOO_LARGE");
 
   // Idempotency: prefer the caller's per-purchase token; otherwise derive a
   // stable one (NO wall-clock, so a retry of the same purchase can't slip past
