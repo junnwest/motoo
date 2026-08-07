@@ -14,12 +14,19 @@ Nothing is half-finished; `main` is green and deployed. These are the known gaps
 deliberate. Ordered by what would hurt most if ignored.
 
 **Needs a real answer before money moves**
-- [ ] **The 환불·청약철회 policy page is still a placeholder** (`/terms`, `/privacy` too). User-
-  facing copy now says 구매한 모찌는 환불되지 않아요 with "legally-mandated exceptions
-  only" — but the exceptions are nowhere written down. 전자상거래법 §17 gives consumers a
-  withdrawal right on unused prepaid content that a flat no-refunds line sits awkwardly
-  against, and 선불전자지급수단 rules add their own. **This is the one open item that is a
-  liability rather than a nicety.** See DECISIONS 2026-08-01.
+- [ ] **`/refund` needs Korean counsel sign-off before `PAYMENT_PROVIDER` leaves `mock`.**
+  The page now exists and states real positions (2026-08-06): 7-day 청약철회 on a wholly
+  unused purchase, 60% 사용 → 잔액 환불, plus the 법령 carve-out. Those positions were the
+  owner's calls, **not a lawyer's** — nobody has checked them against 전자상거래법 §17 or the
+  선불전자지급수단 rules. **This is still the one open item that is a liability rather than a
+  nicety.** See DECISIONS 2026-08-06.
+  - [ ] **The policy is silent on creator/service termination** — what happens to an unused
+    balance if a creator stops trading or motoo closes the market. Deliberately omitted (the
+    owner chose the 60% rule alone over 60%+termination), but it is the clause hardest to
+    defend leaving out. Take it to counsel with the rest.
+  - [ ] **`/refund` tells users to contact 고객센터, which does not exist** — the footer's
+    support links are still `href="#"`. The policy promises a channel the product lacks.
+  - [ ] `/terms` and `/privacy` are still one-line placeholders, now linked from the footer.
 - [ ] Real PG (Toss/NICE/PortOne), real 본인인증, Kakao login — all blocked on 사업자등록.
   Mocks stand in behind `PaymentProvider` / `VerificationProvider`.
 

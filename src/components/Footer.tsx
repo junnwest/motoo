@@ -95,9 +95,9 @@ export function Footer({ variant = "fan" }: { variant?: "fan" | "creator" }) {
             <FooterCol
               title={t("colTerms")}
               links={[
-                { label: t("terms.tos"), href: "#" },
-                { label: t("terms.privacy"), href: "#" },
-                { label: t("terms.refund"), href: "#", underline: true },
+                { label: t("terms.tos"), href: "/terms" },
+                { label: t("terms.privacy"), href: "/privacy" },
+                { label: t("terms.refund"), href: "/refund", underline: true },
               ]}
             />
           </div>

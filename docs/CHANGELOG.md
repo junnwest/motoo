@@ -4,6 +4,27 @@ What shipped, newest first. **This file is history — it is not a resume point.
 For current status and open work see [`PROGRESS.md`](./PROGRESS.md); for *why* a thing is
 the way it is see [`DECISIONS.md`](./DECISIONS.md).
 
+## 2026-08-06 (the 환불·청약철회 policy page is real)
+
+- [x] **New `/refund`** — the placeholder that PROGRESS had flagged as the project's one
+  liability-grade gap. States three separated refund paths: 주문 취소 (mochi restored, already
+  built), 청약철회 (7 days, wholly-unused purchase, KRW), 미사용 잔액 (60% spent → remainder
+  at price paid, KRW), plus the 법령 carve-out and the 양도·재판매 prohibition. Copy in both
+  locales, 21 keys, no hardcoded strings.
+- [x] **Fixed the contradiction at the point of payment**: `marketplace.disclosure` still
+  promised a flat no-refund with law-only exceptions, which the new policy contradicts. It
+  now summarises the 7-day rule and links to `/refund`.
+- [x] **Wired three dead footer links** — 이용약관/개인정보처리방침/환불·청약철회 had pointed at
+  `#` since Phase 1. `/refund` added to `ONBOARDING_ALLOW` so the gate doesn't bounce it.
+- [x] **The positions are the owner's, not counsel's** — sign-off is now the gate on
+  `PAYMENT_PROVIDER` leaving `mock`, and termination-of-service is a deliberate omission.
+  Both carried as open items. See DECISIONS 2026-08-06.
+- [x] Verified: `tsc` clean, `check:vocab` clean (contextual "return" warnings only — the
+  English word for returning money), `check:emoji` clean, eslint unchanged (same 2
+  pre-existing errors), `pnpm build` clean (**26 routes**, `/refund` new), ko/en key parity
+  confirmed at 0 drift. **`pnpm test` not run** — Docker daemon down, and this change
+  touches no money logic (`src/lib/mochi.ts` untouched).
+
 ## 2026-08-03 (studio→apex hops go straight to the canonical host)
 
 - [x] **Cross-host redirects are one hop, not two.** Vercel serves the consumer app on **www**

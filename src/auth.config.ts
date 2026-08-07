@@ -19,6 +19,7 @@ const ONBOARDING_ALLOW = [
   "/onboarding",
   "/terms",
   "/privacy",
+  "/refund",
   "/login",
   "/signup",
 ];

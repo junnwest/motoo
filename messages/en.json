@@ -722,7 +722,8 @@
       "instant": "Instant",
       "request": "Request"
     },
-    "disclosure": "Mochi is prepaid credit for use only in this creator's market. It is non-transferable, non-resellable, and non-refundable once purchased. The only exceptions are cases the law requires, such as a payment made by a minor.",
+    "disclosure": "Mochi is prepaid credit for use only in this creator's market. It cannot be transferred or resold. Within 7 days of purchase, and provided you have not spent a single mochi from it, you may withdraw the purchase.",
+    "disclosureLink": "Read the refund & withdrawal policy",
     "errors": {
       "login": "Please log in to continue.",
       "notOnSale": "Mochi isn't on sale right now.",
@@ -788,6 +789,43 @@
     "termsTitle": "Terms of Service",
     "privacyTitle": "Privacy Policy",
     "placeholder": "Placeholder document for the demo. Full terms to come.",
+    "back": "Back"
+  },
+  "refund": {
+    "title": "Refund & Withdrawal Policy",
+    "updated": "Last revised: 6 August 2026",
+    "intro": "Mochi is prepaid credit usable only in one creator's market. Order cancellations, withdrawal of purchase, and refunds of unused balance are handled as set out below.",
+    "seller": {
+      "title": "Who sells, and who holds the money",
+      "body": "Each creator issues and sells their own mochi. motoo provides the marketplace as an intermediary and does not hold payment funds. Payment passes through a licensed PG directly to the creator, and the refund obligation likewise sits with the creator as seller. motoo receives requests and assists with processing."
+    },
+    "orderCancel": {
+      "title": "1. Order cancellation — returned as mochi",
+      "body": "If a creator cancels an order you placed for a market item, the mochi spent on that order is restored to your balance in full. This is a return of mochi, not a cash refund.",
+      "note": "Instant items complete at the moment of ordering, so they cannot be cancelled."
+    },
+    "withdrawal": {
+      "title": "2. Withdrawal of purchase — within 7 days",
+      "body": "If it is within 7 days of your purchase and you have not spent a single mochi from that purchase, you may withdraw it. The full amount paid is returned to your original payment method.",
+      "note": "If any mochi from that purchase has been spent, withdrawal no longer applies. See the unused-balance section below instead."
+    },
+    "balance": {
+      "title": "3. Unused balance — once 60% has been spent",
+      "body": "Once you have spent 60% or more of the mochi you bought from a creator, you may request a refund of what remains. The remaining mochi is refunded at the price you paid for it.",
+      "note": "For example: buy 1,000 mochi for ₩100,000, spend 700, and the remaining 300 mochi are refundable at ₩30,000."
+    },
+    "legalException": {
+      "title": "4. Refunds required by law",
+      "body": "Separately from the above, where the law requires a refund we process it accordingly. A payment made by a minor without their legal guardian's consent is the principal example."
+    },
+    "howTo": {
+      "title": "5. How to request",
+      "body": "Contact support. We confirm the purchase and the grounds for the request, tell you the outcome, and — where a withdrawal is confirmed — return the payment within the statutory 3 business days. Depending on your payment method, the money may take a few days more to appear."
+    },
+    "noResale": {
+      "title": "6. Transfer and resale",
+      "body": "Mochi cannot be transferred or resold to anyone else, and cannot be moved between creators. Refunds are made only to the person who bought it."
+    },
     "back": "Back"
   },
   "creatorTaxonomy": {

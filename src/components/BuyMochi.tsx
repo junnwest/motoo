@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Button, ButtonLink } from "@/components/ui/Button";
@@ -234,9 +235,12 @@ export function BuyMochi({
             </p>
           )}
 
-          {/* non-financial disclosure */}
+          {/* non-financial disclosure — the refund terms it summarises live at /refund */}
           <p className="mt-5 text-[12px] leading-[1.6] text-muted">
-            {t("disclosure")}
+            {t("disclosure")}{" "}
+            <Link href="/refund" className="underline hover:text-body">
+              {t("disclosureLink")}
+            </Link>
           </p>
         </div>
       )}

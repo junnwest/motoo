@@ -11,6 +11,7 @@ To pull a single entry, grep its heading with trailing context, e.g.
 
 | Date | Decision |
 | --- | --- |
+| 2026-08-06 | `/refund` states real positions: 7-day 청약철회, 60% rule, 법령 carve-out |
 | 2026-08-03 | Cross-host hops target the canonical host, not the bare apex |
 | 2026-08-02 | Auth transitions navigate for real; a server-action redirect skipped middleware |
 | 2026-08-02 | The shell has a height floor, so collapsing a rail can't move the footer |
@@ -66,6 +67,43 @@ To pull a single entry, grep its heading with trailing context, e.g.
 | 2026-07-08 | `FoundingMembership` table for the founding-number invariant |
 | 2026-07-08 | Prisma pinned to v6 (not v7) |
 | 2026-07-08 | Korean-first, i18n-ready; integer KRW; mock PG |
+
+## 2026-08-06 — `/refund` states real positions: 7-day 청약철회, 60% rule, 법령 carve-out
+The 환불·청약철회 page had been a placeholder since the non-refundable decision (2026-08-01)
+flagged it as the one open item that was a liability rather than a nicety. It now exists,
+and the flat "구매한 모찌는 환불되지 않아요" line it was sitting against is gone.
+
+- **Three refund paths, deliberately separated**, because they were being conflated in copy
+  and they behave differently in the schema:
+  1. **주문 취소 → mochi back.** Already built (`cancelOrder`); the item order reverses and
+     `MochiHolding.balance` is restored. Never touches KRW.
+  2. **청약철회 → KRW back.** Within 7 days, and only if *not one mochi* from that purchase
+     has been spent. Not built — no PG to refund through.
+  3. **미사용 잔액 → KRW back.** Once 60% or more of what was bought from a creator has been
+     spent, the remainder is refundable at the price paid. Not built.
+- **The positions are the owner's calls, not counsel's.** Chosen 2026-08-06 from options put
+  to him explicitly: the 7-day/unused-only window (the statutory default shape, lowest risk)
+  over both a pro-rated version and the flat no-refund posture; and the 60% rule (the
+  신유형 상품권 표준약관 convention Korean consumers already expect) over termination-only.
+  **Nobody has checked any of this against 전자상거래법 §17 or the 선불전자지급수단 rules.**
+  That review is now the gate on `PAYMENT_PROVIDER` leaving `mock` — recorded in PROGRESS.
+- **Termination is deliberately NOT in the policy.** The owner was offered "60% rule" vs
+  "termination-only" vs "both" and picked the first, so the page says nothing about a
+  creator quitting or the market closing. It was flagged at the time as the clause hardest
+  to defend omitting; left out rather than added unilaterally, and carried as an open item.
+- **`krwPaidTotal` finally has a consumer.** It was kept at 2026-08-01 as "the ledger for the
+  legal-exception path"; both new KRW paths price the refund off it. Still nothing reads it
+  yet — the accounting is per-holding, and the 7-day rule needs it **per purchase**, so
+  whoever builds the flow will need a purchase-level record that does not exist today.
+- **The buy-flow disclosure was the real bug.** `marketplace.disclosure` promised a flat
+  no-refund with law-only exceptions; shipping the page without rewriting it would have left
+  the product contradicting its own policy at the point of payment. It now summarises the
+  7-day rule and links to `/refund`.
+- **Page posture: a real policy, with the review gated in docs** rather than a visible
+  "draft" banner. No real money moves yet (mock PG), so the page is accurate for the current
+  state, and a provisional-looking policy reads worse to users than a plain one.
+- The footer's 환불·청약철회 link had existed since Phase 1 pointing at `#`; it, 이용약관 and
+  개인정보처리방침 are now wired. The latter two still resolve to placeholders.
 
 ## 2026-08-03 — Cross-host hops target the canonical host, not the bare apex
 Prompted by "there are consumer pages under the studio domain — aren't these duplicates?"
