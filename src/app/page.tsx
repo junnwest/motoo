@@ -17,6 +17,7 @@ import { StreamerCard } from "@/components/StreamerCard";
 import { CreatorCover } from "@/components/CreatorCover";
 import { getExploreStreamers, type StreamerCard as CardData } from "@/lib/streamers";
 import { getSession } from "@/lib/session";
+import { getSupporterLeaderboard } from "@/lib/ranking";
 import { formatCount } from "@/lib/format";
 
 export default async function FanLandingPage() {
@@ -44,6 +45,10 @@ export default async function FanLandingPage() {
     trending = [];
   }
   const spotlight = trending[0];
+  // The spotlight's real lifetime mochi, not a multiple of its supporter count.
+  const spotlightMochi = spotlight
+    ? (await getSupporterLeaderboard(spotlight.id, 1)).totalMochiPurchased
+    : 0;
 
   return (
     <>
@@ -216,9 +221,13 @@ export default async function FanLandingPage() {
                   </div>
                 </div>
                 <div>
+                  {/* Was `backerCount * 10` — an invented number presented as
+                      this creator's real mochi total, on the homepage of a
+                      product whose whole premise is trustworthy support data.
+                      The true figure was one query away. */}
                   <div className="flex items-center gap-[6px] text-[24px] font-extrabold">
                     <Mochi width={18} height={14} />
-                    {formatCount(spotlight.backerCount * 10)}
+                    {formatCount(spotlightMochi)}
                   </div>
                   <div className="text-[13px] text-muted">
                     {t("spotlightMochi")}

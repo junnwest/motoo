@@ -1,12 +1,9 @@
 import {
   PrismaClient,
-  BackingDisplay,
   MarketplaceItemType,
   FulfillmentMode,
 } from "@prisma/client";
-import { computeGrades, type TrustMetrics } from "../src/lib/grades";
 import { hashPassword } from "../src/lib/password";
-import { MOCHI_TO_KRW } from "../src/lib/payments/types";
 
 const prisma = new PrismaClient();
 
@@ -29,8 +26,6 @@ const NICKNAMES = [
   "포근포근", "하트뿅", "겜생겜사", "노래좋아", "버추얼덕후", "공부방지기",
   "커피한잔", "별헤는밤",
 ];
-
-const CATEGORIES = ["game", "music", "virtual", "daily", "study"];
 
 interface StreamerSeed {
   handle: string;
@@ -57,12 +52,6 @@ const STREAMERS: StreamerSeed[] = [
   { handle: "creatorH", displayName: "픽셀탐험대", creatorType: "youtuber", category: "game", bio: "인디게임 탐험가. 숨은 명작 발굴.", avgViewers: 95, followerCount: 4100, backers: 19, recurringRate: 0.26, fulfillment: 0.75, publish: false },
   { handle: "creatorI", displayName: "만두작가", creatorType: "author", category: "webtoon", bio: "주 2회 연재하는 일상 웹툰 작가예요.", avgViewers: 0, followerCount: 5300, backers: 24, recurringRate: 0.34, fulfillment: 0.85, publish: true },
   { handle: "creatorJ", displayName: "달빛서고", creatorType: "author", category: "novel", bio: "판타지 장편소설을 연재하고 있어요.", avgViewers: 0, followerCount: 2800, backers: 12, recurringRate: 0.25, fulfillment: 0.72, publish: false },
-];
-
-const TIER_TEMPLATES = [
-  { name: "새싹 응원", priceKrw: 3000, description: "가볍게 마음을 전하는 첫 응원", perks: ["팬 월 등록", "파운딩 배지"] },
-  { name: "단골 서포터", priceKrw: 6000, description: "단골 팬만의 혜택을 누려요", perks: ["팬 전용 소식", "디스코드 서포터 역할", "월간 추첨 참여"] },
-  { name: "핵심 팬", priceKrw: 12000, description: "가장 가까이에서 함께하는 핵심 팬", perks: ["Q&A 우선 참여", "손편지·굿즈 우선권", "비공개 라이브 초대"] },
 ];
 
 // Phase 2: each creator's marketplace items, priced in that creator's mochi.
@@ -117,13 +106,7 @@ async function main() {
   await prisma.marketplaceItem.deleteMany();
   await prisma.mochiHolding.deleteMany();
   await prisma.mochiIssuance.deleteMany();
-  await prisma.perkDelivery.deleteMany();
-  await prisma.foundingMembership.deleteMany();
-  await prisma.backing.deleteMany();
-  await prisma.perk.deleteMany();
   await prisma.update.deleteMany();
-  await prisma.trustReport.deleteMany();
-  await prisma.tier.deleteMany();
   await prisma.streamer.deleteMany();
   await prisma.backer.deleteMany();
 
@@ -293,142 +276,6 @@ async function main() {
       flagship = creatorRef;
     }
 
-    // Tiers
-    const tiers = [];
-    for (let t = 0; t < TIER_TEMPLATES.length; t++) {
-      const tpl = TIER_TEMPLATES[t];
-      tiers.push(
-        await prisma.tier.create({
-          data: {
-            streamerId: streamer.id,
-            name: tpl.name,
-            priceKrw: tpl.priceKrw,
-            description: tpl.description,
-            sortOrder: t,
-          },
-        }),
-      );
-    }
-
-    // Perks (one per tier), with due dates spread around now.
-    const perks = [];
-    for (let t = 0; t < tiers.length; t++) {
-      const perk = await prisma.perk.create({
-        data: {
-          tierId: tiers[t].id,
-          streamerId: streamer.id,
-          title: TIER_TEMPLATES[t].perks[0],
-          description: `${tiers[t].name} 팬에게 제공되는 퍼크`,
-          promisedBy: new Date(2026, 5 + t, 20),
-          status: t === 0 ? "delivered" : t === 1 ? "in_progress" : "promised",
-          backersOwed: 0,
-        },
-      });
-      perks.push(perk);
-    }
-
-    // Backings — assign founding numbers sequentially per streamer.
-    let foundingCounter = 0;
-    const backerFounding = new Map<string, number>();
-    const tierBackerCounts = [0, 0, 0];
-    let totalKrw = 0;
-    let deliveredCount = 0;
-    let owedCount = 0;
-
-    // choose a subset of the backer pool for this streamer
-    const shuffled = [...backers].sort(() => rand() - 0.5).slice(0, s.backers);
-    for (const backer of shuffled) {
-      const timesToBack = rand() < s.recurringRate ? 1 + Math.floor(rand() * 3) : 1;
-      for (let b = 0; b < timesToBack; b++) {
-        const tierIndex =
-          rand() < 0.5 ? 0 : rand() < 0.75 ? 1 : 2;
-        const tier = tiers[tierIndex];
-        tierBackerCounts[tierIndex]++;
-
-        // founding number: assigned once per (streamer, backer)
-        let founding = backerFounding.get(backer.id);
-        if (founding === undefined) {
-          founding = ++foundingCounter;
-          backerFounding.set(backer.id, founding);
-          await prisma.foundingMembership.create({
-            data: {
-              streamerId: streamer.id,
-              backerId: backer.id,
-              foundingNumber: founding,
-            },
-          });
-        }
-
-        const display = pick([
-          BackingDisplay.public,
-          BackingDisplay.public,
-          BackingDisplay.nickname,
-          BackingDisplay.anonymous,
-        ]);
-        const hasMessage = rand() < 0.4;
-        const mochi = tier.priceKrw / MOCHI_TO_KRW;
-        totalKrw += tier.priceKrw;
-
-        const backing = await prisma.backing.create({
-          data: {
-            streamerId: streamer.id,
-            backerId: backer.id,
-            tierId: tier.id,
-            amountKrw: tier.priceKrw,
-            currencyUnitsSpent: mochi,
-            foundingNumber: founding,
-            display,
-            displayName:
-              display === BackingDisplay.nickname
-                ? backer.nickname
-                : null,
-            message: hasMessage
-              ? pick([
-                  "항상 응원해요! 오래오래 방송해주세요.",
-                  "덕분에 하루가 즐거워요.",
-                  "첫 방송부터 지금까지 쭉 함께했어요.",
-                  "다음 콘텐츠도 기대할게요!",
-                  "힘내세요, 우리가 있잖아요.",
-                ])
-              : null,
-            status: "paid",
-            createdAt: new Date(
-              2026,
-              1 + Math.floor(rand() * 5),
-              1 + Math.floor(rand() * 27),
-            ),
-          },
-        });
-
-        // Perk delivery — only for the delivered (tier 0) perk, at the fulfillment rate.
-        if (tierIndex === 0) {
-          owedCount++;
-          if (rand() < s.fulfillment) {
-            deliveredCount++;
-            await prisma.perkDelivery.create({
-              data: {
-                perkId: perks[0].id,
-                backingId: backing.id,
-                confirmedByBacker: rand() < 0.7,
-              },
-            });
-          }
-        }
-      }
-    }
-
-    // Update tier backer counts + perk owed counts
-    for (let t = 0; t < tiers.length; t++) {
-      await prisma.tier.update({
-        where: { id: tiers[t].id },
-        data: { backerCount: tierBackerCounts[t] },
-      });
-    }
-    await prisma.perk.update({
-      where: { id: perks[0].id },
-      data: { backersOwed: owedCount, deliveredAt: new Date(2026, 5, 18) },
-    });
-
     // Updates. The public one varies per creator — the home aggregates these
     // side by side, and four identical cards read as placeholder text.
     const publicUpdate = pick(PUBLIC_UPDATES);
@@ -455,53 +302,6 @@ async function main() {
       ],
     });
 
-    // Trust report (published for some)
-    const totalBackers = backerFounding.size;
-    const totalBackings = tierBackerCounts.reduce((a, b) => a + b, 0);
-    const recurringRate =
-      totalBackers > 0 ? (totalBackings - totalBackers) / totalBackings : 0;
-    const coreFanCount = Math.round(totalBackers * 0.15);
-    const perkFulfillmentRate = owedCount > 0 ? deliveredCount / owedCount : 1;
-
-    const metrics: TrustMetrics = {
-      fanSupport: {
-        totalBackers,
-        averageBackingKrw:
-          totalBackings > 0 ? Math.round(totalKrw / totalBackings) : 0,
-        recurringRate,
-      },
-      fanLoyalty: {
-        coreFanCount,
-        publicBackerRatio: 0.55 + rand() * 0.2,
-        messageRate: 0.3 + rand() * 0.2,
-        updateResponseRate: 0.4 + rand() * 0.3,
-      },
-      execution: {
-        perkFulfillmentRate,
-        updateFrequencyPerMonth: 4,
-        overduePerkCount: s.fulfillment < 0.8 ? 1 : 0,
-      },
-      growth: {
-        followerGrowth: 0.05 + rand() * 0.15,
-        avgViewerGrowth: 0.03 + rand() * 0.12,
-        communityGrowth: 0.06 + rand() * 0.14,
-      },
-    };
-    const grades = computeGrades(metrics);
-
-    await prisma.trustReport.create({
-      data: {
-        streamerId: streamer.id,
-        reportNumber: 1,
-        periodStart: new Date(2026, 5, 1),
-        periodEnd: new Date(2026, 5, 30),
-        metrics: metrics as unknown as object,
-        grades: grades as unknown as object,
-        status: s.publish ? "published" : "draft",
-        publishedAt: s.publish ? new Date(2026, 6, 1) : null,
-        generatedAt: new Date(2026, 6, 1),
-      },
-    });
   }
 
   // ── Phase 2: populate the flagship creator's holdings + orders ──────────────

@@ -28,10 +28,14 @@ preview deploys per PR.
 | Verify deployed site | ✅ `/explore` + `/s/[handle]` render 200 against Supabase, no console errors |
 | Cross-host redirects | ✅ 2026-08-03 — `studio.themotoo.com/*` consumer paths 307 straight to **www** (one hop; previously two via the bare apex) |
 
-> **Note (Hobby plan):** function-region selection via `vercel.json` (`icn1`) is a Pro
-> feature — on Hobby it's likely ignored, so functions run in Vercel's default US region
-> while the DB is in Seoul (adds cross-Pacific latency per query). Fine for the demo;
-> revisit on Pro.
+> **Region (resolved 2026-08-06):** the account is on **Vercel Pro**, which honours
+> single-region pinning, so `vercel.json`'s `icn1` applies and functions run in Seoul
+> beside the database. The earlier note here assumed Hobby and warned about
+> cross-Pacific latency — that was never the case.
+>
+> **`CRON_SECRET` is required.** `vercel.json` schedules `/api/cron/purge-accounts`
+> daily; the route refuses to run without the secret, so if it's unset the account
+> deletion grace period never actually expires and nobody's account is ever purged.
 
 ## Env vars (set in Vercel + local `.env`)
 

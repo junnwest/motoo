@@ -1,9 +1,11 @@
 # CLAUDE.md — start here
 
 **motoo** is a Korean creator-support **mochi-marketplace**: each creator issues their own
-mochi, users buy it and spend it in that creator's marketplace. (The original Trust Report
-thesis has been removed from the website for 1.0.0 — grades/report schema stays in Prisma,
-fully dormant, no remaining UI surface. See DECISIONS 2026-08-01.)
+mochi, users buy it and spend it in that creator's marketplace. (The original Trust Report thesis was removed
+from the website for 1.0.0 and its schema was **dropped entirely** on 2026-08-06 once the
+owner confirmed the retirement is permanent — `Tier`, `Backing`, `Perk`, `PerkDelivery`,
+`TrustReport`, `FoundingMembership` and their enums are gone. `Update` survives and is what
+creator posts will be built on. See DECISIONS 2026-08-01.)
 
 **Accounts are additive:** everyone is a **user (fan)**; a **creator** is just a user who
 *also owns a Studio* (a `Streamer`). No separate account type, no mode toggle — creator

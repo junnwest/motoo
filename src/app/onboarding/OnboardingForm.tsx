@@ -30,12 +30,19 @@ export function OnboardingForm({
   const [submitPending, startSubmit] = useTransition();
 
   // Debounced handle availability check.
+  //
+  // Every setState is deferred into the timer callback rather than run in the
+  // effect body. Setting state synchronously there cascades an extra render on
+  // each keystroke, which is what `react-hooks/set-state-in-effect` flags — the
+  // same rewrite `usePersistedCollapse`, `FollowButton` and /settings' own
+  // handle field already had. This was the last remaining instance, and the
+  // longest-standing lint error in the repo.
   useEffect(() => {
     const h = handle.trim().toLowerCase();
-    if (!h) return setHandleState("idle");
-    if (!/^[a-z0-9_]{2,20}$/.test(h)) return setHandleState("invalid");
-    setHandleState("checking");
     const timer = setTimeout(async () => {
+      if (!h) return setHandleState("idle");
+      if (!/^[a-z0-9_]{2,20}$/.test(h)) return setHandleState("invalid");
+      setHandleState("checking");
       const res = await checkHandle(h);
       setHandleState(
         res.available ? "available" : res.reason === "taken" ? "taken" : "invalid",

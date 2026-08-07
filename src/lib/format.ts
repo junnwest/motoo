@@ -29,7 +29,9 @@ export function formatFoundingNumber(n: number): string {
 
 /**
  * YYYY.MM.DD in KST, so an evening-KST timestamp shows the local calendar day
- * regardless of where the server runs (Vercel Hobby runs functions in the US).
+ * regardless of where the server runs. (Functions run in icn1 today — Vercel Pro
+ * honours the region pin in vercel.json — but the formatting shouldn't depend on
+ * that staying true.)
  */
 export function formatKstDate(date: Date): string {
   const parts = new Intl.DateTimeFormat("ko-KR", {

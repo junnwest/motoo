@@ -123,14 +123,6 @@
     "notFoundBody": "주소가 바뀌었거나 사라진 페이지예요. 홈에서 다시 찾아보세요.",
     "notFoundCta": "홈으로 →"
   },
-  "stub": {
-    "loginTitle": "로그인",
-    "loginBody": "로그인은 곧 제공될 예정이에요. 지금은 데모 후원자로 응원 흐름을 체험할 수 있어요.",
-    "signupTitle": "회원가입",
-    "signupBody": "회원가입은 곧 제공될 예정이에요. 네이버·카카오·구글 로그인이 준비되고 있어요.",
-    "applyTitle": "크리에이터 신청",
-    "applyBody": "크리에이터 신청 폼은 곧 제공될 예정이에요. 심사 후 서브 가맹점 설정과 함께 페이지가 열려요."
-  },
   "safety": {
     "ageCheck": "연령 확인 · 성인 인증",
     "refundPolicy": "환불 · 청약철회 정책",
@@ -982,7 +974,14 @@
     "title": "알림",
     "subtitle": "응원 중인 크리에이터의 소식을 모아서 보여드려요.",
     "markAllRead": "모두 읽음 처리",
-    "empty": "아직 알림이 없어요. 크리에이터를 팔로우하거나 모찌를 보내면 여기서 소식을 받아볼 수 있어요."
+    "empty": "아직 알림이 없어요. 크리에이터를 팔로우하거나 모찌를 보내면 여기서 소식을 받아볼 수 있어요.",
+    "push": {
+      "priceRaisedTitle": "{name}님이 모찌 가격을 인상했어요",
+      "priceRaisedBody": "개당 {price, number}원으로 올랐어요. 보유 중인 모찌 가치는 그대로예요.",
+      "newItemTitle": "{name}님이 새 아이템을 추가했어요",
+      "orderFulfilledTitle": "{name}님이 주문을 완료했어요",
+      "orderCancelledTitle": "{name}님이 주문을 취소하고 모찌를 환불했어요"
+    }
   },
   "myProfile": {
     "title": "프로필",

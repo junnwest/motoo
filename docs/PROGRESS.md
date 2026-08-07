@@ -52,8 +52,10 @@ deliberate. Ordered by what would hurt most if ignored.
 - [ ] **Schema pushes to prod are manual** and easy to forget — the Vercel build runs
   `prisma generate` but not `db push`. Automating via `prisma migrate deploy` in the build
   would remove the footgun. See DEPLOYMENT → "Schema changes".
-- [ ] Vercel Hobby likely ignores `vercel.json`'s `icn1`, so functions run in the US while
-  the DB is in Seoul (cross-Pacific latency per query). Revisit on Pro.
+- [x] ~~Vercel Hobby likely ignores `icn1`~~ — **resolved 2026-08-06: the account is Pro, which
+  honours single-region pinning, so functions run in `icn1` beside the Seoul DB.** There was
+  never a cross-Pacific hop. (Stage 6 of the audit; the query counts it prompted were still
+  worth fixing — see CHANGELOG.)
 
 **Design tier 2/3** (unchanged, see "Current focus" below): the landing repeats one section
 template five times, Latin eyebrows (`DISCOVER`, `HOW MOCHI WORKS`), English

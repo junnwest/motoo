@@ -1,10 +1,14 @@
-// motoo data model — see §7 of motoo-product-description.md.
+// motoo data model.
 // Money is ALWAYS integer KRW. Never floats.
-// Invariants enforced in application logic (src/lib/backing.ts):
-//   - foundingNumber: assigned once per (streamer, backer), never reused/reordered,
-//     never released on refund.
-//   - PerkDelivery rows (not Perk.status) are the source of truth for Execution.
-//   - TrustReport metrics are snapshotted at generation; a published report is never recomputed.
+//
+// The Phase-1 Trust Report thesis (Tier / Backing / Perk / PerkDelivery /
+// TrustReport / FoundingMembership and their enums) was retired from the
+// product in DECISIONS 2026-08-01 and dropped from the schema once the owner
+// confirmed the retirement is permanent (2026-08-06). `Update` survives it:
+// it is still read by the home feed and creator pages, and Stage 9 builds the
+// authoring UI on it.
+//
+// Money invariants live in src/lib/mochi.ts and are covered by `pnpm test`.
 
 generator client {
   provider = "prisma-client-js"
@@ -31,41 +35,10 @@ enum StreamerStatus {
   suspended
 }
 
-enum BackingDisplay {
-  public
-  nickname
-  anonymous
-}
-
-enum BackingStatus {
-  paid
-  refunded
-  failed
-}
-
-enum PerkStatus {
-  promised
-  in_progress
-  delivered
-}
-
 enum UpdateVisibility {
   public
   backers
   tier
-}
-
-enum ReportStatus {
-  draft
-  approved
-  published
-}
-
-// Grades are words, never numbers/letters/scores (spec §6).
-enum Grade {
-  Emerging
-  Strong
-  Excellent
 }
 
 // ── Phase 2: mochi-marketplace pivot ─────────────────────────────────────────
@@ -129,12 +102,7 @@ model Streamer {
   createdAt     DateTime       @default(now())
   approvedAt    DateTime?
 
-  tiers               Tier[]
-  backings            Backing[]
-  perks               Perk[]
-  updates             Update[]
-  reports             TrustReport[]
-  foundingMemberships FoundingMembership[]
+  updates Update[]
 
   // Phase 2 relations
   mochiIssuance    MochiIssuance?
@@ -145,25 +113,6 @@ model Streamer {
 
   @@index([status])
   @@index([category])
-}
-
-model Tier {
-  id          String   @id @default(cuid())
-  streamerId  String
-  streamer    Streamer @relation(fields: [streamerId], references: [id], onDelete: Cascade)
-  name        String
-  priceKrw    Int // integer KRW
-  description String?
-  backerCount Int      @default(0)
-  limit       Int?
-  active      Boolean  @default(true)
-  sortOrder   Int      @default(0)
-
-  perks    Perk[]
-  backings Backing[]
-  updates  Update[]
-
-  @@index([streamerId])
 }
 
 // The universal account record. A plain user has role=backer; a creator account
@@ -217,92 +166,12 @@ model Backer {
   ageVerified     Boolean   @default(false)
   guardianConsent Boolean? // true once a minor's guardian consent is recorded
 
-  backings            Backing[]
-  foundingMemberships FoundingMembership[]
-
   // Phase 2 relations
   ownedStreamer Streamer?      @relation("CreatorOwner")
   mochiHoldings MochiHolding[]
   orders        Order[]
   follows       Follow[]
   notifications Notification[]
-}
-
-model Backing {
-  id                 String         @id @default(cuid())
-  streamerId         String
-  streamer           Streamer       @relation(fields: [streamerId], references: [id], onDelete: Cascade)
-  backerId           String
-  backer             Backer         @relation(fields: [backerId], references: [id], onDelete: Cascade)
-  tierId             String
-  tier               Tier           @relation(fields: [tierId], references: [id])
-  amountKrw          Int // integer KRW
-  currencyUnitsSpent Int // mochi spent
-  foundingNumber     Int // per (streamer, backer), assigned once — see invariants
-  display            BackingDisplay @default(public)
-  displayName        String?
-  message            String?
-  status             BackingStatus  @default(paid)
-  createdAt          DateTime       @default(now())
-
-  deliveries PerkDelivery[]
-
-  // foundingNumber here is a denormalized display copy. The authoritative,
-  // once-per-(streamer,backer) assignment lives in FoundingMembership.
-  @@index([streamerId])
-  @@index([backerId])
-  @@index([streamerId, foundingNumber])
-}
-
-// Source of truth for the founding number invariant (§7): assigned once per
-// (streamer, backer), never reused, never reordered, never released on refund.
-// The two unique constraints enforce this at the database level.
-model FoundingMembership {
-  id             String   @id @default(cuid())
-  streamerId     String
-  streamer       Streamer @relation(fields: [streamerId], references: [id], onDelete: Cascade)
-  backerId       String
-  backer         Backer   @relation(fields: [backerId], references: [id], onDelete: Cascade)
-  foundingNumber Int
-  createdAt      DateTime @default(now())
-
-  @@unique([streamerId, backerId])
-  @@unique([streamerId, foundingNumber])
-  @@index([streamerId])
-}
-
-model Perk {
-  id          String     @id @default(cuid())
-  tierId      String
-  tier        Tier       @relation(fields: [tierId], references: [id], onDelete: Cascade)
-  streamerId  String
-  streamer    Streamer   @relation(fields: [streamerId], references: [id], onDelete: Cascade)
-  title       String
-  description String?
-  promisedBy  DateTime
-  status      PerkStatus @default(promised)
-  deliveredAt DateTime?
-  backersOwed Int        @default(0)
-
-  deliveries PerkDelivery[]
-
-  @@index([streamerId])
-  @@index([tierId])
-}
-
-// Source of truth for the Execution grade — a perk counts as fulfilled only to
-// the extent individual backers actually received it.
-model PerkDelivery {
-  id                String   @id @default(cuid())
-  perkId            String
-  perk              Perk     @relation(fields: [perkId], references: [id], onDelete: Cascade)
-  backingId         String
-  backing           Backing  @relation(fields: [backingId], references: [id], onDelete: Cascade)
-  deliveredAt       DateTime @default(now())
-  confirmedByBacker Boolean  @default(false)
-
-  @@unique([perkId, backingId])
-  @@index([perkId])
 }
 
 model Update {
@@ -312,31 +181,10 @@ model Update {
   title         String
   body          String
   visibility    UpdateVisibility @default(public)
-  tierId        String?
-  tier          Tier?            @relation(fields: [tierId], references: [id])
   publishedAt   DateTime         @default(now())
   viewCount     Int              @default(0)
   reactionCount Int              @default(0)
 
-  @@index([streamerId])
-}
-
-model TrustReport {
-  id           String       @id @default(cuid())
-  streamerId   String
-  streamer     Streamer     @relation(fields: [streamerId], references: [id], onDelete: Cascade)
-  reportNumber Int
-  periodStart  DateTime
-  periodEnd    DateTime
-  // Snapshotted metrics + grades (Json so a published report is never recomputed).
-  metrics      Json
-  grades       Json
-  status       ReportStatus @default(draft)
-  approvedBy   String?
-  generatedAt  DateTime     @default(now())
-  publishedAt  DateTime?
-
-  @@unique([streamerId, reportNumber])
   @@index([streamerId])
 }
 

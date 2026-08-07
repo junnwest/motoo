@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { IBM_Plex_Mono } from "next/font/google";
-import { NextIntlClientProvider, hasLocale } from "next-intl";
-import { getLocale, getTranslations } from "next-intl/server";
-import { locales } from "@/i18n/config";
+import { NextIntlClientProvider } from "next-intl";
+import { getTranslations } from "next-intl/server";
+import { defaultLocale } from "@/i18n/config";
 import { SITE_URL } from "@/lib/metadata";
 import "./globals.css";
 
@@ -68,12 +68,10 @@ export const viewport: Viewport = {
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const locale = await getLocale();
-  const lang = hasLocale(locales, locale) ? locale : "ko";
   const t = await getTranslations("a11y");
 
   return (
-    <html lang={lang} className={`${ibmPlexMono.variable} h-full antialiased`}>
+    <html lang={defaultLocale} className={`${ibmPlexMono.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-cream text-ink">
         <NextIntlClientProvider>
           {/* Skip link (WCAG 2.4.1). Every page starts with the same nav, and

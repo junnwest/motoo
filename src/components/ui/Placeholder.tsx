@@ -14,8 +14,14 @@ export function Avatar({
 }) {
   const initial = name.replace(/^@/, "").charAt(0).toUpperCase();
   if (src) {
-    // eslint-disable-next-line @next/next/no-img-element
     return (
+      // Deliberately not next/image: `src` here is a data URL stored in
+      // Postgres (see src/lib/imageUpload.ts), already downscaled and byte-
+      // capped on both client and server. next/image would proxy and re-encode
+      // something that is neither remote nor unoptimised.
+      // The directive was previously a line too early, so it suppressed nothing
+      // and was itself reported as unused — two warnings for one line.
+      // eslint-disable-next-line @next/next/no-img-element
       <img
         src={src}
         alt={name}

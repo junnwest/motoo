@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 import { MarketplaceItemType, FulfillmentMode } from "@prisma/client";
 import { prisma } from "@/lib/db";
@@ -96,11 +97,12 @@ export async function updateIssuance(input: {
     // Best-effort, after the write commits — a notify() failure must never
     // undo the price change or fail this action (see src/lib/notify.ts).
     if (priceRaised) {
+      const tn = await getTranslations("notifications.push");
       const holderIds = await getHolderBackerIds(creator.id);
       await notifyMany(holderIds, {
         type: "price_raised",
-        title: `${creator.displayName}님이 모찌 가격을 인상했어요`,
-        body: `개당 ${pricePerMochiKrw.toLocaleString("ko-KR")}원으로 올랐어요. 보유 중인 모찌 가치는 그대로예요.`,
+        title: tn("priceRaisedTitle", { name: creator.displayName }),
+        body: tn("priceRaisedBody", { price: pricePerMochiKrw }),
         link: `/s/${creator.handle}`,
       });
     }
@@ -292,10 +294,11 @@ export async function upsertItem(input: {
       // Only a genuinely new item announces — editing an existing one (the `id`
       // branch above) would otherwise re-notify on every typo fix.
       if (active) {
+        const tn = await getTranslations("notifications.push");
         const stakeholderIds = await getStakeholderBackerIds(creator.id);
         await notifyMany(stakeholderIds, {
           type: "new_item",
-          title: `${creator.displayName}님이 새 아이템을 추가했어요`,
+          title: tn("newItemTitle", { name: creator.displayName }),
           body: title,
           link: `/s/${creator.handle}#market`,
         });
@@ -354,14 +357,17 @@ export async function fulfill(orderId: string): Promise<ActionResult> {
 
     // Best-effort, after the tested transaction in mochi.ts has already
     // committed — see src/lib/notify.ts.
-    const item = await prisma.marketplaceItem.findUnique({
-      where: { id: order.itemId },
-      select: { title: true },
-    });
+    const [tn, item] = await Promise.all([
+      getTranslations("notifications.push"),
+      prisma.marketplaceItem.findUnique({
+        where: { id: order.itemId },
+        select: { title: true },
+      }),
+    ]);
     await notify({
       backerId: order.backerId,
       type: "order_fulfilled",
-      title: `${creator.displayName}님이 주문을 완료했어요`,
+      title: tn("orderFulfilledTitle", { name: creator.displayName }),
       body: item?.title,
       link: "/me/mochi",
     });
@@ -381,14 +387,17 @@ export async function cancel(orderId: string): Promise<ActionResult> {
     revalidatePath(`${DASHBOARD}/orders`);
     revalidatePath(DASHBOARD);
 
-    const item = await prisma.marketplaceItem.findUnique({
-      where: { id: order.itemId },
-      select: { title: true },
-    });
+    const [tn, item] = await Promise.all([
+      getTranslations("notifications.push"),
+      prisma.marketplaceItem.findUnique({
+        where: { id: order.itemId },
+        select: { title: true },
+      }),
+    ]);
     await notify({
       backerId: order.backerId,
       type: "order_cancelled",
-      title: `${creator.displayName}님이 주문을 취소하고 모찌를 환불했어요`,
+      title: tn("orderCancelledTitle", { name: creator.displayName }),
       body: item?.title,
       link: "/me/mochi",
     });

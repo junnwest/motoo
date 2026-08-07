@@ -140,11 +140,6 @@ export const getStreamerProfile = cache(async (handle: string) => {
   const streamer = await prisma.streamer.findUnique({
     where: { handle },
     include: {
-      tiers: {
-        where: { active: true },
-        orderBy: { sortOrder: "asc" },
-        include: { perks: true },
-      },
       updates: { orderBy: { publishedAt: "desc" }, take: 5 },
       // Phase 2: active marketplace items, so the profile page renders the
       // spend module from this one streamer query (no second fetch). Buy
@@ -160,24 +155,9 @@ export const getStreamerProfile = cache(async (handle: string) => {
 
   return {
     streamer,
-    tiers: streamer.tiers,
     updates: streamer.updates,
   };
 });
-
-/** Data needed by the backing flow. */
-export async function getStreamerForBacking(handle: string) {
-  return prisma.streamer.findUnique({
-    where: { handle },
-    include: {
-      tiers: {
-        where: { active: true },
-        orderBy: { sortOrder: "asc" },
-        include: { perks: true },
-      },
-    },
-  });
-}
 
 // ── Phase 2: mochi-marketplace reads ─────────────────────────────────────────
 
