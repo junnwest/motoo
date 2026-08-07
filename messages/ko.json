@@ -783,9 +783,16 @@
       "amountMax": "한 번에 결제할 수 있는 금액을 넘었어요. 수량을 줄여 주세요.",
       "verifyRequired": "본인인증이 필요해요. 인증을 마친 뒤 다시 시도해 주세요.",
       "guardianRequired": "만 19세 미만은 법정대리인 동의가 있어야 모찌를 살 수 있어요.",
-      "generic": "처리하지 못했어요. 잠시 후 다시 시도해 주세요."
+      "generic": "처리하지 못했어요. 잠시 후 다시 시도해 주세요.",
+      "notPending": "이미 처리된 주문이라 취소할 수 없어요."
     },
-    "followNudge": "{name}님을 팔로우하고 소식을 받아보세요"
+    "followNudge": "{name}님을 팔로우하고 소식을 받아보세요",
+    "confirmTitle": "이 아이템을 이용할까요?",
+    "confirmSpend": "{count} 모찌 사용",
+    "confirmRemaining": "사용 후 잔액 {count} 모찌",
+    "confirmCta": "네, 이용할게요",
+    "confirmCancel": "취소",
+    "mochiUnit": "모찌"
   },
   "myMochi": {
     "title": "내 모찌",
@@ -803,7 +810,14 @@
       "pending": "준비 중",
       "fulfilled": "완료",
       "cancelled": "취소·환불"
-    }
+    },
+    "cancelOrder": "주문 취소",
+    "cancelling": "취소하는 중…",
+    "cancelConfirmTitle": "주문을 취소할까요?",
+    "cancelConfirmBody": "{item} 주문을 취소하고 {count} 모찌를 돌려받아요. 취소한 주문은 되돌릴 수 없어요.",
+    "cancelConfirm": "네, 취소할게요",
+    "cancelKeep": "그대로 둘게요",
+    "cancelled": "주문을 취소하고 모찌를 돌려드렸어요."
   },
   "onboarding": {
     "eyebrow": "환영해요",

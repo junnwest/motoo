@@ -783,9 +783,16 @@
       "amountMax": "That's more than one payment allows. Please lower the quantity.",
       "verifyRequired": "Identity verification is required. Please verify and try again.",
       "guardianRequired": "Under 19s need a guardian's consent before buying mochi.",
-      "generic": "We couldn't process that. Please try again shortly."
+      "generic": "We couldn't process that. Please try again shortly.",
+      "notPending": "This order has already been processed."
     },
-    "followNudge": "Follow {name} to hear from them"
+    "followNudge": "Follow {name} to hear from them",
+    "confirmTitle": "Use this item?",
+    "confirmSpend": "Spend {count} mochi",
+    "confirmRemaining": "{count} mochi left afterwards",
+    "confirmCta": "Yes, use it",
+    "confirmCancel": "Cancel",
+    "mochiUnit": "mochi"
   },
   "myMochi": {
     "title": "My mochi",
@@ -803,7 +810,14 @@
       "pending": "In progress",
       "fulfilled": "Done",
       "cancelled": "Cancelled & refunded"
-    }
+    },
+    "cancelOrder": "Cancel order",
+    "cancelling": "Cancelling…",
+    "cancelConfirmTitle": "Cancel this order?",
+    "cancelConfirmBody": "Cancelling {item} returns {count} mochi to your balance. This cannot be undone.",
+    "cancelConfirm": "Yes, cancel it",
+    "cancelKeep": "Keep it",
+    "cancelled": "Order cancelled and your mochi returned."
   },
   "onboarding": {
     "eyebrow": "Welcome",

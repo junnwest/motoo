@@ -312,14 +312,37 @@ export async function fulfillOrder(orderId: string, byStreamerId: string) {
 }
 
 /**
- * Creator cancels a pending order: refunds the exact mochi to the buyer's holding
- * and frees the item's stock. Unspent mochi is always refundable (DECISIONS).
+ * Cancel a pending order: refund the exact mochi to the buyer's holding and
+ * free the item's stock. Shared by the creator-side and buyer-side entry
+ * points below, which differ only in who is allowed to do it.
+ *
+ * **The status transition is claimed atomically**, and that is the whole point
+ * of this function's shape. The previous version read the order, checked
+ * `status === "pending"`, and only then refunded — so two cancels racing (the
+ * creator and the buyer both hitting cancel, or one double-click) could each
+ * read `pending` and each credit the balance, refunding twice for one order.
+ * A conditional UPDATE takes the row lock instead: the loser re-evaluates its
+ * WHERE against the committed row, matches nothing, and backs out having moved
+ * no money. Same guard `redeemItem` already uses for balance and stock.
+ *
+ * This mattered less when only the creator could cancel. Buyer-initiated
+ * cancellation makes the race genuinely reachable, so it is closed here rather
+ * than assumed away.
  */
-export async function cancelOrder(orderId: string, byStreamerId: string) {
+async function cancelPendingOrder(
+  orderId: string,
+  authorize: (order: { streamerId: string; backerId: string }) => boolean,
+) {
   return prisma.$transaction(async (tx) => {
     const order = await tx.order.findUnique({ where: { id: orderId } });
-    if (!order || order.streamerId !== byStreamerId) throw new Error("NOT_FOUND");
+    if (!order || !authorize(order)) throw new Error("NOT_FOUND");
     if (order.status !== "pending") throw new Error("NOT_PENDING");
+
+    const claimed = await tx.order.updateMany({
+      where: { id: orderId, status: "pending" },
+      data: { status: "cancelled" },
+    });
+    if (claimed.count === 0) throw new Error("NOT_PENDING");
 
     await tx.mochiHolding.update({
       where: {
@@ -336,11 +359,34 @@ export async function cancelOrder(orderId: string, byStreamerId: string) {
       data: { redeemedCount: { decrement: order.quantity } },
     });
 
-    return tx.order.update({
-      where: { id: orderId },
-      data: { status: "cancelled" },
-    });
+    return tx.order.findUniqueOrThrow({ where: { id: orderId } });
   });
+}
+
+/**
+ * Creator cancels a pending order. Unspent mochi is always refundable
+ * (DECISIONS), and cancelling is how a creator declines a request.
+ */
+export async function cancelOrder(orderId: string, byStreamerId: string) {
+  return cancelPendingOrder(orderId, (o) => o.streamerId === byStreamerId);
+}
+
+/**
+ * **Buyer** cancels their own pending order.
+ *
+ * Until now cancellation was creator-only: a fan who redeemed the wrong item,
+ * or changed their mind a second later, had no way to undo it and had to ask
+ * the creator. Spending was the fastest, least reversible interaction in the
+ * product. This is the exact mirror of the creator path — same transaction,
+ * same refund, same stock release — differing only in the ownership check.
+ *
+ * Only `pending` orders qualify, which is what keeps this honest: an `instant`
+ * item is recorded `fulfilled` at redemption (see `redeemItem`) and so can
+ * never be cancelled, and a creator who has already fulfilled a request has
+ * done the work.
+ */
+export async function cancelOrderByBuyer(orderId: string, byBackerId: string) {
+  return cancelPendingOrder(orderId, (o) => o.backerId === byBackerId);
 }
 
 /** A user's unspent mochi balance for one creator (0 if they hold none). */

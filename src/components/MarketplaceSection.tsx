@@ -168,14 +168,16 @@ function ItemCard({
         </p>
       )}
 
+      {/* The price used to render twice — `formatCount(priceMochi)` followed by
+          a message that also interpolates the count ("3" then "3 모찌"), on
+          every item of every creator page. The number is the styled part; the
+          second span is now just the unit. */}
       <div className="mt-3 flex items-center gap-1.5">
         <Mochi width={16} height={12} />
         <span className="text-[16px] font-extrabold text-ink">
           {formatCount(item.priceMochi)}
         </span>
-        <span className="text-[13px] text-muted">
-          {t("priceMochi", { count: item.priceMochi })}
-        </span>
+        <span className="text-[13px] text-muted">{t("mochiUnit")}</span>
       </div>
 
       {/* stock line */}
@@ -203,6 +205,27 @@ function ItemCard({
           </ButtonLink>
         ) : open ? (
           <div>
+            {/* Confirmation summary. Redeeming is irreversible from the buyer's
+                side once a creator fulfils it, and until now it was the fastest
+                interaction in the product: one tap opened the note box, a second
+                spent the mochi, with the cost shown nowhere in between. Stating
+                the spend and the resulting balance is the minimum friction a
+                value transfer should carry. */}
+            <div className="mb-2 rounded-[12px] bg-white px-4 py-3">
+              <p className="text-[13.5px] font-bold text-ink break-keep">
+                {t("confirmTitle")}
+              </p>
+              <p className="mt-1 flex flex-wrap items-center gap-x-2 text-[13px] text-body">
+                <span className="font-semibold text-coral-deep">
+                  {t("confirmSpend", { count: item.priceMochi })}
+                </span>
+                <span className="text-muted">
+                  {t("confirmRemaining", {
+                    count: Math.max(0, balance - item.priceMochi),
+                  })}
+                </span>
+              </p>
+            </div>
             <Textarea
               value={note}
               disabled={pending}
@@ -233,7 +256,7 @@ function ItemCard({
                 disabled={soldOut || needMore}
                 onClick={confirm}
               >
-                {pending ? t("redeeming") : t("redeem")}
+                {pending ? t("redeeming") : t("confirmCta")}
               </Button>
             </div>
           </div>

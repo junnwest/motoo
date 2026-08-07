@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useCallback } from "react";
+import { useCallback, useTransition } from "react";
 import { IconSearch } from "@/components/ui/Icons";
 import { Select } from "@/components/ui/Field";
 import {
@@ -15,6 +15,9 @@ import {
 /** URL-driven filter/sort bar for Explore. Ranking never includes money raised. */
 export function ExploreFilters() {
   const router = useRouter();
+  // Without this a filter change froze the old results with no feedback while
+  // the server re-rendered. `isPending` dims the grid instead.
+  const [isPending, startTransition] = useTransition();
   const params = useSearchParams();
   const t = useTranslations("explore");
   const tax = useTranslations("creatorTaxonomy");
@@ -24,7 +27,7 @@ export function ExploreFilters() {
       const next = new URLSearchParams(params.toString());
       if (!value || value === "all") next.delete(key);
       else next.set(key, value);
-      router.push(`/explore?${next.toString()}`);
+      startTransition(() => router.push(`/explore?${next.toString()}`));
     },
     [params, router],
   );
@@ -37,7 +40,7 @@ export function ExploreFilters() {
       if (!value || value === "all") next.delete("type");
       else next.set("type", value);
       next.delete("category");
-      router.push(`/explore?${next.toString()}`);
+      startTransition(() => router.push(`/explore?${next.toString()}`));
     },
     [params, router],
   );
@@ -49,9 +52,21 @@ export function ExploreFilters() {
       : ALL_CATEGORIES;
 
   return (
-    <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+    <div
+      className={`flex flex-col gap-3 transition-opacity sm:flex-row sm:flex-wrap sm:items-center ${isPending ? "opacity-60" : ""}`}
+      aria-busy={isPending || undefined}
+    >
+      {/* Search used to be a bare `<form action="/explore">` containing only
+          `q`, so submitting it produced /explore?q=… and silently dropped any
+          active type, category, backerRange and sort. Filter, then search, and
+          your filters vanished with no explanation. Routing through the same
+          `setParam` the selects use keeps every other facet intact. */}
       <form
-        action="/explore"
+        onSubmit={(e) => {
+          e.preventDefault();
+          const value = new FormData(e.currentTarget).get("q");
+          setParam("q", typeof value === "string" ? value.trim() : "");
+        }}
         className="flex flex-1 items-center gap-[10px] rounded-[12px] border border-line-3 bg-white px-4 py-[10px]"
       >
         <IconSearch width={17} height={17} className="flex-none text-muted" />

@@ -8,7 +8,13 @@
 import { describe, it, before, beforeEach, after } from "node:test";
 import assert from "node:assert/strict";
 import { prisma } from "@/lib/db";
-import { buyMochi, redeemItem, cancelOrder, getHolding } from "@/lib/mochi";
+import {
+  buyMochi,
+  redeemItem,
+  cancelOrder,
+  cancelOrderByBuyer,
+  getHolding,
+} from "@/lib/mochi";
 import {
   MOCHI_MAX_PURCHASE_QTY,
   MOCHI_MAX_PURCHASE_KRW,
@@ -292,6 +298,77 @@ describe("cancelOrder", () => {
     const item = await newItem(4);
     const r = await redeemItem({ backerId, itemId: item.id });
     await assert.rejects(() => cancelOrder(r.orderId, "some-other-streamer"), /NOT_FOUND/);
+  });
+});
+
+/**
+ * Buyer-initiated cancellation. Spending used to be irreversible from the fan's
+ * side — only the creator could cancel — so a mis-tapped redemption had no undo.
+ */
+describe("cancelOrderByBuyer", () => {
+  it("refunds the exact mochi and frees the stock", async () => {
+    await buyMochi({ backerId, streamerId, quantity: 10, idempotencyKey: "k" });
+    const item = await newItem(4, 2);
+    const r = await redeemItem({ backerId, itemId: item.id });
+    const c = await cancelOrderByBuyer(r.orderId, backerId);
+    assert.equal(c.status, "cancelled");
+    assert.equal((await getHolding(streamerId, backerId))?.balance, 10);
+    const after = await prisma.marketplaceItem.findUniqueOrThrow({ where: { id: item.id } });
+    assert.equal(after.redeemedCount, 0);
+  });
+
+  it("refuses to cancel someone else's order", async () => {
+    await buyMochi({ backerId, streamerId, quantity: 10, idempotencyKey: "k" });
+    const item = await newItem(4);
+    const r = await redeemItem({ backerId, itemId: item.id });
+    await assert.rejects(
+      () => cancelOrderByBuyer(r.orderId, consentedMinorId),
+      /NOT_FOUND/,
+    );
+    // ...and the money stayed put.
+    assert.equal((await getHolding(streamerId, backerId))?.balance, 6);
+  });
+
+  it("cannot cancel an already-fulfilled order", async () => {
+    await buyMochi({ backerId, streamerId, quantity: 10, idempotencyKey: "k" });
+    // `instant` items are recorded fulfilled at redemption, so this covers the
+    // "creator already did the work" case without needing the creator path.
+    const item = await newItem(4, null, "instant");
+    const r = await redeemItem({ backerId, itemId: item.id });
+    await assert.rejects(() => cancelOrderByBuyer(r.orderId, backerId), /NOT_PENDING/);
+    assert.equal((await getHolding(streamerId, backerId))?.balance, 6);
+  });
+
+  it("refunds exactly once when the buyer and creator cancel simultaneously", async () => {
+    await buyMochi({ backerId, streamerId, quantity: 10, idempotencyKey: "k" });
+    const item = await newItem(4, 2);
+    const r = await redeemItem({ backerId, itemId: item.id });
+
+    const results = await Promise.allSettled([
+      cancelOrderByBuyer(r.orderId, backerId),
+      cancelOrder(r.orderId, streamerId),
+    ]);
+    const ok = results.filter((x) => x.status === "fulfilled").length;
+    assert.equal(ok, 1, "exactly one cancel should win");
+
+    // The real assertion: the balance is refunded once, not twice. Before the
+    // status transition was claimed atomically, both callers could read
+    // `pending` and both credit the holding.
+    assert.equal((await getHolding(streamerId, backerId))?.balance, 10);
+    const after = await prisma.marketplaceItem.findUniqueOrThrow({ where: { id: item.id } });
+    assert.equal(after.redeemedCount, 0, "stock is released once, not twice");
+  });
+
+  it("refunds exactly once under a burst of buyer cancels", async () => {
+    await buyMochi({ backerId, streamerId, quantity: 10, idempotencyKey: "k" });
+    const item = await newItem(3);
+    const r = await redeemItem({ backerId, itemId: item.id });
+
+    const results = await Promise.allSettled(
+      Array.from({ length: 5 }, () => cancelOrderByBuyer(r.orderId, backerId)),
+    );
+    assert.equal(results.filter((x) => x.status === "fulfilled").length, 1);
+    assert.equal((await getHolding(streamerId, backerId))?.balance, 10);
   });
 });
 

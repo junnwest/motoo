@@ -3,7 +3,12 @@
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { getCurrentBacker } from "@/lib/session";
-import { buyMochi, redeemItem } from "@/lib/mochi";
+import {
+  buyMochi,
+  redeemItem,
+  cancelOrderByBuyer,
+  getHolding,
+} from "@/lib/mochi";
 import { MOCHI_MAX_PURCHASE_QTY } from "@/lib/issuance";
 
 /**
@@ -105,6 +110,44 @@ export async function redeemItemAction(
     const msg = e instanceof Error ? e.message : "";
     if (msg === "OUT_OF_STOCK") return { ok: false, error: "outOfStock" };
     if (msg === "INSUFFICIENT_MOCHI") return { ok: false, error: "insufficient" };
+    return { ok: false, error: "generic" };
+  }
+}
+
+const cancelSchema = z.object({ orderId: z.string().min(1) });
+
+export type CancelOrderActionResult =
+  | { ok: true; balance: number }
+  | { ok: false; error: string };
+
+/**
+ * Buyer cancels their own pending order and gets the mochi back.
+ *
+ * Ownership is enforced inside `cancelOrderByBuyer` against the session's
+ * backer id — the client supplies only an order id and is never trusted to say
+ * whose it is, matching how the Studio actions treat streamerId.
+ */
+export async function cancelOrderAction(
+  input: z.infer<typeof cancelSchema>,
+): Promise<CancelOrderActionResult> {
+  const parsed = cancelSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: "generic" };
+
+  const backer = await getCurrentBacker();
+  if (!backer) return { ok: false, error: "login" };
+
+  try {
+    const order = await cancelOrderByBuyer(parsed.data.orderId, backer.id);
+    const holding = await getHolding(order.streamerId, backer.id);
+    revalidatePath("/profile");
+    revalidatePath("/home");
+    return { ok: true, balance: holding?.balance ?? 0 };
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "";
+    // NOT_PENDING covers both "already fulfilled" and "someone cancelled it a
+    // moment ago" — from the buyer's side those read the same: it's too late.
+    if (msg === "NOT_PENDING") return { ok: false, error: "notPending" };
+    if (msg === "NOT_FOUND") return { ok: false, error: "generic" };
     return { ok: false, error: "generic" };
   }
 }

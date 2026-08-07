@@ -9,6 +9,7 @@ import { ButtonLink } from "@/components/ui/Button";
 import { Mochi } from "@/components/Mochi";
 import { Avatar } from "@/components/ui/Placeholder";
 import { CreatorBadge } from "@/components/CreatorBadge";
+import { CancelOrderButton } from "@/components/CancelOrderButton";
 import { CreatorCover } from "@/components/CreatorCover";
 import { Section } from "@/components/ui/Section";
 import { getCurrentBacker } from "@/lib/session";
@@ -182,6 +183,15 @@ export default async function ProfilePage() {
                     >
                       {tm(`orderStatus.${o.status}` as never)}
                     </span>
+                    {/* Only a pending order can be taken back — a fulfilled one
+                        has already cost the creator the work. */}
+                    {o.status === "pending" && (
+                      <CancelOrderButton
+                        orderId={o.id}
+                        itemTitle={o.item.title}
+                        mochiSpent={o.mochiSpent}
+                      />
+                    )}
                   </li>
                 ))}
               </ul>
