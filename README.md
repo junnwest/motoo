@@ -8,8 +8,9 @@ users buy it and spend it in that creator's marketplace. Price ratchets up in ti
 spec and [`design-handoff/`](./design-handoff/) for the visual system.
 
 > **motoo is not a financial product.** Mochi is prepaid support credit, not an
-> investment — non-transferable, non-refundable (legally-mandated exceptions only), no
-> resale/return, no securities. See
+> investment — non-transferable, no resale, no securities. Refunds are narrow and
+> defined in [the 환불·청약철회 policy](./src/app/refund/page.tsx) (7-day withdrawal on an
+> unused purchase, balance refund past 60% use, plus legally-required cases). See
 > §2 of the product doc. A CI-style check (`pnpm check:vocab`) guards against banned
 > investment vocabulary in user-facing copy.
 

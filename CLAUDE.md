@@ -61,8 +61,12 @@ relative `Location` and loops. Dev: `studio.localhost:PORT`. See DECISIONS 2026-
 ## Hard constraints
 - **Not a financial product.** No investment/return vocabulary in user-facing copy (spec §2).
   Run `pnpm check:vocab` after touching copy. Mochi = prepaid marketplace credit:
-  non-transferable, **non-refundable** (legally-mandated exceptions only — e.g. a minor's
-  payment), no resale/return. See DECISIONS 2026-08-01.
+  non-transferable, no resale. **Refunds are narrow but real** — 7-day 청약철회 on a wholly
+  unused purchase, 잔액 환불 once 60% is spent, plus the 법령 carve-out (a minor's payment).
+  **`/refund` is the single source of truth; any copy touching refunds must agree with it**
+  — the buy-flow disclosure contradicted it for one commit and that was the actual bug.
+  The positions are the owner's, not counsel's: sign-off gates `PAYMENT_PROVIDER` leaving
+  `mock`. See DECISIONS 2026-08-06 (supersedes the flat no-refund line of 2026-08-01).
 - **Money logic is tested.** Run `pnpm test` (node:test via tsx, needs `pnpm db:up`)
   after touching `src/lib/mochi.ts` — it asserts the buy/redeem/cancel invariants
   and the concurrency guards (no oversell, no negative balance).

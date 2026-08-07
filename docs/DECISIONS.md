@@ -281,6 +281,12 @@ the two places a user looks for who they are: the nav's avatar dropdown header a
   on either surface. Copy lives in `common` since two namespaces need it.
 
 ## 2026-08-01 — Mochi is non-refundable; user-uploaded images; creators land in the Studio
+> **The refund half of this entry is superseded by 2026-08-06.** The flat no-refund line
+> below was narrowed once the policy page was actually written: 7-day 청약철회 on a wholly
+> unused purchase, 잔액 환불 past 60% use, plus the 법령 carve-out. The "flagged, not
+> resolved" note at the end of the refund section is what got resolved. Everything here
+> about uploaded images and Studio landing still stands.
+
 Second feedback pass the same day. The two structural decisions here are the refund policy
 and how uploaded images are stored.
 
@@ -1145,10 +1151,12 @@ handoff is shelved (schema/components kept, not featured).
 
 ## 2026-07-09 — Mochi supply = "capped as a soft goal"
 > Evolved by the **2026-07-15 ratcheting price tiers** entry above — the soft goal is now
-> per-tier availability and the price ratchets up. **"unspent-refundable" below is also
-> superseded**: mochi is non-refundable as of the 2026-08-01 entry, legally-mandated
-> exceptions only. The "not a security" stance below still holds (more so, in fact — there
-> is now no cash-out path at all).
+> per-tier availability and the price ratchets up. **"unspent-refundable" below is
+> superseded twice**: flat non-refundable at 2026-08-01, then narrowed again at
+> **2026-08-06** to the shipped policy (7-day 청약철회 on a wholly unused purchase, 잔액
+> 환불 past 60% use, plus the 법령 carve-out) — see `/refund`. The "not a security" stance
+> below still holds: the surviving refund paths all return **at the price paid**, so there
+> is still no buy-low-refund-high path.
 
 A creator sets quantity × price as a **target** (e.g. 100 × ₩200 = ₩20,000). Mochi is
 prepaid credit spendable only in that creator's marketplace. **Non-transferable,

@@ -635,9 +635,10 @@ See [`DEPLOYMENT.md`](./DEPLOYMENT.md) for the exact steps and env-var list.
 
 The product for the demo: a creator issues their own mochi, users buy it and spend
 it in that creator's marketplace. Mochi = prepaid marketplace credit, **capped as a
-soft goal**, non-transferable, **non-refundable** (legally-mandated exceptions only, as of
-2026-08-01 — this section originally said "unspent-refundable"), no resale/return (see
-DECISIONS).
+soft goal**, non-transferable, no resale/return. Refund wording here has moved twice —
+originally "unspent-refundable", flat non-refundable at 2026-08-01, then narrowed to the
+shipped policy at **2026-08-06**. `/refund` is the current source of truth; do not quote
+this line for it.
 
 Verified: `pnpm db:push` + `db:seed` succeed; all Phase 2 routes render 200 with real
 data; the buy → redeem → cancel-refund invariants hold end-to-end against Postgres
