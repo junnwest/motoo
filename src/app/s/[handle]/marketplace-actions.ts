@@ -10,6 +10,7 @@ import {
   getHolding,
 } from "@/lib/mochi";
 import { MOCHI_MAX_PURCHASE_QTY } from "@/lib/issuance";
+import { checkRateLimit } from "@/lib/rateLimit";
 
 /**
  * User-side buy/spend server actions for the mochi marketplace.
@@ -53,6 +54,10 @@ export async function buyMochiAction(
 
   const backer = await getCurrentBacker();
   if (!backer) return { ok: false, error: "login" };
+  // A ceiling per purchase is not a ceiling per minute.
+  if (!(await checkRateLimit("buy", backer.id))) {
+    return { ok: false, error: "tooMany" };
+  }
 
   try {
     const { balance, amountKrw } = await buyMochi({
@@ -96,6 +101,9 @@ export async function redeemItemAction(
 
   const backer = await getCurrentBacker();
   if (!backer) return { ok: false, error: "login" };
+  if (!(await checkRateLimit("redeem", backer.id))) {
+    return { ok: false, error: "tooMany" };
+  }
 
   try {
     const { balance, mochiSpent, instant } = await redeemItem({

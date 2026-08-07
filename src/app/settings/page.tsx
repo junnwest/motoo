@@ -6,6 +6,9 @@ import { ConsumerShell } from "@/components/ConsumerShell";
 import { Footer } from "@/components/Footer";
 import { Section } from "@/components/ui/Section";
 import { getCurrentBacker, getSession } from "@/lib/session";
+import { getHoldingsForBacker } from "@/lib/mochi";
+import { AccountSection } from "@/components/AccountSection";
+import { ACCOUNT_DELETION_GRACE_DAYS } from "@/lib/accountDeletion";
 import { IdentityForm } from "./SettingsForm";
 import { AvatarForm } from "./AvatarForm";
 import { PasswordForm } from "./PasswordForm";
@@ -26,6 +29,11 @@ export default async function SettingsPage() {
   const t = await getTranslations("settings");
   const backer = await getCurrentBacker();
   if (!backer) redirect("/api/session-reset");
+
+  // Stated in the delete confirmation: what happens to unspent mochi is the
+  // part of leaving that users actually care about.
+  const holdings = await getHoldingsForBacker(backer.id);
+  const unspentMochi = holdings.reduce((sum, h) => sum + h.balance, 0);
 
   return (
     <>
@@ -57,6 +65,17 @@ export default async function SettingsPage() {
               <p className="text-[14px] text-muted">{t("oauthOnly")}</p>
             )}
           </Section>
+
+          {/* PIPA rights of access and erasure — neither existed before. */}
+          <div className="mt-6">
+            <AccountSection
+              graceDays={ACCOUNT_DELETION_GRACE_DAYS}
+              unspentMochi={unspentMochi}
+              pendingDeletionAt={
+                backer.pendingDeletionAt?.toISOString() ?? null
+              }
+            />
+          </div>
         </div>
       </ConsumerShell>
       <Footer variant="fan" />

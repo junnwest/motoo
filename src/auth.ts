@@ -130,6 +130,17 @@ export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
             avatarUrl: user.image ?? null,
           },
         });
+        // Signing back in *is* the cancellation gesture for a scheduled
+        // deletion — the user shouldn't have to find a setting to undo it, and
+        // returning to the product is the clearest possible statement of
+        // intent. Done here so it applies to every provider at once.
+        if (backer.pendingDeletionAt) {
+          await prisma.backer.update({
+            where: { id: backer.id },
+            data: { pendingDeletionAt: null },
+          });
+        }
+
         token.backerId = backer.id;
         token.ver = backer.tokenVersion; // revocation stamp, checked above
         token.role = backer.role;

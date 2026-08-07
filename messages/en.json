@@ -428,7 +428,8 @@
     "signupHeroSubtitle": "Buy mochi and spend it in your creators' markets.",
     "signupBenefit1": "Buy a creator's mochi",
     "signupBenefit2": "Redeem the items you want in their market",
-    "signupBenefit3": "Manage every creator you support in one place"
+    "signupBenefit3": "Manage every creator you support in one place",
+    "tooMany": "Too many attempts. Please try again shortly."
   },
   "creatorOnboarding": {
     "title": "Start as a creator",
@@ -784,7 +785,8 @@
       "verifyRequired": "Identity verification is required. Please verify and try again.",
       "guardianRequired": "Under 19s need a guardian's consent before buying mochi.",
       "generic": "We couldn't process that. Please try again shortly.",
-      "notPending": "This order has already been processed."
+      "notPending": "This order has already been processed.",
+      "tooMany": "Too many requests. Please try again shortly."
     },
     "followNudge": "Follow {name} to hear from them",
     "confirmTitle": "Use this item?",
@@ -1024,6 +1026,26 @@
       "imageRejected": "We couldn't save that picture. Please try a smaller image.",
       "weakPassword": "8+ characters, including a letter and a number.",
       "wrongPassword": "Current password is incorrect."
+    },
+    "dangerTitle": "Account",
+    "dangerSubtitle": "Download your data or delete your account.",
+    "exportTitle": "Download my data",
+    "exportBody": "Your mochi holdings, orders, following list and notifications as a JSON file.",
+    "exportCta": "Download",
+    "deleteTitle": "Delete account",
+    "deleteBody": "Once requested, your account and all its data are permanently removed after {days} days. Signing back in before then cancels it.",
+    "deleteCta": "Request deletion",
+    "deleteConfirmTitle": "Delete your account?",
+    "deleteConfirmBody": "Your account and data are permanently deleted after {days} days. Signing back in before then cancels it.",
+    "deleteConfirmBalance": "Your {count} unspent mochi return to the creator market supply.",
+    "deleteConfirmNoBalance": "You have no unspent mochi.",
+    "deleteConfirmCta": "Yes, request deletion",
+    "deleteKeep": "Keep my account",
+    "deleteScheduled": "Scheduled for deletion on {date}. Signing back in before then cancels it.",
+    "deleteErrors": {
+      "creatorAccount": "Creator accounts cannot be deleted here. Please contact support.",
+      "login": "Please log in.",
+      "generic": "We could not process that. Please try again shortly."
     }
   },
   "imagePicker": {

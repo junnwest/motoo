@@ -2,6 +2,7 @@
 
 import { signIn } from "@/auth";
 import { AuthError } from "next-auth";
+import { checkRateLimit } from "@/lib/rateLimit";
 
 /**
  * Sign in with email + password. Returns `{ ok: true }` on success and lets the
@@ -26,6 +27,11 @@ export async function loginAction(
   email: string,
   password: string,
 ): Promise<{ ok: true } | { ok: false; error: string }> {
+  // Keyed on the submitted email, not a session — the whole point is that there
+  // is no session yet. This is what slows credential stuffing.
+  if (!(await checkRateLimit("login", email.trim().toLowerCase()))) {
+    return { ok: false, error: "tooMany" };
+  }
   try {
     await signIn("credentials", {
       email: email.toLowerCase(),

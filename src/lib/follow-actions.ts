@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { getCurrentBacker } from "@/lib/session";
+import { checkRateLimit } from "@/lib/rateLimit";
 
 /**
  * Follow mutations. Split out of `lib/follows.ts` so that module can drop its
@@ -19,6 +20,9 @@ export async function toggleFollow(
 ): Promise<{ ok: true; following: boolean } | { ok: false; error: string }> {
   const backer = await getCurrentBacker();
   if (!backer) return { ok: false, error: "signedOut" };
+  if (!(await checkRateLimit("follow", backer.id))) {
+    return { ok: false, error: "tooMany" };
+  }
 
   const existing = await prisma.follow.findUnique({
     where: { streamerId_backerId: { streamerId, backerId: backer.id } },

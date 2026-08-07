@@ -428,7 +428,8 @@
     "signupHeroSubtitle": "모찌를 구매해 크리에이터의 마켓에서 사용하세요.",
     "signupBenefit1": "크리에이터의 모찌를 구매해요",
     "signupBenefit2": "마켓에서 원하는 아이템을 이용해요",
-    "signupBenefit3": "응원한 크리에이터를 한곳에서 관리해요"
+    "signupBenefit3": "응원한 크리에이터를 한곳에서 관리해요",
+    "tooMany": "시도가 너무 잦아요. 잠시 후 다시 시도해 주세요."
   },
   "creatorOnboarding": {
     "title": "크리에이터 시작하기",
@@ -784,7 +785,8 @@
       "verifyRequired": "본인인증이 필요해요. 인증을 마친 뒤 다시 시도해 주세요.",
       "guardianRequired": "만 19세 미만은 법정대리인 동의가 있어야 모찌를 살 수 있어요.",
       "generic": "처리하지 못했어요. 잠시 후 다시 시도해 주세요.",
-      "notPending": "이미 처리된 주문이라 취소할 수 없어요."
+      "notPending": "이미 처리된 주문이라 취소할 수 없어요.",
+      "tooMany": "요청이 너무 잦아요. 잠시 후 다시 시도해 주세요."
     },
     "followNudge": "{name}님을 팔로우하고 소식을 받아보세요",
     "confirmTitle": "이 아이템을 이용할까요?",
@@ -1024,6 +1026,26 @@
       "imageRejected": "사진을 저장하지 못했어요. 더 작은 이미지로 다시 시도해 주세요.",
       "weakPassword": "8자 이상, 영문과 숫자를 함께 써주세요.",
       "wrongPassword": "현재 비밀번호가 맞지 않아요."
+    },
+    "dangerTitle": "계정",
+    "dangerSubtitle": "내 데이터를 내려받거나 계정을 삭제할 수 있어요.",
+    "exportTitle": "내 데이터 내려받기",
+    "exportBody": "보유 모찌, 주문 내역, 팔로잉, 알림을 JSON 파일로 받아요.",
+    "exportCta": "내려받기",
+    "deleteTitle": "계정 삭제",
+    "deleteBody": "삭제를 신청하면 {days}일 뒤에 계정과 모든 데이터가 완전히 사라져요. 그 전에 다시 로그인하면 삭제가 취소돼요.",
+    "deleteCta": "계정 삭제 신청",
+    "deleteConfirmTitle": "정말 계정을 삭제할까요?",
+    "deleteConfirmBody": "{days}일 뒤에 계정과 데이터가 완전히 삭제돼요. 그 전에 다시 로그인하면 취소할 수 있어요.",
+    "deleteConfirmBalance": "사용하지 않은 모찌 {count}개는 크리에이터의 마켓 판매분으로 돌아가요.",
+    "deleteConfirmNoBalance": "사용하지 않은 모찌는 없어요.",
+    "deleteConfirmCta": "네, 삭제를 신청할게요",
+    "deleteKeep": "그대로 둘게요",
+    "deleteScheduled": "{date}에 삭제될 예정이에요. 그 전에 다시 로그인하면 취소돼요.",
+    "deleteErrors": {
+      "creatorAccount": "크리에이터 계정은 여기서 삭제할 수 없어요. 고객센터로 문의해 주세요.",
+      "login": "로그인이 필요해요.",
+      "generic": "처리하지 못했어요. 잠시 후 다시 시도해 주세요."
     }
   },
   "imagePicker": {

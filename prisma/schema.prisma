@@ -192,6 +192,12 @@ model Backer {
   // between logging out and logging straight back in. See DECISIONS 2026-08-02.
   tokenVersion    Int      @default(0)
 
+  // Account deletion is a scheduled state, not an immediate purge: the user
+  // gets a grace period (ACCOUNT_DELETION_GRACE_DAYS) in which signing back in
+  // cancels it. Null = not scheduled. The row is only actually destroyed by the
+  // purge job once this timestamp is in the past. See src/lib/accountDeletion.ts.
+  pendingDeletionAt DateTime?
+
   // Onboarding — every new user completes this once (creators use /creator/onboarding).
   // Middleware redirects a signed-in, non-onboarded fan to /onboarding.
   onboardedAt      DateTime?
@@ -472,4 +478,22 @@ model Notification {
 
   @@index([backerId, read])
   @@index([backerId, createdAt])
+}
+
+/**
+ * Fixed-window rate-limit counters. A table rather than Redis: motoo does
+ * single-digit RPS and the database is already on every request path, so this
+ * avoids a hosted dependency and a secret for no practical gain. Rows are
+ * pruned nightly by the same cron that purges deleted accounts.
+ * See src/lib/rateLimit.ts.
+ */
+model RateLimit {
+  id          String   @id @default(cuid())
+  /// "<kind>:<subject>", e.g. "buy:<backerId>" or "login:<email>"
+  key         String
+  windowStart DateTime
+  count       Int      @default(0)
+
+  @@unique([key, windowStart])
+  @@index([windowStart])
 }

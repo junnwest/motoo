@@ -6,6 +6,7 @@ import { prisma } from "@/lib/db";
 import { hashPassword, PASSWORD_RE } from "@/lib/password";
 import { signIn } from "@/auth";
 import { AuthError } from "next-auth";
+import { checkRateLimit } from "@/lib/rateLimit";
 
 const signupSchema = z.object({
   email: z.string().email(),
@@ -32,6 +33,10 @@ export type SignupInput = z.input<typeof signupSchema>;
 export async function signupUser(
   input: SignupInput,
 ): Promise<{ ok: true } | { ok: false; error: string }> {
+  if (!(await checkRateLimit("signup", String(input?.email ?? "").trim().toLowerCase()))) {
+    return { ok: false, error: "tooMany" };
+  }
+
   const parsed = signupSchema.safeParse(input);
   if (!parsed.success) {
     if (!PASSWORD_RE.test(String(input?.password ?? ""))) {
