@@ -1,4 +1,5 @@
-import { Prisma } from "@prisma/client";
+import { cache } from "react";
+import { Prisma, type OrderStatus } from "@prisma/client";
 import { prisma } from "./db";
 import { getPaymentProvider } from "./payments";
 import { validatePurchase } from "./issuance";
@@ -397,20 +398,35 @@ export async function getHolding(streamerId: string, backerId: string) {
   return holding ?? null;
 }
 
-/** All of a user's holdings across creators, for the "My mochi" view. */
-export async function getHoldingsForBacker(backerId: string) {
+/**
+ * All of a user's holdings across creators, for the "My mochi" view.
+ * Cached per request: the RightRail and the page itself both read it.
+ */
+export const getHoldingsForBacker = cache(async (backerId: string) => {
   return prisma.mochiHolding.findMany({
     where: { backerId, balance: { gt: 0 } },
     include: { streamer: true },
     orderBy: { updatedAt: "desc" },
   });
-}
+});
 
-/** A user's order/redemption history across creators, newest first. */
-export async function getOrdersForBacker(backerId: string) {
+/**
+ * A user's order/redemption history across creators, newest first.
+ *
+ * Bounded. This used to fetch **every order the user had ever placed** on both
+ * `/profile` and `/home` — and `/home` only wanted the pending ones, which it
+ * then filtered in JavaScript. `status` pushes that filter into the query, and
+ * `take` stops the history growing without limit behind a page that shows a
+ * flat list.
+ */
+export async function getOrdersForBacker(
+  backerId: string,
+  opts: { status?: OrderStatus; take?: number } = {},
+) {
   return prisma.order.findMany({
-    where: { backerId },
+    where: { backerId, ...(opts.status ? { status: opts.status } : {}) },
     orderBy: { createdAt: "desc" },
+    take: opts.take ?? 50,
     include: {
       item: { select: { title: true } },
       streamer: { select: { handle: true, displayName: true, avatarUrl: true } },

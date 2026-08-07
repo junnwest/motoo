@@ -12,7 +12,7 @@ import { InlineMessage } from "@/components/ui/InlineMessage";
 import { IconHeart } from "@/components/ui/Icons";
 import { formatKrw, formatCount } from "@/lib/format";
 import { buyMochiAction } from "@/app/s/[handle]/marketplace-actions";
-import { toggleFollow } from "@/lib/follows";
+import { toggleFollow } from "@/lib/follow-actions";
 import {
   MOCHI_MAX_PURCHASE_QTY,
   MOCHI_MAX_PURCHASE_KRW,

@@ -8,6 +8,7 @@
  * triggered it. This mirrors home.ts staying out of mochi.ts's tested surface.
  */
 
+import { cache } from "react";
 import { prisma } from "@/lib/db";
 import type { NotificationType } from "@prisma/client";
 
@@ -78,6 +79,7 @@ export async function getNotificationsForBacker(backerId: string, take = 30) {
   });
 }
 
-export async function getUnreadCount(backerId: string) {
+// Rendered by both Nav and ConsumerShell on every signed-in page.
+export const getUnreadCount = cache(async (backerId: string) => {
   return prisma.notification.count({ where: { backerId, read: false } });
-}
+});

@@ -54,7 +54,9 @@ export async function HomeSignedIn({
   const [holdings, rankings, orders, updates, affordable] = await Promise.all([
     getHoldingsForBacker(backerId),
     getMyRankings(backerId),
-    getOrdersForBacker(backerId),
+    // Only the pending ones are rendered; asking for them narrows the query
+    // instead of fetching every order this user has ever placed and filtering.
+    getOrdersForBacker(backerId, { status: "pending", take: 20 }),
     getUpdatesForBacker(backerId),
     getAffordableItems(backerId),
   ]);

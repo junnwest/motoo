@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
+import { getSession } from "@/lib/session";
 import { NOINDEX } from "@/lib/metadata";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { auth } from "@/auth";
 import { ConsumerShell } from "@/components/ConsumerShell";
 import { Footer } from "@/components/Footer";
 import { CreatorCover } from "@/components/CreatorCover";
@@ -21,7 +21,7 @@ export const metadata: Metadata = { robots: NOINDEX };
  * held creators; following alone has no money behind it to rank.
  */
 export default async function RankingPage() {
-  const session = await auth();
+  const session = await getSession();
   if (!session?.user) redirect("/");
 
   const t = await getTranslations("ranking");

@@ -1,3 +1,5 @@
+import { cache } from "react";
+import { unstable_cache } from "next/cache";
 import { prisma } from "./db";
 
 export interface StreamerCard {
@@ -52,6 +54,22 @@ export interface ExploreParams {
  * 2026-08-01), never a stored/derived metric. Ranked by real support, never
  * money raised (spec §6) — there is deliberately no "top earners" sort.
  */
+/**
+ * How many creators one Explore request may load.
+ *
+ * There was no limit at all: the query fetched **every** approved creator with
+ * a `_count` subquery each, then filtered and sorted the whole set in
+ * JavaScript. At seed scale that's invisible; at a few thousand creators it is
+ * a full table scan plus N correlated subqueries, and it ran on *every signed-in
+ * page* — not just /explore — because the RightRail calls this to build its
+ * discovery list.
+ *
+ * A cap rather than real pagination: the UI has no pager yet (that's still
+ * open), so this bounds the damage without changing the page's contract. Wire
+ * `skip` through when the pager lands.
+ */
+export const EXPLORE_PAGE_SIZE = 60;
+
 export async function getExploreStreamers(
   params: ExploreParams = {},
 ): Promise<StreamerCard[]> {
@@ -77,6 +95,13 @@ export async function getExploreStreamers(
     include: {
       _count: { select: { mochiHoldings: true } },
     },
+    // `newest` is orderable in the database; `backers` is a relation count and
+    // is still sorted below. The take applies either way, so the unbounded
+    // fetch is gone regardless of sort.
+    ...(params.sort === "newest"
+      ? { orderBy: { createdAt: "desc" as const } }
+      : {}),
+    take: EXPLORE_PAGE_SIZE,
   });
 
   let cards = streamers.map(toStreamerCard);
@@ -111,7 +136,7 @@ export async function getExploreStreamers(
  * 2026-08-01: not part of 1.0.0) — the `reports` relation still exists on
  * the schema, just unread from here.
  */
-export async function getStreamerProfile(handle: string) {
+export const getStreamerProfile = cache(async (handle: string) => {
   const streamer = await prisma.streamer.findUnique({
     where: { handle },
     include: {
@@ -138,7 +163,7 @@ export async function getStreamerProfile(handle: string) {
     tiers: streamer.tiers,
     updates: streamer.updates,
   };
-}
+});
 
 /** Data needed by the backing flow. */
 export async function getStreamerForBacking(handle: string) {
@@ -193,3 +218,21 @@ export async function getCreatorDashboard(streamerId: string) {
     },
   });
 }
+
+/**
+ * The discovery list shown in the RightRail.
+ *
+ * Identical for every user, yet it was recomputed on **every signed-in page
+ * render** — the rail is part of ConsumerShell, so browsing five pages ran the
+ * creator scan five times over. Cached across requests rather than merely per
+ * request: "who is trending" does not need to be second-accurate, and a minute
+ * of staleness removes the single most repeated query on the site.
+ *
+ * Deliberately NOT used by /explore, which is a user-driven query and should
+ * reflect a new filter, follow, or creator immediately.
+ */
+export const getTrendingCreators = unstable_cache(
+  async () => getExploreStreamers({ sort: "backers" }),
+  ["trending-creators"],
+  { revalidate: 60, tags: ["creators"] },
+);

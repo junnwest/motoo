@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { NOINDEX } from "@/lib/metadata";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { auth } from "@/auth";
 import { ConsumerShell } from "@/components/ConsumerShell";
 import { Footer } from "@/components/Footer";
 import { ButtonLink } from "@/components/ui/Button";
@@ -12,7 +11,7 @@ import { CreatorBadge } from "@/components/CreatorBadge";
 import { CancelOrderButton } from "@/components/CancelOrderButton";
 import { CreatorCover } from "@/components/CreatorCover";
 import { Section } from "@/components/ui/Section";
-import { getCurrentBacker } from "@/lib/session";
+import { getCurrentBacker, getSession } from "@/lib/session";
 import { getHoldingsForBacker, getOrdersForBacker } from "@/lib/mochi";
 import { formatKstDate } from "@/lib/format";
 import { ALL_CATEGORIES } from "@/lib/creatorTaxonomy";
@@ -33,7 +32,7 @@ const ORDER_STATUS_CHIP: Record<string, string> = {
  * redirects here.
  */
 export default async function ProfilePage() {
-  const session = await auth();
+  const session = await getSession();
   if (!session?.user) redirect("/");
 
   const t = await getTranslations("myProfile");

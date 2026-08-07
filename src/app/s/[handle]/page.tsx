@@ -42,7 +42,11 @@ export async function generateMetadata({
   if (!data) return {};
 
   const { streamer } = data;
-  const { totalSupporters } = await getSupporterLeaderboard(streamer.id, 1);
+  // Default limit on purpose, matching the page's own call below: both are
+  // `cache()`d, so identical arguments collapse into one set of queries per
+  // request. Passing `1` here to "save" rows would defeat that and double the
+  // leaderboard work for a number the page fetches anyway.
+  const { totalSupporters } = await getSupporterLeaderboard(streamer.id);
   const title = t("creator.title", {
     name: streamer.displayName,
     handle: streamer.handle,

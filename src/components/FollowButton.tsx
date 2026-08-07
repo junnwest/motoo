@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
-import { toggleFollow } from "@/lib/follows";
+import { toggleFollow } from "@/lib/follow-actions";
 
 /**
  * Free follow toggle on a creator profile — distinct from the 모찌 보내기 CTA,

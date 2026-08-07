@@ -397,6 +397,9 @@ model MarketplaceItem {
   orders Order[]
 
   @@index([streamerId])
+  // Every creator page filters on (streamerId, active), and getAffordableItems
+  // ORs over per-creator price bounds with active = true.
+  @@index([streamerId, active])
 }
 
 // A redemption: a user spends mochi on a marketplace item. Records the order;
@@ -419,6 +422,10 @@ model Order {
   @@index([streamerId])
   @@index([backerId])
   @@index([itemId])
+  // The Studio's pending queue and a buyer's own history both filter by owner
+  // plus status, then order by createdAt.
+  @@index([streamerId, status])
+  @@index([backerId, status])
 }
 
 // A free, in-app "I want to hear from this creator" relationship — distinct from

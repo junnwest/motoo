@@ -1,10 +1,10 @@
 import { getTranslations } from "next-intl/server";
+import { getSession } from "@/lib/session";
 import { Nav } from "@/components/Nav";
 import { Sidebar } from "@/components/Sidebar";
 import { RightRail } from "@/components/RightRail";
 import { MobileTabBar } from "@/components/MobileTabBar";
 import { getUnreadCount } from "@/lib/notify";
-import { auth } from "@/auth";
 
 /**
  * The app frame for signed-in consumer pages. Three independent columns
@@ -36,7 +36,7 @@ export async function ConsumerShell({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await auth();
+  const session = await getSession();
   const backerId = session?.user?.id;
   const [t, tmp, unreadCount] = await Promise.all([
     getTranslations("nav"),

@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { headers } from "next/headers";
 import { getTranslations } from "next-intl/server";
-import { auth } from "@/auth";
 import { BrandLogo } from "./BrandLogo";
 import { SignupButton } from "./SignupButton";
 import { UserMenu, type MenuItem } from "./UserMenu";
@@ -10,7 +9,7 @@ import { StudioPill } from "./StudioPill";
 import { Mochi } from "./Mochi";
 import { IconTrophy } from "@/components/ui/Icons";
 import { getUnreadCount } from "@/lib/notify";
-import { getAvatarUrl } from "@/lib/session";
+import { getAvatarUrl, getSession } from "@/lib/session";
 
 /**
  * Top navigation (DECISIONS 2026-07-30 restructure).
@@ -41,7 +40,7 @@ export async function Nav() {
   const ts = await getTranslations("settings");
   const tcd = await getTranslations("creatorDashboard");
 
-  const session = await auth();
+  const session = await getSession();
   const authed = !!session?.user;
   const handle = session?.user?.creator ?? null;
   const name = session?.user?.nickname ?? session?.user?.name ?? "";

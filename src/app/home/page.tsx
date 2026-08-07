@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
 import { NOINDEX } from "@/lib/metadata";
 import { redirect } from "next/navigation";
-import { auth } from "@/auth";
 import { ConsumerShell } from "@/components/ConsumerShell";
 import { Footer } from "@/components/Footer";
 import { HomeSignedIn } from "@/components/HomeSignedIn";
-import { getCurrentBacker } from "@/lib/session";
+import { getCurrentBacker, getSession } from "@/lib/session";
 
 /** Signed-in surface: one person’s balances and history. Never indexed. */
 export const metadata: Metadata = { robots: NOINDEX };
@@ -21,7 +20,7 @@ export const metadata: Metadata = { robots: NOINDEX };
  * is nothing here to see without an account, and `/` is the right pitch.
  */
 export default async function HomePage() {
-  const session = await auth();
+  const session = await getSession();
   if (!session?.user) redirect("/");
 
   const backer = await getCurrentBacker();

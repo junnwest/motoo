@@ -9,6 +9,7 @@
  * ORDER BY is cheap, and a stored rank would drift the moment anyone buys.
  */
 
+import { cache } from "react";
 import { prisma } from "@/lib/db";
 
 export type MyRanking = {
@@ -37,21 +38,61 @@ export async function getMyRankings(backerId: string): Promise<MyRanking[]> {
   });
   if (holdings.length === 0) return [];
 
-  return Promise.all(
-    holdings.map(async (h) => {
-      const { rank, total } = await getSupporterRank(h.streamerId, backerId);
-      return {
-        streamerId: h.streamerId,
-        handle: h.streamer.handle,
-        displayName: h.streamer.displayName,
-        category: h.streamer.category,
-        balance: h.balance,
-        purchasedTotal: h.purchasedTotal,
-        rank,
-        totalSupporters: total,
-      };
+  /**
+   * One grouped query for every creator the user holds, instead of calling
+   * `getSupporterRank` per holding.
+   *
+   * That was an N+1 of N+1s: each call ran three queries (the user's own row,
+   * a count of holders ahead, a count of all holders), so a user holding four
+   * creators spent 1 + 4x3 = 13 queries just to render the rank line on their
+   * home page. Here two `groupBy`s cover all creators at once: total holders
+   * each, and holders ahead of this user's own purchasedTotal.
+   */
+  const streamerIds = holdings.map((h) => h.streamerId);
+  const mine = new Map(holdings.map((h) => [h.streamerId, h.purchasedTotal]));
+
+  const [totals, ahead] = await Promise.all([
+    prisma.mochiHolding.groupBy({
+      by: ["streamerId"],
+      where: { streamerId: { in: streamerIds } },
+      _count: { _all: true },
     }),
+    // "Holders who bought strictly more than me" can't be expressed per-creator
+    // in one groupBy (the threshold differs per row), so fetch the comparison
+    // set once and bucket it in memory — still a single query, and the rows are
+    // just (streamerId, purchasedTotal) pairs.
+    prisma.mochiHolding.findMany({
+      where: { streamerId: { in: streamerIds } },
+      select: { streamerId: true, purchasedTotal: true },
+    }),
+  ]);
+
+  const totalByStreamer = new Map(
+    totals.map((t) => [t.streamerId, t._count._all]),
   );
+  const aheadByStreamer = new Map<string, number>();
+  for (const row of ahead) {
+    const threshold = mine.get(row.streamerId);
+    if (threshold === undefined) continue;
+    if (row.purchasedTotal > threshold) {
+      aheadByStreamer.set(
+        row.streamerId,
+        (aheadByStreamer.get(row.streamerId) ?? 0) + 1,
+      );
+    }
+  }
+
+  return holdings.map((h) => ({
+    streamerId: h.streamerId,
+    handle: h.streamer.handle,
+    displayName: h.streamer.displayName,
+    category: h.streamer.category,
+    balance: h.balance,
+    purchasedTotal: h.purchasedTotal,
+    // Ties share a rank, same as getSupporterRank: 1 + however many bought more.
+    rank: (aheadByStreamer.get(h.streamerId) ?? 0) + 1,
+    totalSupporters: totalByStreamer.get(h.streamerId) ?? 0,
+  }));
 }
 
 /**
@@ -93,14 +134,14 @@ export type LeaderboardEntry = {
  * to the mochi model; see DECISIONS 2026-08-01). Same live-computed pattern:
  * cheap at this scale, never drifts out of sync with a purchase.
  */
-export async function getSupporterLeaderboard(
+export const getSupporterLeaderboard = cache(async (
   streamerId: string,
   limit = 60,
 ): Promise<{
   entries: LeaderboardEntry[];
   totalSupporters: number;
   totalMochiPurchased: number;
-}> {
+}> => {
   const [holdings, totalSupporters, sum] = await Promise.all([
     prisma.mochiHolding.findMany({
       where: { streamerId, purchasedTotal: { gt: 0 } },
@@ -141,4 +182,4 @@ export async function getSupporterLeaderboard(
     totalSupporters,
     totalMochiPurchased: sum._sum.purchasedTotal ?? 0,
   };
-}
+});

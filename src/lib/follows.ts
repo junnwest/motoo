@@ -1,10 +1,15 @@
-"use server";
-
-import { revalidatePath } from "next/cache";
+import { cache } from "react";
 import { prisma } from "@/lib/db";
-import { getCurrentBacker } from "@/lib/session";
 
 /**
+ * This module used to carry a file-level `"use server"`, which made every
+ * export a server action — including the two reads, which are just queries.
+ * That also blocked `cache()`, and `getFollowList` is called **twice on every
+ * signed-in page** (once by the Sidebar, once by the RightRail), issuing the
+ * identical query both times. The directive is now scoped to `toggleFollow`,
+ * the only export that is actually a mutation, and the reads are deduplicated
+ * per request.
+ *
  * Following is the free half of "creators you support" — MochiHolding is the
  * paid half. It costs nothing, so it's what fills the home rail (DECISIONS
  * 2026-07-30) for a creator a user is interested in but hasn't bought mochi
@@ -18,7 +23,7 @@ import { getCurrentBacker } from "@/lib/session";
  * independent; a paying-but-not-following supporter won't appear here, which
  * is why BuyMochi nudges a follow right after a first purchase).
  */
-export async function getFollowList(backerId: string) {
+export const getFollowList = cache(async (backerId: string) => {
   const rows = await prisma.follow.findMany({
     where: { backerId },
     orderBy: { createdAt: "desc" },
@@ -32,45 +37,12 @@ export async function getFollowList(backerId: string) {
     displayName: r.streamer.displayName,
     category: r.streamer.category,
   }));
-}
+});
 
-export async function isFollowing(streamerId: string, backerId: string) {
+export const isFollowing = cache(async (streamerId: string, backerId: string) => {
   const row = await prisma.follow.findUnique({
     where: { streamerId_backerId: { streamerId, backerId } },
     select: { id: true },
   });
   return !!row;
-}
-
-/** Toggle follow for the signed-in user. Returns the new state. */
-export async function toggleFollow(
-  streamerId: string,
-  handle: string,
-): Promise<{ ok: true; following: boolean } | { ok: false; error: string }> {
-  const backer = await getCurrentBacker();
-  if (!backer) return { ok: false, error: "signedOut" };
-
-  const existing = await prisma.follow.findUnique({
-    where: { streamerId_backerId: { streamerId, backerId: backer.id } },
-    select: { id: true },
-  });
-
-  if (existing) {
-    await prisma.follow.delete({ where: { id: existing.id } });
-  } else {
-    await prisma.follow.create({ data: { streamerId, backerId: backer.id } });
-  }
-
-  // Sidebar's following list and RightRail's discovery pool (which excludes
-  // already-followed creators) render on every ConsumerShell page, not just
-  // /home — revalidate them all so an instant-follow from the rail is
-  // reflected regardless of which page it happened on.
-  revalidatePath(`/s/${handle}`);
-  revalidatePath("/home");
-  revalidatePath("/explore");
-  revalidatePath("/ranking");
-  revalidatePath("/notifications");
-  revalidatePath("/profile");
-  revalidatePath("/settings");
-  return { ok: true, following: !existing };
-}
+});

@@ -79,25 +79,46 @@ export async function getAffordableItems(backerId: string, take = 6) {
   });
   if (holdings.length === 0) return [];
 
-  // One query per held creator (a handful at most), then interleave so a single
-  // creator with cheap items can't crowd out everyone else.
-  const perCreator = await Promise.all(
-    holdings.map(async (h) => {
-      const items = await prisma.marketplaceItem.findMany({
-        where: {
-          streamerId: h.streamerId,
-          active: true,
-          priceMochi: { lte: h.balance },
-        },
-        orderBy: { priceMochi: "desc" },
-        take: 2,
-      });
-      return items.map((item) => ({
-        item,
-        balance: h.balance,
-        streamer: h.streamer,
-      }));
-    }),
+  /**
+   * One query for every held creator at once, then interleave so a single
+   * creator with cheap items can't crowd out everyone else.
+   *
+   * Was a query per holding. The affordability threshold differs per creator
+   * (each has its own balance), which is why this can't be a single `WHERE
+   * priceMochi <= ?` — instead it fetches each creator's active items once via
+   * an `OR` of per-creator price bounds and buckets them in memory. Same shape
+   * as the ranking fix: the per-row condition moves out of the query planner
+   * and into a pass over rows we were fetching anyway.
+   */
+  const items = await prisma.marketplaceItem.findMany({
+    where: {
+      active: true,
+      OR: holdings.map((h) => ({
+        streamerId: h.streamerId,
+        priceMochi: { lte: h.balance },
+      })),
+    },
+    orderBy: { priceMochi: "desc" },
+  });
+
+  const byStreamer = new Map(holdings.map((h) => [h.streamerId, h]));
+  const grouped = new Map<string, typeof items>();
+  for (const item of items) {
+    const list = grouped.get(item.streamerId) ?? [];
+    // Two per creator, matching the previous per-creator `take: 2`; the list is
+    // already price-descending, so the first two are the priciest affordable.
+    if (list.length < 2) {
+      list.push(item);
+      grouped.set(item.streamerId, list);
+    }
+  }
+
+  const perCreator = holdings.map((h) =>
+    (grouped.get(h.streamerId) ?? []).map((item) => ({
+      item,
+      balance: h.balance,
+      streamer: byStreamer.get(h.streamerId)!.streamer,
+    })),
   );
 
   const interleaved: (typeof perCreator)[number] = [];

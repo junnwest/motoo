@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
+import { getSession } from "@/lib/session";
 import { NOINDEX } from "@/lib/metadata";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { auth } from "@/auth";
 import { ConsumerShell } from "@/components/ConsumerShell";
 import { Footer } from "@/components/Footer";
 import { NotificationList } from "./NotificationList";
@@ -13,7 +13,7 @@ export const metadata: Metadata = { robots: NOINDEX };
 
 /** Full notification history — the page the bell's "전체 보기" hands off to. */
 export default async function NotificationsPage() {
-  const session = await auth();
+  const session = await getSession();
   if (!session?.user) redirect("/");
 
   const t = await getTranslations("notifications");

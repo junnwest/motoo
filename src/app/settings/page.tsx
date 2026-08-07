@@ -2,11 +2,10 @@ import type { Metadata } from "next";
 import { NOINDEX } from "@/lib/metadata";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { auth } from "@/auth";
 import { ConsumerShell } from "@/components/ConsumerShell";
 import { Footer } from "@/components/Footer";
 import { Section } from "@/components/ui/Section";
-import { getCurrentBacker } from "@/lib/session";
+import { getCurrentBacker, getSession } from "@/lib/session";
 import { IdentityForm } from "./SettingsForm";
 import { AvatarForm } from "./AvatarForm";
 import { PasswordForm } from "./PasswordForm";
@@ -21,7 +20,7 @@ export const metadata: Metadata = { robots: NOINDEX };
  * the request host starts with `studio.` (see isStudioPage).
  */
 export default async function SettingsPage() {
-  const session = await auth();
+  const session = await getSession();
   if (!session?.user) redirect("/");
 
   const t = await getTranslations("settings");

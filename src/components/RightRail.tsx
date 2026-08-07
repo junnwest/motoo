@@ -1,7 +1,7 @@
 import { RightRailPanel } from "@/components/RightRailPanel";
 import { getHoldingsForBacker } from "@/lib/mochi";
 import { getFollowList } from "@/lib/follows";
-import { getExploreStreamers } from "@/lib/streamers";
+import { getTrendingCreators } from "@/lib/streamers";
 
 /**
  * The persistent right rail — discovery suggestions, mirroring the left
@@ -30,9 +30,9 @@ export async function RightRail({ backerId }: { backerId: string }) {
     ...follows.map((f) => f.handle),
   ]);
 
-  let discover: Awaited<ReturnType<typeof getExploreStreamers>> = [];
+  let discover: Awaited<ReturnType<typeof getTrendingCreators>> = [];
   try {
-    const trending = await getExploreStreamers({ sort: "backers" });
+    const trending = await getTrendingCreators();
     discover = trending.filter((s) => !supportedHandles.has(s.handle)).slice(0, 6);
   } catch {
     discover = [];

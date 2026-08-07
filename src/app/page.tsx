@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { auth } from "@/auth";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 import { SafetyStrip } from "@/components/SafetyStrip";
@@ -17,6 +16,7 @@ import { Mochi } from "@/components/Mochi";
 import { StreamerCard } from "@/components/StreamerCard";
 import { CreatorCover } from "@/components/CreatorCover";
 import { getExploreStreamers, type StreamerCard as CardData } from "@/lib/streamers";
+import { getSession } from "@/lib/session";
 import { formatCount } from "@/lib/format";
 
 export default async function FanLandingPage() {
@@ -30,7 +30,7 @@ export default async function FanLandingPage() {
   // so this is one hop either way. Accounts are still additive — the Studio
   // nav's motoo pill goes straight back to /home, which stays fully reachable.
   // (Non-onboarded users are caught by the onboarding middleware before this.)
-  const session = await auth();
+  const session = await getSession();
   if (session?.user) redirect(session.user.creator ? "/studio" : "/home");
 
   const t = await getTranslations("fanLanding");
