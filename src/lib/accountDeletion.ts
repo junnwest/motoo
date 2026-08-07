@@ -18,48 +18,31 @@ export function deletionDeadline(from: Date = new Date()): Date {
 }
 
 /**
- * What happens to an unspent mochi balance when an account is finally purged.
+ * What happens to an unspent mochi balance when an account is purged.
  *
- * **This is the one open question in the whole flow, and it is deliberately
- * isolated here so it can be answered late without touching anything else.**
+ * **Nothing. It is forfeited.** Owner decision, 2026-08-07: no refund, and the
+ * units are NOT returned to the creator's sellable supply either. The holding
+ * rows simply cascade away with the account.
  *
- * Decided: the units return to the creator's market supply — `soldQuantity`
- * decrements so they become sellable again. That is what this function does.
+ * The two halves are load-bearing together, which is why there is no code here
+ * rather than half of it. Payment settles directly to the creator's
+ * sub-merchant at purchase time (spec §8), so:
  *
- * NOT decided: whether the user gets their money back. Payment settles directly
- * to the creator's sub-merchant at purchase time (spec §8), so returning the
- * units without refunding means the creator can sell the same mochi twice while
- * the purged user receives nothing — double-payment against a single
- * fulfilment obligation. Forfeiting prepaid credit (선불전자지급수단) is also
- * close to the least defensible position under Korean law, and it contradicts
- * `/refund`'s 60% rule: a user below that threshold would do better by deleting
- * their account than by requesting a refund.
+ *   - no refund + units returned to supply  → the creator is paid, then gets to
+ *     sell the same units again: paid twice for one fulfilment obligation.
+ *   - no refund + units stay sold (this)    → the creator is paid once and
+ *     never has to fulfil. A windfall, but bounded and not resellable.
  *
- * If counsel says "refund then return", the fix is a `voidCharge`/refund call
- * at the top of this function — the rest of the purge is unaffected. Until
- * then this does the supply return only, and the open question is recorded in
- * docs/AUDIT-2026-08-06.md rather than silently resolved in code.
+ * An earlier revision decremented `MochiIssuance.soldQuantity`. That was the
+ * first of those, and it was wrong.
+ *
+ * NOTE — **recorded as the owner's call, not counsel's.** Forfeiting an unspent
+ * prepaid balance is the part of this flow most likely to be challenged under
+ * the 선불전자지급수단 rules, and it sits awkwardly beside `/refund`, which
+ * already promises a 잔액 환불 once 60% is spent. Take it to counsel with the
+ * creator/service termination clause. If the answer changes, this is where the
+ * refund call goes — the rest of the purge is unaffected.
  */
-async function releaseUnspentMochi(
-  tx: Parameters<Parameters<typeof prisma.$transaction>[0]>[0],
-  backerId: string,
-): Promise<void> {
-  const holdings = await tx.mochiHolding.findMany({
-    where: { backerId, balance: { gt: 0 } },
-    select: { streamerId: true, balance: true },
-  });
-
-  for (const h of holdings) {
-    // Return the unspent units to the creator's current tier meter. Clamped at
-    // zero: a price raise resets `soldQuantity`, so a holding bought in an
-    // earlier tier can legitimately exceed what the current tier has sold, and
-    // decrementing past zero would make the availability meter nonsense.
-    await tx.$executeRaw`
-      UPDATE "MochiIssuance"
-      SET "soldQuantity" = GREATEST(0, "soldQuantity" - ${h.balance})
-      WHERE "streamerId" = ${h.streamerId}`;
-  }
-}
 
 /**
  * Schedule deletion and sign the user out everywhere.
@@ -125,12 +108,10 @@ export async function purgeExpiredAccounts(now = new Date()): Promise<PurgeResul
       continue;
     }
     try {
-      await prisma.$transaction(async (tx) => {
-        await releaseUnspentMochi(tx, account.id);
-        // Everything else the user owns cascades from Backer (holdings, orders,
-        // follows, notifications — see the schema's onDelete: Cascade).
-        await tx.backer.delete({ where: { id: account.id } });
-      });
+      // Everything the user owns cascades from Backer — holdings (and with
+      // them any unspent balance, see above), orders, follows, notifications.
+      // See the schema's onDelete: Cascade.
+      await prisma.backer.delete({ where: { id: account.id } });
       purged++;
     } catch (err) {
       failed++;

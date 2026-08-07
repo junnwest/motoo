@@ -89,19 +89,24 @@ to run without `CRON_SECRET`.
 its orders, and *every holder's balance* — one person leaving would destroy other people's
 money. Creator termination needs its own flow and its own counsel review.
 
-**What is decided:** unspent mochi returns to the creator's market supply (`soldQuantity`
-decrements, the units become sellable again).
+**Unspent mochi is forfeited.** No refund, and the units are *not* returned to the creator's
+sellable supply either. The holding rows cascade away with the account.
 
-**What is NOT decided, and is deliberately isolated in one function:** whether the purged user
-gets their money back. Payment settles directly to the creator's sub-merchant at purchase time
-(spec §8), so returning the units *without* refunding means the creator can sell the same mochi
-twice while the user receives nothing — double-payment against a single fulfilment obligation.
-Forfeiting prepaid credit (선불전자지급수단) is also close to the least defensible position under
-Korean law, and it contradicts `/refund`'s 60% rule: a user below that threshold would do better
-by deleting their account than by asking for a refund. `releaseUnspentMochi` in
-`src/lib/accountDeletion.ts` does the supply return only; a refund is one call at the top of that
-function if counsel says so. **Constraint: take this to counsel together with the creator/service
-termination clause — they are the same question.**
+Those two halves are load-bearing together. Payment settles directly to the creator's
+sub-merchant at purchase time (spec §8), so "no refund + units returned to supply" would let the
+creator sell the same mochi twice — paid twice for one fulfilment obligation. An earlier revision
+of this decision did exactly that and was wrong. "No refund + units stay sold" is the coherent
+version: the creator is paid once and never has to fulfil. A windfall, but bounded, and not a
+resellable asset.
+
+⚠️ **This is the owner's call, not counsel's, and it is the highest-risk position in the
+product.** Forfeiting an unspent prepaid balance is the part most likely to be challenged under
+the 선불전자지급수단 rules, and it sits awkwardly beside `/refund`, which already promises a 잔액
+환불 once 60% is spent — a user below that threshold now does *worse* by deleting their account
+than by asking for a refund. **Constraint: take this to counsel with the creator/service
+termination clause — they are the same question.** If the answer changes, the refund call goes at
+the top of the purge in `src/lib/accountDeletion.ts`; nothing else is affected. The deletion
+confirmation dialog states the forfeiture explicitly, so the user is told before they confirm.
 
 ## 2026-08-07 — Rate limiting lives in Postgres, not Redis, and fails open
 

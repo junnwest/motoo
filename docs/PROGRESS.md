@@ -21,11 +21,13 @@ all pass**. Ordered by what would hurt most if ignored.
 - [ ] **Counsel sign-off on `/refund`, and on two questions it doesn't cover.** The page states
   real positions (7-day 청약철회, 60% 사용 → 잔액 환불, 법령 carve-out) but they are the owner's
   calls, not a lawyer's. Gate on `PAYMENT_PROVIDER` leaving `mock`. Two clauses to take with it:
-  - [ ] **What happens to an unspent balance when a purged account is finally deleted.** The
-    units return to the creator's supply (decided); whether the *money* is refunded is not.
-    Payment settles directly to the creator, so "return only" pays them twice for one
-    obligation — and it contradicts the 60% rule. Isolated in `releaseUnspentMochi`
-    (`src/lib/accountDeletion.ts`) so it can be answered late. See DECISIONS 2026-08-07.
+  - [ ] **Unspent balances are forfeited on account deletion — get this reviewed.** Decided
+    2026-08-07: no refund, and the units are not returned to the creator's supply either
+    (doing both would pay the creator twice for one obligation). It is implemented, and the
+    confirmation dialog states it plainly before the user commits. But forfeiting prepaid
+    credit is the single most challengeable position in the product under 선불전자지급수단
+    rules, and it means a user with under 60% spent now does *worse* by deleting their account
+    than by requesting a refund. See DECISIONS 2026-08-07.
   - [ ] **Creator/service termination** — what happens to balances if a creator stops trading
     or motoo closes. Deliberately omitted from `/refund`; still the clause hardest to defend
     leaving out. Account deletion currently *refuses* creator accounts for this reason.

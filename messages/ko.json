@@ -1059,7 +1059,7 @@
     "deleteCta": "계정 삭제 신청",
     "deleteConfirmTitle": "정말 계정을 삭제할까요?",
     "deleteConfirmBody": "{days}일 뒤에 계정과 데이터가 완전히 삭제돼요. 그 전에 다시 로그인하면 취소할 수 있어요.",
-    "deleteConfirmBalance": "사용하지 않은 모찌 {count}개는 크리에이터의 마켓 판매분으로 돌아가요.",
+    "deleteConfirmBalance": "사용하지 않은 모찌 {count}개는 함께 삭제되며 돌려받을 수 없어요.",
     "deleteConfirmNoBalance": "사용하지 않은 모찌는 없어요.",
     "deleteConfirmCta": "네, 삭제를 신청할게요",
     "deleteKeep": "그대로 둘게요",
