@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+import { NOINDEX } from "@/lib/metadata";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { auth } from "@/auth";
@@ -13,6 +15,9 @@ import { getCurrentBacker } from "@/lib/session";
 import { getHoldingsForBacker, getOrdersForBacker } from "@/lib/mochi";
 import { formatKstDate } from "@/lib/format";
 import { ALL_CATEGORIES } from "@/lib/creatorTaxonomy";
+
+/** Signed-in surface: one person’s balances and history. Never indexed. */
+export const metadata: Metadata = { robots: NOINDEX };
 
 const ORDER_STATUS_CHIP: Record<string, string> = {
   pending: "bg-coral-chip text-coral-deep",

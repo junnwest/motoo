@@ -1,8 +1,21 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 import { SUPPORT_EMAIL, supportMailto } from "@/lib/support";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("meta");
+  const title = t("refund.title");
+  const description = t("refund.description");
+  return {
+    title,
+    description,
+    alternates: { canonical: "/refund" },
+    openGraph: { url: "/refund", title, description },
+  };
+}
 
 /**
  * The 환불·청약철회 policy. Ordered as a reader hits the questions: who is

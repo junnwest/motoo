@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+import { NOINDEX } from "@/lib/metadata";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { auth } from "@/auth";
@@ -8,6 +10,9 @@ import { getCurrentBacker } from "@/lib/session";
 import { IdentityForm } from "./SettingsForm";
 import { AvatarForm } from "./AvatarForm";
 import { PasswordForm } from "./PasswordForm";
+
+/** Signed-in surface: one person’s balances and history. Never indexed. */
+export const metadata: Metadata = { robots: NOINDEX };
 
 /**
  * Fan account settings — apex-only route, distinct from the Studio host's own

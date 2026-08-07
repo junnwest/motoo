@@ -2,6 +2,40 @@
   "a11y": {
     "skipToContent": "Skip to content"
   },
+  "meta": {
+    "siteName": "motoo",
+    "title": "motoo — Back the creators you love, with mochi",
+    "description": "Buy a creator's own mochi and spend it in their market. The warmest way to get closer to the creators you back.",
+    "explore": {
+      "title": "Browse creators",
+      "description": "Creators ranked by real support. Find someone you care about and back them with mochi."
+    },
+    "creator": {
+      "title": "{name} (@{handle})",
+      "description": "Buy {name}'s mochi and spend it on items in their market. {supporters} supporters are backing them.",
+      "descriptionNoSupporters": "Buy {name}'s mochi and spend it on items in their market."
+    },
+    "buy": {
+      "title": "Send mochi to {name}",
+      "description": "Buy the mochi {name} issues. Mochi is prepaid credit spendable only in this creator's market."
+    },
+    "creators": {
+      "title": "For creators",
+      "description": "Issue your own mochi, open a market, and receive your fans' support directly."
+    },
+    "refund": {
+      "title": "Refund & cancellation",
+      "description": "How withdrawal and balance refunds work for mochi purchases."
+    },
+    "terms": {
+      "title": "Terms of service",
+      "description": "The terms of using motoo."
+    },
+    "privacy": {
+      "title": "Privacy policy",
+      "description": "How motoo handles your personal data."
+    }
+  },
   "common": {
     "brand": "motoo",
     "login": "Log in",

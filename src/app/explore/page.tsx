@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { ConsumerShell } from "@/components/ConsumerShell";
@@ -10,6 +11,18 @@ import {
   type ExploreParams,
   type ExploreSort,
 } from "@/lib/streamers";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("meta");
+  const title = t("explore.title");
+  const description = t("explore.description");
+  return {
+    title,
+    description,
+    alternates: { canonical: "/explore" },
+    openGraph: { url: "/explore", title, description },
+  };
+}
 
 export default async function ExplorePage({
   searchParams,

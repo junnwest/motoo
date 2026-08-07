@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
@@ -13,6 +14,18 @@ import {
   IconAward,
   IconGift,
 } from "@/components/ui/Icons";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("meta");
+  const title = t("creators.title");
+  const description = t("creators.description");
+  return {
+    title,
+    description,
+    alternates: { canonical: "/creators" },
+    openGraph: { url: "/creators", title, description },
+  };
+}
 import { Mochi } from "@/components/Mochi";
 import { Avatar } from "@/components/ui/Placeholder";
 

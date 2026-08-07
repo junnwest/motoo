@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { ConsumerShell } from "@/components/ConsumerShell";
@@ -17,6 +18,59 @@ import { isFollowing } from "@/lib/follows";
 import { getSupporterLeaderboard } from "@/lib/ranking";
 import { formatCount } from "@/lib/format";
 import { isCreatorType, ALL_CATEGORIES } from "@/lib/creatorTaxonomy";
+
+/**
+ * Per-creator metadata. This page is the product's main shareable object — a
+ * creator posting their link is the primary organic growth path — and until now
+ * it inherited the root layout's single (and retired) title/description, with
+ * no image. Every share looked identical and described the wrong product.
+ *
+ * Unknown handles return empty metadata rather than guessing: the page itself
+ * calls notFound(), and titling a 404 after the handle someone mistyped would
+ * put that string in the tab and in any preview card.
+ */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ handle: string }>;
+}): Promise<Metadata> {
+  const { handle } = await params;
+  const [t, data] = await Promise.all([
+    getTranslations("meta"),
+    getStreamerProfile(handle),
+  ]);
+  if (!data) return {};
+
+  const { streamer } = data;
+  const { totalSupporters } = await getSupporterLeaderboard(streamer.id, 1);
+  const title = t("creator.title", {
+    name: streamer.displayName,
+    handle: streamer.handle,
+  });
+  const description =
+    totalSupporters > 0
+      ? t("creator.description", {
+          name: streamer.displayName,
+          supporters: totalSupporters,
+        })
+      : t("creator.descriptionNoSupporters", { name: streamer.displayName });
+  const url = `/s/${streamer.handle}`;
+
+  return {
+    title,
+    description,
+    alternates: { canonical: url },
+    openGraph: {
+      type: "profile",
+      url,
+      title,
+      description,
+      // The sibling opengraph-image.tsx renders this per creator; Next wires it
+      // up automatically, so only the URL fields need stating here.
+    },
+    twitter: { card: "summary_large_image", title, description },
+  };
+}
 
 export default async function StreamerProfilePage({
   params,

@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+import { NOINDEX } from "@/lib/metadata";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { auth } from "@/auth";
@@ -5,6 +7,9 @@ import { ConsumerShell } from "@/components/ConsumerShell";
 import { Footer } from "@/components/Footer";
 import { NotificationList } from "./NotificationList";
 import { getNotificationsForBacker } from "@/lib/notify";
+
+/** Signed-in surface: one person’s balances and history. Never indexed. */
+export const metadata: Metadata = { robots: NOINDEX };
 
 /** Full notification history — the page the bell's "전체 보기" hands off to. */
 export default async function NotificationsPage() {

@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+import { NOINDEX } from "@/lib/metadata";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
@@ -9,6 +11,9 @@ import { Section } from "@/components/ui/Section";
 import { IconTrophy } from "@/components/ui/Icons";
 import { getMyRankings } from "@/lib/ranking";
 import { ALL_CATEGORIES } from "@/lib/creatorTaxonomy";
+
+/** Signed-in surface: one person’s balances and history. Never indexed. */
+export const metadata: Metadata = { robots: NOINDEX };
 
 /**
  * Your rank as a supporter within each creator you hold mochi in — by

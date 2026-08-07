@@ -3,6 +3,7 @@ import { IBM_Plex_Mono } from "next/font/google";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { getLocale, getTranslations } from "next-intl/server";
 import { locales } from "@/i18n/config";
+import { SITE_URL } from "@/lib/metadata";
 import "./globals.css";
 
 // Pretendard is loaded via CDN in globals.css (not on Google Fonts).
@@ -13,11 +14,40 @@ const ibmPlexMono = IBM_Plex_Mono({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  title: "motoo — 팬의 응원을 스폰서에게 보여줄 증거로",
-  description:
-    "팬의 응원을 매달 한 장의 트러스트 리포트로. 브랜드·스폰서·MCN에게 진짜 팬덤을 증명하세요.",
-};
+/**
+ * Site-wide metadata. Was a single hardcoded title/description still selling
+ * the retired Trust Report ("매달 한 장의 트러스트 리포트로") — which every page
+ * in the app inherited, because this was the only `metadata` export anywhere.
+ *
+ * `title.template` means a page only supplies its own name; the suffix is
+ * applied here so it can never drift page to page.
+ */
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("meta");
+  const title = t("title");
+  const description = t("description");
+
+  return {
+    // Required for OG/canonical URLs to resolve absolutely. Scrapers reject or
+    // mishandle relative ones.
+    metadataBase: new URL(SITE_URL),
+    title: { default: title, template: `%s · ${t("siteName")}` },
+    description,
+    applicationName: t("siteName"),
+    alternates: { canonical: "/" },
+    openGraph: {
+      type: "website",
+      siteName: t("siteName"),
+      locale: "ko_KR",
+      url: "/",
+      title,
+      description,
+    },
+    twitter: { card: "summary_large_image", title, description },
+    robots: { index: true, follow: true },
+    formatDetection: { telephone: false },
+  };
+}
 
 /**
  * Explicit viewport. Without this Next emits its default, which is fine, but

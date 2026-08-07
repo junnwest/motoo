@@ -1,7 +1,20 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("meta");
+  const title = t("terms.title");
+  const description = t("terms.description");
+  return {
+    title,
+    description,
+    alternates: { canonical: "/terms" },
+    openGraph: { url: "/terms", title, description },
+  };
+}
 
 export default async function TermsPage() {
   const t = await getTranslations("legal");

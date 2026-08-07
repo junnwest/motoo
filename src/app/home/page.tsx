@@ -1,9 +1,14 @@
+import type { Metadata } from "next";
+import { NOINDEX } from "@/lib/metadata";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { ConsumerShell } from "@/components/ConsumerShell";
 import { Footer } from "@/components/Footer";
 import { HomeSignedIn } from "@/components/HomeSignedIn";
 import { getCurrentBacker } from "@/lib/session";
+
+/** Signed-in surface: one person’s balances and history. Never indexed. */
+export const metadata: Metadata = { robots: NOINDEX };
 
 /**
  * `/home` — the app home for signed-in users. `/` stays the marketing landing
