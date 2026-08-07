@@ -216,3 +216,17 @@ export const getTrendingCreators = unstable_cache(
   ["trending-creators"],
   { revalidate: 60, tags: ["creators"] },
 );
+
+/**
+ * A creator's own updates, for the Studio composer — every visibility, newest
+ * first. The public read path (`getStreamerProfile`, `getUpdatesForBacker`)
+ * filters by visibility; this one deliberately does not, because a creator
+ * needs to see what they posted regardless of who it was for.
+ */
+export async function getUpdatesForCreator(streamerId: string, take = 30) {
+  return prisma.update.findMany({
+    where: { streamerId },
+    orderBy: { publishedAt: "desc" },
+    take,
+  });
+}

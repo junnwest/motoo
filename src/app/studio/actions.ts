@@ -3,7 +3,11 @@
 import { revalidatePath } from "next/cache";
 import { getTranslations } from "next-intl/server";
 import { z } from "zod";
-import { MarketplaceItemType, FulfillmentMode } from "@prisma/client";
+import {
+  MarketplaceItemType,
+  FulfillmentMode,
+  UpdateVisibility,
+} from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { getCurrentCreator } from "@/lib/session";
 import { fulfillOrder, cancelOrder } from "@/lib/mochi";
@@ -402,6 +406,79 @@ export async function cancel(orderId: string): Promise<ActionResult> {
       link: "/me/mochi",
     });
 
+    return { ok: true };
+  } catch {
+    return { ok: false, error: "generic" };
+  }
+}
+
+const updateSchema = z.object({
+  title: z.string().trim().min(1).max(80),
+  body: z.string().trim().min(1).max(2000),
+  visibility: z.nativeEnum(UpdateVisibility),
+});
+
+/**
+ * Post an update to supporters.
+ *
+ * The `Update` model, the queries that read it, and the cards that render it on
+ * `/home` and `/s/[handle]` all already existed — the only thing missing was a
+ * way for a creator to write one, so the feed could only ever show seeded rows.
+ * This closes that loop, which is the retention half of the product: buying and
+ * spending were both possible, but a creator had no reason to come back.
+ */
+export async function createUpdate(input: {
+  title: string;
+  body: string;
+  visibility: UpdateVisibility;
+}): Promise<ActionResult> {
+  try {
+    const creator = await getCurrentCreator();
+    if (!creator) return { ok: false, error: "generic" };
+
+    const parsed = updateSchema.safeParse(input);
+    if (!parsed.success) return { ok: false, error: "generic" };
+    const { title, body, visibility } = parsed.data;
+
+    await prisma.update.create({
+      data: { streamerId: creator.id, title, body, visibility },
+    });
+
+    revalidatePath(DASHBOARD);
+    revalidatePath(`/s/${creator.handle}`);
+
+    // Best-effort, after the write — same rule as every other notify() call
+    // here: a failed notification must never undo the thing it announces.
+    const tn = await getTranslations("notifications.push");
+    const stakeholderIds = await getStakeholderBackerIds(creator.id);
+    await notifyMany(stakeholderIds, {
+      type: "new_update",
+      title: tn("newUpdateTitle", { name: creator.displayName }),
+      body: title,
+      link: `/s/${creator.handle}`,
+    });
+
+    return { ok: true };
+  } catch {
+    return { ok: false, error: "generic" };
+  }
+}
+
+/** Delete one of this creator's own updates. Ownership checked before the write. */
+export async function deleteUpdate(id: string): Promise<ActionResult> {
+  try {
+    const creator = await getCurrentCreator();
+    if (!creator) return { ok: false, error: "generic" };
+
+    // deleteMany with the owner in the WHERE, so another creator's id simply
+    // matches nothing rather than needing a separate read-then-check.
+    const { count } = await prisma.update.deleteMany({
+      where: { id, streamerId: creator.id },
+    });
+    if (count === 0) return { ok: false, error: "generic" };
+
+    revalidatePath(DASHBOARD);
+    revalidatePath(`/s/${creator.handle}`);
     return { ok: true };
   } catch {
     return { ok: false, error: "generic" };

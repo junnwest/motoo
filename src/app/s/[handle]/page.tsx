@@ -109,6 +109,8 @@ export default async function StreamerProfilePage({
     getSupporterLeaderboard(streamer.id),
   ]);
   const balance = holding?.balance ?? 0;
+  // Has this viewer ever bought this creator's mochi? Gates backers-only posts.
+  const isSupporter = (holding?.purchasedTotal ?? 0) > 0;
   const items = streamer.marketplaceItems.map((i) => ({
     id: i.id,
     title: i.title,
@@ -255,7 +257,13 @@ export default async function StreamerProfilePage({
           ) : (
             <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {updates.map((u) => {
-                const locked = u.visibility !== "public";
+                // A backers-only post is locked for everyone *except* someone
+                // who actually holds this creator's mochi. It used to be
+                // locked unconditionally, so the people it was written for
+                // could never read it — which made "팬 전용" a label with no
+                // payoff. `purchasedTotal`, not `balance`: spending your mochi
+                // shouldn't revoke access you already paid for.
+                const locked = u.visibility !== "public" && !isSupporter;
                 return (
                   <li
                     key={u.id}

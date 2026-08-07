@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { getTranslations } from "next-intl/server";
 import { getCurrentCreator } from "@/lib/session";
-import { getCreatorDashboard } from "@/lib/streamers";
+import { getCreatorDashboard, getUpdatesForCreator } from "@/lib/streamers";
 import { formatCount } from "@/lib/format";
 import { CreatorFacet } from "@/components/CreatorFacet";
 import { isCreatorType, ALL_CATEGORIES } from "@/lib/creatorTaxonomy";
@@ -9,6 +9,7 @@ import { SettingsButton } from "./SettingsButton";
 import { MochiSettingsForm } from "./MochiSettingsForm";
 import { ItemsManager, type DashboardItem } from "./ItemsManager";
 import { OrdersTable, type DashboardOrder } from "./OrdersTable";
+import { UpdatesManager } from "./UpdatesManager";
 import { InfoTooltip } from "./InfoTooltip";
 
 function StatTile({ label, value }: { label: string; value: string }) {
@@ -92,7 +93,10 @@ export default async function CreatorDashboardHome() {
   const creator = await getCurrentCreator();
   if (!creator) return null;
 
-  const data = await getCreatorDashboard(creator.id);
+  const [data, updates] = await Promise.all([
+    getCreatorDashboard(creator.id),
+    getUpdatesForCreator(creator.id),
+  ]);
   if (!data) return null;
 
   const t = await getTranslations("creatorDashboard");
@@ -280,6 +284,9 @@ export default async function CreatorDashboardHome() {
         {/* ItemsManager renders its own section header so the "새 아이템" button
             can sit at the header's right (it owns the create-form state). */}
         <ItemsManager items={items} creatorType={creator.creatorType} />
+
+        {/* Same pattern: owns its own composer state, so it owns its header. */}
+        <UpdatesManager updates={updates} />
       </div>
     </div>
   );

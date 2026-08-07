@@ -35,10 +35,11 @@ enum StreamerStatus {
   suspended
 }
 
+// Who can read a creator update. `backers` = anyone holding that creator's
+// mochi. The tier-scoped third option went with the Phase-1 Tier model.
 enum UpdateVisibility {
   public
   backers
-  tier
 }
 
 // ── Phase 2: mochi-marketplace pivot ─────────────────────────────────────────
@@ -308,6 +309,7 @@ enum NotificationType {
   order_cancelled // creator cancelled your order; mochi was refunded
   new_item // a creator you hold mochi in or follow added a marketplace item
   price_raised // a creator you hold mochi in raised their mochi price (new tier)
+  new_update // a creator you hold mochi in or follow posted an update
 }
 
 // A notification queued for one Backer. Created outside the money-invariant

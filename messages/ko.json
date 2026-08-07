@@ -727,6 +727,28 @@
       },
       "markFulfilled": "완료로 표시",
       "cancel": "취소·환불"
+    },
+    "updates": {
+      "title": "소식",
+      "subtitle": "응원해준 팬들에게 소식을 전해보세요. 홈 피드와 프로필에 나타나요.",
+      "addNew": "소식 쓰기",
+      "nameLabel": "제목",
+      "namePlaceholder": "예) 다음 주 방송 일정 안내",
+      "bodyLabel": "내용",
+      "bodyPlaceholder": "팬들에게 전하고 싶은 이야기를 적어주세요.",
+      "visibilityLabel": "공개 범위",
+      "visibility": {
+        "public": "전체 공개",
+        "backers": "모찌 보유 팬에게만"
+      },
+      "publish": "올리기",
+      "publishing": "올리는 중…",
+      "cancel": "취소",
+      "empty": "아직 올린 소식이 없어요.",
+      "delete": "삭제",
+      "deleteConfirm": "이 소식을 삭제할까요?",
+      "chipPublic": "전체 공개",
+      "chipBackers": "팬 전용"
     }
   },
   "marketplace": {
@@ -980,7 +1002,8 @@
       "priceRaisedBody": "개당 {price, number}원으로 올랐어요. 보유 중인 모찌 가치는 그대로예요.",
       "newItemTitle": "{name}님이 새 아이템을 추가했어요",
       "orderFulfilledTitle": "{name}님이 주문을 완료했어요",
-      "orderCancelledTitle": "{name}님이 주문을 취소하고 모찌를 환불했어요"
+      "orderCancelledTitle": "{name}님이 주문을 취소하고 모찌를 환불했어요",
+      "newUpdateTitle": "{name}님이 새 소식을 올렸어요"
     }
   },
   "myProfile": {
