@@ -69,11 +69,19 @@ relative `Location` and loops. Dev: `studio.localhost:PORT`. See DECISIONS 2026-
   — the buy-flow disclosure contradicted it for one commit and that was the actual bug.
   The positions are the owner's, not counsel's: sign-off gates `PAYMENT_PROVIDER` leaving
   `mock`. See DECISIONS 2026-08-06 (supersedes the flat no-refund line of 2026-08-01).
-- **Money logic is tested.** Run `pnpm test` (node:test via tsx, needs `pnpm db:up`)
-  after touching `src/lib/mochi.ts` — it asserts the buy/redeem/cancel invariants
-  and the concurrency guards (no oversell, no negative balance).
+- **Money logic is tested.** Run `pnpm test` (node:test via tsx, needs `pnpm db:up`) after
+  touching `src/lib/mochi.ts` — 24 tests covering the buy/redeem/cancel invariants, the
+  per-purchase ceilings, buyer eligibility (본인인증 + minor/guardian consent), and the
+  concurrency guards: no oversell, no negative balance, and **no double refund** when a buyer
+  and a creator cancel the same order at once.
+- **`pnpm lint` exits 0 and should stay that way.** It was non-zero for months; the errors
+  were real (a cascading-render effect, a misplaced eslint-disable) and were fixed rather than
+  suppressed. `design-handoff/` is ignored — it is reference material, not source.
 - Money is **integer KRW**, never floats.
-- Korean-first, **no hardcoded strings** — all copy in `messages/*.json` (next-intl).
+- **Korean only, and no hardcoded strings** — all copy in `messages/ko.json` (next-intl).
+  `en.json` was deleted on 2026-08-07: it was maintained at full parity behind a language
+  switcher that never existed, so nobody could reach it (DECISIONS 2026-08-07). next-intl
+  stays regardless — it is what keeps copy out of components and what `check:vocab` scans.
   Fans are **팬 / 후원자** — **백커 is retired** and `pnpm check:vocab` now fails on it
   (its `RETIRED` list, separate from the regulatory `STRICT` one). Korean headings/titles in
   narrow cards want `break-keep`, or Hangul wraps mid-word.
@@ -104,7 +112,8 @@ pnpm dev                                       # http://localhost:3000
 ```
 Dev logins: fan `demo@motoo.dev` / `motoo` (holds mochi in 4 creators, so `/home` shows its
 populated state); **creator `creator@motoo.dev` / `motoo`** (a user who owns `@creatorA`).
-Both land on `/home`; the creator gets a **스튜디오** nav link. `pnpm db:seed` starts with
+The fan lands on `/home`; the creator lands in the **Studio** (`/` is the fork — see the top of
+this file). `pnpm db:seed` starts with
 `deleteMany()` — it wipes every account, including ones you signed up with locally. If you
 need a personal account that survives reseeds, add it to `prisma/seed.ts` the way
 `orangeandmustard@gmail.com` is (Kenneth's). In dev, `src/lib/session.ts` falls back to the demo fan (`getCurrentBacker`) and demo
@@ -114,6 +123,10 @@ creator (`getCurrentCreator`) when nobody's signed in. New signups are forced th
 `pnpm test` (money logic), `pnpm check:vocab` (banned copy), `pnpm check:emoji`, `pnpm lint`.
 Google/Naver OAuth are live in dev (`.env`, gitignored); Kakao + real 본인인증 + real PG all
 need a business registration (`사업자등록`) — mocks stand in until then.
+
+**`VERIFICATION_MOCK_MINOR=1`** makes the mock 본인확인기관 return a minor instead of an adult.
+The money path blocks minors without recorded guardian consent, and the mock used to hardcode
+`isAdult: true` — without this flag that gate is unreachable in dev and untestable.
 
 ## Deploy
 **Live at [themotoo.com](https://themotoo.com)** — Vercel + Supabase Pro Postgres (Seoul,

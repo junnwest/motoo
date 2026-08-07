@@ -4,6 +4,75 @@ What shipped, newest first. **This file is history — it is not a resume point.
 For current status and open work see [`PROGRESS.md`](./PROGRESS.md); for *why* a thing is
 the way it is see [`DECISIONS.md`](./DECISIONS.md).
 
+## 2026-08-07 (the audit: ten staged passes over the whole product)
+
+A full read of `src/**` produced [`AUDIT-2026-08-06.md`](./AUDIT-2026-08-06.md) — findings
+plus a ten-stage plan — and then the plan was executed stage by stage. One commit per stage,
+each verified before the next started. Rationale for the load-bearing choices is in
+DECISIONS 2026-08-07.
+
+- [x] **Stage 0 — money safety.** `buyMochi` took an unbounded positive integer and the mock
+  PG (still the production provider) succeeds unconditionally, so a crafted request could mint
+  millions of mochi for free; large enough values overflowed the Int4 columns *after* the
+  charge. Added `MOCHI_MAX_PURCHASE_QTY/KRW`, checked before the PG is called. Added
+  `assertCanPurchase`: the live buy path never read `verifiedAt`/`ageVerified`/
+  `guardianConsent` — only the dead `/back` flow did — while `/refund` promises minors a
+  statutory carve-out. The mock verifier hardcoded `isAdult: true`, so the gate would have
+  shipped untestable; it now derives age, and `VERIFICATION_MOCK_MINOR=1` produces a minor.
+- [x] **Stage 1 — resilience.** No `error.tsx`, `global-error.tsx` or `not-found.tsx` existed
+  anywhere: any throw showed Next's unstyled English crash page. Four boundaries over a shared
+  `ErrorState`. `/s/[handle]` rendered "not found" at HTTP 200 — dead handles were indexable —
+  now a real `notFound()`. Security headers (CSP **Report-Only**; enforcing needs a nonce), and
+  the image proxy narrowed from `hostname: "**"`, an open SSRF vector that bought nothing since
+  `next/image` is unused. Footer's `/dashboard` 404'd; all six `href="#"` links are gone.
+- [x] **Stage 2 — UI primitives.** Seven files declared a byte-identical `inputClass` and six a
+  byte-identical `labelClass`, already drifted. `Field`/`Input`/`Textarea`/`Select` and
+  `InlineMessage`, migrated across all 10 files. Beyond dedup they carry the a11y wiring nothing
+  had: `htmlFor`, `aria-describedby`, `aria-invalid`, `role="alert"` — **every form in the
+  product previously announced nothing on submit** (WCAG 4.1.3). `Button` gained a real loading
+  state; `SignupModal` dropped its duplicated portal/Escape/scroll-lock copy onto `ui/Modal`.
+- [x] **Stage 3 — mobile + accessibility.** Below `lg` the Sidebar and RightRail don't render
+  and the avatar menu is identity-only, so **on a phone the only route to `/explore` was a
+  footer link**. Added `MobileTabBar` (94×56px targets). `ui/Modal` gained a focus trap and
+  focus restore — Tab used to walk out into the dimmed page behind (2.1.2) and closing dropped
+  focus to `<body>` (2.4.3). Skip link, one `main` landmark per page, `themeColor`/`viewportFit`.
+  No horizontal scroll at 375–1440px.
+- [x] **Stage 4 — SEO and share cards.** The app had **one** `metadata` export and it still sold
+  the retired Trust Report, so every page shared one wrong title with no OG tags. Root metadata,
+  `generateMetadata` on seven public routes, `noindex` on every signed-in surface, `robots.ts`,
+  `sitemap.ts` (static + every approved creator), `manifest.ts`, and a per-creator OG image.
+  The card needed a Noto Sans KR subset fetched per render — Satori ships Latin only, so every
+  real creator 500'd until then (58KB subset vs 6.1MB full face).
+- [x] **Stage 5 — buyer cancellation.** Spending was the fastest and least reversible action in
+  the product: two taps, cost shown nowhere between, and only the *creator* could cancel.
+  `cancelOrderByBuyer` mirrors the creator path exactly. Closed a pre-existing **double-refund
+  race** while in reach: `cancelOrder` read-then-checked `status`, so two cancels racing could
+  each credit the balance. Also: Explore search silently dropped every other filter; marketplace
+  items rendered their price twice.
+- [x] **Stage 6 — performance.** Measured with Prisma query logging, same method before and
+  after: `/home` **44 → 22**, `/explore` 19 → 9, `/s/creatorA` **50 → 19**, `/profile` 25 → 11.
+  Largest cause wasn't in the audit at all — `auth()` isn't deduplicated, and its `jwt` callback
+  queries Backer and Streamer on every call (five times on a creator page). Plus: `getFollowList`
+  ran twice per page, `/s/[handle]` fetched its profile and leaderboard twice, both N+1s removed,
+  three unbounded queries bounded, and the discovery rail cached across requests.
+- [x] **Stage 7 — deletion, export, rate limiting.** `/settings` had no way to leave. Account
+  deletion is now a **30-day grace period** (owner decision) — signing back in cancels it,
+  requesting it revokes the session, and a Vercel cron runs an idempotent purge. Creator accounts
+  are refused outright: deleting a `Streamer` cascades to every holder's balance. Data export for
+  PIPA. Rate limiting where there was none, on Postgres counters rather than a hosted dependency.
+- [x] **Stage 8 — debt.** 954 LOC of dead code deleted (the `/back` subtree was a closed island),
+  the Phase-1 schema dropped now that the Trust Report retirement is confirmed permanent,
+  `en.json` deleted (Korean-only at launch), and **`pnpm lint` exits 0 for the first time** — three
+  real fixes, no suppressions. Also killed a fabricated homepage stat (`backerCount * 10` shown as
+  a creator's real mochi total).
+- [x] **Stage 9 — creator updates.** `Update` has existed since Phase 1 and **nothing could ever
+  write one**, so every 소식 came from the seed. Studio composer, `new_update` notification, and
+  backers-only posts now unlock for people who actually bought mochi (they were locked for
+  everyone, including the audience they were written for).
+- [x] Verified per stage: `pnpm build`, `pnpm test` (24, up from 11), `check:vocab`,
+  `check:emoji`, and `pnpm lint` — which finished at **exit 0**. Money-logic changes were
+  verified against the database, and UI changes in a real browser.
+
 ## 2026-08-06 (the 환불·청약철회 policy page is real)
 
 - [x] **New `/refund`** — the placeholder that PROGRESS had flagged as the project's one

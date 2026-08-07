@@ -11,6 +11,13 @@ To pull a single entry, grep its heading with trailing context, e.g.
 
 | Date | Decision |
 | --- | --- |
+| 2026-08-07 | Account deletion is a 30-day grace period; the money question stays open |
+| 2026-08-07 | Rate limiting lives in Postgres, not Redis, and fails open |
+| 2026-08-07 | The Trust Report schema is dropped, not dormant; `Update` survives |
+| 2026-08-07 | Korean only: `en.json` deleted rather than maintained for nobody |
+| 2026-08-07 | Mobile gets a bottom tab bar, not a hamburger |
+| 2026-08-07 | Purchase ceilings are per-transaction, and the age gate lives in `mochi.ts` |
+| 2026-08-07 | CSP ships Report-Only; HSTS ships without `preload` |
 | 2026-08-06 | `/refund` states real positions: 7-day 청약철회, 60% rule, 법령 carve-out |
 | 2026-08-03 | Cross-host hops target the canonical host, not the bare apex |
 | 2026-08-02 | Auth transitions navigate for real; a server-action redirect skipped middleware |
@@ -67,6 +74,135 @@ To pull a single entry, grep its heading with trailing context, e.g.
 | 2026-07-08 | `FoundingMembership` table for the founding-number invariant |
 | 2026-07-08 | Prisma pinned to v6 (not v7) |
 | 2026-07-08 | Korean-first, i18n-ready; integer KRW; mock PG |
+
+## 2026-08-07 — Account deletion is a 30-day grace period; the money question stays open
+
+Deleting is scheduled, not immediate: the account enters a 30-day window, the user is told
+when it ends, and **signing back in cancels it** — done in the `jwt` callback so it works for
+every provider, and because returning to the product is the clearest statement of intent there
+is. Requesting deletion revokes the session via `tokenVersion`, the same mechanism logout uses.
+Nothing in the stack ran scheduled work before, so this also needed a runner: a Vercel cron on
+an idempotent, resumable purge that works account-by-account in its own transaction and refuses
+to run without `CRON_SECRET`.
+
+**Creator accounts are refused outright.** Deleting a `Streamer` cascades to its marketplace,
+its orders, and *every holder's balance* — one person leaving would destroy other people's
+money. Creator termination needs its own flow and its own counsel review.
+
+**What is decided:** unspent mochi returns to the creator's market supply (`soldQuantity`
+decrements, the units become sellable again).
+
+**What is NOT decided, and is deliberately isolated in one function:** whether the purged user
+gets their money back. Payment settles directly to the creator's sub-merchant at purchase time
+(spec §8), so returning the units *without* refunding means the creator can sell the same mochi
+twice while the user receives nothing — double-payment against a single fulfilment obligation.
+Forfeiting prepaid credit (선불전자지급수단) is also close to the least defensible position under
+Korean law, and it contradicts `/refund`'s 60% rule: a user below that threshold would do better
+by deleting their account than by asking for a refund. `releaseUnspentMochi` in
+`src/lib/accountDeletion.ts` does the supply return only; a refund is one call at the top of that
+function if counsel says so. **Constraint: take this to counsel together with the creator/service
+termination clause — they are the same question.**
+
+## 2026-08-07 — Rate limiting lives in Postgres, not Redis, and fails open
+
+Nothing was throttled: buy, redeem, follow, login, signup and the handle check could all be
+called as fast as a script could issue them. A cap per purchase is not a cap per minute, and the
+credentials provider was open to stuffing.
+
+The conventional answer is Upstash. It was rejected: a hosted dependency plus a secret is hard to
+justify for a product doing single-digit RPS, and the database is already on every request path.
+A counter table costs one upsert. Every caller goes through `checkRateLimit`, so the internals can
+be swapped for a real bucket store when traffic justifies it.
+
+**Fails open on purpose.** If the limiter itself errors, the action proceeds. A limiter outage must
+not take payments down, and everything it backstops — ownership checks, purchase ceilings, balance
+guards — is still in force. Closed windows are pruned by the same nightly cron as the account
+purge; without that the table grows forever.
+
+## 2026-08-07 — The Trust Report schema is dropped, not dormant; `Update` survives
+
+The 1.0.0 removal (2026-08-01) left the schema in place and called it dormant. The owner confirmed
+on 2026-08-06 that the retirement is permanent, so `Tier`, `Backing`, `Perk`, `PerkDelivery`,
+`TrustReport`, `FoundingMembership` and the `BackingDisplay` / `BackingStatus` / `PerkStatus` /
+`ReportStatus` / `Grade` enums were dropped outright, along with the 954 LOC that read them (the
+`/s/[handle]/back` subtree turned out to be a closed island — routable, linked from nowhere, and
+the only consumer of `lib/backing.ts` and `BackingFlow`).
+
+**`Update` is the exception and stays.** The home feed reads it, creator pages render it, and it is
+what creator posts are built on (Stage 9). Two knock-ons: `Update.tierId` pointed at the dropped
+`Tier` and went with it, and `UpdateVisibility.tier` was removed — the enum is now
+`public | backers`.
+
+**Constraint:** CLAUDE.md's "grades/report schema stays in Prisma, fully dormant" line is now false
+and was rewritten. Reviving any of this means a real migration, not un-commenting.
+
+## 2026-08-07 — Korean only: `en.json` deleted rather than maintained for nobody
+
+`en.json` was kept at full parity — 800+ keys — behind a language switcher that was never built.
+`LOCALE_COOKIE` was documented as "set by the language switcher"; no such component existed
+anywhere in `src/`, so every user got `ko` and no user could ever reach the English catalog.
+Maintaining both halves of a feature with no entry point is worse than shipping one.
+
+Deleted, along with the cookie, the negotiation and `hasLocale`. **next-intl stays**: keeping copy
+out of components is a project invariant independent of how many languages ship, and it is what
+`check:vocab` scans. Re-adding a locale means a file plus a switcher; nothing else assumes one.
+
+## 2026-08-07 — Mobile gets a bottom tab bar, not a hamburger
+
+The Sidebar is `hidden lg:block` and the RightRail `hidden xl:block`, so below 1024px neither
+rendered — and the avatar dropdown is identity-only. The result: **the only route to `/explore` on
+a phone was a link at the bottom of the footer.** For a Korean creator-economy product, where
+traffic is overwhelmingly mobile, the discovery surface was effectively unreachable for most users.
+(The codebase had 114 `sm:` utilities against 17 `lg:` — designed at desktop width and narrowed.)
+
+A bottom tab bar rather than a hamburger: 홈 · 둘러보기 · 알림 · 프로필 are peer destinations users
+switch between constantly, which is what a tab bar is for, and it costs no header space. Two
+consequences worth noting: the header bell is now `lg:`-only (the tab bar carries 알림 with the same
+badge, and two identical controls on a 375px header was already making the Studio pill wrap), and
+`viewportFit: "cover"` is required or the bar's `env(safe-area-inset-bottom)` resolves to zero on
+notched devices.
+
+**Still open:** the following list remains desktop-only. Surfacing it on mobile needs a drawer with
+its own focus management; the critical navigation gap is closed without it.
+
+## 2026-08-07 — Purchase ceilings are per-transaction, and the age gate lives in `mochi.ts`
+
+`quantity` was `z.number().int().positive()` with no upper bound, and the **mock** PG — still the
+production provider — returns `ok: true` unconditionally. A crafted request could mint millions of
+mochi for free, and a large enough one overflowed the Int4 columns *after* the charge.
+`MOCHI_MAX_PURCHASE_QTY` (10,000) and `MOCHI_MAX_PURCHASE_KRW` (1,000,000) are checked before the
+PG is called. They coincide at the 100원 price floor; above it the KRW ceiling binds.
+
+The age gate went into `buyMochi`, not just the server action. `ageVerified`/`guardianConsent` were
+read **only** by the dead `/back` flow, while `/refund` promises minors a statutory carve-out — the
+product can't honour a rule it never evaluates. `/onboarding` already hard-requires `verifiedAt`, so
+this closes the action-level path and, more importantly, makes the rule testable. A minor is not
+blocked outright: recorded guardian consent lets them transact, which is what the column is for.
+
+**The mock verifier had to change too.** It hardcoded `isAdult: true`, so no account could ever be a
+minor and the gate would have shipped as untestable dead code. It now derives age from the birth
+year, and `VERIFICATION_MOCK_MINOR=1` produces a minor.
+
+## 2026-08-07 — CSP ships Report-Only; HSTS ships without `preload`
+
+There were no security headers at all. Added `X-Frame-Options`, `X-Content-Type-Options`,
+`Referrer-Policy`, `Permissions-Policy`, HSTS (prod only) and CSP.
+
+**CSP is Report-Only.** Next injects inline bootstrap scripts and Tailwind emits inline styles, so
+enforcing needs a per-request nonce threaded through the middleware — bigger than the stage, and
+getting it wrong takes the site down rather than degrading it. Report-Only gives the violation data
+at zero blast radius. `style-src` must currently allow jsdelivr because Pretendard is a CDN
+`@import`; **self-hosting the font is a prerequisite for tightening to `'self'`**. Note
+`upgrade-insecure-requests` is deliberately absent: browsers ignore it in a report-only policy and
+log a console error for it on every page load.
+
+**HSTS has no `preload`.** That directive bakes the domain into browsers' shipped preload lists,
+takes months to reverse, and would strand any future subdomain that can't do HTTPS. One word to add
+whenever that's a deliberate decision.
+
+Separately, `images.remotePatterns` was `hostname: "**"` — an open image proxy, a standard
+SSRF/bandwidth-abuse vector. It was pure risk: `next/image` is used **zero** times (avatars and
+covers are data URLs rendered with plain `<img>`). Narrowed to the OAuth avatar CDNs.
 
 ## 2026-08-06 — `/refund` states real positions: 7-day 청약철회, 60% rule, 법령 carve-out
 The 환불·청약철회 page had been a placeholder since the non-refundable decision (2026-08-01)
