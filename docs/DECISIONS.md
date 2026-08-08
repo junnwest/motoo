@@ -11,7 +11,8 @@ To pull a single entry, grep its heading with trailing context, e.g.
 
 | Date | Decision |
 | --- | --- |
-| 2026-08-07 | Account deletion is a 30-day grace period; the money question stays open |
+| 2026-08-07 | Schema changes go through migrations, and prod had already drifted |
+| 2026-08-07 | Account deletion: 30-day grace, and unspent mochi is forfeited |
 | 2026-08-07 | Rate limiting lives in Postgres, not Redis, and fails open |
 | 2026-08-07 | The Trust Report schema is dropped, not dormant; `Update` survives |
 | 2026-08-07 | Korean only: `en.json` deleted rather than maintained for nobody |
@@ -75,7 +76,38 @@ To pull a single entry, grep its heading with trailing context, e.g.
 | 2026-07-08 | Prisma pinned to v6 (not v7) |
 | 2026-07-08 | Korean-first, i18n-ready; integer KRW; mock PG |
 
-## 2026-08-07 — Account deletion is a 30-day grace period; the money question stays open
+## 2026-08-07 — Schema changes go through migrations, and prod had already drifted
+
+The Vercel build ran `prisma generate` but never `db push`, so production's schema only
+changed when someone remembered to push it by hand. DEPLOYMENT had carried a note about this
+being "a manual pre-deploy step" since July, with the caveat that data was reseedable and it
+could wait.
+
+It could not. By the time migrations were adopted, production was **three stages behind**: the
+six Phase-1 tables still present with ~900 rows, `RateLimit` and `Backer.pendingDeletionAt`
+missing, no `_prisma_migrations` table. Deploying would not merely have failed a build —
+`getCurrentBacker` selects `Backer.pendingDeletionAt`, so every authenticated page would have
+500'd. Nothing checked, so nobody knew.
+
+The build is now `prisma migrate deploy && next build`, with a `0_init` baseline generated from
+the current schema. **A failed migration fails the build**, and Vercel keeps the previous
+deployment live rather than promoting code whose schema doesn't match — a loud failure instead
+of the silent drift that caused this.
+
+`pnpm check:drift` (read-only) reports production against the repo. It exists because the
+lesson here isn't "remember to push the schema", it's "have something that tells you when you
+didn't".
+
+**Deliberately not automated:** bringing production up to date drops six tables and ~900 rows.
+That is irreversible, needs a backup, and needs someone to confirm the rows really are seed
+data. It is a runbook (`scripts/baseline-prod.md`), not a script that runs itself.
+
+**Constraint:** local databases created with `db push` have no `_prisma_migrations` table and
+will fail `migrate deploy` with **P3005**. Baseline them once with
+`prisma migrate resolve --applied 0_init`. The local database hit this immediately, which is
+the cheapest possible place to learn it.
+
+## 2026-08-07 — Account deletion: 30-day grace, and unspent mochi is forfeited
 
 Deleting is scheduled, not immediate: the account enters a 30-day window, the user is told
 when it ends, and **signing back in cancels it** — done in the `jwt` callback so it works for

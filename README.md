@@ -26,9 +26,9 @@ spec and [`design-handoff/`](./design-handoff/) for the visual system.
 **Current direction:** the **mochi-marketplace** is built and deployed — creators
 issue their own mochi, users buy it and spend it in each creator's marketplace. Accounts
 are **additive**: everyone is a user (fan); a **creator** is a user who *also* owns a
-**Studio**. The original **Streamer Trust Report** thesis has been removed from the
-website entirely (not part of 1.0.0) — its schema stays in Prisma, fully dormant, no
-remaining UI.
+**Studio**. The original **Streamer Trust Report** thesis was removed from the website (not part of
+1.0.0) and its schema was **dropped entirely** on 2026-08-07, once the retirement was
+confirmed permanent. `Update` survives it and is what creator posts are built on.
 
 ## What's built
 
@@ -76,7 +76,9 @@ real 본인인증 (NICE/PASS/간편인증), Kakao login. Mocks stand in behind p
 
 - **Mochi is money**: `src/lib/mochi.ts` uses row-locked conditional updates so concurrent
   redemptions can't oversell stock or drive a holding negative. `pnpm test` proves it
-  (buy/redeem/cancel invariants + concurrency guards).
+  (buy/redeem/cancel invariants, per-purchase ceilings, buyer eligibility, and the
+  concurrency guards — including no double refund when a buyer and a creator cancel the
+  same order at once).
 - **Not a financial product**: no investment vocabulary in copy (`pnpm check:vocab`). The
   same check also fails on **retired product vocabulary** — 백커 is gone; fans are 팬/후원자.
 - **Uploaded images never become files**: there's no object storage, so profile pictures and
@@ -85,9 +87,8 @@ real 본인인증 (NICE/PASS/간편인증), Kakao login. Mocks stand in behind p
   only (never svg) and a hard byte cap, coercing anything else to null.
 - **No emoji in the UI**: every user-visible glyph is a line icon from
   `src/components/ui/Icons.tsx` (`pnpm check:emoji` fails the build on any pictograph in
-  `src/**` or `messages/*.json`). Emoji render in the OS emoji font, so they shift per
+  `src/**` or `messages/ko.json`). Emoji render in the OS emoji font, so they shift per
   platform and can't take brand color.
-- Dormant Phase-1 invariants (founding number, grades) remain in the schema, unused.
 - **Notifications are best-effort, never money-adjacent**: `src/lib/notify.ts` is called
   from server actions after their triggering mutation commits, not from inside
   `mochi.ts`'s transactions, and swallows its own errors — a failed insert can never
@@ -124,8 +125,10 @@ signed in.
 | --- | --- |
 | `pnpm dev` / `pnpm build` / `pnpm start` | Next.js dev / build / production |
 | `pnpm db:up` / `pnpm db:down` | Start / stop Postgres |
-| `pnpm db:push` / `pnpm db:seed` / `pnpm db:studio` | Schema push / seed / Prisma Studio |
+| `pnpm db:migrate` | Create a migration from a schema change (applied in the Vercel build) |
+| `pnpm db:push` / `pnpm db:seed` / `pnpm db:studio` | Local schema push / seed / Prisma Studio |
+| `pnpm check:drift` | Read-only: production schema vs the repo |
 | `pnpm test` | Money-logic integration tests (node:test via tsx; needs `db:up`) |
 | `pnpm check:vocab` | Banned-vocabulary check on message catalogs (spec §2) |
-| `pnpm check:emoji` | Fails on any emoji in `src/**` or `messages/*.json` (use a line icon) |
-| `pnpm lint` | ESLint |
+| `pnpm check:emoji` | Fails on any emoji in `src/**` or `messages/ko.json` (use a line icon) |
+| `pnpm lint` | ESLint — **exits 0; keep it that way** |

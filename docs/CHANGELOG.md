@@ -4,6 +4,33 @@ What shipped, newest first. **This file is history — it is not a resume point.
 For current status and open work see [`PROGRESS.md`](./PROGRESS.md); for *why* a thing is
 the way it is see [`DECISIONS.md`](./DECISIONS.md).
 
+## 2026-08-07 (after the stages: forfeiture, migrations, and a live prod drift)
+
+- [x] **Unspent mochi is forfeited on account deletion, not returned to supply.** Reverses
+  half of the earlier decision. The owner ruled out a refund, and "no refund" + "units go
+  back on sale" cannot both hold — payment settles directly to the creator, so they would be
+  paid for the mochi and then get to sell the same units again. The coherent no-refund shape
+  is that the units stay sold. The confirmation dialog said the balance "returns to the
+  creator's market supply"; that would have become a false statement to someone about to give
+  up money, so it now says the balance is deleted and cannot be recovered. Recorded as the
+  owner's call — see DECISIONS 2026-08-07.
+- [x] **Prisma migrations adopted.** The build is now `prisma migrate deploy && next build`,
+  with a `0_init` baseline. A failed migration fails the build and Vercel keeps the previous
+  deployment, which is the point: a loud failure instead of silent drift.
+- [x] **Found that the drift had already happened.** New `pnpm check:drift` (read-only)
+  reports production against the repo: the six Phase-1 tables still present with ~900 rows,
+  `RateLimit` and `Backer.pendingDeletionAt` missing, no `_prisma_migrations`. Production is
+  three stages behind, and deploying as-is would 500 every authenticated page —
+  `getCurrentBacker` selects a column prod doesn't have. **Not fixed here**: the fix drops
+  ~900 rows from a live database, so it needs a backup and a human. Runbook in
+  [`scripts/baseline-prod.md`](../../scripts/baseline-prod.md).
+- [x] **Docs brought current.** PROGRESS rewritten as a real resume point (7KB); this file got
+  the ten-stage entry below; DECISIONS gained seven entries with matching index rows; CLAUDE.md
+  and README corrected (`messages/*.json` → `ko.json`, the suite is 24 tests not 11, lint exits
+  0, `VERIFICATION_MOCK_MINOR` documented, and a line that predated the Studio-landing change).
+- [x] Branch renamed `audit/stages-0-3` → `audit/product-hardening` — it had carried stages
+  0–9 since Stage 4.
+
 ## 2026-08-07 (the audit: ten staged passes over the whole product)
 
 A full read of `src/**` produced [`AUDIT-2026-08-06.md`](./AUDIT-2026-08-06.md) — findings
