@@ -74,9 +74,12 @@ all pass**. Ordered by what would hurt most if ignored.
 **Maintenance**
 - [ ] **Prisma 7 will drop `package.json#prisma`** — every `db push` warns. We only keep
   `{"seed": ...}` there, so migrating to `prisma.config.ts` is small.
-- [ ] **Schema pushes to prod are still manual.** The Vercel build runs `prisma generate` but not
-  `db push`/`migrate deploy`. Stage 8 dropped six models and added two — that gap is now more
-  dangerous than it was. See DEPLOYMENT → "Schema changes".
+- [ ] **Production is three stages behind on schema, and deploying before fixing it will
+  break the site.** Prod still has the six Phase-1 tables (~900 rows) and is missing
+  `RateLimit` and `Backer.pendingDeletionAt`, so `getCurrentBacker` would error on every
+  authenticated page. The build now runs `prisma migrate deploy`, but production needs a
+  one-time baseline first — **run [`scripts/baseline-prod.md`](../scripts/baseline-prod.md)**.
+  `pnpm check:drift` reports the current state, read-only.
 - [ ] Carried refactors: route-group layouts (`(marketing)`/`(app)`/`(auth)`) to stop repeating
   `<Nav/>`+`<Footer/>` across 20 pages; `EmptyState` + `PageHeader` primitives (6 and 9 real call
   sites); hardcoded Korean still in `creators/page.tsx`; `Backer` → `User` rename (high churn,

@@ -28,6 +28,17 @@ preview deploys per PR.
 | Verify deployed site | ✅ `/explore` + `/s/[handle]` render 200 against Supabase, no console errors |
 | Cross-host redirects | ✅ 2026-08-03 — `studio.themotoo.com/*` consumer paths 307 straight to **www** (one hop; previously two via the bare apex) |
 
+> **Schema changes now go through migrations (2026-08-07).** The build runs
+> `prisma migrate deploy && next build`, so a schema change reaches production by
+> committing a folder under `prisma/migrations/` — not by remembering to run
+> `db push` by hand. If `migrate deploy` fails the build fails and Vercel keeps the
+> previous deployment live, which is the intended behaviour.
+>
+> **One-time setup is required before the first deploy of this change** — production
+> has no `_prisma_migrations` table and is three stages behind the repo schema. See
+> [`scripts/baseline-prod.md`](../scripts/baseline-prod.md). Check current drift any
+> time with `pnpm check:drift` (read-only).
+
 > **Region (resolved 2026-08-06):** the account is on **Vercel Pro**, which honours
 > single-region pinning, so `vercel.json`'s `icn1` applies and functions run in Seoul
 > beside the database. The earlier note here assumed Hobby and warned about
@@ -89,27 +100,40 @@ git push origin main
 3. Deploy. Region is pinned to `icn1` via `vercel.json`.
 4. After the first deploy, every push to `main` auto-deploys; PRs get preview URLs.
 
-## Schema changes — push the DB **before** the code
+## Schema changes — migrations, applied by the build
 
-**The Vercel build does not run `prisma db push`.** It only runs `prisma generate`
-(via `postinstall`), so a deploy carrying a new column ships code that queries a
-column the database doesn't have — Prisma throws and every page touching that model
-500s. Apply the schema first, then push to `main`:
+**Since 2026-08-07 the build runs `prisma migrate deploy && next build`.** A schema
+change reaches production by committing a migration, not by remembering to run
+anything by hand:
 
-```powershell
-# from the repo root, BEFORE `git push`
-npx -y dotenv-cli -e .env.production.local -- npx prisma db push --skip-generate
-# expect: "Your database is now in sync with your Prisma schema."
+```bash
+# 1. edit prisma/schema.prisma, then generate a migration against local docker
+pnpm db:migrate            # prisma migrate dev
+
+# 2. commit the generated prisma/migrations/<timestamp>_<name>/ folder
+# 3. push — the Vercel build applies it before building
 ```
 
-`dotenv-cli` scopes the production credentials to that one child process. If you set
-`DATABASE_URL` in your shell by hand instead, **close the window afterwards** —
-`pnpm db:seed` opens with `deleteMany()` and would wipe production from that shell.
+If `migrate deploy` fails, **the build fails and Vercel keeps the previous
+deployment live**. That is the point: a build whose schema doesn't match never gets
+promoted. Fix the migration and push again.
 
-Additive, nullable columns are safe (that's all we've shipped so far). Without
-`--accept-data-loss`, Prisma refuses anything destructive rather than guessing. Data
-here is reseedable; if that stops being true, switch to `prisma migrate deploy` in the
-Vercel build so this stops being a manual step.
+`pnpm db:push` still exists for throwaway local experiments. Anything that should
+reach production goes through a migration.
 
-Applied this way so far: `MarketplaceItem.coverImage` and `Backer.tokenVersion`
-(2026-08-01/02).
+> **This replaced a manual pre-deploy `db push`,** which was the standing footgun:
+> the build only ran `prisma generate`, so a deploy carrying a new column shipped
+> code querying a column the database didn't have, and every page touching that
+> model 500'd. It went wrong the moment it mattered — by 2026-08-07 production was
+> three stages of schema behind the repo without anyone noticing.
+
+**`pnpm check:drift`** reports production's actual schema versus the repo, read-only.
+Run it if you're ever unsure.
+
+> If you do need to run something against production by hand, scope the credentials
+> to that one process: `npx dotenv -e .env.production.local -- <command>`. Never
+> export `DATABASE_URL` into your shell — `pnpm db:seed` opens with `deleteMany()`
+> and would wipe production from that window.
+
+Applied by hand before migrations existed: `MarketplaceItem.coverImage` and
+`Backer.tokenVersion` (2026-08-01/02).
