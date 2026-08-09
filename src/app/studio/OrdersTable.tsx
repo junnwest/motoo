@@ -49,8 +49,13 @@ export function OrdersTable({ orders }: { orders: DashboardOrder[] }) {
   }
 
   return (
+    // 480px was a floor seven columns of Korean plus two action buttons could
+    // never honour, so the table never scrolled — it crushed instead, until
+    // 대기 중 wrapped one character per line. The floor is now the width the
+    // content actually needs; below it the wrapper scrolls, which is what the
+    // overflow-x was always there to do.
     <div className="overflow-x-auto rounded-lg border border-line-2 bg-card">
-      <table className="w-full min-w-[480px] border-collapse text-left">
+      <table className="w-full min-w-[860px] border-collapse text-left">
         <thead>
           <tr className="border-b border-line text-xs text-muted">
             <th className="px-3 py-3 font-semibold">{t("orders.colItem")}</th>
@@ -86,10 +91,13 @@ function OrderRow({ order }: { order: DashboardOrder }) {
 
   return (
     <tr className="border-b border-line last:border-b-0 align-top">
-      <td className="px-3 py-3 text-sm font-semibold text-ink">
+      {/* break-keep on both: Hangul has no spaces to break at inside a word,
+          so a narrow cell splits 멤버 전용 포스트 into 멤버 전 / 용 포스 / 트
+          without it (CLAUDE.md, the Korean typography rule). */}
+      <td className="px-3 py-3 text-sm font-semibold text-ink break-keep">
         {order.itemTitle}
       </td>
-      <td className="px-3 py-3 text-sm text-body">{order.fan}</td>
+      <td className="px-3 py-3 text-sm text-body break-keep">{order.fan}</td>
       <td className="px-3 py-3 text-sm text-body">
         <span className="flex items-center gap-1.5">
           <Mochi width={16} height={12} />
@@ -101,7 +109,7 @@ function OrderRow({ order }: { order: DashboardOrder }) {
       </td>
       <td className="px-3 py-3">
         <span
-          className={`inline-block rounded-full px-2.5 py-0.5 text-2xs font-semibold ${statusChipClass[order.status]}`}
+          className={`inline-block whitespace-nowrap rounded-full px-2.5 py-0.5 text-2xs font-semibold ${statusChipClass[order.status]}`}
         >
           {t(`orders.status.${order.status}`)}
         </span>

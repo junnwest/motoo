@@ -270,27 +270,27 @@ export default async function CreatorDashboardHome() {
         </StudioSection>
       </div>
 
-      {/* Row 2 — orders + market items. Market items get the wider column
-          (more room for suggestions + item cards) than the orders table. */}
-      <div className="grid grid-cols-1 gap-10 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)] xl:items-start">
-        <StudioSection
-          id="orders"
-          title={t("orders.title")}
-          action={
-            <InfoTooltip
-              label={t("helpLabel")}
-              items={[t("orders.subtitle")]}
-            />
-          }
-        >
-          <OrdersTable orders={orders} />
-        </StudioSection>
+      {/* Orders gets its own full-width row. It is seven columns of Korean plus
+          two action buttons — in half a column it either crushed (대기 중
+          breaking one character per line) or scrolled with the 완료로 표시
+          button clipped off the right edge, and a primary action you have to
+          scroll sideways to reach is the worse of the two. Full width, it
+          simply fits. */}
+      <StudioSection
+        id="orders"
+        title={t("orders.title")}
+        action={
+          <InfoTooltip label={t("helpLabel")} items={[t("orders.subtitle")]} />
+        }
+      >
+        <OrdersTable orders={orders} />
+      </StudioSection>
 
-        {/* ItemsManager renders its own section header so the "새 아이템" button
-            can sit at the header's right (it owns the create-form state). */}
+      {/* Row 3 — the two composer surfaces, side by side. Both own their
+          section header so their create buttons can sit at the header's right,
+          and both are card grids that reflow to one column happily. */}
+      <div className="grid grid-cols-1 gap-10 xl:grid-cols-2 xl:items-start">
         <ItemsManager items={items} creatorType={creator.creatorType} />
-
-        {/* Same pattern: owns its own composer state, so it owns its header. */}
         <UpdatesManager updates={updates} />
       </div>
     </div>
