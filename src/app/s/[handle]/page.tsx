@@ -148,7 +148,13 @@ export default async function StreamerProfilePage({
           column, and a second cap inside them left the market grid stranded in
           whitespace. The page fills its column and boxes each section instead. */}
       <section className="border-b border-line bg-cream-warm px-6 py-12 sm:px-10">
-        <div className="flex w-full flex-col gap-6 sm:flex-row sm:items-center">
+        {/* Two columns at desktop: identity left, actions + stats right. As one
+            row with the CTA pinned right, the band left a dead gap the width of
+            half the screen between the bio and the buttons — the stats were
+            stranded below it, reading as two empty banners. Pairing the numbers
+            with the actions closes the gap and gives the band a right edge. */}
+        <div className="flex w-full flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
           <Avatar name={streamer.displayName} size={92} src={streamer.avatarUrl} />
           <div className="flex-1">
             <div className="flex flex-wrap items-center gap-3">
@@ -190,7 +196,10 @@ export default async function StreamerProfilePage({
               ))}
             </div>
           </div>
-          <div className="flex flex-none gap-2.5">
+        </div>
+
+        <div className="flex flex-none flex-col gap-5 lg:items-end">
+          <div className="flex gap-2.5">
             <FollowButton
               streamerId={streamer.id}
               handle={streamer.handle}
@@ -201,29 +210,35 @@ export default async function StreamerProfilePage({
               <Mochi width={18} height={14} /> {tc("donate")}
             </ButtonLink>
           </div>
-        </div>
 
-        {/* headline stats — kept to a stat-row width rather than stretched
-            across the full column, which would read as two empty banners. */}
-        <div className="mt-8 grid w-full grid-cols-2 gap-3 sm:max-w-[440px]">
-          {headlineStats.map((s) => (
-            <div
-              key={s.label}
-              className="rounded-lg border border-line-2 bg-card p-4 text-center"
-            >
-              <div className="text-2xl font-extrabold tracking-[-0.02em]">
-                {s.value}
+          {/* Stats sit on the band, not in bordered boxes on top of it: a
+              border inside a tinted section reads as a card that lost its
+              page. Translucent white keeps the warm tone showing through. */}
+          <div className="grid w-full grid-cols-2 gap-3 lg:w-auto">
+            {headlineStats.map((s) => (
+              <div
+                key={s.label}
+                className="rounded-lg bg-white/70 px-6 py-4 text-center lg:min-w-[132px]"
+              >
+                <div className="text-2xl font-extrabold tracking-[-0.02em]">
+                  {s.value}
+                </div>
+                <div className="mt-0.5 text-xs text-muted">{s.label}</div>
               </div>
-              <div className="text-xs text-muted">{s.label}</div>
-            </div>
-          ))}
+            ))}
+          </div>
+        </div>
         </div>
       </section>
 
       {/* Each section is its own bordered panel so the page reads as distinct
-          blocks rather than one continuous scroll. Inner item cards drop to
-          `bg-panel` — the established "inset panel on a white card" treatment
-          (DECISIONS 2026-07-31) — so boxes don't nest as card-on-card. */}
+          blocks rather than one continuous scroll (DECISIONS 2026-08-01). The
+          three panels used to be byte-identical — same border, same radius,
+          same white — so nothing said which one mattered. They now carry three
+          weights: the market is raised (white + shadow), the leaderboard is
+          recessed (panel tint, no shadow) because it's context for the market
+          rather than a peer of it, and updates stay flat. Same system, three
+          depths; no section was de-boxed. */}
       <div className="flex w-full flex-col gap-6 px-6 py-10 sm:px-10 sm:py-12">
         {/* Ranking (30%) + Marketplace (70%), side by side (DECISIONS
             2026-08-01) — 후원하기 now routes to its own page
@@ -231,13 +246,13 @@ export default async function StreamerProfilePage({
             column for the supporter leaderboard next to the market instead of
             stacked above it. Stacks to one column on narrow viewports. */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-10">
-          <div className="rounded-xl border border-line-2 bg-card p-6 lg:col-span-3">
+          <div className="rounded-xl border border-line-2 bg-panel p-6 lg:col-span-3">
             <SupporterLeaderboard
               entries={leaderboard.entries}
               totalSupporters={leaderboard.totalSupporters}
             />
           </div>
-          <div className="rounded-xl border border-line-2 bg-card p-6 lg:col-span-7">
+          <div className="rounded-xl border border-line-2 bg-card p-6 shadow-card lg:col-span-7">
             <MarketplaceSection
               handle={streamer.handle}
               balance={balance}

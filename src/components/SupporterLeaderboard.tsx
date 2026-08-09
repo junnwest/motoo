@@ -33,25 +33,46 @@ export async function SupporterLeaderboard({
       </p>
 
       {entries.length > 0 && (
-        <ul className="mt-4 flex flex-col gap-2">
-          {entries.map((e) => (
-            <li
-              key={e.backerId}
-              className="flex items-center gap-2.5 rounded-md bg-panel px-3 py-2.5"
-            >
-              <span className="flex h-6 w-6 flex-none items-center justify-center rounded-full bg-coral-chip text-2xs font-extrabold text-coral-deep">
-                {e.rank}
-              </span>
-              <Avatar name={e.nickname} src={e.avatarUrl} size={30} />
-              <span className="min-w-0 flex-1 truncate text-sm font-semibold text-ink">
-                {e.nickname}
-              </span>
-              <span className="flex flex-none items-center gap-1 text-xs font-bold text-ink">
-                <Mochi width={12} height={9.5} />
-                {formatCount(e.mochiEarnedTotal)}
-              </span>
-            </li>
-          ))}
+        // Rows were eleven identical tinted pills, so #1 carried exactly as
+        // much weight as #10 and the whole point of a ranking was lost. The
+        // fill is gone in favour of hairlines, which lets the top three carry
+        // the emphasis instead: #1 gets the solid coral badge and a larger
+        // avatar, #2 and #3 the tinted badge, everyone below a plain numeral.
+        <ul className="mt-4 divide-y divide-line-2">
+          {entries.map((e) => {
+            const lead = e.rank === 1;
+            return (
+              <li key={e.backerId} className="flex items-center gap-2.5 py-2.5">
+                <span
+                  className={`flex h-6 w-6 flex-none items-center justify-center rounded-full text-2xs font-extrabold ${
+                    lead
+                      ? "bg-coral text-white"
+                      : e.rank <= 3
+                        ? "bg-coral-chip text-coral-deep"
+                        : "text-muted"
+                  }`}
+                >
+                  {e.rank}
+                </span>
+                <Avatar
+                  name={e.nickname}
+                  src={e.avatarUrl}
+                  size={lead ? 34 : 30}
+                />
+                <span
+                  className={`min-w-0 flex-1 truncate text-sm text-ink ${
+                    lead ? "font-extrabold" : "font-semibold"
+                  }`}
+                >
+                  {e.nickname}
+                </span>
+                <span className="flex flex-none items-center gap-1 text-xs font-bold text-ink">
+                  <Mochi width={12} height={9.5} />
+                  {formatCount(e.mochiEarnedTotal)}
+                </span>
+              </li>
+            );
+          })}
         </ul>
       )}
     </section>

@@ -172,12 +172,15 @@ function ItemCard({
           a message that also interpolates the count ("3" then "3 모찌"), on
           every item of every creator page. The number is the styled part; the
           second span is now just the unit. */}
-      <div className="mt-3 flex items-center gap-1.5">
-        <Mochi width={16} height={12} />
-        <span className="text-base font-extrabold text-ink">
+      {/* The price is what the fan is deciding on, so it carries the weight
+          here — it used to be a 15px line under a 48px coral button, which
+          inverted the hierarchy and turned every card into a wall of CTA. */}
+      <div className="mt-3 flex items-baseline gap-1.5">
+        <Mochi width={18} height={14} />
+        <span className="text-xl font-extrabold tracking-[-0.02em] text-ink">
           {formatCount(item.priceMochi)}
         </span>
-        <span className="text-xs text-muted">{t("mochiUnit")}</span>
+        <span className="text-sm text-muted">{t("mochiUnit")}</span>
       </div>
 
       {/* stock line */}
@@ -261,9 +264,13 @@ function ItemCard({
             </div>
           </div>
         ) : (
+          // Secondary, not primary. Filled coral is the page's *donate* action;
+          // three full-width coral slabs down the market column competed with
+          // it and with each other. The primary fill returns on the confirm
+          // step above, where committing mochi is genuinely the one thing to do.
           <Button
             type="button"
-            variant="primary"
+            variant="secondary"
             className="w-full"
             disabled={soldOut || needMore || pending}
             onClick={() => {
