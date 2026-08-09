@@ -78,7 +78,7 @@ export async function createStudio(
           streamerId: streamer.id,
           pricePerMochiKrw: data.mochiPriceKrw,
           goalQuantity: data.mochiGoal,
-          soldQuantity: 0,
+          grantedQuantity: 0,
           active: true,
         },
       });

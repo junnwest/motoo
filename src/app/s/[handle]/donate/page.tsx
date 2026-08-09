@@ -3,26 +3,28 @@ import { getTranslations } from "next-intl/server";
 import { Nav } from "@/components/Nav";
 import { Avatar } from "@/components/ui/Placeholder";
 import { IconChevronLeft, IconSearch } from "@/components/ui/Icons";
-import { BuyMochi } from "@/components/BuyMochi";
+import { DonateMochi } from "@/components/DonateMochi";
 import { getStreamerMarketplace } from "@/lib/streamers";
 import { getCurrentBacker } from "@/lib/session";
 import { getHolding } from "@/lib/mochi";
 import { isFollowing } from "@/lib/follows";
 
 /**
- * The focused buy-mochi flow — its own page, not a section of the profile
+ * The focused donate flow — its own page, not a section of the profile
  * (DECISIONS 2026-08-01): the hero's 모찌 보내기 button used to jump to an
  * in-page anchor; now it routes here. Skips ConsumerShell on purpose, same as
- * the retired `/back` flow it replaces — a purchase flow doesn't need the
- * Sidebar/RightRail chrome, just a way back to the profile.
+ * the retired `/back` flow it replaces — a donation flow doesn't need the
+ * Sidebar/RightRail chrome, just a way back to the profile. Mochi is never
+ * sold here (see docs/DECISIONS.md, the donation-pivot entry): the fan's KRW
+ * goes straight to the creator, and mochi is granted afterward as a bonus.
  */
-export default async function BuyMochiPage({
+export default async function DonateMochiPage({
   params,
 }: {
   params: Promise<{ handle: string }>;
 }) {
   const { handle } = await params;
-  const t = await getTranslations("marketplace");
+  const t = await getTranslations("donate");
   const tp = await getTranslations("profile");
 
   const streamer = await getStreamerMarketplace(handle);
@@ -56,7 +58,7 @@ export default async function BuyMochiPage({
     ? {
         pricePerMochiKrw: streamer.mochiIssuance.pricePerMochiKrw,
         goalQuantity: streamer.mochiIssuance.goalQuantity,
-        soldQuantity: streamer.mochiIssuance.soldQuantity,
+        grantedQuantity: streamer.mochiIssuance.grantedQuantity,
         active: streamer.mochiIssuance.active,
       }
     : null;
@@ -85,7 +87,7 @@ export default async function BuyMochiPage({
         </div>
 
         <div className="mt-6">
-          <BuyMochi
+          <DonateMochi
             handle={handle}
             streamerId={streamer.id}
             creatorName={streamer.displayName}

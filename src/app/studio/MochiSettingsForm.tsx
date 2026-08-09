@@ -13,7 +13,7 @@ import { updateIssuance } from "./actions";
 type Issuance = {
   pricePerMochiKrw: number;
   goalQuantity: number;
-  soldQuantity: number;
+  grantedQuantity: number;
   active: boolean;
 } | null;
 

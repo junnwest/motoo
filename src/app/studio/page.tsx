@@ -107,7 +107,7 @@ export default async function CreatorDashboardHome() {
     ? {
         pricePerMochiKrw: issuanceRaw.pricePerMochiKrw,
         goalQuantity: issuanceRaw.goalQuantity,
-        soldQuantity: issuanceRaw.soldQuantity,
+        grantedQuantity: issuanceRaw.grantedQuantity,
         active: issuanceRaw.active,
       }
     : null;
@@ -141,7 +141,9 @@ export default async function CreatorDashboardHome() {
   ).length;
   const percent = issuanceRaw
     ? issuanceRaw.goalQuantity > 0
-      ? Math.round((issuanceRaw.soldQuantity / issuanceRaw.goalQuantity) * 100)
+      ? Math.round(
+          (issuanceRaw.grantedQuantity / issuanceRaw.goalQuantity) * 100,
+        )
       : 0
     : 0;
 
@@ -179,7 +181,7 @@ export default async function CreatorDashboardHome() {
             <div className="grid flex-1 auto-rows-fr grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
               <StatTile
                 label={t("statSold")}
-                value={formatCount(issuanceRaw?.lifetimeSold ?? 0)}
+                value={formatCount(issuanceRaw?.lifetimeGranted ?? 0)}
               />
               <StatTile
                 label={t("statGoal")}
@@ -230,12 +232,15 @@ export default async function CreatorDashboardHome() {
                   />
                   <SummaryRow
                     label={t("mochi.summarySold")}
-                    value={`${formatCount(issuance.soldQuantity)} / ${formatCount(issuance.goalQuantity)}`}
+                    value={`${formatCount(issuance.grantedQuantity)} / ${formatCount(issuance.goalQuantity)}`}
                   />
                   <SummaryRow
                     label={t("mochi.summaryRemaining")}
                     value={formatCount(
-                      Math.max(issuance.goalQuantity - issuance.soldQuantity, 0),
+                      Math.max(
+                        issuance.goalQuantity - issuance.grantedQuantity,
+                        0,
+                      ),
                     )}
                   />
                 </dl>

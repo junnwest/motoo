@@ -7,12 +7,13 @@
  * is a fact about the business, not copy: the footer link, the refund page, and
  * anything else that needs it must never be able to disagree about what it is.
  *
+ * It is a personal inbox for now (the owner's own email) — there is no real
+ * support desk yet. Swap this for the business address once 사업자등록 lands;
+ * nothing else needs to change.
+ *
  * If this is ever set back to `null`, every consumer degrades to "no channel
  * shown" rather than rendering a link that goes nowhere — a dead `href="#"`
  * labelled 고객센터 is worse than no link, because it looks live.
- *
- * Swap this for the business address once 사업자등록 lands; nothing else needs
- * to change.
  */
 export const SUPPORT_EMAIL: string | null = "junn223@gmail.com";
 

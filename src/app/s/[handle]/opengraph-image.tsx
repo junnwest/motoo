@@ -103,14 +103,14 @@ export default async function Image({
   }
 
   const { streamer } = data;
-  const [t, { totalSupporters, totalMochiPurchased }] = await Promise.all([
+  const [t, { totalSupporters, totalMochiEarned }] = await Promise.all([
     getTranslations("profile"),
     getSupporterLeaderboard(streamer.id, 1),
   ]);
   const initial = streamer.displayName.trim().charAt(0);
 
   const supporters = totalSupporters.toLocaleString("ko-KR");
-  const mochi = totalMochiPurchased.toLocaleString("ko-KR");
+  const mochi = totalMochiEarned.toLocaleString("ko-KR");
   // Exactly the glyphs this card draws — the subset is built from this string,
   // so anything rendered below must be represented here or it comes out blank.
   const fontData = await loadFontSubset(

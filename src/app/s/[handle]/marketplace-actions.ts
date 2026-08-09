@@ -4,74 +4,77 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { getCurrentBacker } from "@/lib/session";
 import {
-  buyMochi,
+  donateMochi,
   redeemItem,
   cancelOrderByBuyer,
   getHolding,
 } from "@/lib/mochi";
-import { MOCHI_MAX_PURCHASE_QTY } from "@/lib/issuance";
+import { MOCHI_MAX_PURCHASE_KRW } from "@/lib/issuance";
 import { checkRateLimit } from "@/lib/rateLimit";
 
 /**
- * User-side buy/spend server actions for the mochi marketplace.
+ * User-side donate/spend server actions for the mochi marketplace.
  * Return shape is always { ok:true, ... } | { ok:false, error:string }, where
- * `error` is an i18n key suffix under the "marketplace.errors" namespace.
+ * `error` is an i18n key suffix under the "donate.errors" / "marketplace.errors"
+ * namespace respectively.
  *
- * Buying is gated (verification + age + purchase ceilings, all enforced in
- * `buyMochi`). **Redeeming deliberately is not** — spending mochi you already
- * hold is not a new payment, so it doesn't re-run the payment eligibility rules.
- * The money moved, and was gated, at purchase time.
+ * Donating is gated (verification + age + per-donation ceilings, all enforced
+ * in `donateMochi`). **Redeeming deliberately is not** — spending mochi you
+ * already hold is not a new payment, so it doesn't re-run the payment
+ * eligibility rules. The money moved, and was gated, at donation time.
  */
 
-const buySchema = z.object({
+const donateSchema = z.object({
   handle: z.string(),
   streamerId: z.string(),
-  // Bounded at the edge as well as in buyMochi. `.max()` here gives the client a
-  // specific error; buyMochi re-checks because it, not this schema, is the money
-  // surface under test.
-  quantity: z.number().int().positive().max(MOCHI_MAX_PURCHASE_QTY),
-  // Per-purchase idempotency token from the client (a retried click reuses it).
+  // Bounded at the edge as well as in donateMochi. `.max()` here gives the
+  // client a specific error; donateMochi re-checks because it, not this schema,
+  // is the money surface under test.
+  donationAmountKrw: z.number().int().positive().max(MOCHI_MAX_PURCHASE_KRW),
+  // Per-donation idempotency token from the client (a retried click reuses it).
   idempotencyKey: z.string().min(1).max(200).optional(),
 });
 
-export type BuyMochiActionResult =
-  | { ok: true; balance: number; amountKrw: number }
+export type DonateMochiActionResult =
+  | { ok: true; balance: number; mochiGranted: number; amountKrw: number }
   | { ok: false; error: string };
 
-export async function buyMochiAction(
-  input: z.infer<typeof buySchema>,
-): Promise<BuyMochiActionResult> {
-  const parsed = buySchema.safeParse(input);
+export async function donateMochiAction(
+  input: z.infer<typeof donateSchema>,
+): Promise<DonateMochiActionResult> {
+  const parsed = donateSchema.safeParse(input);
   if (!parsed.success) {
-    // The only bound a well-formed client can trip is the quantity ceiling, so
-    // name it rather than falling through to the generic message.
-    const tooMany =
-      typeof input?.quantity === "number" &&
-      input.quantity > MOCHI_MAX_PURCHASE_QTY;
-    return { ok: false, error: tooMany ? "quantityMax" : "generic" };
+    // The only bound a well-formed client can trip is the KRW ceiling, so name
+    // it rather than falling through to the generic message.
+    const tooMuch =
+      typeof input?.donationAmountKrw === "number" &&
+      input.donationAmountKrw > MOCHI_MAX_PURCHASE_KRW;
+    return { ok: false, error: tooMuch ? "amountMax" : "generic" };
   }
   const data = parsed.data;
 
   const backer = await getCurrentBacker();
   if (!backer) return { ok: false, error: "login" };
-  // A ceiling per purchase is not a ceiling per minute.
+  // A ceiling per donation is not a ceiling per minute.
   if (!(await checkRateLimit("buy", backer.id))) {
     return { ok: false, error: "tooMany" };
   }
 
   try {
-    const { balance, amountKrw } = await buyMochi({
+    const { balance, mochiGranted, amountKrw } = await donateMochi({
       backerId: backer.id,
       streamerId: data.streamerId,
-      quantity: data.quantity,
+      donationAmountKrw: data.donationAmountKrw,
       idempotencyKey: data.idempotencyKey,
     });
     revalidatePath(`/s/${data.handle}`);
-    revalidatePath(`/s/${data.handle}/buy`);
-    return { ok: true, balance, amountKrw };
+    revalidatePath(`/s/${data.handle}/donate`);
+    return { ok: true, balance, mochiGranted, amountKrw };
   } catch (e) {
     const msg = e instanceof Error ? e.message : "";
-    if (msg === "MOCHI_NOT_ON_SALE") return { ok: false, error: "notOnSale" };
+    if (msg === "MOCHI_BONUS_PAUSED")
+      return { ok: false, error: "donationClosed" };
+    if (msg === "DONATION_BELOW_MIN") return { ok: false, error: "belowMin" };
     if (msg === "QUANTITY_TOO_LARGE") return { ok: false, error: "quantityMax" };
     if (msg === "AMOUNT_TOO_LARGE") return { ok: false, error: "amountMax" };
     if (msg === "NOT_VERIFIED") return { ok: false, error: "verifyRequired" };
@@ -112,7 +115,7 @@ export async function redeemItemAction(
       note: data.note ?? null,
     });
     revalidatePath(`/s/${data.handle}`);
-    revalidatePath(`/s/${data.handle}/buy`);
+    revalidatePath(`/s/${data.handle}/donate`);
     return { ok: true, balance, mochiSpent, instant };
   } catch (e) {
     const msg = e instanceof Error ? e.message : "";

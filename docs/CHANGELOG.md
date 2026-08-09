@@ -1,8 +1,183 @@
-# motoo — Changelog
+﻿# motoo — Changelog
 
 What shipped, newest first. **This file is history — it is not a resume point.**
 For current status and open work see [`PROGRESS.md`](./PROGRESS.md); for *why* a thing is
 the way it is see [`DECISIONS.md`](./DECISIONS.md).
+
+## 2026-08-10 (merged `main`'s donation pivot into the audit branch)
+
+- [x] **Merged `origin/main` into `audit/product-hardening`** — 18 conflicting files across
+  the money core, the actions, the copy catalog and all six docs. The two branches had
+  changed the same surface from different directions: `main` renamed buy → donate, the
+  audit branch had hardened buying (per-transaction ceilings, donor eligibility, rate
+  limiting, the N+1 fix in `ranking.ts`). Every hardening rule was kept and re-expressed
+  in donation terms: the unit ceiling now binds the *granted* bonus and the KRW ceiling the
+  donation amount, both still checked before the PG is called.
+- [x] **The pivot's schema rename became a migration.** `main` shipped it as a bare
+  `db push` that reached only local dev, leaving prod's mochi pages pending a manual
+  `--accept-data-loss` push. The audit branch had already moved schema changes onto
+  migrations applied by the build, so the rename is now
+  `prisma/migrations/20260810020000_donation_pivot_rename` — `ALTER TABLE … RENAME COLUMN`,
+  which preserves the lifetime totals a drop-and-recreate would have lost.
+- [x] **Explore's chevron moved into the shared `Select`.** `main`'s local `FilterSelect`
+  and the audit branch's `Select` primitive solved overlapping halves of the same problem;
+  merged into the primitive, so every select in the app gets the treatment.
+- [x] **`messages/en.json` stays deleted** (2026-08-07 decision), and the donation copy
+  `main` added to it was dropped with it. `donate.errors` gained the audit branch's
+  eligibility/ceiling/rate-limit keys, reworded for donation.
+
+## 2026-08-10 (pushed to `main` — production schema migration still pending)
+
+- [x] Committed and pushed this session's full changeset (donation pivot, dev-environment
+  fixes, 고객센터, design tier 2/3) to `main`.
+- [ ] **Known, accepted gap** (since resolved by the merge above): the donation-pivot's
+  destructive schema rename (`purchasedTotal`/`soldQuantity`/`lifetimeSold` →
+  `mochiEarnedTotal`/`grantedQuantity`/`lifetimeGranted`) was only pushed to local dev
+  Postgres, never to Supabase prod — Vercel's build doesn't run `db push`, and nobody on
+  this session had `.env.production.local`. Owner chose to push code first anyway
+  (DECISIONS 2026-08-10) rather than wait. It is now carried as a migration on
+  `audit/product-hardening`, where the build applies it.
+
+## 2026-08-10 (design tier 2/3, and de-boxing the landing's repeated cards)
+
+- [x] **Translated the last Latin-script surface on the landing pages** — `Eyebrow`
+  renders its text `uppercase` via CSS, so lowercase-English source copy
+  (`"discover"`, `"how mochi works"`) was showing as `DISCOVER`/`HOW MOCHI WORKS`. Fixed
+  the 5 live keys across `fanLanding`/`creatorLanding` (+ 1 dead one in `explore`, fixed
+  in passing) — Korean only, `en.json` untouched since English eyebrows are correct there.
+- [x] **Explore's 4 filter `<select>`s get a real chevron** — new `IconChevronDown` in
+  `src/components/ui/Icons.tsx`, a local `FilterSelect` wrapper in `ExploreFilters.tsx`
+  (`appearance-none` + the icon absolutely positioned) replaces each browser's own
+  disclosure-arrow glyph, which no amount of `className` could touch.
+- [x] **퍼크 (Phase-1 vocabulary) reworded to 혜택/아이템** in the 3 spots that are
+  actually live: `fanLanding.benefits.perksBody`/`.dashboardBody`,
+  `creatorLanding.how.step2Body`. Left the unused `perkTitle`/`perkBody`/`tierPerks` keys
+  alone (zero imports — dead code, not a copy bug).
+- [x] **Two of PROGRESS's four design-tier-2/3 items turned out already resolved** —
+  `STRONG`/`EMERGING` badges live in `src/lib/grades.ts`, which has had zero imports since
+  the Trust Report's removal (DECISIONS 2026-08-01); and "퍼크 still on explore" wasn't
+  actually true — no 퍼크 reference exists in the `explore` namespace at all, it was on
+  the landing pages instead. See DECISIONS 2026-08-10 for the full per-item breakdown.
+- [x] Verified: `tsc` clean, `check:vocab`/`check:emoji` clean, ko/en key parity holds,
+  `pnpm build` clean (26 routes), `pnpm test` 13/13, `pnpm lint` matches the documented
+  2-error baseline. Confirmed via server-rendered HTML (curl) that the Korean eyebrow text
+  and exactly 4 matching chevron SVGs render — no headless-browser tool available in this
+  environment for a pixel-level screenshot check, worth a manual look in a real browser.
+- [x] **De-boxed the landing's two single-item card sections** — "Mochi explainer" and
+  "Are you a creator?" were `rounded-[24px] border border-line-2` cards; asked the owner
+  first (a past session guessed wrong on a similar visual call and got corrected — see
+  DECISIONS 2026-07-31) rather than assume. Owner picked de-boxing over "keep boxed, vary
+  color" or "hold for a mockup." Both sections are now full-bleed color bands
+  (cream-warm / dark ink), matching the page's own Final CTA section — the one section
+  that already avoided the repeated-card look. Benefits (4 items) and Spotlight (a real
+  profile chunk) kept their cards. Verified via server-rendered HTML: the old card markup
+  is gone from both changed sections, present and unchanged on the two that stayed boxed.
+
+## 2026-08-10 (local dev environment actually works; Prisma 7 deprecation cleared)
+
+- [x] **This machine had never had `pnpm install` run, for any part of this repo.** Fixed
+  properly: installed `pnpm` globally, ran `pnpm install`, approved the legitimate native
+  build scripts in `pnpm-workspace.yaml`'s `allowBuilds` (`@parcel/watcher`,
+  `@prisma/client`, `@prisma/engines`, `@swc/core`, `esbuild`, `prisma`). `.env` didn't
+  exist either — created from `.env.example` (local Postgres + a freshly generated
+  `AUTH_SECRET`).
+- [x] **The donation-pivot schema rename is live** on local dev — `prisma db push` (run
+  with the correct pinned Prisma 6.19.3, not the unpinned 7.x a bare `npx prisma` had
+  grabbed) applied `mochiEarnedTotal`/`grantedQuantity`/`lifetimeGranted` cleanly. No
+  migration-history workflow here (`db push` + `db:seed` is the documented local flow),
+  so there was no SQL to hand-inspect.
+- [x] **`package.json#prisma` → `prisma.config.ts`** (PROGRESS's "small" maintenance item,
+  now done): the seed command moved out; the now-dead `pnpm.onlyBuiltDependencies` in
+  `package.json` (superseded by `pnpm-workspace.yaml`'s `allowBuilds`) was removed in the
+  same pass. Still the classic engine (`schema.prisma`'s own `url`/`directUrl`) — this is
+  not the bigger Prisma 7 driver-adapter migration. One real gotcha: a `prisma.config.ts`
+  file turns OFF Prisma's automatic `.env` loading, so the config calls
+  `process.loadEnvFile()` itself (Node's native loader — no `dotenv` dependency added).
+- [x] Verified for real, end to end: `pnpm test` 13/13, `tsc --noEmit` clean, `check:vocab`
+  clean (caught and fixed a real substring false-positive — "후원금" contains the banned
+  term "원금"; reworded rather than touching the checker), `check:emoji` clean, `pnpm
+  build` clean (26 routes), `pnpm lint` matches the documented 2-error baseline exactly.
+- [x] **고객센터 wired up** — a real, open item since the `/refund` work: the footer's
+  support links and `/refund`'s "how to request" section now point at a real `mailto:`
+  (`SUPPORT_MAILTO` in the new `src/lib/support.ts`), the owner's personal email as an
+  explicit stopgap. `/refund`'s `howTo.body` moved from plain `t()` to `t.rich()` so
+  "고객센터"/"Contact support" is an actual link, not just text naming a channel that
+  didn't go anywhere. `docs/legal/privacy-draft.md`'s placeholders updated to match, with
+  a new review-point flagging the personal-email-as-DPO-contact question for counsel.
+  Verified: `tsc`, `check:vocab`, `check:emoji`, `pnpm build` all clean after.
+
+## 2026-08-09 (mochi becomes a donation bonus, not a purchase — the donation pivot)
+
+- [x] **`buyMochi()` → `donateMochi()`.** A fan now donates a KRW amount directly to a
+  creator (100% passthrough, unchanged — motoo never took a cut structurally, only the
+  framing changed); mochi is granted afterward as a non-purchased bonus,
+  `mochiGranted = floor(donationAmountKrw / pricePerMochiKrw)`, computed by motoo before
+  charging. `PaymentProvider.purchaseMochi` → `.donate`, and no longer returns a
+  `mochiGranted` field — that was always motoo's own math riding along in a PG-owned
+  response. New guard: a donation below the current rate is rejected
+  (`DONATION_BELOW_MIN`) rather than silently granting a 0-mochi "bonus."
+- [x] **The ratcheting price-tier mechanism needed no mechanical changes** — a KRW/mochi
+  ratio means the same thing read as "cost to buy" or "cost to earn a bonus," and
+  "price only rises" is the same rule as "bonus rate only shrinks." `src/lib/issuance.ts`
+  and `MochiIssuancePicker.tsx` are untouched; only surrounding copy moved from
+  발행/판매 (issue/sell) framing to 보너스 지급 (bonus-grant) framing.
+- [x] **Three field renames**: `MochiHolding.purchasedTotal` → `mochiEarnedTotal`,
+  `MochiIssuance.soldQuantity` → `grantedQuantity`, `.lifetimeSold` → `lifetimeGranted`.
+  `krwPaidTotal` keeps its name. Ranking/leaderboard basis deliberately stays
+  mochi-earned (not switched to KRW-donated), knowingly accepting the rate-distortion
+  trade-off that creates.
+- [x] **Route + component renames**: `/s/[handle]/buy` → `/s/[handle]/donate` (permanent
+  redirect added for the old URL), `BuyMochi.tsx` → `DonateMochi.tsx`, its interaction
+  inverted (donation-amount presets in, a derived mochi-bonus preview out, instead of a
+  mochi-quantity stepper in, a derived KRW total out).
+- [x] **`messages/*.json`'s `marketplace` namespace split**: a new `donate` namespace
+  (acquisition copy, entirely reworded to donation framing) and a trimmed `marketplace`
+  namespace (redemption copy — spending earned mochi on items — unchanged, since that
+  side of the model didn't change). Swept the buy-flow disclosure, onboarding subtitle,
+  signup hero, landing "how mochi works" steps, age-verification copy, and the
+  ranking/leaderboard subtitles for lingering "구매"/"buy mochi" language.
+- [x] **`/refund`'s copy reworded, its mechanic preserved, not re-derived** — "구매"
+  (purchase) framing became "후원" (donation) framing without changing the underlying
+  promise (7-day, wholly-unused, full KRW back). Whether that promise is still the right
+  one for a donation rather than a purchase is an explicitly open question for counsel,
+  not resolved here — see `docs/legal/terms-draft.md`'s 제8조 and new review-point 6.
+- [x] **Why now**: legal research this session found Korea's 전자금융거래법 (amended 2024
+  post-머지포인트 사태) and 전자상거래법's prepayment rules both attach real obligations
+  to a straightforward "buy prepaid credit" model. Recasting mochi as a non-purchased
+  donation bonus is a genuine attempt to move outside that regime — not certain to work,
+  and explicitly flagged as unresolved rather than asserted as safe. Full reasoning in
+  DECISIONS 2026-08-09 ("the donation pivot").
+- [x] `test/mochi.test.ts`: 11 → 13 tests — the `buyMochi` describe block became
+  `donateMochi` with 2 new cases (flooring an uneven donation; rejecting a below-rate
+  donation), all 8+ fixture call sites across the other describe blocks converted from
+  quantity-in to amount-in.
+- [x] Verified: `check:vocab` clean on the reworded `donate`/`refund`/`creatorDashboard`
+  namespaces (one substring false-positive caught — "후원금" contains the banned term
+  "원금"; reworded rather than touching the checker); ko/en key parity holds. The schema
+  rename, `pnpm test`, `tsc`, and `pnpm build` were verified the next day once this
+  machine's dev environment was actually working — see 2026-08-10 above.
+
+## 2026-08-09 (dropped the 60% unused-balance refund path)
+
+- [x] **`/refund` now states two refund paths instead of three**: 주문 취소 (mochi back) and
+  청약철회 (7-day, wholly-unused, KRW back), plus the 법령 carve-out. The 60% 미사용 잔액 환불
+  path is gone — once any mochi from a purchase is spent, the rest just stays spendable in
+  that creator's market, no cash path back. Prompted by asking whether purchases could be
+  made non-refundable outright; the 7-day right survives because it tracks 전자상거래법 §17
+  (already learned the hard way in 2026-08-01 → 2026-08-06 that a ToS clause can't just
+  waive it), but the 60% rule was only ever a 신유형 상품권 표준약관 convention, not a floor —
+  so it came out to narrow the refund surface as far as currently defensible.
+- [x] Updated `messages/ko.json` / `en.json` (`refund` namespace: `balance` section removed,
+  `intro` and the `withdrawal.note` reworded, remaining sections renumbered 1–5),
+  `src/app/refund/page.tsx`'s `SECTIONS` array, `CLAUDE.md`, `README.md`, and
+  `docs/legal/terms-draft.md`'s 제8조. `marketplace.disclosure` (the buy-flow copy) already
+  only referenced the 7-day rule, so it needed no change.
+- [x] Added lawyer-review drafts for `/terms` and `/privacy` at `docs/legal/terms-draft.md`
+  and `docs/legal/privacy-draft.md` — not wired into the live pages, which still show the old
+  placeholder pending counsel markup.
+- [x] Verified: `check:vocab` clean, ko/en key parity holds (both locales dropped the same
+  key). `tsc` and `pnpm build` not re-run this pass — copy-only change to an existing
+  namespace, no types or routes touched.
 
 ## 2026-08-07 (after the stages: forfeiture, migrations, and a live prod drift)
 

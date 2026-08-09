@@ -109,8 +109,8 @@ export default async function StreamerProfilePage({
     getSupporterLeaderboard(streamer.id),
   ]);
   const balance = holding?.balance ?? 0;
-  // Has this viewer ever bought this creator's mochi? Gates backers-only posts.
-  const isSupporter = (holding?.purchasedTotal ?? 0) > 0;
+  // Has this viewer ever earned this creator's mochi? Gates supporter-only posts.
+  const isSupporter = (holding?.mochiEarnedTotal ?? 0) > 0;
   const items = streamer.marketplaceItems.map((i) => ({
     id: i.id,
     title: i.title,
@@ -135,7 +135,7 @@ export default async function StreamerProfilePage({
   const headlineStats = [
     { value: `${leaderboard.totalSupporters}`, label: t("backers") },
     {
-      value: formatCount(leaderboard.totalMochiPurchased),
+      value: formatCount(leaderboard.totalMochiEarned),
       label: t("totalMochi"),
     },
   ];
@@ -197,8 +197,8 @@ export default async function StreamerProfilePage({
               initialFollowing={following}
               signedIn={!!backer}
             />
-            <ButtonLink href={`/s/${streamer.handle}/buy`} size="lg">
-              <Mochi width={18} height={14} /> {tc("sendMochi")}
+            <ButtonLink href={`/s/${streamer.handle}/donate`} size="lg">
+              <Mochi width={18} height={14} /> {tc("donate")}
             </ButtonLink>
           </div>
         </div>
@@ -226,8 +226,8 @@ export default async function StreamerProfilePage({
           (DECISIONS 2026-07-31) — so boxes don't nest as card-on-card. */}
       <div className="flex w-full flex-col gap-6 px-6 py-10 sm:px-10 sm:py-12">
         {/* Ranking (30%) + Marketplace (70%), side by side (DECISIONS
-            2026-08-01) — 모찌 보내기 now routes to its own page
-            (/s/[handle]/buy) instead of an in-page anchor, freeing this
+            2026-08-01) — 후원하기 now routes to its own page
+            (/s/[handle]/donate) instead of an in-page anchor, freeing this
             column for the supporter leaderboard next to the market instead of
             stacked above it. Stacks to one column on narrow viewports. */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-10">
@@ -261,8 +261,8 @@ export default async function StreamerProfilePage({
                 // who actually holds this creator's mochi. It used to be
                 // locked unconditionally, so the people it was written for
                 // could never read it — which made "팬 전용" a label with no
-                // payoff. `purchasedTotal`, not `balance`: spending your mochi
-                // shouldn't revoke access you already paid for.
+                // payoff. `mochiEarnedTotal`, not `balance`: spending your
+                // mochi shouldn't revoke access your donation earned.
                 const locked = u.visibility !== "public" && !isSupporter;
                 return (
                   <li

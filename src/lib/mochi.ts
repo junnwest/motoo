@@ -5,11 +5,13 @@ import { getPaymentProvider } from "./payments";
 import { validatePurchase } from "./issuance";
 
 /**
- * Phase 2 — mochi-marketplace core.
+ * Phase 3 — donation-bonus core.
  *
- * A creator issues their own mochi (prepaid marketplace credit) at a per-mochi
- * KRW rate, capped as a SOFT GOAL (see docs/DECISIONS.md). Users buy mochi into a
- * per-creator holding and spend it on that creator's marketplace items.
+ * A fan donates KRW directly to a creator (100% of it, minus only the PG's own
+ * unavoidable fee — motoo takes 0% cut). Mochi is never sold: it's granted
+ * afterward as a non-purchased bonus, at a per-mochi rate the creator sets and
+ * can only raise, capped as a SOFT GOAL (see docs/DECISIONS.md). Fans spend
+ * earned mochi on that creator's marketplace items.
  *
  * Invariants:
  *   - Mochi is integer units; KRW is integer (never floats).
@@ -29,7 +31,7 @@ import { validatePurchase } from "./issuance";
  */
 
 /**
- * Gate the buyer before any money moves.
+ * Gate the donor before any money moves.
  *
  * Korea gates payments on 본인인증 through a 본인확인기관, not a self-reported
  * birthdate — `Backer.verifiedAt` / `ageVerified` are written server-side by a
@@ -37,7 +39,7 @@ import { validatePurchase } from "./issuance";
  *
  * This lives here, in the tested money surface, rather than only in the server
  * action. `/onboarding` already hard-requires `verifiedAt` before an account can
- * reach the app, so in practice every buyer arriving through the UI is verified;
+ * reach the app, so in practice every donor arriving through the UI is verified;
  * this closes the action-level path and makes the rule testable. The `/refund`
  * 법령 carve-out promises a minor's payment is refundable, and the product can't
  * honour a rule it never evaluates.
@@ -61,33 +63,40 @@ async function assertCanPurchase(backerId: string): Promise<void> {
   }
 }
 
-export interface BuyMochiInput {
+export interface DonateMochiInput {
   backerId: string;
   streamerId: string;
-  /** number of mochi units to buy (must be a positive integer) */
-  quantity: number;
+  /** integer KRW the fan chooses to donate (must be a positive integer) */
+  donationAmountKrw: number;
   /**
    * Idempotency token for the PG charge — generated once per user-initiated
-   * purchase (client-side) so a network retry of the same click reuses it and
-   * never double-charges. A stable per-purchase fallback is derived when absent.
+   * donation (client-side) so a network retry of the same click reuses it and
+   * never double-charges. A stable per-donation fallback is derived when absent.
    */
   idempotencyKey?: string;
 }
 
-export interface BuyMochiResult {
+export interface DonateMochiResult {
   balance: number;
-  purchasedTotal: number;
+  mochiEarnedTotal: number;
+  /** mochi earned by THIS donation — the caller can't infer it from its own
+   * input (a donation amount, not a mochi count), so the server returns it. */
+  mochiGranted: number;
   amountKrw: number;
 }
 
 /**
- * Buy `quantity` mochi from a creator. Charges KRW via the PaymentProvider (mock
- * in dev), credits a per-creator holding, and advances the soft-goal progress.
+ * Donate `donationAmountKrw` to a creator. Charges the fan via the
+ * PaymentProvider (mock in dev), computes the mochi bonus from the creator's
+ * current rate, credits a per-creator holding, and advances the soft-goal
+ * progress — then routes the FULL donation to the creator (motoo takes 0%).
  */
-export async function buyMochi(input: BuyMochiInput): Promise<BuyMochiResult> {
-  const quantity = Math.trunc(input.quantity);
-  if (!Number.isInteger(quantity) || quantity <= 0) {
-    throw new Error("INVALID_QUANTITY");
+export async function donateMochi(
+  input: DonateMochiInput,
+): Promise<DonateMochiResult> {
+  const donationAmountKrw = Math.trunc(input.donationAmountKrw);
+  if (!Number.isInteger(donationAmountKrw) || donationAmountKrw <= 0) {
+    throw new Error("INVALID_AMOUNT");
   }
 
   // Buyer eligibility before anything else — no lookup, no charge, no credit for
@@ -97,36 +106,49 @@ export async function buyMochi(input: BuyMochiInput): Promise<BuyMochiResult> {
   const issuance = await prisma.mochiIssuance.findUnique({
     where: { streamerId: input.streamerId },
   });
-  if (!issuance || !issuance.active) throw new Error("MOCHI_NOT_ON_SALE");
+  if (!issuance || !issuance.active) throw new Error("MOCHI_BONUS_PAUSED");
 
-  const amountKrw = issuance.pricePerMochiKrw * quantity; // integer KRW
+  // A donation smaller than the current rate would earn 0 bonus mochi — reject
+  // rather than silently accept it for a confusing 0-mochi "bonus."
+  if (donationAmountKrw < issuance.pricePerMochiKrw) {
+    throw new Error("DONATION_BELOW_MIN");
+  }
 
-  // Purchase ceilings — server-authoritative, checked BEFORE the PG is called so
-  // an over-limit request is never charged. The client caps its own input too,
-  // but that's a courtesy; this is the enforcement.
-  const limitError = validatePurchase(quantity, amountKrw);
+  // motoo's own math, computed BEFORE charging, independent of the PG. Floor:
+  // a fan never earns a fractional mochi; the remainder still goes 100% to the
+  // creator (no mochi "change" owed — donation size never changes).
+  const mochiGranted = Math.floor(
+    donationAmountKrw / issuance.pricePerMochiKrw,
+  );
+
+  // Per-donation ceilings — server-authoritative, checked BEFORE the PG is
+  // called so an over-limit request is never charged. The client caps its own
+  // input too, but that's a courtesy; this is the enforcement. The bonus grant
+  // is what the quantity ceiling binds, so it's checked after the floor above.
+  const limitError = validatePurchase(mochiGranted, donationAmountKrw);
   if (limitError === "quantityMax") throw new Error("QUANTITY_TOO_LARGE");
   if (limitError === "amountMax") throw new Error("AMOUNT_TOO_LARGE");
 
-  // Idempotency: prefer the caller's per-purchase token; otherwise derive a
-  // stable one (NO wall-clock, so a retry of the same purchase can't slip past
+  // Idempotency: prefer the caller's per-donation token; otherwise derive a
+  // stable one (NO wall-clock, so a retry of the same donation can't slip past
   // a PG's idempotency guard and double-charge).
   const idempotencyKey =
     input.idempotencyKey ??
-    `mochi_${input.backerId}_${input.streamerId}_${quantity}_${amountKrw}`;
+    `mochi_donate_${input.backerId}_${input.streamerId}_${donationAmountKrw}`;
 
-  // Charge the buyer via the PG (real charge in prod; simulated in mock).
-  const charge = await getPaymentProvider().purchaseMochi({
+  // Charge the fan via the PG (real charge in prod; simulated in mock). The PG
+  // has no concept of mochi — it only ever sees a donation amount.
+  const charge = await getPaymentProvider().donate({
     backerId: input.backerId,
     streamerId: input.streamerId,
-    quantity,
-    amountKrw,
+    amountKrw: donationAmountKrw,
     idempotencyKey,
   });
   if (!charge.ok) throw new Error(charge.error ?? "CHARGE_FAILED");
 
-  // Persist the credit. If this fails after a successful charge, COMPENSATE by
-  // voiding the charge — never leave the buyer charged with no mochi credited.
+  // Persist the bonus credit. If this fails after a successful charge,
+  // COMPENSATE by voiding the charge — never leave the fan charged with no
+  // mochi credited.
   let result;
   try {
     result = await prisma.$transaction(async (tx) => {
@@ -140,25 +162,25 @@ export async function buyMochi(input: BuyMochiInput): Promise<BuyMochiResult> {
         create: {
           streamerId: input.streamerId,
           backerId: input.backerId,
-          balance: charge.mochiGranted,
-          purchasedTotal: charge.mochiGranted,
-          krwPaidTotal: amountKrw,
+          balance: mochiGranted,
+          mochiEarnedTotal: mochiGranted,
+          krwPaidTotal: donationAmountKrw,
         },
         update: {
-          balance: { increment: charge.mochiGranted },
-          purchasedTotal: { increment: charge.mochiGranted },
-          // Lifetime KRW paid — the basis for a future refund-at-paid flow.
-          krwPaidTotal: { increment: amountKrw },
+          balance: { increment: mochiGranted },
+          mochiEarnedTotal: { increment: mochiGranted },
+          // Lifetime KRW donated — the leaderboard/refund ledger.
+          krwPaidTotal: { increment: donationAmountKrw },
         },
       });
 
-      // Advance the current tier's meter (soft goal — buying past it is allowed)
-      // and the lifetime total (which survives price-raise tier resets).
+      // Advance the current tier's meter (soft goal — donating past it is
+      // allowed) and the lifetime total (which survives rate-raise resets).
       await tx.mochiIssuance.update({
         where: { streamerId: input.streamerId },
         data: {
-          soldQuantity: { increment: charge.mochiGranted },
-          lifetimeSold: { increment: charge.mochiGranted },
+          grantedQuantity: { increment: mochiGranted },
+          lifetimeGranted: { increment: mochiGranted },
         },
       });
 
@@ -166,14 +188,15 @@ export async function buyMochi(input: BuyMochiInput): Promise<BuyMochiResult> {
     });
   } catch (e) {
     await getPaymentProvider()
-      .voidCharge({ idempotencyKey, amountKrw })
+      .voidCharge({ idempotencyKey, amountKrw: donationAmountKrw })
       .catch(() => {
         // Best-effort void; a real adapter would enqueue a reconciliation job.
       });
     throw e;
   }
 
-  // Route KRW to the creator's sub-merchant (motoo never holds funds, §8).
+  // Route the FULL donation to the creator's sub-merchant — motoo never holds
+  // funds and takes 0% cut (§8).
   const streamer = await prisma.streamer.findUnique({
     where: { id: input.streamerId },
     select: { subMerchantId: true },
@@ -181,15 +204,16 @@ export async function buyMochi(input: BuyMochiInput): Promise<BuyMochiResult> {
   if (streamer?.subMerchantId) {
     await getPaymentProvider().settleToStreamer({
       streamerSubMerchantId: streamer.subMerchantId,
-      amountKrw,
+      amountKrw: donationAmountKrw,
       backingRef: idempotencyKey,
     });
   }
 
   return {
     balance: result.balance,
-    purchasedTotal: result.purchasedTotal,
-    amountKrw,
+    mochiEarnedTotal: result.mochiEarnedTotal,
+    mochiGranted,
+    amountKrw: donationAmountKrw,
   };
 }
 

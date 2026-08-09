@@ -1,6 +1,6 @@
-# motoo — Progress Tracker
+﻿# motoo — Progress Tracker
 
-_Last updated: 2026-08-07_
+_Last updated: 2026-08-10_
 
 **Read this whole file — it is short on purpose.** Everything in it is either open, blocked,
 or a live constraint. Shipped history lives in [`CHANGELOG.md`](./CHANGELOG.md) and does not
@@ -14,13 +14,22 @@ is history now, except for its "Open questions" section, which is still live.**
 
 ## Open items — read this first when resuming
 
-`main` is green: `pnpm build`, `pnpm test` (24), `check:vocab`, `check:emoji` and **`pnpm lint`
-all pass**. Ordered by what would hurt most if ignored.
+The branch is green after merging `main`'s donation pivot: `pnpm build`, `pnpm test` (26),
+`check:vocab`, `check:emoji` and **`pnpm lint` all pass**. Ordered by what would hurt most if
+ignored.
 
 **Blocks a real launch**
-- [ ] **Counsel sign-off on `/refund`, and on two questions it doesn't cover.** The page states
-  real positions (7-day 청약철회, 60% 사용 → 잔액 환불, 법령 carve-out) but they are the owner's
-  calls, not a lawyer's. Gate on `PAYMENT_PROVIDER` leaving `mock`. Two clauses to take with it:
+- [ ] **Counsel sign-off on `/refund`, and on three questions it doesn't answer.** The page
+  states real positions (7-day 청약철회 on a wholly unused donation, 법령 carve-out) but they
+  are the owner's calls, not a lawyer's. (The 60% unused-balance path was dropped 2026-08-09 —
+  never a statutory floor, just a 신유형 상품권 표준약관 convention.) Gate on
+  `PAYMENT_PROVIDER` leaving `mock`. Three things to take with it:
+  - [ ] **Does the donation pivot actually hold?** Mochi acquisition changed from a purchase
+    to a donation bonus (DECISIONS 2026-08-09) specifically to move mochi outside
+    선불전자지급수단 regulation — but whether "donate and automatically earn a bonus" still
+    counts as 대가관계, and whether the 7-day 청약철회 right applies the same way to a
+    donation as it did to a purchase, are both unresolved. `/refund` was reworded to stop
+    asserting 구매, not to answer either question. See `docs/legal/terms-draft.md` 제6조/제8조.
   - [ ] **Unspent balances are forfeited on account deletion — get this reviewed.** Decided
     2026-08-07: no refund, and the units are not returned to the creator's supply either
     (doing both would pay the creator twice for one obligation). It is implemented, and the
@@ -30,17 +39,26 @@ all pass**. Ordered by what would hurt most if ignored.
     than by requesting a refund. See DECISIONS 2026-08-07.
   - [ ] **Creator/service termination** — what happens to balances if a creator stops trading
     or motoo closes. Deliberately omitted from `/refund`; still the clause hardest to defend
-    leaving out. Account deletion currently *refuses* creator accounts for this reason.
+    leaving out, and more exposed since the 60% path went: past the 7-day window there is now
+    no voluntary refund route at all. Account deletion currently *refuses* creator accounts
+    for this reason.
+  - [x] **고객센터 resolves to something** (2026-08-10) — the footer support link and
+    `/refund`'s "신청 방법" section point at `src/lib/support.ts`, a `mailto:` to the owner's
+    personal email. Real, but **explicitly interim**: a personal Gmail as the official contact
+    channel (and as the 개인정보 보호책임자 contact in `docs/legal/privacy-draft.md`) is fine
+    pre-registration, not something to carry into a launch. Swap the one constant.
 - [ ] **`CRON_SECRET` must be set in Vercel.** `vercel.json` schedules `/api/cron/purge-accounts`
   daily; the route refuses to run without it, so if it is unset the 30-day deletion grace period
   never expires and no account is ever actually purged.
 - [ ] **`/terms` and `/privacy` are still one-line placeholders**, linked from the footer and
-  agreed to at onboarding. Blocked on counsel text; the page structure is ready.
+  agreed to at onboarding. Blocked on counsel text; the page structure is ready. Lawyer-review
+  drafts exist at `docs/legal/terms-draft.md` and `docs/legal/privacy-draft.md` (2026-08-09) —
+  not wired into the site; they're for counsel to mark up first.
 - [ ] Real PG (Toss/NICE/PortOne), real 본인인증, Kakao login — all blocked on 사업자등록. Mocks
   stand in behind `PaymentProvider` / `VerificationProvider`.
-  - Note the age gate is now enforced in `buyMochi`, but the **mock verifier always returns an
-    adult** unless `VERIFICATION_MOCK_MINOR=1`. The guardian-consent *collection* flow does not
-    exist, so a real minor is currently blocked outright rather than asked.
+  - Note the age gate is now enforced in `donateMochi`, but the **mock verifier always returns
+    an adult** unless `VERIFICATION_MOCK_MINOR=1`. The guardian-consent *collection* flow does
+    not exist, so a real minor is currently blocked outright rather than asked.
 
 **Verify on the next deploy**
 - [ ] **Share cards on real URLs.** Metadata, OG tags and the per-creator OG image were verified
@@ -72,14 +90,25 @@ all pass**. Ordered by what would hurt most if ignored.
   real check. **No action recommended.**
 
 **Maintenance**
-- [ ] **Prisma 7 will drop `package.json#prisma`** — every `db push` warns. We only keep
-  `{"seed": ...}` there, so migrating to `prisma.config.ts` is small.
+- [x] **`package.json#prisma` → `prisma.config.ts`** (2026-08-10, from `main`) — the seed
+  command moved and `package.json`'s dead `pnpm.onlyBuiltDependencies` (superseded by
+  `pnpm-workspace.yaml`'s `allowBuilds`) went with it. Still the classic engine, not the
+  Prisma 7 driver-adapter jump. Gotcha: a `prisma.config.ts` turns off Prisma's automatic
+  `.env` loading, so the config calls `process.loadEnvFile()` itself.
 - [ ] **Production is three stages behind on schema, and deploying before fixing it will
   break the site.** Prod still has the six Phase-1 tables (~900 rows) and is missing
   `RateLimit` and `Backer.pendingDeletionAt`, so `getCurrentBacker` would error on every
   authenticated page. The build now runs `prisma migrate deploy`, but production needs a
   one-time baseline first — **run [`scripts/baseline-prod.md`](../scripts/baseline-prod.md)**.
   `pnpm check:drift` reports the current state, read-only.
+  - The donation-pivot rename (`purchasedTotal` → `mochiEarnedTotal`, `soldQuantity` →
+    `grantedQuantity`, `lifetimeSold` → `lifetimeGranted`) arrived from `main` as a bare
+    `db push` that never reached prod. On merge it became
+    `prisma/migrations/20260810020000_donation_pivot_rename` — `ALTER TABLE … RENAME
+    COLUMN`, so the lifetime totals survive. It applies with the rest once prod is
+    baselined; no separate manual step, and **no `--accept-data-loss` push needed**.
+- [ ] Vercel Hobby likely ignores `vercel.json`'s `icn1`, so functions run in the US while
+  the DB is in Seoul (cross-Pacific latency per query). Revisit on Pro.
 - [ ] Carried refactors: route-group layouts (`(marketing)`/`(app)`/`(auth)`) to stop repeating
   `<Nav/>`+`<Footer/>` across 20 pages; `EmptyState` + `PageHeader` primitives (6 and 9 real call
   sites); hardcoded Korean still in `creators/page.tsx`; `Backer` → `User` rename (high churn,
@@ -98,6 +127,9 @@ The audit roadmap is complete through Stage 9. What is left is either **blocked 
    `/explore`, so it teaches without branching.
 4. **Global search**, **creator analytics**.
 
+The design tier 2/3 pass that came in with the donation pivot (Korean eyebrows, styled
+selects, 퍼크 cleanup, de-boxed landing sections) is complete — see CHANGELOG 2026-08-10.
+
 ## Not built (need a business registration + paid contract — same blocker class)
 
 - [ ] Real Korean PG (Toss/NICE / PortOne) — needs credentials **and** a redirect+confirm flow
@@ -106,14 +138,16 @@ The audit roadmap is complete through Stage 9. What is left is either **blocked 
 
 ## Real payments — what a live PG needs (not built)
 
-The current `PaymentProvider` is synchronous (`purchaseMochi` charges inline in a server action)
-and only the **mock** adapter exists. A real Toss/NICE integration is not a drop-in adapter:
-1. **Merchant credentials** in env, not repo.
-2. **A redirect-based flow**: create a payment → redirect to the PG → handle the callback →
-   **server-side confirm** → then credit mochi. This replaces "charge inline, credit in the same
-   request".
+The current `PaymentProvider` is synchronous (`donate` charges inline in a server action) and
+only the **mock** adapter exists. A real Toss/NICE integration is not a drop-in adapter:
+1. **Merchant credentials** (secret key / sub-merchant onboarding) in env, not repo.
+2. **A redirect-based flow**: create a payment → redirect the donor to the PG → handle the
+   callback → **server-side confirm** → then grant the mochi bonus. This replaces "charge
+   inline, credit in the same request".
 3. **Webhook + reconciliation** for async settlement and refunds/voids (`voidCharge` is a mock
    no-op today — and note the account-deletion refund question above would depend on it).
+
+Until then, `PAYMENT_PROVIDER=mock` grants mochi without moving real money.
 
 ### Marketplace item guidelines (all optional, off-platform fulfillment for v1)
 - Digital/experiential · access passes · physical goods · 1:1 time slots

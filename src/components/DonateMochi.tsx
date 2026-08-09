@@ -11,26 +11,31 @@ import { Input } from "@/components/ui/Field";
 import { InlineMessage } from "@/components/ui/InlineMessage";
 import { IconHeart } from "@/components/ui/Icons";
 import { formatKrw, formatCount } from "@/lib/format";
-import { buyMochiAction } from "@/app/s/[handle]/marketplace-actions";
-import { toggleFollow } from "@/lib/follow-actions";
 import {
-  MOCHI_MAX_PURCHASE_QTY,
-  MOCHI_MAX_PURCHASE_KRW,
-} from "@/lib/issuance";
+  DONATION_PRESET_AMOUNTS_KRW,
+  DONATION_RECOMMENDED_AMOUNT_KRW,
+} from "@/lib/donation";
+import { donateMochiAction } from "@/app/s/[handle]/marketplace-actions";
+// Reads live in @/lib/follows; the mutation is the only server action, and it
+// lives here so the reads can stay cached (stage 6, DECISIONS 2026-08-08).
+import { toggleFollow } from "@/lib/follow-actions";
+import { MOCHI_MAX_PURCHASE_KRW } from "@/lib/issuance";
 
 type Issuance = {
   pricePerMochiKrw: number;
   goalQuantity: number;
-  soldQuantity: number;
+  grantedQuantity: number;
   active: boolean;
 };
 
 /**
- * User-side buy-mochi module, imported into the creator profile page.
- * A creator issues their own mochi at a per-mochi KRW rate (a soft goal); the
- * user buys mochi into a per-creator holding to spend in the creator's market.
+ * User-side donate module, imported into the creator profile page. A fan
+ * donates KRW directly to a creator (100% of it reaches them — motoo takes
+ * 0% cut); mochi is never sold, it's granted afterward as a bonus at the
+ * creator's current rate (a soft goal, only ever raised — see
+ * docs/DECISIONS.md, the donation-pivot entry).
  */
-export function BuyMochi({
+export function DonateMochi({
   handle,
   streamerId,
   creatorName,
@@ -45,18 +50,19 @@ export function BuyMochi({
   issuance: Issuance | null;
   balance: number;
   loggedIn: boolean;
-  /** Already following this creator? Gates the post-purchase follow nudge —
+  /** Already following this creator? Gates the post-donation follow nudge —
    * omit/false for a logged-out visitor, who can't follow yet anyway. */
   following?: boolean;
 }) {
-  const t = useTranslations("marketplace");
+  const t = useTranslations("donate");
   const router = useRouter();
   const [pending, startTransition] = useTransition();
-  const [quantity, setQuantity] = useState(10);
+  const [amount, setAmount] = useState<number>(DONATION_RECOMMENDED_AMOUNT_KRW);
+  const [customMode, setCustomMode] = useState(false);
   const [success, setSuccess] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
-  // First purchase is the moment "do you want to hear from them" is most
-  // relevant — buying does NOT auto-follow (DECISIONS 2026-07-30: the two
+  // First donation is the moment "do you want to hear from them" is most
+  // relevant — donating does NOT auto-follow (DECISIONS 2026-07-30: the two
   // stay independent), so this nudges instead.
   const [nowFollowing, setNowFollowing] = useState(!!following);
   const [followPending, startFollowTransition] = useTransition();
@@ -71,51 +77,39 @@ export function BuyMochi({
     });
   }
 
-  const onSale = issuance !== null && issuance.active;
+  const open = issuance !== null && issuance.active;
 
   const price = issuance?.pricePerMochiKrw ?? 0;
-
-  /**
-   * The most this fan may buy in one go: the unit ceiling, and whatever the KRW
-   * ceiling works out to at this creator's price — whichever binds first. Mirrors
-   * `validatePurchase` on the server, which is what actually enforces it; this
-   * only keeps the UI from offering a quantity that would bounce.
-   */
-  const maxQuantity = Math.max(
-    1,
-    Math.min(
-      MOCHI_MAX_PURCHASE_QTY,
-      price > 0 ? Math.floor(MOCHI_MAX_PURCHASE_KRW / price) : MOCHI_MAX_PURCHASE_QTY,
-    ),
-  );
-  const atMax = quantity >= maxQuantity;
-
-  const total = quantity * price;
+  const belowMin = price > 0 && amount < price;
+  const bonusPreview = price > 0 ? Math.floor(amount / price) : 0;
+  // The most this fan may donate in one go. Mirrors `validatePurchase` on the
+  // server, which is what actually enforces it; this only keeps the UI from
+  // offering an amount that would bounce.
+  const atMax = amount >= MOCHI_MAX_PURCHASE_KRW;
   const percent =
     issuance && issuance.goalQuantity > 0
       ? Math.min(
           100,
-          Math.round((issuance.soldQuantity / issuance.goalQuantity) * 100),
+          Math.round((issuance.grantedQuantity / issuance.goalQuantity) * 100),
         )
       : 0;
 
   function submit() {
-    if (!issuance) return;
+    if (!issuance || belowMin) return;
     setError(null);
     setSuccess(null);
-    const qty = quantity;
-    // One idempotency token per user-initiated purchase; a retry of this same
+    // One idempotency token per user-initiated donation; a retry of this same
     // click reuses it so the PG never double-charges.
     const idempotencyKey = crypto.randomUUID();
     startTransition(async () => {
-      const res = await buyMochiAction({
+      const res = await donateMochiAction({
         handle,
         streamerId,
-        quantity: qty,
+        donationAmountKrw: amount,
         idempotencyKey,
       });
       if (res.ok) {
-        setSuccess(qty);
+        setSuccess(res.mochiGranted);
         router.refresh();
       } else {
         setError(res.error);
@@ -125,12 +119,12 @@ export function BuyMochi({
 
   return (
     <div className="rounded-[20px] border border-line-2 bg-card p-6">
-      <Eyebrow>{t("buyTitle")}</Eyebrow>
+      <Eyebrow>{t("title")}</Eyebrow>
       <p className="mt-1.5 text-[15px] text-body">
-        {t("buySubtitle", { name: creatorName })}
+        {t("subtitle", { name: creatorName })}
       </p>
 
-      {!onSale || !issuance ? (
+      {!open || !issuance ? (
         <p className="mt-5 text-[15px] text-muted">{t("notOnSale")}</p>
       ) : (
         <div className="mt-5">
@@ -146,74 +140,86 @@ export function BuyMochi({
           </div>
 
           <p className="mt-4 text-[14px] text-muted">
-            {t("pricePerMochi", { price })}
+            {t("mochiRate", { price })}
           </p>
 
-          {/* Quantity stepper. A <span>, not a <label>: the group is − / field /
-              +, so there's no single control this could point `htmlFor` at, and
-              a label with no target is worse than none. The field carries the
-              same text as its aria-label. */}
+          {/* Donation amount: preset grid, then a custom field. A <span>, not a
+              <label>: the presets are buttons and the custom field only appears
+              once 직접 입력 is chosen, so there's no single control this could
+              point `htmlFor` at — and a label with no target is worse than
+              none. The field carries the same text as its aria-label. */}
           <span className="mb-1.5 mt-4 block text-[13px] font-semibold text-muted-2">
-            {t("quantityLabel")}
+            {t("amountLabel")}
           </span>
-          <div className="flex items-center gap-2">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+            {DONATION_PRESET_AMOUNTS_KRW.map((v) => (
+              <Button
+                key={v}
+                type="button"
+                variant={!customMode && amount === v ? "primary" : "secondary"}
+                aria-pressed={!customMode && amount === v}
+                disabled={pending}
+                onClick={() => {
+                  setCustomMode(false);
+                  setAmount(v);
+                }}
+              >
+                {formatKrw(v)}
+              </Button>
+            ))}
             <Button
               type="button"
-              variant="secondary"
-              aria-label="-"
-              className="!px-4"
-              disabled={pending || quantity <= 1}
-              onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+              variant={customMode ? "primary" : "secondary"}
+              aria-pressed={customMode}
+              disabled={pending}
+              onClick={() => setCustomMode(true)}
             >
-              −
+              {t("customAmount")}
             </Button>
+          </div>
+          {customMode && (
             <Input
               type="number"
               min={1}
-              max={maxQuantity}
-              value={quantity}
+              max={MOCHI_MAX_PURCHASE_KRW}
+              value={amount}
               disabled={pending}
-              aria-label={t("quantityLabel")}
+              aria-label={t("amountLabel")}
               onChange={(e) => {
                 const n = Math.trunc(Number(e.target.value));
                 // Clamp on the way in — typing past the cap silently snaps back
-                // to it rather than letting the buy button submit a doomed value.
-                setQuantity(
-                  Number.isFinite(n) && n >= 1 ? Math.min(n, maxQuantity) : 1,
+                // to it rather than letting the donate button submit a doomed
+                // value.
+                setAmount(
+                  Number.isFinite(n) && n >= 1
+                    ? Math.min(n, MOCHI_MAX_PURCHASE_KRW)
+                    : 1,
                 );
               }}
-              // The stepper's − / + sit either side, so the field itself is the
-              // flex child that grows; the label above is rendered separately.
-              fieldClassName="w-full"
+              fieldClassName="mt-2 w-full"
               className="text-center"
             />
-            <Button
-              type="button"
-              variant="secondary"
-              aria-label="+"
-              className="!px-4"
-              disabled={pending || atMax}
-              onClick={() => setQuantity((q) => Math.min(maxQuantity, q + 1))}
-            >
-              +
-            </Button>
-          </div>
+          )}
           {atMax && (
-            // The raw number, not formatCount() — a limit has to be exact, and
-            // its compact form ("5.0k") is both imprecise and Latin-glyphed in
-            // Korean copy. ICU formats the number arg with locale grouping.
+            // The raw number, not a compact form — a limit has to be exact, and
+            // "100만" is both imprecise and awkward next to a typed figure. ICU
+            // formats the number arg with locale grouping.
             <p className="mt-1.5 text-[12px] text-muted">
-              {t("quantityMaxHint", { max: maxQuantity })}
+              {t("amountMaxHint", { max: MOCHI_MAX_PURCHASE_KRW })}
             </p>
           )}
 
-          {/* you pay */}
+          {/* derived bonus preview */}
           <div className="mt-4 flex items-center justify-between">
-            <span className="text-[14px] text-muted-2">{t("youPay")}</span>
-            <span className="text-[18px] font-extrabold tracking-[-0.02em] text-ink">
-              {formatKrw(total)}
+            <span className="text-[14px] text-muted-2">
+              {belowMin ? "" : t("bonusPreview", { count: bonusPreview })}
             </span>
           </div>
+          {belowMin && (
+            <p className="mt-1 text-[13px] font-semibold text-live">
+              {t("belowMinHint", { price })}
+            </p>
+          )}
 
           {/* soft-goal progress */}
           <div className="mt-4">
@@ -228,7 +234,7 @@ export function BuyMochi({
             </p>
           </div>
 
-          {/* buy button */}
+          {/* submit */}
           <div className="mt-5">
             {loggedIn ? (
               <Button
@@ -237,9 +243,10 @@ export function BuyMochi({
                 size="lg"
                 className="w-full"
                 loading={pending}
+                disabled={belowMin}
                 onClick={submit}
               >
-                {pending ? t("buying") : t("buyButton", { amount: total })}
+                {pending ? t("submitting") : t("submitButton", { amount })}
               </Button>
             ) : (
               <ButtonLink
@@ -248,7 +255,7 @@ export function BuyMochi({
                 size="lg"
                 className="w-full"
               >
-                {t("buyButton", { amount: total })}
+                {t("submitButton", { amount })}
               </ButtonLink>
             )}
           </div>
@@ -256,7 +263,7 @@ export function BuyMochi({
           {success !== null && (
             <div className="mt-3 rounded-[12px] bg-sage-bg px-4 py-3">
               <p className="text-[14px] font-semibold text-sage">
-                {t("bought", { count: success })}
+                {t("success", { count: success })}
               </p>
               {!nowFollowing && (
                 <button

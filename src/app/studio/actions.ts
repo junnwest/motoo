@@ -70,14 +70,15 @@ export async function updateIssuance(input: {
       select: { pricePerMochiKrw: true },
     });
 
-    // Price only ratchets up. Lowering it is rejected. A raise opens a NEW tier:
-    // reset the tier meter (soldQuantity → 0), discarding leftover availability at
-    // the old price (harmless — nothing was minted). Same price = just adjust the
-    // current tier's availability. Held mochi is never touched either way.
+    // The bonus rate only ratchets up (fewer mochi per ₩ donated over time).
+    // Lowering it is rejected. A raise opens a NEW tier: reset the tier meter
+    // (grantedQuantity → 0), discarding the leftover goal at the old rate
+    // (harmless — nothing was minted). Same rate = just adjust the current
+    // tier's goal. Held mochi is never touched either way.
     if (existing && pricePerMochiKrw < existing.pricePerMochiKrw) {
       return { ok: false, error: "priceOnlyUp" };
     }
-    const priceRaised =
+    const rateRaised =
       !!existing && pricePerMochiKrw > existing.pricePerMochiKrw;
 
     await prisma.mochiIssuance.upsert({
@@ -92,15 +93,15 @@ export async function updateIssuance(input: {
         pricePerMochiKrw,
         goalQuantity,
         active,
-        ...(priceRaised ? { soldQuantity: 0 } : {}),
+        ...(rateRaised ? { grantedQuantity: 0 } : {}),
       },
     });
 
     revalidatePath(DASHBOARD);
 
     // Best-effort, after the write commits — a notify() failure must never
-    // undo the price change or fail this action (see src/lib/notify.ts).
-    if (priceRaised) {
+    // undo the rate change or fail this action (see src/lib/notify.ts).
+    if (rateRaised) {
       const tn = await getTranslations("notifications.push");
       const holderIds = await getHolderBackerIds(creator.id);
       await notifyMany(holderIds, {

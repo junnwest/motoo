@@ -20,8 +20,8 @@ import { prisma } from "@/lib/db";
 /**
  * The Sidebar's following list — strictly Follow rows, deliberately NOT merged
  * with MochiHolding (DECISIONS 2026-07-30: holding and following stay
- * independent; a paying-but-not-following supporter won't appear here, which
- * is why BuyMochi nudges a follow right after a first purchase).
+ * independent; a donating-but-not-following supporter won't appear here, which
+ * is why DonateMochi nudges a follow right after a first donation).
  */
 export const getFollowList = cache(async (backerId: string) => {
   const rows = await prisma.follow.findMany({

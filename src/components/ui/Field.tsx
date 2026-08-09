@@ -1,4 +1,5 @@
 import { ComponentProps, ReactNode, useId } from "react";
+import { IconChevronDown } from "@/components/ui/Icons";
 
 /**
  * Form primitives: `Field` (the label / hint / error scaffold) and the three
@@ -202,13 +203,23 @@ export function Select({
       className={fieldClassName}
     >
       {(a11y) => (
-        <select
-          {...a11y}
-          {...props}
-          className={`${size === "sm" ? CONTROL_SM : CONTROL_BASE} ${error ? CONTROL_INVALID : ""} ${className}`}
-        >
-          {children}
-        </select>
+        // The OS's own arrow is hidden and the design system's chevron drawn in
+        // its place — a native select arrow is the one control that can't take
+        // brand color and shifts per platform. `pr-9` reserves the room for it.
+        <div className="relative">
+          <select
+            {...a11y}
+            {...props}
+            className={`appearance-none pr-9 ${size === "sm" ? CONTROL_SM : CONTROL_BASE} ${error ? CONTROL_INVALID : ""} ${className}`}
+          >
+            {children}
+          </select>
+          <IconChevronDown
+            width={16}
+            height={16}
+            className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted"
+          />
+        </div>
       )}
     </Field>
   );

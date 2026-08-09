@@ -1,5 +1,6 @@
 import type {
-  MochiPurchaseRequest,
+  DonationRequest,
+  DonationResult,
   PaymentProvider,
   PurchaseRequest,
   PurchaseResult,
@@ -28,12 +29,11 @@ export class MockPaymentProvider implements PaymentProvider {
     };
   }
 
-  async purchaseMochi(req: MochiPurchaseRequest): Promise<PurchaseResult> {
+  async donate(req: DonationRequest): Promise<DonationResult> {
     await delay(120);
     return {
       ok: true,
       transactionId: `mock_tx_${req.idempotencyKey}`,
-      mochiGranted: req.quantity,
       receiptId: `mock_receipt_${req.idempotencyKey}`,
     };
   }

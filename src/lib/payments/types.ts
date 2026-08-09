@@ -5,6 +5,12 @@
  *
  * The virtual-currency ("모찌"/cookies) model: backers buy fixed packs, then spend
  * mochi to back a streamer. This follows the 별풍선 (prepaid consumable) pattern.
+ * (Phase 1 — CookiePack/purchaseCookies below are dead code, unused by the current
+ * flow; kept as-is, out of scope for the donation pivot.)
+ *
+ * Phase 3: mochi is no longer sold. A fan donates KRW directly to a creator
+ * (see DonationRequest/donate below); mochi is granted afterward as a
+ * non-purchased bonus, computed entirely in mochi.ts.
  */
 
 export interface CookiePack {
@@ -25,19 +31,26 @@ export interface PurchaseRequest {
 }
 
 /**
- * Phase 2: buy a creator's mochi. Unlike fixed cookie packs, the buyer chooses a
- * quantity and the price is the creator's per-mochi rate (MochiIssuance). The PG
- * charges `amountKrw` to the buyer; mochi is credited to a per-creator holding.
+ * Phase 3: a fan donates KRW directly to a creator. The PG has NO concept of
+ * mochi — it only charges an amount and routes it. Mochi-bonus math lives
+ * entirely in mochi.ts, computed from MochiIssuance.pricePerMochiKrw before
+ * the charge, and is never derived from anything the PG returns.
  */
-export interface MochiPurchaseRequest {
+export interface DonationRequest {
   backerId: string;
   streamerId: string;
-  /** mochi units being bought */
-  quantity: number;
-  /** integer KRW total charged to the buyer (quantity × pricePerMochiKrw) */
+  /** integer KRW the fan chose to donate */
   amountKrw: number;
   /** idempotency key so a retried request never double-charges */
   idempotencyKey: string;
+}
+
+export interface DonationResult {
+  ok: boolean;
+  transactionId: string;
+  /** cash receipt (현금영수증) reference where applicable */
+  receiptId?: string;
+  error?: string;
 }
 
 export interface PurchaseResult {
@@ -84,11 +97,11 @@ export interface PaymentProvider {
   readonly name: string;
   /** Buy a cookie pack (real PG charge in production; simulated in mock). */
   purchaseCookies(req: PurchaseRequest): Promise<PurchaseResult>;
-  /** Phase 2: buy a creator's mochi at their per-mochi rate (real PG charge; mock simulates). */
-  purchaseMochi(req: MochiPurchaseRequest): Promise<PurchaseResult>;
-  /** Compensating void/refund of a mochi charge when crediting mochi fails afterward. */
+  /** Phase 3: charge a fan's donation to a creator (real PG charge; mock simulates). */
+  donate(req: DonationRequest): Promise<DonationResult>;
+  /** Compensating void/refund of a donation charge when crediting the mochi bonus fails afterward. */
   voidCharge(req: VoidChargeRequest): Promise<VoidChargeResult>;
-  /** Route a backing's/purchase's KRW to the streamer sub-merchant. */
+  /** Route a donation's KRW to the streamer sub-merchant. */
   settleToStreamer(req: SettlementRequest): Promise<SettlementResult>;
 }
 

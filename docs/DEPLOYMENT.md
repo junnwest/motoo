@@ -1,6 +1,6 @@
 # motoo — Deployment
 
-_Last updated: 2026-07-20_
+_Last updated: 2026-08-10_
 
 **Live at [themotoo.com](https://themotoo.com)** (consumer app) and
 **[studio.themotoo.com](https://studio.themotoo.com)** (creator console). Both are the
@@ -20,7 +20,7 @@ preview deploys per PR.
 | Prisma `directUrl` + `vercel.json` (icn1) | ✅ done |
 | Supabase project (Seoul, Data API off) | ✅ created — ref `nrfhwhefabahsfzuyxqu` |
 | Push code to GitHub `junnwest/motoo` | ✅ done (main, via HTTPS remote) |
-| Schema push + seed to Supabase | ✅ done 2026-07-19 (via `.env.production.local` DIRECT_URL); re-pushed 2026-08-01/02 for `MarketplaceItem.coverImage` + `Backer.tokenVersion` — see "Schema changes" below, it's a **manual pre-deploy step** |
+| Schema push + seed to Supabase | ⚠️ **out of date since 2026-08-10** — code for the donation-pivot rename is on `main`, the prod schema push isn't done yet (needs `--accept-data-loss`, needs real prod credentials nobody used this session). Mochi-related pages are 500ing on production until this runs. See "Schema changes" below. |
 | Vercel project + env vars + deploy | ✅ done 2026-07-20 (project `motoo`, auto-deploy on `main`) |
 | Custom domain `themotoo.com` | ✅ done — Squarespace DNS → Vercel (A `76.76.21.21` + CNAME `www`), Let's Encrypt TLS; **www is primary**, apex 308-redirects |
 | Studio subdomain `studio.themotoo.com` | ✅ done 2026-07-24 — Squarespace `studio` CNAME → `cname.vercel-dns.com`, added on the same Vercel project; serves the creator console (host-split in `src/proxy.ts`) |
@@ -120,6 +120,19 @@ promoted. Fix the migration and push again.
 
 `pnpm db:push` still exists for throwaway local experiments. Anything that should
 reach production goes through a migration.
+
+> **2026-08-10 — the donation pivot's rename came in from `main` as a `db push`,
+> and was converted to a migration on merge.** The pivot renamed
+> `MochiHolding.purchasedTotal` → `mochiEarnedTotal`, `MochiIssuance.soldQuantity`
+> → `grantedQuantity`, `.lifetimeSold` → `lifetimeGranted`. That branch predates
+> migrations, so it reached only local dev Postgres and left prod's mochi pages
+> (donate, leaderboards, ranking, Studio dashboard) 500ing pending a manual
+> `db push --accept-data-loss`. The merge instead commits
+> `20260810020000_donation_pivot_rename`, which does the three `ALTER TABLE …
+> RENAME COLUMN`s and so **preserves the lifetime totals** a drop-and-recreate
+> would have discarded. Prod picks it up from the build like any other migration —
+> once prod is baselined (see PROGRESS: `migrate resolve --applied 0_init`), which
+> is still the gate on deploying this branch at all.
 
 > **This replaced a manual pre-deploy `db push`,** which was the standing footgun:
 > the build only ran `prisma generate`, so a deploy carrying a new column shipped

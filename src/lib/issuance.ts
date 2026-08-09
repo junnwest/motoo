@@ -11,28 +11,29 @@ export const MOCHI_MIN_COUNT = 10; // mochi issued
 export const MOCHI_MIN_TOTAL = 50_000; // 원, total face value (price × count)
 
 /**
- * Ceilings on a SINGLE purchase by one fan. These are about the *buy* side, not
- * the issuance side — a creator may issue 10,000 mochi, but nobody takes all of
- * it in one transaction.
+ * Ceilings on a SINGLE donation by one fan. These are about the *donation* side,
+ * not the issuance side — a creator may issue 10,000 mochi, but nobody earns all
+ * of it in one transaction.
  *
- * Why they exist at all: `quantity` used to be an unbounded positive integer, so
- * a hand-crafted request could ask for millions. With `PAYMENT_PROVIDER=mock`
- * (which unconditionally succeeds) that meant free mochi; with a real PG it
- * means an unbounded charge. Either way the resulting `purchasedTotal`,
- * `lifetimeSold` and leaderboard values are permanently wrong, so this is
- * enforced server-side in `buyMochi` and never trusted from the client.
+ * Why they exist at all: the donation amount used to be an unbounded positive
+ * integer, so a hand-crafted request could ask for millions. With
+ * `PAYMENT_PROVIDER=mock` (which unconditionally succeeds) that meant free
+ * mochi; with a real PG it means an unbounded charge. Either way the resulting
+ * `mochiEarnedTotal`, `lifetimeGranted` and leaderboard values are permanently
+ * wrong, so this is enforced server-side in `donateMochi` and never trusted
+ * from the client.
  *
- * Also an integer-overflow guard: `pricePerMochiKrw * quantity` and
- * `MochiIssuance.soldQuantity` are Postgres `Int` (Int4, max 2,147,483,647).
+ * Also an integer-overflow guard: the donation amount and
+ * `MochiIssuance.grantedQuantity` are Postgres `Int` (Int4, max 2,147,483,647).
  * Capping the KRW total at 1,000,000 keeps every product of the two comfortably
  * inside that range.
  *
- * The two coincide exactly at the 100원 price floor (10,000 × 100 = 1,000,000);
+ * The two coincide exactly at the 100원 rate floor (10,000 × 100 = 1,000,000);
  * above the floor, the KRW ceiling is what binds. Product knobs, not invariants —
- * raise them here and both the action and the buy UI follow.
+ * raise them here and both the action and the donate UI follow.
  */
-export const MOCHI_MAX_PURCHASE_QTY = 10_000; // mochi units in one purchase
-export const MOCHI_MAX_PURCHASE_KRW = 1_000_000; // 원 charged in one purchase
+export const MOCHI_MAX_PURCHASE_QTY = 10_000; // mochi units granted in one donation
+export const MOCHI_MAX_PURCHASE_KRW = 1_000_000; // 원 charged in one donation
 
 export type PurchaseLimitError = "quantityMax" | "amountMax";
 

@@ -142,9 +142,9 @@ export const getStreamerProfile = cache(async (handle: string) => {
     include: {
       updates: { orderBy: { publishedAt: "desc" }, take: 5 },
       // Phase 2: active marketplace items, so the profile page renders the
-      // spend module from this one streamer query (no second fetch). Buy
+      // spend module from this one streamer query (no second fetch). Donate
       // (mochiIssuance) moved to its own page/query — getStreamerMarketplace,
-      // used by /s/[handle]/buy — since it's no longer rendered here.
+      // used by /s/[handle]/donate — since it's no longer rendered here.
       marketplaceItems: {
         where: { active: true },
         orderBy: { sortOrder: "asc" },

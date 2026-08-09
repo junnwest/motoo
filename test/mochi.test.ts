@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Integration tests for the mochi-marketplace money logic (src/lib/mochi.ts).
  *
  * Runs against the local Postgres (docker, `pnpm db:up`). Uses isolated fixtures
@@ -9,7 +9,7 @@ import { describe, it, before, beforeEach, after } from "node:test";
 import assert from "node:assert/strict";
 import { prisma } from "@/lib/db";
 import {
-  buyMochi,
+  donateMochi,
   redeemItem,
   cancelOrder,
   cancelOrderByBuyer,
@@ -27,6 +27,12 @@ const UNVERIFIED_EMAIL = "moneytest-unverified@motoo.test";
 const MINOR_EMAIL = "moneytest-minor@motoo.test";
 const CONSENTED_MINOR_EMAIL = "moneytest-minor-consented@motoo.test";
 const HANDLE = "moneytest_creator";
+
+// Fixture rate: 200 KRW donated earns 1 mochi. Below-price-only donations
+// (100, 200×N) map to the exact same resulting mochi counts the old
+// quantity-driven fixtures produced, so downstream assertions didn't need to
+// change — only the input shape (an amount, not a quantity) did.
+const PRICE = 200;
 
 let streamerId: string;
 let backerId: string;
@@ -75,10 +81,10 @@ before(async () => {
   });
   streamerId = streamer.id;
   await prisma.mochiIssuance.create({
-    data: { streamerId, pricePerMochiKrw: 200, goalQuantity: 100, soldQuantity: 0, active: true },
+    data: { streamerId, pricePerMochiKrw: PRICE, goalQuantity: 100, grantedQuantity: 0, active: true },
   });
-  // `verifiedAt` is required now, not just `ageVerified` — buyMochi gates on a
-  // completed 본인인증 before it gates on age.
+  // `verifiedAt` is required now, not just `ageVerified` — donateMochi gates on
+  // a completed 본인인증 before it gates on age.
   const fan = await prisma.backer.create({
     data: { email: FAN_EMAIL, nickname: "MT Fan", role: "backer", verifiedAt: new Date(), ageVerified: true },
   });
@@ -112,135 +118,164 @@ beforeEach(async () => {
   await prisma.order.deleteMany({ where: { streamerId } });
   await prisma.marketplaceItem.deleteMany({ where: { streamerId } });
   await prisma.mochiHolding.deleteMany({ where: { streamerId } });
-  await prisma.mochiIssuance.update({ where: { streamerId }, data: { soldQuantity: 0, active: true } });
+  // The rate is reset too: the ceiling tests below move it to isolate which cap
+  // binds, and every other test reasons in multiples of PRICE.
+  await prisma.mochiIssuance.update({ where: { streamerId }, data: { grantedQuantity: 0, active: true, pricePerMochiKrw: PRICE } });
 });
 
-/** Issuance for these tests is 200원/mochi — used to reason about the KRW cap. */
-const PRICE = 200;
-
-describe("buyMochi", () => {
-  it("credits the holding and advances soldQuantity; charges qty × price", async () => {
-    const r = await buyMochi({ backerId, streamerId, quantity: 10, idempotencyKey: "k" });
+describe("donateMochi", () => {
+  it("credits the holding and advances grantedQuantity; grants floor(amount/price) mochi", async () => {
+    const r = await donateMochi({ backerId, streamerId, donationAmountKrw: 10 * PRICE, idempotencyKey: "k" });
     assert.equal(r.balance, 10);
+    assert.equal(r.mochiGranted, 10);
     assert.equal(r.amountKrw, 2000);
     const iss = await prisma.mochiIssuance.findUniqueOrThrow({ where: { streamerId } });
-    assert.equal(iss.soldQuantity, 10);
+    assert.equal(iss.grantedQuantity, 10);
   });
 
-  it("rejects when issuance is paused", async () => {
-    await prisma.mochiIssuance.update({ where: { streamerId }, data: { active: false } });
+  it("floors an uneven donation and keeps the full KRW with the creator", async () => {
+    const r = await donateMochi({ backerId, streamerId, donationAmountKrw: 2050, idempotencyKey: "k" });
+    assert.equal(r.mochiGranted, 10); // floor(2050 / 200) = 10, not 10.25
+    assert.equal(r.amountKrw, 2050); // full amount still charged/settled — no mochi "change"
+  });
+
+  it("rejects a donation below the current per-mochi rate", async () => {
     await assert.rejects(
-      () => buyMochi({ backerId, streamerId, quantity: 1, idempotencyKey: "k" }),
-      /MOCHI_NOT_ON_SALE/,
+      () => donateMochi({ backerId, streamerId, donationAmountKrw: 100, idempotencyKey: "k" }),
+      /DONATION_BELOW_MIN/,
     );
   });
 
-  it("rejects a non-positive quantity", async () => {
+  it("rejects when the bonus is paused", async () => {
+    await prisma.mochiIssuance.update({ where: { streamerId }, data: { active: false } });
     await assert.rejects(
-      () => buyMochi({ backerId, streamerId, quantity: 0, idempotencyKey: "k" }),
-      /INVALID_QUANTITY/,
+      () => donateMochi({ backerId, streamerId, donationAmountKrw: PRICE, idempotencyKey: "k" }),
+      /MOCHI_BONUS_PAUSED/,
+    );
+  });
+
+  it("rejects a non-positive donation amount", async () => {
+    await assert.rejects(
+      () => donateMochi({ backerId, streamerId, donationAmountKrw: 0, idempotencyKey: "k" }),
+      /INVALID_AMOUNT/,
     );
   });
 });
 
 /**
- * Purchase ceilings. Before these existed, `quantity` was an unbounded positive
- * integer and the mock PG succeeds unconditionally — so a hand-crafted request
- * could mint millions of mochi for free, and a large enough one overflowed the
- * Int4 columns mid-transaction (after the charge). Both ends are now closed.
+ * Per-donation ceilings. Before these existed the donation amount was an
+ * unbounded positive integer and the mock PG succeeds unconditionally — so a
+ * hand-crafted request could mint millions of mochi for free, and a large
+ * enough one overflowed the Int4 columns mid-transaction (after the charge).
+ * Both ends are now closed: the KRW the fan is charged, and the mochi granted.
  */
-describe("buyMochi — purchase ceilings", () => {
-  it("rejects a quantity above the per-purchase unit cap", async () => {
+describe("donateMochi — per-donation ceilings", () => {
+  it("rejects a donation that would grant more than the unit cap", async () => {
+    // At the fixture rate the KRW cap always binds first (1,000,000 ÷ 200 =
+    // 5,000 mochi, half the unit cap), so the unit cap can only be isolated at
+    // a cheaper rate: at 50원/mochi a donation exactly AT the KRW cap — which
+    // the money ceiling therefore lets through — earns 20,000 mochi.
+    await prisma.mochiIssuance.update({
+      where: { streamerId },
+      data: { pricePerMochiKrw: 50 },
+    });
     await assert.rejects(
       () =>
-        buyMochi({
+        donateMochi({
           backerId,
           streamerId,
-          quantity: MOCHI_MAX_PURCHASE_QTY + 1,
+          donationAmountKrw: MOCHI_MAX_PURCHASE_KRW,
           idempotencyKey: "k",
         }),
       /QUANTITY_TOO_LARGE/,
     );
   });
 
-  it("rejects a purchase above the per-purchase KRW cap", async () => {
-    // Under the unit cap, over the money cap: only the KRW ceiling can catch it.
-    const quantity = Math.floor(MOCHI_MAX_PURCHASE_KRW / PRICE) + 1;
-    assert.ok(quantity <= MOCHI_MAX_PURCHASE_QTY, "fixture must isolate the KRW cap");
+  it("rejects a donation above the per-donation KRW cap", async () => {
+    // One rate-step over the money cap, still well under the unit cap.
+    const amount = MOCHI_MAX_PURCHASE_KRW + PRICE;
+    assert.ok(
+      Math.floor(amount / PRICE) <= MOCHI_MAX_PURCHASE_QTY,
+      "fixture must isolate the KRW cap",
+    );
     await assert.rejects(
-      () => buyMochi({ backerId, streamerId, quantity, idempotencyKey: "k" }),
+      () => donateMochi({ backerId, streamerId, donationAmountKrw: amount, idempotencyKey: "k" }),
       /AMOUNT_TOO_LARGE/,
     );
   });
 
-  it("credits nothing and advances nothing when a purchase is rejected", async () => {
+  it("credits nothing and advances nothing when a donation is rejected", async () => {
     await assert.rejects(() =>
-      buyMochi({
+      donateMochi({
         backerId,
         streamerId,
-        quantity: MOCHI_MAX_PURCHASE_QTY + 1,
+        donationAmountKrw: MOCHI_MAX_PURCHASE_KRW + PRICE,
         idempotencyKey: "k",
       }),
     );
     assert.equal(await getHolding(streamerId, backerId), null);
     const iss = await prisma.mochiIssuance.findUniqueOrThrow({ where: { streamerId } });
-    assert.equal(iss.soldQuantity, 0, "a rejected purchase must not move the meter");
+    assert.equal(iss.grantedQuantity, 0, "a rejected donation must not move the meter");
   });
 
-  it("accepts a purchase exactly at the KRW cap", async () => {
-    const quantity = Math.floor(MOCHI_MAX_PURCHASE_KRW / PRICE);
-    const r = await buyMochi({ backerId, streamerId, quantity, idempotencyKey: "k" });
+  it("accepts a donation exactly at the KRW cap", async () => {
+    const r = await donateMochi({
+      backerId,
+      streamerId,
+      donationAmountKrw: MOCHI_MAX_PURCHASE_KRW,
+      idempotencyKey: "k",
+    });
     assert.equal(r.amountKrw, MOCHI_MAX_PURCHASE_KRW, "the cap is inclusive");
-    assert.equal(r.balance, quantity);
+    assert.equal(r.balance, MOCHI_MAX_PURCHASE_KRW / PRICE);
   });
 });
 
 /**
- * Buyer eligibility. Korea gates payments on 본인인증, and the /refund 법령
+ * Donor eligibility. Korea gates payments on 본인인증, and the /refund 법령
  * carve-out promises a minor's payment is refundable — a rule the product can
  * only honour if it evaluates it. Adults pass; minors need recorded guardian
  * consent; unverified accounts never reach the PG at all.
  */
-describe("buyMochi — buyer eligibility", () => {
-  it("rejects a buyer who has not completed 본인인증", async () => {
+describe("donateMochi — donor eligibility", () => {
+  it("rejects a donor who has not completed 본인인증", async () => {
     await assert.rejects(
       () =>
-        buyMochi({ backerId: unverifiedId, streamerId, quantity: 1, idempotencyKey: "k" }),
+        donateMochi({ backerId: unverifiedId, streamerId, donationAmountKrw: PRICE, idempotencyKey: "k" }),
       /NOT_VERIFIED/,
     );
   });
 
   it("rejects a minor with no guardian consent", async () => {
     await assert.rejects(
-      () => buyMochi({ backerId: minorId, streamerId, quantity: 1, idempotencyKey: "k" }),
+      () => donateMochi({ backerId: minorId, streamerId, donationAmountKrw: PRICE, idempotencyKey: "k" }),
       /GUARDIAN_CONSENT_REQUIRED/,
     );
   });
 
   it("allows a minor once guardian consent is recorded", async () => {
     // The gate is consent, not age — a consented minor may transact.
-    const r = await buyMochi({
+    const r = await donateMochi({
       backerId: consentedMinorId,
       streamerId,
-      quantity: 2,
+      donationAmountKrw: 2 * PRICE,
       idempotencyKey: "k",
     });
     assert.equal(r.balance, 2);
   });
 
-  it("charges nothing when the buyer is ineligible", async () => {
+  it("charges nothing when the donor is ineligible", async () => {
     await assert.rejects(() =>
-      buyMochi({ backerId: minorId, streamerId, quantity: 5, idempotencyKey: "k" }),
+      donateMochi({ backerId: minorId, streamerId, donationAmountKrw: 5 * PRICE, idempotencyKey: "k" }),
     );
     assert.equal(await getHolding(streamerId, minorId), null);
     const iss = await prisma.mochiIssuance.findUniqueOrThrow({ where: { streamerId } });
-    assert.equal(iss.soldQuantity, 0);
+    assert.equal(iss.grantedQuantity, 0);
   });
 });
 
 describe("redeemItem", () => {
   it("debits balance, records a pending order, and bumps redeemedCount", async () => {
-    await buyMochi({ backerId, streamerId, quantity: 10, idempotencyKey: "k" });
+    await donateMochi({ backerId, streamerId, donationAmountKrw: 10 * PRICE, idempotencyKey: "k" });
     const item = await newItem(3);
     const r = await redeemItem({ backerId, itemId: item.id, note: "hi" });
     assert.equal(r.mochiSpent, 3);
@@ -254,18 +289,18 @@ describe("redeemItem", () => {
   });
 
   it("auto-fulfills an instant item on redemption (no pending order)", async () => {
-    await buyMochi({ backerId, streamerId, quantity: 10, idempotencyKey: "k" });
+    await donateMochi({ backerId, streamerId, donationAmountKrw: 10 * PRICE, idempotencyKey: "k" });
     const item = await newItem(3, null, "instant");
     const r = await redeemItem({ backerId, itemId: item.id });
     assert.equal(r.instant, true);
-    assert.equal(r.balance, 7); // money still moves
+    assert.equal(r.balance, 7); // mochi still moves
     const order = await prisma.order.findUniqueOrThrow({ where: { id: r.orderId } });
     assert.equal(order.status, "fulfilled");
     assert.ok(order.fulfilledAt); // stamped at redemption
   });
 
   it("rejects when balance is insufficient (and leaves balance untouched)", async () => {
-    await buyMochi({ backerId, streamerId, quantity: 2, idempotencyKey: "k" });
+    await donateMochi({ backerId, streamerId, donationAmountKrw: 2 * PRICE, idempotencyKey: "k" });
     const item = await newItem(5);
     await assert.rejects(() => redeemItem({ backerId, itemId: item.id }), /INSUFFICIENT_MOCHI/);
     const h = await getHolding(streamerId, backerId);
@@ -273,7 +308,7 @@ describe("redeemItem", () => {
   });
 
   it("rejects when stock is exhausted", async () => {
-    await buyMochi({ backerId, streamerId, quantity: 100, idempotencyKey: "k" });
+    await donateMochi({ backerId, streamerId, donationAmountKrw: 100 * PRICE, idempotencyKey: "k" });
     const item = await newItem(1, 1);
     await redeemItem({ backerId, itemId: item.id });
     await assert.rejects(() => redeemItem({ backerId, itemId: item.id }), /OUT_OF_STOCK/);
@@ -282,7 +317,7 @@ describe("redeemItem", () => {
 
 describe("cancelOrder", () => {
   it("refunds the exact mochi and frees the stock", async () => {
-    await buyMochi({ backerId, streamerId, quantity: 10, idempotencyKey: "k" });
+    await donateMochi({ backerId, streamerId, donationAmountKrw: 10 * PRICE, idempotencyKey: "k" });
     const item = await newItem(4, 2);
     const r = await redeemItem({ backerId, itemId: item.id });
     const c = await cancelOrder(r.orderId, streamerId);
@@ -294,7 +329,7 @@ describe("cancelOrder", () => {
   });
 
   it("refuses to cancel another creator's order", async () => {
-    await buyMochi({ backerId, streamerId, quantity: 10, idempotencyKey: "k" });
+    await donateMochi({ backerId, streamerId, donationAmountKrw: 10 * PRICE, idempotencyKey: "k" });
     const item = await newItem(4);
     const r = await redeemItem({ backerId, itemId: item.id });
     await assert.rejects(() => cancelOrder(r.orderId, "some-other-streamer"), /NOT_FOUND/);
@@ -307,7 +342,7 @@ describe("cancelOrder", () => {
  */
 describe("cancelOrderByBuyer", () => {
   it("refunds the exact mochi and frees the stock", async () => {
-    await buyMochi({ backerId, streamerId, quantity: 10, idempotencyKey: "k" });
+    await donateMochi({ backerId, streamerId, donationAmountKrw: 10 * PRICE, idempotencyKey: "k" });
     const item = await newItem(4, 2);
     const r = await redeemItem({ backerId, itemId: item.id });
     const c = await cancelOrderByBuyer(r.orderId, backerId);
@@ -318,7 +353,7 @@ describe("cancelOrderByBuyer", () => {
   });
 
   it("refuses to cancel someone else's order", async () => {
-    await buyMochi({ backerId, streamerId, quantity: 10, idempotencyKey: "k" });
+    await donateMochi({ backerId, streamerId, donationAmountKrw: 10 * PRICE, idempotencyKey: "k" });
     const item = await newItem(4);
     const r = await redeemItem({ backerId, itemId: item.id });
     await assert.rejects(
@@ -330,7 +365,7 @@ describe("cancelOrderByBuyer", () => {
   });
 
   it("cannot cancel an already-fulfilled order", async () => {
-    await buyMochi({ backerId, streamerId, quantity: 10, idempotencyKey: "k" });
+    await donateMochi({ backerId, streamerId, donationAmountKrw: 10 * PRICE, idempotencyKey: "k" });
     // `instant` items are recorded fulfilled at redemption, so this covers the
     // "creator already did the work" case without needing the creator path.
     const item = await newItem(4, null, "instant");
@@ -340,7 +375,7 @@ describe("cancelOrderByBuyer", () => {
   });
 
   it("refunds exactly once when the buyer and creator cancel simultaneously", async () => {
-    await buyMochi({ backerId, streamerId, quantity: 10, idempotencyKey: "k" });
+    await donateMochi({ backerId, streamerId, donationAmountKrw: 10 * PRICE, idempotencyKey: "k" });
     const item = await newItem(4, 2);
     const r = await redeemItem({ backerId, itemId: item.id });
 
@@ -360,7 +395,7 @@ describe("cancelOrderByBuyer", () => {
   });
 
   it("refunds exactly once under a burst of buyer cancels", async () => {
-    await buyMochi({ backerId, streamerId, quantity: 10, idempotencyKey: "k" });
+    await donateMochi({ backerId, streamerId, donationAmountKrw: 10 * PRICE, idempotencyKey: "k" });
     const item = await newItem(3);
     const r = await redeemItem({ backerId, itemId: item.id });
 
@@ -374,7 +409,7 @@ describe("cancelOrderByBuyer", () => {
 
 describe("concurrency safety (the review fix)", () => {
   it("never overspends a holding under concurrent redemptions", async () => {
-    await buyMochi({ backerId, streamerId, quantity: 10, idempotencyKey: "k" });
+    await donateMochi({ backerId, streamerId, donationAmountKrw: 10 * PRICE, idempotencyKey: "k" });
     const item = await newItem(3);
     const results = await Promise.allSettled(
       Array.from({ length: 6 }, () => redeemItem({ backerId, itemId: item.id })),
@@ -387,7 +422,7 @@ describe("concurrency safety (the review fix)", () => {
   });
 
   it("never oversells limited stock under concurrent redemptions", async () => {
-    await buyMochi({ backerId, streamerId, quantity: 1000, idempotencyKey: "k" });
+    await donateMochi({ backerId, streamerId, donationAmountKrw: 1000 * PRICE, idempotencyKey: "k" });
     const item = await newItem(1, 2);
     const results = await Promise.allSettled(
       Array.from({ length: 8 }, () => redeemItem({ backerId, itemId: item.id })),

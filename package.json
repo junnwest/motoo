@@ -19,9 +19,6 @@
     "db:migrate": "prisma migrate dev",
     "check:drift": "tsx scripts/check-prod-drift.ts"
   },
-  "prisma": {
-    "seed": "tsx prisma/seed.ts"
-  },
   "dependencies": {
     "@prisma/client": "^6.19.3",
     "next": "16.2.10",
@@ -42,14 +39,5 @@
     "tailwindcss": "^4",
     "tsx": "^4.23.0",
     "typescript": "^5"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "@prisma/client",
-      "@prisma/engines",
-      "prisma",
-      "esbuild",
-      "@swc/core"
-    ]
   }
 }

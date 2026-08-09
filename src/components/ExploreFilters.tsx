@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -12,7 +12,12 @@ import {
   isCreatorType,
 } from "@/lib/creatorTaxonomy";
 
-/** URL-driven filter/sort bar for Explore. Ranking never includes money raised. */
+/** URL-driven filter/sort bar for Explore. Ranking never includes money raised.
+ *
+ * The four selects are the shared `Select` primitive, which hides the OS's
+ * default arrow and draws the design system's chevron in its place — that used
+ * to be a local `FilterSelect` here, but every other select in the app wanted
+ * the same treatment, so it moved into the primitive. */
 export function ExploreFilters() {
   const router = useRouter();
   // Without this a filter change froze the old results with no feedback while

@@ -5,8 +5,9 @@ import { formatCount } from "@/lib/format";
 import type { LeaderboardEntry } from "@/lib/ranking";
 
 /**
- * A creator's own supporter ranking — by lifetime mochi purchased, replacing
- * the old founding-number "Backer Wall" (DECISIONS 2026-08-01). Sits beside
+ * A creator's own supporter ranking — by lifetime mochi earned as a donation
+ * bonus, replacing the old founding-number "Backer Wall" (DECISIONS
+ * 2026-08-01). Sits beside
  * `MarketplaceSection` in the profile page's 3:7 split, so rows stay compact:
  * rank badge, avatar, nickname, lifetime total — no message/founding-badge
  * cruft from the retired Phase-1 concept.
@@ -47,7 +48,7 @@ export async function SupporterLeaderboard({
               </span>
               <span className="flex flex-none items-center gap-1 text-[12.5px] font-bold text-ink">
                 <Mochi width={12} height={9.5} />
-                {formatCount(e.purchasedTotal)}
+                {formatCount(e.mochiEarnedTotal)}
               </span>
             </li>
           ))}

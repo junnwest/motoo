@@ -19,20 +19,20 @@ export async function generateMetadata(): Promise<Metadata> {
 
 /**
  * The 환불·청약철회 policy. Ordered as a reader hits the questions: who is
- * actually the seller, then the three distinct paths money can come back —
- * an order reversed in mochi, a purchase withdrawn in KRW, an unused balance
- * cashed out — then the statutory carve-out that overrides all of them.
+ * actually the seller, then the two paths money can come back — an order
+ * reversed in mochi, a purchase withdrawn in KRW — then the statutory
+ * carve-out that overrides both.
  *
  * `note` is the qualifier that keeps each rule honest (what it does NOT cover),
- * so only the three rule sections carry one.
+ * so only the two rule sections carry one. `howTo` alone gets `richBody`: its
+ * copy names 고객센터/support, which is now a real mailto link, not just text.
  */
-const SECTIONS: { id: string; note?: boolean }[] = [
+const SECTIONS: { id: string; note?: boolean; richBody?: boolean }[] = [
   { id: "seller" },
   { id: "orderCancel", note: true },
   { id: "withdrawal", note: true },
-  { id: "balance", note: true },
   { id: "legalException" },
-  { id: "howTo" },
+  { id: "howTo", richBody: true },
   { id: "noResale" },
 ];
 
@@ -59,20 +59,35 @@ export default async function RefundPage() {
                 {t(`${s.id}.title`)}
               </h2>
               <p className="mt-3 break-keep text-[15px] leading-[1.7] text-body">
-                {t(`${s.id}.body`)}
+                {s.richBody
+                  ? t.rich(`${s.id}.body`, {
+                      // Degrades to plain text if the support channel is ever
+                      // unset — a dead link labelled 고객센터 is worse than
+                      // none, because it looks live.
+                      a: (chunks) =>
+                        supportMailto() ? (
+                          <a
+                            href={supportMailto()!}
+                            className="font-semibold text-coral-deep underline"
+                          >
+                            {chunks}
+                          </a>
+                        ) : (
+                          <>{chunks}</>
+                        ),
+                    })
+                  : t(`${s.id}.body`)}
               </p>
               {s.note ? (
                 <p className="mt-3 break-keep border-l-2 border-line-2 pl-4 text-[14px] leading-[1.7] text-muted">
                   {t(`${s.id}.note`)}
                 </p>
               ) : null}
-              {/* The policy body names 고객센터; this is the address that
-                  actually is it. Kept as its own line rather than interpolated
-                  into the body so the counsel-sensitive copy stays untouched,
-                  and so it simply disappears if SUPPORT_EMAIL is ever unset
-                  instead of rendering "고객센터()로 신청해 주세요". */}
+              {/* The policy body names 고객센터 and links it; this spells the
+                  address out so a reader can copy it without hovering. It
+                  disappears with the link if SUPPORT_EMAIL is ever unset. */}
               {s.id === "howTo" && SUPPORT_EMAIL ? (
-                <p className="mt-3 text-[15px] leading-[1.7] text-body">
+                <p className="mt-3 text-[15px] leading-[1.7] text-muted">
                   {t("howTo.contact")}{" "}
                   <a
                     href={supportMailto()!}

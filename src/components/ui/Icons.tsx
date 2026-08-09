@@ -399,3 +399,11 @@ export function IconChevronRight(props: SVGProps<SVGSVGElement>) {
     </Icon>
   );
 }
+
+export function IconChevronDown(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Icon {...props}>
+      <path d="m5 9 7 7 7-7" />
+    </Icon>
+  );
+}

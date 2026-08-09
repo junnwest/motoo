@@ -62,7 +62,7 @@ export async function GET() {
       creator: h.streamer.handle,
       creatorName: h.streamer.displayName,
       balance: h.balance,
-      purchasedTotal: h.purchasedTotal,
+      mochiEarnedTotal: h.mochiEarnedTotal,
       krwPaidTotal: h.krwPaidTotal,
       createdAt: h.createdAt,
     })),
