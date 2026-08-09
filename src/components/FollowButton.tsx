@@ -61,10 +61,15 @@ export function FollowButton({
       aria-pressed={following}
       className={
         compact
-          ? `w-full rounded-sm border px-2 py-1.5 text-2xs font-bold transition-colors disabled:opacity-60 ${
+          ? // Compact lives in the right rail, four at a time in a 2x2 grid.
+            // Solid ink there put four black slabs beside the brand's coral and
+            // read as the loudest thing on a discovery panel, which is the one
+            // place nothing should shout. Tinted coral offers the action without
+            // out-weighing the page.
+            `w-full rounded-sm border px-2 py-1.5 text-2xs font-bold transition-colors duration-swift disabled:opacity-60 ${
               following
-                ? "border-line-3 bg-white text-ink hover:border-coral/50"
-                : "border-ink bg-ink text-cream hover:bg-ink/90"
+                ? "border-line-3 bg-white text-muted-2 hover:border-coral/50 hover:text-ink"
+                : "border-coral-soft bg-coral-chip text-coral-deep hover:border-coral hover:bg-coral hover:text-white"
             }`
           : `rounded-md border px-4 py-3 text-base font-bold transition-colors disabled:opacity-60 ${
               following

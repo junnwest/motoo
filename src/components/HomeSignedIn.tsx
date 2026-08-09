@@ -82,27 +82,33 @@ export async function HomeSignedIn({
                 {holdings.map((h) => {
                   const r = rankByStreamer.get(h.streamerId);
                   return (
+                    // The one section on this page that earns elevation. Your
+                    // balance and rank are why you came back; an item you could
+                    // afford and a news post are not peers of it, and until now
+                    // all three rendered as the same 4px-padded white pill.
                     <Link
                       key={h.id}
                       href={`/s/${h.streamer.handle}`}
-                      className="flex items-center gap-3 rounded-lg bg-card p-4 shadow-soft transition-shadow hover:shadow-card"
+                      className="flex items-center gap-4 rounded-xl bg-card p-5 shadow-card transition-transform duration-swift ease-out-soft hover:-translate-y-0.5"
                     >
                       <CreatorCover
                         handle={h.streamer.handle}
                         displayName={h.streamer.displayName}
-                        className="h-12 w-12 flex-none rounded-full"
-                        markClass="text-lg"
+                        className="h-14 w-14 flex-none rounded-full"
+                        markClass="text-xl"
                       />
                       <span className="min-w-0 flex-1">
-                        <span className="block truncate text-base font-bold text-ink">
+                        <span className="block truncate text-sm font-semibold text-muted-2">
                           {h.streamer.displayName}
                         </span>
-                        <span className="mt-1 flex items-center gap-1.5 text-sm font-extrabold text-ink">
-                          <Mochi width={14} height={11} />
+                        {/* The number is the point of the card, so it reads at
+                            heading scale rather than as another 14px line. */}
+                        <span className="mt-0.5 flex items-baseline gap-1.5 text-xl font-extrabold tracking-[-0.02em] text-ink">
+                          <Mochi width={17} height={13} />
                           {t("balance", { count: h.balance })}
                         </span>
                         {r && (
-                          <span className="mt-1 flex items-center gap-1 text-2xs font-semibold text-coral-deep">
+                          <span className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-coral-chip px-2 py-0.5 text-2xs font-semibold text-coral-deep">
                             <IconTrophy width={12} height={12} />
                             {tr("rankOf", {
                               rank: r.rank,
@@ -122,10 +128,12 @@ export async function HomeSignedIn({
               <Section title={t("affordableTitle")}>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   {affordable.map(({ item, streamer, balance }) => (
+                    // Flat, bordered, no shadow — one step below the balance
+                    // cards above, which is the whole point of the distinction.
                     <Link
                       key={item.id}
                       href={`/s/${streamer.handle}#market`}
-                      className="flex gap-3 rounded-lg bg-card p-4 shadow-soft transition-shadow hover:shadow-card"
+                      className="flex gap-3 rounded-lg border border-line-2 bg-card p-4 transition-colors duration-swift hover:border-coral/40"
                     >
                       <ItemThumbnail
                         thumbnailKey={item.thumbnailKey}
@@ -155,11 +163,14 @@ export async function HomeSignedIn({
 
             {pending.length > 0 && (
               <Section title={t("progressTitle", { count: pending.length })}>
-                <div className="flex flex-col gap-3">
+                {/* Status lines, not objects. A pending order is something you
+                    check, not something you act on, so it reads as a list with
+                    hairlines rather than another stack of white pills. */}
+                <div className="divide-y divide-line-2 border-y border-line-2">
                   {pending.map((o) => (
                     <div
                       key={o.id}
-                      className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg bg-card p-4 shadow-soft"
+                      className="flex flex-wrap items-center gap-x-4 gap-y-2 py-3.5"
                     >
                       <span className="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-coral-chip text-coral-deep">
                         <IconClock width={18} height={18} />
@@ -212,12 +223,15 @@ export async function HomeSignedIn({
 
         {updates.length > 0 && (
           <Section title={t("newsTitle")}>
-            <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {/* A feed, so it reads as one — the page used to end in eight more
+                white pills, which is what made the whole column look like a
+                dump of identical boxes however good each box was. */}
+            <ul className="divide-y divide-line-2 border-y border-line-2">
               {updates.map((u) => (
                 <li key={u.id}>
                   <Link
                     href={`/s/${u.streamer.handle}`}
-                    className="flex h-full flex-col rounded-lg bg-card p-4 shadow-soft transition-shadow hover:shadow-card"
+                    className="group flex h-full flex-col py-4 transition-colors duration-swift"
                   >
                     <div className="flex items-center gap-2 text-xs text-muted">
                       <span className="font-bold text-ink">
@@ -225,10 +239,10 @@ export async function HomeSignedIn({
                       </span>
                       · {formatKstDate(u.publishedAt)}
                     </div>
-                    <div className="mt-1.5 text-base font-bold text-ink">
+                    <div className="mt-1.5 text-base font-bold text-ink break-keep group-hover:text-coral-deep">
                       {u.title}
                     </div>
-                    <p className="mt-1 line-clamp-2 text-sm text-body">
+                    <p className="mt-1 line-clamp-2 text-sm leading-normal text-body">
                       {u.body}
                     </p>
                   </Link>
