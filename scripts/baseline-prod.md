@@ -1,4 +1,4 @@
-# Adopting Prisma migrations on production — one-time runbook
+﻿# Adopting Prisma migrations on production — one-time runbook
 
 Run this **once**, before the first deploy of the `audit/product-hardening` branch.
 After it, `prisma migrate deploy` runs automatically in the Vercel build and schema
@@ -33,19 +33,39 @@ does not have, so every authenticated page errors.
 
 ---
 
-## Step 1 — back up (do not skip)
+## Step 1 — establish a restore point
 
-Step 2 drops six tables and roughly 900 rows. Supabase Pro has PITR; take a
-manual snapshot anyway so the restore point is unambiguous:
+Step 2 drops six tables and roughly 900 rows.
 
-Supabase dashboard → project `nrfhwhefabahsfzuyxqu` → Database → Backups →
-**Create backup**. Wait for it to complete before continuing.
+> **There is no "Create backup" button.** An earlier revision of this runbook
+> said to click one; on a Pro project with PITR enabled, Supabase's Backups page
+> offers *restore*, not on-demand snapshots — backups are automatic. Nothing to
+> click, and nothing to wait for.
+
+So the restore point already exists. What it needs is a **timestamp you wrote
+down**, because PITR restores to a moment, and picking one afterwards from
+memory is the part that goes wrong:
+
+```bash
+node -e "console.log(new Date().toISOString())"   # note this before Step 2
+```
+
+Optionally — and this is the more useful artifact — export the six doomed
+tables to a file first, so "what did we delete?" has an answer that doesn't
+require restoring anything. Raw SQL, because these models no longer exist in
+`schema.prisma`:
+
+```bash
+npx -y dotenv-cli -e .env.production.local -- npx tsx scripts/export-phase1.ts
+```
 
 > Those ~900 rows are Phase-1 Trust Report data (tiers, backings, perks,
 > reports, founding memberships). The row counts match what `prisma/seed.ts`
 > generates, so this is almost certainly seeded demo data rather than anything a
-> real user created — but confirm that before dropping it, because it cannot be
-> recovered afterwards except from the backup.
+> real user created. Dropping a table does not cascade into others, so `Backer`,
+> `Streamer`, `MochiHolding` and `Order` are untouched either way — and since
+> `PAYMENT_PROVIDER` has only ever been `mock`, no payment record exists in
+> there to lose.
 
 ## Step 2 — bring production up to the **pre-pivot** schema
 
@@ -64,7 +84,7 @@ Supabase dashboard → project `nrfhwhefabahsfzuyxqu` → Database → Backups �
 git show f4b159f:prisma/schema.prisma > prisma/schema.baseline.prisma
 
 # Uses .env.production.local (DIRECT_URL — the non-pooled connection).
-npx dotenv -e .env.production.local -- \
+npx -y dotenv-cli -e .env.production.local -- \
   npx prisma db push --accept-data-loss --schema prisma/schema.baseline.prisma
 
 rm prisma/schema.baseline.prisma
@@ -86,7 +106,7 @@ deploy is what renames them.
 ## Step 3 — tell Prisma the baseline is already applied
 
 ```bash
-npx dotenv -e .env.production.local -- npx prisma migrate resolve --applied 0_init
+npx -y dotenv-cli -e .env.production.local -- npx prisma migrate resolve --applied 0_init
 ```
 
 This only writes to `_prisma_migrations`; it does not touch application tables.
@@ -98,9 +118,16 @@ exists.
 first deploy applies it for real. (The exception is the shortcut in the note
 above, where both get resolved because `db push` already did the rename.)
 
-## Step 4 — scope the database env vars to Production
+## Step 4 — scope the database env vars to Production ✅ done 2026-08-10
 
-**Do this before Step 5, and ideally before Step 3.** PRs get Vercel preview
+> Both `DATABASE_URL` and `DIRECT_URL` now read **Production** only. Kept here
+> because the reasoning is the reusable part — and because the CLI has a trap:
+> `vercel env rm NAME preview` deletes the **whole variable**, not just its
+> Preview target. It did exactly that to `DATABASE_URL`, which then had to be
+> re-added from `.env.production.local`. Use the dashboard, which edits scope in
+> place.
+
+**Do this before Step 6, and ideally before Step 3.** PRs get Vercel preview
 deploys, and the build runs `prisma migrate deploy`. If `DATABASE_URL` /
 `DIRECT_URL` are shared with the Preview environment, then once production is
 baselined **any preview build from any branch will apply pending migrations to

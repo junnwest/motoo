@@ -1,4 +1,4 @@
-# motoo — Deployment
+﻿# motoo — Deployment
 
 _Last updated: 2026-08-10_
 
@@ -20,7 +20,7 @@ preview deploys per PR.
 | Prisma `directUrl` + `vercel.json` (icn1) | ✅ done |
 | Supabase project (Seoul, Data API off) | ✅ created — ref `nrfhwhefabahsfzuyxqu` |
 | Push code to GitHub `junnwest/motoo` | ✅ done (main, via HTTPS remote) |
-| Schema push + seed to Supabase | ⚠️ **out of date since 2026-08-10** — code for the donation-pivot rename is on `main`, the prod schema push isn't done yet (needs `--accept-data-loss`, needs real prod credentials nobody used this session). Mochi-related pages are 500ing on production until this runs. See "Schema changes" below. |
+| Schema push + seed to Supabase | ⚠️ **three stages behind + the donation-pivot rename.** Prod still has the six Phase-1 tables (910 rows), no `RateLimit` / `Backer.pendingDeletionAt`, no `_prisma_migrations`. On this branch the rename is a migration, so the fix is the one-time baseline in [`scripts/baseline-prod.md`](../scripts/baseline-prod.md), not a `--accept-data-loss` push. `pnpm check:drift` reports the live state. |
 | Vercel project + env vars + deploy | ✅ done 2026-07-20 (project `motoo`, auto-deploy on `main`) |
 | Custom domain `themotoo.com` | ✅ done — Squarespace DNS → Vercel (A `76.76.21.21` + CNAME `www`), Let's Encrypt TLS; **www is primary**, apex 308-redirects |
 | Studio subdomain `studio.themotoo.com` | ✅ done 2026-07-24 — Squarespace `studio` CNAME → `cname.vercel-dns.com`, added on the same Vercel project; serves the creator console (host-split in `src/proxy.ts`) |
@@ -144,7 +144,7 @@ reach production goes through a migration.
 Run it if you're ever unsure.
 
 > If you do need to run something against production by hand, scope the credentials
-> to that one process: `npx dotenv -e .env.production.local -- <command>`. Never
+> to that one process: `npx -y dotenv-cli -e .env.production.local -- <command>`. Never
 > export `DATABASE_URL` into your shell — `pnpm db:seed` opens with `deleteMany()`
 > and would wipe production from that window.
 

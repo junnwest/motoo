@@ -1,0 +1,349 @@
+﻿// motoo data model.
+// Money is ALWAYS integer KRW. Never floats.
+//
+// The Phase-1 Trust Report thesis (Tier / Backing / Perk / PerkDelivery /
+// TrustReport / FoundingMembership and their enums) was retired from the
+// product in DECISIONS 2026-08-01 and dropped from the schema once the owner
+// confirmed the retirement is permanent (2026-08-06). `Update` survives it:
+// it is still read by the home feed and creator pages, and Stage 9 builds the
+// authoring UI on it.
+//
+// Money invariants live in src/lib/mochi.ts and are covered by `pnpm test`.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  // Pooled connection (PgBouncer) for runtime — required on serverless so we
+  // don't exhaust Postgres connections. On Neon this is the "-pooler" host.
+  url       = env("DATABASE_URL")
+  // Direct connection for migrations / `prisma db push` (no pooler).
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  backer
+  streamer
+  admin
+}
+
+enum StreamerStatus {
+  pending
+  approved
+  suspended
+}
+
+// Who can read a creator update. `backers` = anyone holding that creator's
+// mochi. The tier-scoped third option went with the Phase-1 Tier model.
+enum UpdateVisibility {
+  public
+  backers
+}
+
+// ── Phase 2: mochi-marketplace pivot ─────────────────────────────────────────
+// A creator issues their own mochi (prepaid marketplace credit, capped as a soft
+// goal); users buy it and spend it in that creator's marketplace. Mochi is
+// non-transferable, unspent-refundable, no resale/return (see docs/DECISIONS.md).
+// Not a financial product — no investment vocabulary in user-facing copy (spec §2).
+
+enum Gender {
+  female
+  male
+  other
+  undisclosed
+}
+
+enum MarketplaceItemType {
+  digital // Q&A slot, shout-out, song/topic request, priority chat
+  access // members-only posts/streams, early access, event tickets
+  physical // merch, signed items, letters (needs off-platform fulfillment)
+  session // 1:1 time slots (short call / DM)
+}
+
+enum OrderStatus {
+  pending // placed, awaiting creator fulfillment (off-platform in v1)
+  fulfilled // creator marked done
+  cancelled // creator cancelled; mochi refunded to the buyer's holding
+}
+
+// How a redemption settles.
+enum FulfillmentMode {
+  instant // completes on redemption — no creator action (e.g. a vote ticket)
+  request // needs the creator to act; lands in the pending order list (e.g. a mission)
+}
+
+model Streamer {
+  id            String         @id @default(cuid())
+  handle        String         @unique
+  displayName   String
+  avatarUrl     String?
+  bio           String?
+  category      String
+  // Phase 2 creator onboarding fields
+  creatorType   String? // what kind of creator (게임/버추얼/음악/아트…); free-form for v1
+  gender        Gender?
+  age           Int?
+  // The account (Backer, role=streamer) that owns/operates this creator profile.
+  // Null for legacy Phase-1 seeds with no login. One account owns at most one profile.
+  ownerId       String?        @unique
+  owner         Backer?        @relation("CreatorOwner", fields: [ownerId], references: [id])
+  // platformLinks
+  chzzk         String?
+  soop          String?
+  youtube       String?
+  twitch        String?
+  discordUrl    String?
+  fanCafeUrl    String?
+  status        StreamerStatus @default(pending)
+  subMerchantId String?
+  avgViewers    Int            @default(0)
+  followerCount Int            @default(0)
+  createdAt     DateTime       @default(now())
+  approvedAt    DateTime?
+
+  updates Update[]
+
+  // Phase 2 relations
+  mochiIssuance    MochiIssuance?
+  mochiHoldings    MochiHolding[]
+  marketplaceItems MarketplaceItem[]
+  orders           Order[]
+  follows          Follow[]
+
+  @@index([status])
+  @@index([category])
+}
+
+// The universal account record. A plain user has role=backer; a creator account
+// has role=streamer and owns a Streamer profile via Streamer.owner. (Named "Backer"
+// for Phase-1 continuity; treat it as the account/user table.)
+model Backer {
+  id              String   @id @default(cuid())
+  email           String   @unique
+  nickname        String
+  handle          String?  @unique // public fan @handle, chosen at onboarding
+  // Profile picture: a small square JPEG data URL the user uploads in /settings
+  // (motoo has no object storage — see src/lib/imageUpload.ts). Null = the
+  // initials monogram. Deliberately NOT carried in the JWT: a data URL would
+  // blow past the 4KB session-cookie limit.
+  avatarUrl       String?
+  currencyBalance Int      @default(0) // legacy Phase-1 global mochi; dormant — Phase 2 uses per-creator MochiHolding
+  role            Role     @default(backer)
+  passwordHash    String? // dev credentials login only
+  createdAt       DateTime @default(now())
+  // Session revocation counter. Sessions are stateless JWTs, so signing out can
+  // only ask the browser to drop the cookie — the token itself stays valid until
+  // it expires, and any request still carrying it gets a working session back
+  // (Auth.js re-issues the cookie on every authenticated request). Logout
+  // increments this; a token carrying a stale version is rejected. An exact
+  // counter rather than an issued-at cutoff, so there's no same-second race
+  // between logging out and logging straight back in. See DECISIONS 2026-08-02.
+  tokenVersion    Int      @default(0)
+
+  // Account deletion is a scheduled state, not an immediate purge: the user
+  // gets a grace period (ACCOUNT_DELETION_GRACE_DAYS) in which signing back in
+  // cancels it. Null = not scheduled. The row is only actually destroyed by the
+  // purge job once this timestamp is in the past. See src/lib/accountDeletion.ts.
+  pendingDeletionAt DateTime?
+
+  // Onboarding — every new user completes this once (creators use /creator/onboarding).
+  // Middleware redirects a signed-in, non-onboarded fan to /onboarding.
+  onboardedAt      DateTime?
+  termsAgreedAt    DateTime? // 필수 약관(이용약관·개인정보) 동의 시각
+  marketingConsent Boolean   @default(false) // 선택 마케팅 수신 동의
+  // "become a creator" intent, captured durably at signup so it survives OAuth
+  // round-trips and long gaps between signup and finishing onboarding. Consumed
+  // once by completeOnboarding to route the user to /creator/onboarding.
+  creatorIntent    Boolean   @default(false)
+
+  // Identity verification (본인인증) — populated by a VerificationProvider (mock in
+  // dev; NICE/PASS in prod). Real age gate for payments; not self-reported.
+  verifiedAt      DateTime?
+  verifiedName    String?
+  birthYear       Int?
+  gender          Gender?
+  ageVerified     Boolean   @default(false)
+  guardianConsent Boolean? // true once a minor's guardian consent is recorded
+
+  // Phase 2 relations
+  ownedStreamer Streamer?      @relation("CreatorOwner")
+  mochiHoldings MochiHolding[]
+  orders        Order[]
+  follows       Follow[]
+  notifications Notification[]
+}
+
+model Update {
+  id            String           @id @default(cuid())
+  streamerId    String
+  streamer      Streamer         @relation(fields: [streamerId], references: [id], onDelete: Cascade)
+  title         String
+  body          String
+  visibility    UpdateVisibility @default(public)
+  publishedAt   DateTime         @default(now())
+  viewCount     Int              @default(0)
+  reactionCount Int              @default(0)
+
+  @@index([streamerId])
+}
+
+// ── Phase 2 models ───────────────────────────────────────────────────────────
+
+// Per-creator mochi issuance config. The creator sets quantity × price as a SOFT
+// GOAL/target (e.g. 100 × ₩200 = ₩20,000) — a framing device, not a scarce security
+// (see docs/DECISIONS.md). soldQuantity tracks progress toward the goal.
+model MochiIssuance {
+  id               String   @id @default(cuid())
+  streamerId       String   @unique
+  streamer         Streamer @relation(fields: [streamerId], references: [id], onDelete: Cascade)
+  pricePerMochiKrw Int // integer KRW price of one mochi unit AT THE CURRENT TIER
+  goalQuantity     Int // availability at the current price (the "X left" meter)
+  soldQuantity     Int      @default(0) // sold IN THE CURRENT TIER; resets to 0 on a price raise
+  lifetimeSold     Int      @default(0) // total mochi ever sold, across all tiers (for stats)
+  active           Boolean  @default(true) // creator can pause sales
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+// A user's unspent mochi balance FOR ONE creator. Mochi is non-transferable and
+// scoped to the issuing creator's marketplace. purchasedTotal is lifetime bought
+// (for "supporter" display); balance is what remains spendable.
+model MochiHolding {
+  id             String   @id @default(cuid())
+  streamerId     String
+  streamer       Streamer @relation(fields: [streamerId], references: [id], onDelete: Cascade)
+  backerId       String
+  backer         Backer   @relation(fields: [backerId], references: [id], onDelete: Cascade)
+  balance        Int      @default(0) // unspent mochi units held for this creator
+  purchasedTotal Int      @default(0) // lifetime mochi purchased from this creator
+  krwPaidTotal   Int      @default(0) // lifetime KRW paid — basis for future refund-at-paid
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([streamerId, backerId])
+  @@index([streamerId])
+  @@index([backerId])
+}
+
+// An item in a creator's marketplace, priced in that creator's mochi. Fulfillment
+// is off-platform in v1 (creator marks orders fulfilled). stock null = unlimited.
+model MarketplaceItem {
+  id            String              @id @default(cuid())
+  streamerId    String
+  streamer      Streamer            @relation(fields: [streamerId], references: [id], onDelete: Cascade)
+  title         String
+  description   String?
+  priceMochi    Int // price in mochi units
+  itemType      MarketplaceItemType
+  thumbnailKey  String? // curated thumbnail slug (see lib/itemThumbnails); null = itemType default
+  // Creator-uploaded 16:9 cover photo, stored as a small JPEG data URL (motoo
+  // has no object storage — see src/lib/imageUpload.ts). Null = fall back to the
+  // curated thumbnailKey tile. Size is capped on write, not just on the client.
+  coverImage    String?
+  fulfillment   FulfillmentMode     @default(request) // instant = auto-complete; request = creator acts
+  stock         Int? // null = unlimited; otherwise remaining stock is stock - redeemedCount
+  redeemedCount Int                 @default(0)
+  active        Boolean             @default(true)
+  sortOrder     Int                 @default(0)
+  createdAt     DateTime            @default(now())
+
+  orders Order[]
+
+  @@index([streamerId])
+  // Every creator page filters on (streamerId, active), and getAffordableItems
+  // ORs over per-creator price bounds with active = true.
+  @@index([streamerId, active])
+}
+
+// A redemption: a user spends mochi on a marketplace item. Records the order;
+// the creator fulfills off-platform and marks status. Cancelling refunds mochi.
+model Order {
+  id          String          @id @default(cuid())
+  streamerId  String
+  streamer    Streamer        @relation(fields: [streamerId], references: [id], onDelete: Cascade)
+  backerId    String
+  backer      Backer          @relation(fields: [backerId], references: [id], onDelete: Cascade)
+  itemId      String
+  item        MarketplaceItem @relation(fields: [itemId], references: [id])
+  mochiSpent  Int // mochi debited for this order (quantity × item price at time of order)
+  quantity    Int             @default(1)
+  note        String? // buyer note (song title, shout-out text, delivery ref, …)
+  status      OrderStatus     @default(pending)
+  createdAt   DateTime        @default(now())
+  fulfilledAt DateTime?
+
+  @@index([streamerId])
+  @@index([backerId])
+  @@index([itemId])
+  // The Studio's pending queue and a buyer's own history both filter by owner
+  // plus status, then order by createdAt.
+  @@index([streamerId, status])
+  @@index([backerId, status])
+}
+
+// A free, in-app "I want to hear from this creator" relationship — distinct from
+// MochiHolding (money) and Streamer.followerCount (a dormant Phase-1 seeded
+// number for an off-platform follower count, never rendered). Following costs
+// nothing, so it's the wider of the two "creators you support" relationships and
+// is what fills the home rail for a user who hasn't bought mochi from everyone
+// they're interested in yet.
+model Follow {
+  id         String   @id @default(cuid())
+  streamerId String
+  streamer   Streamer @relation(fields: [streamerId], references: [id], onDelete: Cascade)
+  backerId   String
+  backer     Backer   @relation(fields: [backerId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@unique([streamerId, backerId])
+  @@index([streamerId])
+  @@index([backerId])
+}
+
+// What triggers a Notification. Kept to events with a clear, unambiguous
+// audience (see src/lib/notify.ts for exactly who receives each type).
+enum NotificationType {
+  order_fulfilled // creator marked your order done
+  order_cancelled // creator cancelled your order; mochi was refunded
+  new_item // a creator you hold mochi in or follow added a marketplace item
+  price_raised // a creator you hold mochi in raised their mochi price (new tier)
+  new_update // a creator you hold mochi in or follow posted an update
+}
+
+// A notification queued for one Backer. Created outside the money-invariant
+// transactions in mochi.ts (see src/lib/notify.ts) — best-effort, never allowed
+// to fail the action that triggered it.
+model Notification {
+  id        String           @id @default(cuid())
+  backerId  String
+  backer    Backer           @relation(fields: [backerId], references: [id], onDelete: Cascade)
+  type      NotificationType
+  title     String
+  body      String?
+  link      String? // where "전체 보기"/clicking the row goes, e.g. /me/mochi
+  read      Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  @@index([backerId, read])
+  @@index([backerId, createdAt])
+}
+
+/**
+ * Fixed-window rate-limit counters. A table rather than Redis: motoo does
+ * single-digit RPS and the database is already on every request path, so this
+ * avoids a hosted dependency and a secret for no practical gain. Rows are
+ * pruned nightly by the same cron that purges deleted accounts.
+ * See src/lib/rateLimit.ts.
+ */
+model RateLimit {
+  id          String   @id @default(cuid())
+  /// "<kind>:<subject>", e.g. "buy:<backerId>" or "login:<email>"
+  key         String
+  windowStart DateTime
+  count       Int      @default(0)
+
+  @@unique([key, windowStart])
+  @@index([windowStart])
+}
