@@ -55,7 +55,7 @@ export default async function FanLandingPage() {
       <Nav />
 
       {/* Hero */}
-      <section id="main" className="relative overflow-hidden bg-cream-warm px-6 py-16 text-center sm:px-14 sm:py-[78px]">
+      <section id="main" className="relative overflow-hidden bg-cream-warm px-6 py-20 text-center sm:px-14 sm:py-24">
         {/* Soft decorative circles (same shape as the final CTA), not floating mochis */}
         <div className="absolute left-[8%] top-10 h-16 w-16 rounded-[46%_46%_48%_48%/52%_52%_48%_48%] bg-coral-soft/45" />
         <div className="absolute right-[12%] top-28 h-11 w-11 rounded-[46%_46%_48%_48%/52%_52%_48%_48%] bg-white/60" />
@@ -96,7 +96,7 @@ export default async function FanLandingPage() {
       </section>
 
       {/* Trending creators */}
-      <section className="mx-auto max-w-[1200px] px-6 py-20 sm:px-14">
+      <section className="mx-auto max-w-[1200px] px-6 py-20 sm:px-14 sm:py-24">
         <div className="mb-8">
           <Eyebrow className="mb-3">{t("trendingEyebrow")}</Eyebrow>
           <h2 className="text-3xl font-extrabold tracking-[-0.03em] sm:text-5xl">
@@ -115,13 +115,13 @@ export default async function FanLandingPage() {
       </section>
 
       {/* How mochi works (dark) */}
-      <section className="bg-ink px-6 py-[88px] text-dark-text sm:px-14">
+      <section className="bg-ink px-6 py-20 text-dark-text sm:px-14 sm:py-24">
         <div className="mx-auto max-w-[1200px]">
           <div className="mb-[50px] text-center">
             <Eyebrow tone="onDark" className="mb-4">
               {t("howEyebrow")}
             </Eyebrow>
-            <h2 className="text-4xl font-extrabold tracking-[-0.03em] text-cream sm:text-5xl">
+            <h2 className="text-3xl font-extrabold tracking-[-0.03em] text-cream sm:text-5xl">
               {t("howTitle")}
             </h2>
           </div>
@@ -146,9 +146,13 @@ export default async function FanLandingPage() {
         </div>
       </section>
 
-      {/* Benefits */}
-      <section className="mx-auto max-w-[1200px] px-6 py-[92px] sm:px-14">
-        <h2 className="mb-10 text-center text-3xl font-extrabold tracking-[-0.03em] sm:text-5xl">
+      {/* Benefits. Left-aligned, matching Trending: the rule on this page is
+          that sections sitting *on* the page align left, and full-bleed colour
+          bands (hero, the dark how-it-works, the final CTA) centre. Before,
+          Trending was left and Benefits was centred with nothing distinguishing
+          them, which is the kind of near-miss that reads as unconsidered. */}
+      <section className="mx-auto max-w-[1200px] px-6 py-20 sm:px-14 sm:py-24">
+        <h2 className="mb-10 text-3xl font-extrabold tracking-[-0.03em] sm:text-5xl">
           {t("benefitsTitle")}
         </h2>
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
@@ -247,7 +251,7 @@ export default async function FanLandingPage() {
           the repeated-card look). */}
       <section
         id="what-is-mochi"
-        className="bg-cream-warm px-6 py-20 text-center sm:px-14"
+        className="bg-cream-warm px-6 py-20 text-center sm:px-14 sm:py-24"
       >
         <div className="mx-auto max-w-[680px]">
           <div className="mb-[18px] flex justify-center gap-[10px]">
@@ -267,7 +271,7 @@ export default async function FanLandingPage() {
       </section>
 
       {/* Are you a creator? — full-bleed dark band, same non-boxed treatment. */}
-      <section className="bg-ink px-6 py-16 sm:px-14">
+      <section className="bg-ink px-6 py-20 sm:px-14 sm:py-24">
         <div className="mx-auto flex max-w-[1200px] flex-col items-center justify-between gap-6 text-center sm:flex-row sm:text-left">
           <div>
             <h3 className="text-2xl font-extrabold text-cream sm:text-3xl">
@@ -286,7 +290,7 @@ export default async function FanLandingPage() {
       <SafetyStrip />
 
       {/* Final CTA */}
-      <section className="relative overflow-hidden bg-coral px-6 py-[92px] text-center text-white sm:px-14">
+      <section className="relative overflow-hidden bg-coral px-6 py-20 text-center text-white sm:px-14 sm:py-24">
         <div className="absolute left-[10%] top-8 h-[50px] w-[50px] rounded-[46%_46%_48%_48%/52%_52%_48%_48%] bg-white/20" />
         <div className="absolute bottom-10 right-[14%] h-[64px] w-[64px] rounded-[46%_46%_48%_48%/52%_52%_48%_48%] bg-black/10" />
         <div className="relative">
