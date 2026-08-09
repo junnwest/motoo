@@ -20,7 +20,7 @@ preview deploys per PR.
 | Prisma `directUrl` + `vercel.json` (icn1) | ✅ done |
 | Supabase project (Seoul, Data API off) | ✅ created — ref `nrfhwhefabahsfzuyxqu` |
 | Push code to GitHub `junnwest/motoo` | ✅ done (main, via HTTPS remote) |
-| Schema push + seed to Supabase | ⚠️ **three stages behind + the donation-pivot rename.** Prod still has the six Phase-1 tables (910 rows), no `RateLimit` / `Backer.pendingDeletionAt`, no `_prisma_migrations`. On this branch the rename is a migration, so the fix is the one-time baseline in [`scripts/baseline-prod.md`](../scripts/baseline-prod.md), not a `--accept-data-loss` push. `pnpm check:drift` reports the live state. |
+| Schema push + seed to Supabase | ✅ **baselined onto migrations 2026-08-10** — six Phase-1 tables (910 rows) dropped, `RateLimit` / `Backer.pendingDeletionAt` / `_prisma_migrations` present, `0_init` marked applied, `20260810020000_donation_pivot_rename` applied by the build. Live data intact. `pnpm check:drift` reports the state, read-only. |
 | Vercel project + env vars + deploy | ✅ done 2026-07-20 (project `motoo`, auto-deploy on `main`) |
 | Custom domain `themotoo.com` | ✅ done — Squarespace DNS → Vercel (A `76.76.21.21` + CNAME `www`), Let's Encrypt TLS; **www is primary**, apex 308-redirects |
 | Studio subdomain `studio.themotoo.com` | ✅ done 2026-07-24 — Squarespace `studio` CNAME → `cname.vercel-dns.com`, added on the same Vercel project; serves the creator console (host-split in `src/proxy.ts`) |
@@ -34,10 +34,16 @@ preview deploys per PR.
 > `db push` by hand. If `migrate deploy` fails the build fails and Vercel keeps the
 > previous deployment live, which is the intended behaviour.
 >
-> **One-time setup is required before the first deploy of this change** — production
-> has no `_prisma_migrations` table and is three stages behind the repo schema. See
-> [`scripts/baseline-prod.md`](../scripts/baseline-prod.md). Check current drift any
-> time with `pnpm check:drift` (read-only).
+> **The one-time baseline is done (2026-08-10)** — production has `_prisma_migrations`,
+> `0_init` is marked applied, and every migration since arrives with the build.
+> [`scripts/baseline-prod.md`](../scripts/baseline-prod.md) is kept as the record of how,
+> and for the next environment that needs it. Check drift any time with `pnpm check:drift`
+> (read-only).
+>
+> **`DATABASE_URL` and `DIRECT_URL` are Production-scoped, deliberately.** Preview builds
+> run `migrate deploy` too, so sharing them would let an unmerged PR's preview migrate
+> production. Preview has no database — give it its own Supabase branch before relying on
+> preview deploys again.
 
 > **Region (resolved 2026-08-06):** the account is on **Vercel Pro**, which honours
 > single-region pinning, so `vercel.json`'s `icn1` applies and functions run in Seoul

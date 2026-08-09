@@ -4,6 +4,23 @@ What shipped, newest first. **This file is history — it is not a resume point.
 For current status and open work see [`PROGRESS.md`](./PROGRESS.md); for *why* a thing is
 the way it is see [`DECISIONS.md`](./DECISIONS.md).
 
+## 2026-08-10 (production baselined onto migrations; the audit branch is live)
+
+- [x] **Production baselined and deployed.** Six Phase-1 tables and 910 rows dropped,
+  `0_init` marked applied, and the build applied
+  `20260810020000_donation_pivot_rename` — so the mochi lifetime totals were *renamed*,
+  not reset, which a `db push` would have done. Live data intact: 70 backers, 12
+  streamers, 11 holdings, 5 orders. `/s/[handle]`, `/s/[handle]/donate` and the OG image
+  render 200 with a populated leaderboard; they had been 500ing since `main` deployed the
+  pivot against pre-rename columns.
+- [x] **`DATABASE_URL` / `DIRECT_URL` scoped to Production only**, closing the path where a
+  preview build from an unmerged PR could migrate the production database.
+- [x] Three process lessons, all recorded in the runbook because each cost real time:
+  `vercel env rm NAME preview` deletes the whole variable rather than one target; piping a
+  value into `vercel env add` stored something P1013-invalid and failed a deploy; and
+  sensitive variables can't be read back, so `vercel env pull` returning empty proves
+  nothing — only a build verifies a value.
+
 ## 2026-08-10 (merged `main`'s donation pivot into the audit branch)
 
 - [x] **Merged `origin/main` into `audit/product-hardening`** — 18 conflicting files across

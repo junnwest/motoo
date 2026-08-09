@@ -95,25 +95,30 @@ ignored.
   `pnpm-workspace.yaml`'s `allowBuilds`) went with it. Still the classic engine, not the
   Prisma 7 driver-adapter jump. Gotcha: a `prisma.config.ts` turns off Prisma's automatic
   `.env` loading, so the config calls `process.loadEnvFile()` itself.
-- [ ] **Production is three stages behind on schema, and deploying before fixing it will
-  break the site.** Prod still has the six Phase-1 tables (~900 rows) and is missing
-  `RateLimit` and `Backer.pendingDeletionAt`, so `getCurrentBacker` would error on every
-  authenticated page. The build now runs `prisma migrate deploy`, but production needs a
-  one-time baseline first — **run [`scripts/baseline-prod.md`](../scripts/baseline-prod.md)**.
-  `pnpm check:drift` reports the current state, read-only.
-  - **Scope `DATABASE_URL`/`DIRECT_URL` to Production in Vercel before baselining.** Preview
-    builds run `prisma migrate deploy` too; sharing the connection string means that once
-    prod is baselined, a preview build from any unmerged PR applies pending migrations to
-    production. P3005 masks this today — the baseline is what removes the accident. Step 4
-    of the runbook.
-  - The donation-pivot rename (`purchasedTotal` → `mochiEarnedTotal`, `soldQuantity` →
-    `grantedQuantity`, `lifetimeSold` → `lifetimeGranted`) arrived from `main` as a bare
-    `db push` that never reached prod. On merge it became
-    `prisma/migrations/20260810020000_donation_pivot_rename` — `ALTER TABLE … RENAME
-    COLUMN`, so the lifetime totals survive. It applies with the rest once prod is
-    baselined; no separate manual step, and **no `--accept-data-loss` push needed**.
-- [ ] Vercel Hobby likely ignores `vercel.json`'s `icn1`, so functions run in the US while
-  the DB is in Seoul (cross-Pacific latency per query). Revisit on Pro.
+- [x] **Production baselined onto migrations and deployed** (2026-08-10). The six Phase-1
+  tables and their 910 rows are dropped, `RateLimit` / `Backer.pendingDeletionAt` /
+  `_prisma_migrations` are present, `0_init` is marked applied, and the build applied
+  `20260810020000_donation_pivot_rename` for real — so the lifetime totals survived the
+  rename instead of being reset by a drop-and-add. Live data came through intact (70
+  backers, 12 streamers, 11 holdings, 5 orders) and `/s/[handle]`, `/donate` and the OG
+  image all render 200 with a populated leaderboard. `pnpm check:drift` stays as the
+  read-only way to ask.
+- [x] **`DATABASE_URL` / `DIRECT_URL` scoped to Production only.** Preview builds run
+  `prisma migrate deploy` too, so a shared connection string meant any unmerged PR's
+  preview could apply migrations to production once prod had `_prisma_migrations`. P3005
+  had been masking it; baselining would have removed that accident of protection.
+  - **Do this in the dashboard, never `vercel env rm NAME preview`** — that CLI command
+    deletes the *whole* variable rather than one target, and re-adding by piping a value
+    to `vercel env add` silently stored something P1013-invalid, which failed the first
+    deploy. Sensitive variables also can't be read back (`vercel env pull` returns empty
+    strings for them), so the only way to verify a value is to build.
+- [ ] **`CRON_SECRET` is still unset in Vercel**, so `/api/cron/purge-accounts` refuses to
+  run and no account is ever actually purged after its 30-day grace period.
+- [ ] **The four OAuth vars are missing from Vercel** — `AUTH_GOOGLE_ID`/`SECRET`,
+  `AUTH_NAVER_ID`/`SECRET`. `src/auth.ts` only registers a provider when its credentials
+  are present, so **Google and Naver login silently don't exist on production**; the
+  buttons are gated by the same check, so nothing errors, they just aren't there. They work
+  in dev because the credentials are in the local `.env`.
 - [ ] Carried refactors: route-group layouts (`(marketing)`/`(app)`/`(auth)`) to stop repeating
   `<Nav/>`+`<Footer/>` across 20 pages; `EmptyState` + `PageHeader` primitives (6 and 9 real call
   sites); hardcoded Korean still in `creators/page.tsx`; `Backer` → `User` rename (high churn,
