@@ -101,6 +101,11 @@ ignored.
   authenticated page. The build now runs `prisma migrate deploy`, but production needs a
   one-time baseline first — **run [`scripts/baseline-prod.md`](../scripts/baseline-prod.md)**.
   `pnpm check:drift` reports the current state, read-only.
+  - **Scope `DATABASE_URL`/`DIRECT_URL` to Production in Vercel before baselining.** Preview
+    builds run `prisma migrate deploy` too; sharing the connection string means that once
+    prod is baselined, a preview build from any unmerged PR applies pending migrations to
+    production. P3005 masks this today — the baseline is what removes the accident. Step 4
+    of the runbook.
   - The donation-pivot rename (`purchasedTotal` → `mochiEarnedTotal`, `soldQuantity` →
     `grantedQuantity`, `lifetimeSold` → `lifetimeGranted`) arrived from `main` as a bare
     `db push` that never reached prod. On merge it became
