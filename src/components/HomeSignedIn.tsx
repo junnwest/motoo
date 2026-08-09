@@ -67,10 +67,10 @@ export async function HomeSignedIn({
 
   return (
     <div className="mx-auto max-w-[900px] px-6 py-12 sm:px-10 sm:py-16">
-      <h1 className="text-[28px] font-extrabold tracking-[-0.03em] text-ink sm:text-[34px]">
+      <h1 className="text-3xl font-extrabold tracking-[-0.03em] text-ink sm:text-4xl">
         {t("greeting", { name: nickname })}
       </h1>
-      <p className="mt-2 text-[15.5px] text-body">
+      <p className="mt-2 text-base text-body">
         {hasMochi ? t("subtitle") : t("subtitleNew")}
       </p>
 
@@ -85,24 +85,24 @@ export async function HomeSignedIn({
                     <Link
                       key={h.id}
                       href={`/s/${h.streamer.handle}`}
-                      className="flex items-center gap-3 rounded-[16px] bg-card p-4 shadow-soft transition-shadow hover:shadow-card"
+                      className="flex items-center gap-3 rounded-lg bg-card p-4 shadow-soft transition-shadow hover:shadow-card"
                     >
                       <CreatorCover
                         handle={h.streamer.handle}
                         displayName={h.streamer.displayName}
                         className="h-12 w-12 flex-none rounded-full"
-                        markClass="text-[18px]"
+                        markClass="text-lg"
                       />
                       <span className="min-w-0 flex-1">
-                        <span className="block truncate text-[14.5px] font-bold text-ink">
+                        <span className="block truncate text-base font-bold text-ink">
                           {h.streamer.displayName}
                         </span>
-                        <span className="mt-1 flex items-center gap-1.5 text-[13.5px] font-extrabold text-ink">
+                        <span className="mt-1 flex items-center gap-1.5 text-sm font-extrabold text-ink">
                           <Mochi width={14} height={11} />
                           {t("balance", { count: h.balance })}
                         </span>
                         {r && (
-                          <span className="mt-1 flex items-center gap-1 text-[12px] font-semibold text-coral-deep">
+                          <span className="mt-1 flex items-center gap-1 text-2xs font-semibold text-coral-deep">
                             <IconTrophy width={12} height={12} />
                             {tr("rankOf", {
                               rank: r.rank,
@@ -125,7 +125,7 @@ export async function HomeSignedIn({
                     <Link
                       key={item.id}
                       href={`/s/${streamer.handle}#market`}
-                      className="flex gap-3 rounded-[16px] bg-card p-4 shadow-soft transition-shadow hover:shadow-card"
+                      className="flex gap-3 rounded-lg bg-card p-4 shadow-soft transition-shadow hover:shadow-card"
                     >
                       <ItemThumbnail
                         thumbnailKey={item.thumbnailKey}
@@ -133,13 +133,13 @@ export async function HomeSignedIn({
                         size={46}
                       />
                       <span className="min-w-0 flex-1">
-                        <span className="block truncate text-[14.5px] font-bold text-ink">
+                        <span className="block truncate text-base font-bold text-ink">
                           {item.title}
                         </span>
-                        <span className="block truncate text-[12.5px] text-muted">
+                        <span className="block truncate text-xs text-muted">
                           {streamer.displayName}
                         </span>
-                        <span className="mt-2 flex items-center gap-1.5 text-[13.5px] font-extrabold text-coral-deep">
+                        <span className="mt-2 flex items-center gap-1.5 text-sm font-extrabold text-coral-deep">
                           <Mochi width={14} height={11} />
                           {t("itemPrice", { count: item.priceMochi })}
                           <span className="font-medium text-muted">
@@ -159,24 +159,24 @@ export async function HomeSignedIn({
                   {pending.map((o) => (
                     <div
                       key={o.id}
-                      className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-[14px] bg-card p-4 shadow-soft"
+                      className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg bg-card p-4 shadow-soft"
                     >
                       <span className="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-coral-chip text-coral-deep">
                         <IconClock width={18} height={18} />
                       </span>
                       <div className="min-w-0 flex-1">
-                        <div className="truncate text-[15px] font-bold text-ink">
+                        <div className="truncate text-base font-bold text-ink">
                           {o.item.title}
                         </div>
-                        <div className="truncate text-[13px] text-muted">
+                        <div className="truncate text-xs text-muted">
                           {o.streamer.displayName} · {formatKstDate(o.createdAt)}
                         </div>
                       </div>
-                      <span className="flex items-center gap-1.5 text-[14px] font-extrabold text-ink">
+                      <span className="flex items-center gap-1.5 text-sm font-extrabold text-ink">
                         <Mochi width={15} height={11} />
                         {t("spent", { count: o.mochiSpent })}
                       </span>
-                      <span className="rounded-full bg-coral-chip px-2.5 py-1 text-[12px] font-semibold text-coral-deep">
+                      <span className="rounded-full bg-coral-chip px-2.5 py-1 text-2xs font-semibold text-coral-deep">
                         {t("statusPending")}
                       </span>
                     </div>
@@ -217,18 +217,18 @@ export async function HomeSignedIn({
                 <li key={u.id}>
                   <Link
                     href={`/s/${u.streamer.handle}`}
-                    className="flex h-full flex-col rounded-[14px] bg-card p-4 shadow-soft transition-shadow hover:shadow-card"
+                    className="flex h-full flex-col rounded-lg bg-card p-4 shadow-soft transition-shadow hover:shadow-card"
                   >
-                    <div className="flex items-center gap-2 text-[13px] text-muted">
+                    <div className="flex items-center gap-2 text-xs text-muted">
                       <span className="font-bold text-ink">
                         {u.streamer.displayName}
                       </span>
                       · {formatKstDate(u.publishedAt)}
                     </div>
-                    <div className="mt-1.5 text-[15px] font-bold text-ink">
+                    <div className="mt-1.5 text-base font-bold text-ink">
                       {u.title}
                     </div>
-                    <p className="mt-1 line-clamp-2 text-[13.5px] text-body">
+                    <p className="mt-1 line-clamp-2 text-sm text-body">
                       {u.body}
                     </p>
                   </Link>
@@ -261,11 +261,11 @@ function Step({
   body: string;
 }) {
   return (
-    <Link href={href} className="group block rounded-[12px]">
-      <span className="flex h-10 w-10 items-center justify-center rounded-[12px] bg-coral-chip text-coral-deep transition group-hover:bg-coral group-hover:text-white">
+    <Link href={href} className="group block rounded-md">
+      <span className="flex h-10 w-10 items-center justify-center rounded-md bg-coral-chip text-coral-deep transition group-hover:bg-coral group-hover:text-white">
         {icon}
       </span>
-      <div className="mt-3 flex items-center gap-1 text-[15.5px] font-extrabold text-ink">
+      <div className="mt-3 flex items-center gap-1 text-base font-extrabold text-ink">
         {title}
         <span
           aria-hidden="true"
@@ -274,7 +274,7 @@ function Step({
           →
         </span>
       </div>
-      <p className="mt-1 text-[14px] leading-relaxed text-body">{body}</p>
+      <p className="mt-1 text-sm leading-relaxed text-body">{body}</p>
     </Link>
   );
 }

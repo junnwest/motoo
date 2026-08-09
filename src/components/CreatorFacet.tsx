@@ -25,7 +25,7 @@ export function CreatorFacet({
 
   if (variant === "text") {
     return (
-      <p className={`text-[14px] font-semibold text-muted-2 ${className}`}>
+      <p className={`text-sm font-semibold text-muted-2 ${className}`}>
         {[type, category].filter(Boolean).join(" · ")}
       </p>
     );
@@ -34,12 +34,12 @@ export function CreatorFacet({
   return (
     <div className={`flex flex-wrap gap-2 ${className}`}>
       {type ? (
-        <span className="rounded-full bg-coral-chip px-3 py-1 text-[12.5px] font-semibold text-coral-deep">
+        <span className="rounded-full bg-coral-chip px-3 py-1 text-xs font-semibold text-coral-deep">
           {type}
         </span>
       ) : null}
       {category ? (
-        <span className="rounded-full border border-line-3 bg-white px-3 py-1 text-[12.5px] font-medium text-muted-2">
+        <span className="rounded-full border border-line-3 bg-white px-3 py-1 text-xs font-medium text-muted-2">
           {category}
         </span>
       ) : null}

@@ -53,7 +53,7 @@ export function Thumbnail({
   return (
     <div
       aria-hidden="true"
-      className={`flex items-center justify-center bg-sand text-[13px] text-muted ${className}`}
+      className={`flex items-center justify-center bg-sand text-xs text-muted ${className}`}
     >
       {label}
     </div>

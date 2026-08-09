@@ -39,10 +39,10 @@ export default async function SettingsPage() {
     <>
       <ConsumerShell>
         <div className="mx-auto max-w-[640px] px-6 py-12 sm:px-10 sm:py-16">
-          <h1 className="text-[28px] font-extrabold tracking-[-0.03em] text-ink sm:text-[34px]">
+          <h1 className="text-3xl font-extrabold tracking-[-0.03em] text-ink sm:text-4xl">
             {t("title")}
           </h1>
-          <p className="mt-2 text-[15.5px] text-body">{t("subtitle")}</p>
+          <p className="mt-2 text-base text-body">{t("subtitle")}</p>
 
           {/* boxed: a form-group, not a content shelf — the Spotify reference
               (DECISIONS 2026-07-31) that keeps other Sections bare doesn't
@@ -62,7 +62,7 @@ export default async function SettingsPage() {
             {backer.passwordHash ? (
               <PasswordForm />
             ) : (
-              <p className="text-[14px] text-muted">{t("oauthOnly")}</p>
+              <p className="text-sm text-muted">{t("oauthOnly")}</p>
             )}
           </Section>
 

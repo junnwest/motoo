@@ -19,9 +19,9 @@ export function SafetyStrip({ bordered = true }: { bordered?: boolean }) {
       {items.map((it) => (
         <span
           key={it.label}
-          className="flex items-center gap-[10px] text-[15px] font-semibold text-muted-2"
+          className="flex items-center gap-[10px] text-base font-semibold text-muted-2"
         >
-          <span className="flex h-[30px] w-[30px] items-center justify-center rounded-[9px] bg-sand text-[13px] font-extrabold">
+          <span className="flex h-[30px] w-[30px] items-center justify-center rounded-sm bg-sand text-xs font-extrabold">
             {it.badge}
           </span>
           {it.label}

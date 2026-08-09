@@ -38,10 +38,10 @@ export function UpdatesManager({ updates }: { updates: DashboardUpdate[] }) {
     <section id="updates" className="scroll-mt-24">
       <header className="mb-5 flex items-start justify-between gap-4 border-t border-line-2 pt-8">
         <div>
-          <h2 className="text-[22px] font-extrabold tracking-[-0.02em] text-ink">
+          <h2 className="text-xl font-extrabold tracking-[-0.02em] text-ink">
             {t("updates.title")}
           </h2>
-          <p className="mt-1 max-w-[560px] text-[14px] text-muted break-keep">
+          <p className="mt-1 max-w-[560px] text-sm text-muted break-keep">
             {t("updates.subtitle")}
           </p>
         </div>
@@ -61,21 +61,21 @@ export function UpdatesManager({ updates }: { updates: DashboardUpdate[] }) {
         {open && <Composer onClose={() => setOpen(false)} />}
 
         {updates.length === 0 && !open ? (
-          <div className="rounded-[16px] border border-line-2 bg-card p-6 text-[15px] text-muted">
+          <div className="rounded-lg border border-line-2 bg-card p-6 text-base text-muted">
             {t("updates.empty")}
           </div>
         ) : (
           updates.map((u) => (
             <article
               key={u.id}
-              className="rounded-[16px] border border-line-2 bg-card p-5"
+              className="rounded-lg border border-line-2 bg-card p-5"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <h3 className="text-[16px] font-extrabold text-ink break-keep">
+                  <h3 className="text-base font-extrabold text-ink break-keep">
                     {u.title}
                   </h3>
-                  <div className="mt-1 flex items-center gap-2 text-[12px] text-muted">
+                  <div className="mt-1 flex items-center gap-2 text-2xs text-muted">
                     <span
                       className={`rounded-full px-2.5 py-0.5 font-semibold ${
                         u.visibility === "public"
@@ -92,7 +92,7 @@ export function UpdatesManager({ updates }: { updates: DashboardUpdate[] }) {
                 </div>
                 <DeleteButton id={u.id} onDone={() => router.refresh()} />
               </div>
-              <p className="mt-3 whitespace-pre-wrap text-[14px] leading-[1.6] text-body break-keep">
+              <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-body break-keep">
                 {u.body}
               </p>
             </article>
@@ -133,7 +133,7 @@ function Composer({ onClose }: { onClose: () => void }) {
   return (
     <form
       onSubmit={submit}
-      className="rounded-[16px] border border-line-2 bg-panel p-5"
+      className="rounded-lg border border-line-2 bg-panel p-5"
     >
       <div className="flex flex-col gap-4">
         <Input
@@ -204,7 +204,7 @@ function DeleteButton({ id, onDone }: { id: string; onDone: () => void }) {
       <Button
         type="button"
         variant="ghost"
-        className="flex-none !px-3 !py-1.5 !text-[13px] !text-muted"
+        className="flex-none !px-3 !py-1.5 !text-xs !text-muted"
         onClick={() => setConfirming(true)}
       >
         {t("updates.delete")}
@@ -216,13 +216,13 @@ function DeleteButton({ id, onDone }: { id: string; onDone: () => void }) {
   // rewriting it, so it doesn't warrant interrupting the page.
   return (
     <div className="flex flex-none items-center gap-2">
-      <span className="text-[12.5px] text-muted break-keep">
+      <span className="text-xs text-muted break-keep">
         {t("updates.deleteConfirm")}
       </span>
       <Button
         type="button"
         variant="secondary"
-        className="!px-3 !py-1.5 !text-[13px]"
+        className="!px-3 !py-1.5 !text-xs"
         loading={pending}
         onClick={() =>
           startTransition(async () => {
@@ -237,7 +237,7 @@ function DeleteButton({ id, onDone }: { id: string; onDone: () => void }) {
       <Button
         type="button"
         variant="ghost"
-        className="!px-3 !py-1.5 !text-[13px]"
+        className="!px-3 !py-1.5 !text-xs"
         disabled={pending}
         onClick={() => setConfirming(false)}
       >

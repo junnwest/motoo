@@ -58,10 +58,66 @@
   --font-mono: var(--font-ibm-plex-mono), "IBM Plex Mono", ui-monospace,
     monospace;
 
-  /* radii */
+  /*
+    Type scale. Before this existed the app used **41 distinct font sizes**
+    (10, 10.5, 11, 11.5, 12, 12.5, 13, 13.5, 14, 14.5, 15, 15.5, 16, 16.5 …) —
+    tokens were declared here and then ignored in favour of `text-[13.5px]`.
+    Nobody consciously sees 13.5 next to 14 next to 15; they just read the page
+    as assembled rather than designed. Twelve steps, and a size that isn't one
+    of them is a bug, not a nuance.
+
+    `base` is 15px because Korean at Pretendard's metrics reads small — the body
+    default is deliberately one step above the 14px a Latin-first system uses.
+  */
+  --text-2xs: 12px; /* mono labels, legal, timestamps */
+  --text-xs: 13px; /* captions, chips */
+  --text-sm: 14px; /* secondary body, dense rows */
+  --text-base: 15px; /* body copy — the default */
+  --text-lg: 17px; /* lead paragraph, card title */
+  --text-xl: 20px; /* h3 */
+  --text-2xl: 24px; /* h2 */
+  --text-3xl: 28px; /* h1 */
+  --text-4xl: 34px; /* section display, mobile hero */
+  --text-5xl: 40px; /* hero, mobile */
+  --text-6xl: 48px; /* section display, desktop */
+  --text-7xl: 60px; /* hero, desktop */
+
+  /*
+    Line height. Same story — twelve values (1.1 … 1.7) collapsed to four.
+    Korean wants more room than Latin: `normal` is 1.55, not 1.5, and body
+    paragraphs use `relaxed`. Headings go tight because Hangul has no
+    descenders to speak of and 1.25 leaves a visible gap.
+  */
+  --leading-tight: 1.15;
+  --leading-snug: 1.25;
+  --leading-normal: 1.55;
+  --leading-relaxed: 1.7;
+
+  /*
+    Radii. Was thirteen values (6, 8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 28)
+    against three declared tokens. Five steps, each with a job.
+  */
+  --radius-sm: 8px; /* chips, small badges */
+  --radius-md: 12px; /* buttons, inputs */
+  --radius-lg: 16px; /* inset panels, list rows */
+  --radius-xl: 20px; /* cards */
+  --radius-2xl: 24px; /* full-bleed sections, modals */
+
+  /* Kept: the original handoff names, now aliases of the scale above. */
   --radius-btn: 12px;
   --radius-card: 20px;
   --radius-card-lg: 24px;
+
+  /*
+    Motion. There was no motion system — 29 scattered `transition` classes,
+    almost all `transition-colors`, no shared easing. These three are the whole
+    vocabulary: `swift` for state feedback the finger is still on, `settle` for
+    something arriving on screen, and the eases so nothing moves linearly.
+  */
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out-soft: cubic-bezier(0.65, 0, 0.35, 1);
+  --duration-swift: 150ms;
+  --duration-settle: 320ms;
 
   /* shadows */
   --shadow-soft: 0 2px 4px rgba(33, 28, 24, 0.04);

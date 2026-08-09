@@ -76,16 +76,16 @@ export function AccountSection({
     : null;
 
   return (
-    <section className="rounded-[20px] bg-cream-warm-2 p-6 sm:p-7">
-      <h2 className="text-[17px] font-extrabold tracking-[-0.02em] text-ink">
+    <section className="rounded-xl bg-cream-warm-2 p-6 sm:p-7">
+      <h2 className="text-lg font-extrabold tracking-[-0.02em] text-ink">
         {t("dangerTitle")}
       </h2>
-      <p className="mt-1 text-[14px] text-body">{t("dangerSubtitle")}</p>
+      <p className="mt-1 text-sm text-body">{t("dangerSubtitle")}</p>
 
       {/* Export */}
       <div className="mt-6 border-t border-line-2 pt-5">
-        <h3 className="text-[15px] font-bold text-ink">{t("exportTitle")}</h3>
-        <p className="mt-1 text-[13.5px] leading-[1.6] text-body break-keep">
+        <h3 className="text-base font-bold text-ink">{t("exportTitle")}</h3>
+        <p className="mt-1 text-sm leading-relaxed text-body break-keep">
           {t("exportBody")}
         </p>
         {/* A plain link, not fetch(): the response is a file download, and
@@ -93,7 +93,7 @@ export function AccountSection({
         <a
           href="/api/account/export"
           download
-          className="mt-3 inline-flex items-center justify-center gap-2 rounded-[14px] border-[1.5px] border-line-3 bg-white px-5 py-3 text-[15px] font-bold text-ink transition-colors hover:border-coral/60"
+          className="mt-3 inline-flex items-center justify-center gap-2 rounded-lg border-[1.5px] border-line-3 bg-white px-5 py-3 text-base font-bold text-ink transition-colors hover:border-coral/60"
         >
           {t("exportCta")}
         </a>
@@ -101,7 +101,7 @@ export function AccountSection({
 
       {/* Deletion */}
       <div className="mt-6 border-t border-line-2 pt-5">
-        <h3 className="text-[15px] font-bold text-ink">{t("deleteTitle")}</h3>
+        <h3 className="text-base font-bold text-ink">{t("deleteTitle")}</h3>
         {deletionDate ? (
           <>
             <InlineMessage tone="error" className="mt-2">
@@ -120,7 +120,7 @@ export function AccountSection({
           </>
         ) : (
           <>
-            <p className="mt-1 text-[13.5px] leading-[1.6] text-body break-keep">
+            <p className="mt-1 text-sm leading-relaxed text-body break-keep">
               {t("deleteBody", { days: graceDays })}
             </p>
             <Button
@@ -147,14 +147,14 @@ export function AccountSection({
       >
         <h2
           id="delete-account"
-          className="text-[20px] font-extrabold tracking-[-0.02em] text-ink break-keep"
+          className="text-xl font-extrabold tracking-[-0.02em] text-ink break-keep"
         >
           {t("deleteConfirmTitle")}
         </h2>
-        <p className="mt-2 text-[14.5px] leading-[1.6] text-body break-keep">
+        <p className="mt-2 text-base leading-relaxed text-body break-keep">
           {t("deleteConfirmBody", { days: graceDays })}
         </p>
-        <p className="mt-3 rounded-[12px] bg-panel px-4 py-3 text-[13.5px] leading-[1.6] text-muted-2 break-keep">
+        <p className="mt-3 rounded-md bg-panel px-4 py-3 text-sm leading-relaxed text-muted-2 break-keep">
           {unspentMochi > 0
             ? t("deleteConfirmBalance", { count: unspentMochi })
             : t("deleteConfirmNoBalance")}

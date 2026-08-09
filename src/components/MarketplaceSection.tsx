@@ -49,13 +49,13 @@ export function MarketplaceSection({
     <section id="market" className="scroll-mt-24">
       {/* Sized to match the neighbouring boxed sections (ranking / updates),
           which all share a 20px section heading. */}
-      <h2 className="text-[20px] font-extrabold tracking-[-0.02em] text-ink">
+      <h2 className="text-xl font-extrabold tracking-[-0.02em] text-ink">
         {t("marketTitle")}
       </h2>
-      <p className="mt-1 text-[13px] text-muted">{t("marketSubtitle")}</p>
+      <p className="mt-1 text-xs text-muted">{t("marketSubtitle")}</p>
 
       {items.length === 0 ? (
-        <p className="mt-6 rounded-[16px] border border-dashed border-line-3 bg-cream-warm/50 px-5 py-10 text-center text-[15px] text-muted">
+        <p className="mt-6 rounded-lg border border-dashed border-line-3 bg-cream-warm/50 px-5 py-10 text-center text-base text-muted">
           {t("marketEmpty")}
         </p>
       ) : (
@@ -120,7 +120,7 @@ function ItemCard({
   }
 
   return (
-    <div className="flex flex-col overflow-hidden rounded-[16px] border border-line-2 bg-panel">
+    <div className="flex flex-col overflow-hidden rounded-lg border border-line-2 bg-panel">
       {item.coverImage ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
@@ -142,15 +142,15 @@ function ItemCard({
           {/* break-keep: without it Korean wraps mid-word (실시간 샤/라웃) once the
               card narrows, which it does now that the market sits inside a
               boxed section. keep-all is the correct CJK line-break rule. */}
-          <h3 className="text-[16px] font-extrabold tracking-[-0.02em] text-ink break-keep">
+          <h3 className="text-base font-extrabold tracking-[-0.02em] text-ink break-keep">
             {item.title}
           </h3>
           <div className="flex flex-none flex-col items-end gap-1">
-            <span className="rounded-full bg-coral-chip px-2.5 py-1 text-[11px] font-semibold text-coral-deep">
+            <span className="rounded-full bg-coral-chip px-2.5 py-1 text-2xs font-semibold text-coral-deep">
               {t(`types.${item.itemType}`)}
             </span>
             <span
-              className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${
+              className={`rounded-full px-2.5 py-1 text-2xs font-semibold ${
                 item.fulfillment === "instant"
                   ? "bg-sage-bg text-sage"
                   : "bg-panel text-muted-2"
@@ -163,7 +163,7 @@ function ItemCard({
       </div>
 
       {item.description && (
-        <p className="mt-2 text-[14px] leading-[1.5] text-body">
+        <p className="mt-2 text-sm leading-normal text-body">
           {item.description}
         </p>
       )}
@@ -174,16 +174,16 @@ function ItemCard({
           second span is now just the unit. */}
       <div className="mt-3 flex items-center gap-1.5">
         <Mochi width={16} height={12} />
-        <span className="text-[16px] font-extrabold text-ink">
+        <span className="text-base font-extrabold text-ink">
           {formatCount(item.priceMochi)}
         </span>
-        <span className="text-[13px] text-muted">{t("mochiUnit")}</span>
+        <span className="text-xs text-muted">{t("mochiUnit")}</span>
       </div>
 
       {/* stock line */}
       {item.stock !== null && (
         <p
-          className={`mt-2 text-[13px] font-semibold ${
+          className={`mt-2 text-xs font-semibold ${
             soldOut ? "text-live" : "text-muted-2"
           }`}
         >
@@ -211,11 +211,11 @@ function ItemCard({
                 spent the mochi, with the cost shown nowhere in between. Stating
                 the spend and the resulting balance is the minimum friction a
                 value transfer should carry. */}
-            <div className="mb-2 rounded-[12px] bg-white px-4 py-3">
-              <p className="text-[13.5px] font-bold text-ink break-keep">
+            <div className="mb-2 rounded-md bg-white px-4 py-3">
+              <p className="text-sm font-bold text-ink break-keep">
                 {t("confirmTitle")}
               </p>
-              <p className="mt-1 flex flex-wrap items-center gap-x-2 text-[13px] text-body">
+              <p className="mt-1 flex flex-wrap items-center gap-x-2 text-xs text-body">
                 <span className="font-semibold text-coral-deep">
                   {t("confirmSpend", { count: item.priceMochi })}
                 </span>
@@ -277,11 +277,11 @@ function ItemCard({
         )}
 
         {needMore && !soldOut && (
-          <p className="mt-2 text-[13px] text-muted">{t("needMore")}</p>
+          <p className="mt-2 text-xs text-muted">{t("needMore")}</p>
         )}
 
         {done && (
-          <p className="mt-2 rounded-[12px] bg-sage-bg px-4 py-2.5 text-[14px] font-semibold text-sage">
+          <p className="mt-2 rounded-md bg-sage-bg px-4 py-2.5 text-sm font-semibold text-sage">
             {t(doneInstant ? "redeemedInstant" : "redeemed")}
           </p>
         )}

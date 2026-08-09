@@ -72,20 +72,20 @@ export function IdentityForm({
       <Field label={t("handleLabel")}>
         {(a11y) => (
           <>
-            <div className="flex items-center gap-2 rounded-[12px] border border-line-3 bg-white px-4 py-3 transition focus-within:border-coral/60">
-              <span className="text-[15px] text-muted">@</span>
+            <div className="flex items-center gap-2 rounded-md border border-line-3 bg-white px-4 py-3 transition focus-within:border-coral/60">
+              <span className="text-base text-muted">@</span>
               <input
                 {...a11y}
                 value={handle}
                 onChange={(e) => setHandle(e.target.value.toLowerCase())}
                 maxLength={20}
-                className="w-full text-[15px] outline-none"
+                className="w-full text-base outline-none"
               />
             </div>
             {handle !== initialHandle && (
               <p
                 role="status"
-                className={`mt-1.5 text-[12.5px] font-medium ${
+                className={`mt-1.5 text-xs font-medium ${
                   handleStatus === "ok" ? "text-sage" : "text-muted"
                 }`}
               >

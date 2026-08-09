@@ -34,7 +34,7 @@ export function InlineMessage({
     <p
       // Errors interrupt; successes wait for a pause. Both are announced.
       role={tone === "error" ? "alert" : "status"}
-      className={`text-[13.5px] font-semibold ${
+      className={`text-sm font-semibold ${
         tone === "error" ? "text-live" : "text-sage"
       } ${className}`}
     >

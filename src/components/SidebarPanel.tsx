@@ -87,13 +87,13 @@ export function SidebarPanel({
         >
           <IconChevronLeft width={14} height={14} />
         </button>
-        <span className="text-[12px] font-bold uppercase tracking-[0.08em] text-muted">
+        <span className="text-2xs font-bold uppercase tracking-[0.08em] text-muted">
           {t("followingTitle")}
         </span>
       </div>
 
       {following.length === 0 ? (
-        <p className="px-3 text-[13px] leading-relaxed text-muted">
+        <p className="px-3 text-xs leading-relaxed text-muted">
           {t("followingEmpty")}
         </p>
       ) : (
@@ -102,19 +102,19 @@ export function SidebarPanel({
             <li key={c.streamerId}>
               <Link
                 href={`/s/${c.handle}`}
-                className="flex items-center gap-2.5 rounded-[10px] px-3 py-2 transition-colors hover:bg-cream-warm"
+                className="flex items-center gap-2.5 rounded-md px-3 py-2 transition-colors hover:bg-cream-warm"
               >
                 <CreatorCover
                   handle={c.handle}
                   displayName={c.displayName}
                   className="h-7 w-7 flex-none rounded-full"
-                  markClass="text-[12px]"
+                  markClass="text-2xs"
                 />
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[13.5px] font-semibold text-ink">
+                  <span className="block truncate text-sm font-semibold text-ink">
                     {c.displayName}
                   </span>
-                  <span className="block truncate text-[11px] text-muted">
+                  <span className="block truncate text-2xs text-muted">
                     {ALL_CATEGORIES.includes(c.category)
                       ? tax(`categories.${c.category}`)
                       : c.category}
@@ -144,7 +144,7 @@ function SidebarLink({
     <Link
       href={href}
       aria-current={active ? "page" : undefined}
-      className={`flex items-center gap-3 rounded-[10px] px-3 py-2.5 text-[14.5px] font-bold transition-colors ${
+      className={`flex items-center gap-3 rounded-md px-3 py-2.5 text-base font-bold transition-colors ${
         active
           ? "bg-cream-warm text-coral-deep"
           : "text-ink hover:bg-cream-warm"

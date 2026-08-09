@@ -10,7 +10,7 @@ export function ItemThumbnail({
   thumbnailKey,
   itemType,
   size = 44,
-  rounded = "rounded-[12px]",
+  rounded = "rounded-md",
   className = "",
 }: {
   thumbnailKey: string | null | undefined;

@@ -29,11 +29,11 @@ import { IconChevronDown } from "@/components/ui/Icons";
  */
 
 const CONTROL_BASE =
-  "w-full rounded-[12px] border border-line-3 bg-white px-4 py-3 text-[15px] outline-none transition focus:border-coral/60";
+  "w-full rounded-md border border-line-3 bg-white px-4 py-3 text-base outline-none transition focus:border-coral/60";
 
 /** Compact variant for filter-bar controls, which aren't full-width fields. */
 const CONTROL_SM =
-  "rounded-[12px] border border-line-3 bg-white px-3 py-[10px] text-[14px] font-medium text-ink outline-none transition focus:border-coral";
+  "rounded-md border border-line-3 bg-white px-3 py-[10px] text-sm font-medium text-ink outline-none transition focus:border-coral";
 
 /**
  * Exported for *group* labels only — a set of choice tiles (thumbnail picker,
@@ -43,7 +43,7 @@ const CONTROL_SM =
  * duplication this file exists to end.
  */
 export const FIELD_LABEL_CLASS =
-  "mb-1.5 block text-[13px] font-semibold text-muted-2";
+  "mb-1.5 block text-xs font-semibold text-muted-2";
 
 const LABEL_CLASS = FIELD_LABEL_CLASS;
 
@@ -104,7 +104,7 @@ export function Field({
           in a <p> is invalid HTML. Tailwind's preflight zeroes paragraph margins
           anyway, so the two render identically. */}
       {hint && (
-        <div id={hintId} className="mt-1.5 text-[12.5px] text-muted">
+        <div id={hintId} className="mt-1.5 text-xs text-muted">
           {hint}
         </div>
       )}
@@ -112,7 +112,7 @@ export function Field({
         <p
           id={errorId}
           role="alert"
-          className="mt-1.5 text-[12.5px] font-semibold text-live"
+          className="mt-1.5 text-xs font-semibold text-live"
         >
           {error}
         </p>

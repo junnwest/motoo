@@ -43,10 +43,10 @@ export default async function OnboardingPage() {
       <section id="main" className="mx-auto flex w-full max-w-[520px] flex-1 flex-col justify-center px-5 py-12">
         <div className="mb-6 text-center">
           <Eyebrow className="justify-center">{t("eyebrow")}</Eyebrow>
-          <h1 className="mt-2 text-[26px] font-extrabold tracking-[-0.02em] text-ink sm:text-[30px]">
+          <h1 className="mt-2 text-2xl font-extrabold tracking-[-0.02em] text-ink sm:text-3xl">
             {t("title")}
           </h1>
-          <p className="mt-2 text-[15px] leading-[1.6] text-body">
+          <p className="mt-2 text-base leading-relaxed text-body">
             {t("subtitle")}
           </p>
         </div>

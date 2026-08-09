@@ -93,7 +93,7 @@ export function SignupForm({
           // aria-describedby — so a screen reader hears which rules are still
           // unmet when the field is focused, instead of only seeing them.
           hint={
-            <span className="mt-0.5 flex flex-wrap gap-x-3.5 gap-y-1 text-[12px]">
+            <span className="mt-0.5 flex flex-wrap gap-x-3.5 gap-y-1 text-2xs">
               {reqs.map(([ok, label]) => (
                 <span
                   key={label}
@@ -101,7 +101,7 @@ export function SignupForm({
                     ok ? "text-sage" : "text-muted"
                   }`}
                 >
-                  <span className="text-[11px]">{ok ? "✓" : "○"}</span>
+                  <span className="text-2xs">{ok ? "✓" : "○"}</span>
                   {label}
                 </span>
               ))}
@@ -136,7 +136,7 @@ export function SignupForm({
       <SocialButtons providers={providers} />
 
       {/* Secondary links */}
-      <p className="mt-6 text-center text-[14px] text-muted">
+      <p className="mt-6 text-center text-sm text-muted">
         {t("haveAccount")}{" "}
         <Link
           href="/login"
@@ -145,7 +145,7 @@ export function SignupForm({
           {t("goLogin")}
         </Link>
       </p>
-      <p className="mt-2 text-center text-[14px] text-muted">
+      <p className="mt-2 text-center text-sm text-muted">
         {creatorMode ? (
           <Link
             href="/api/fan-signup"

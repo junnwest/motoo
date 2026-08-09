@@ -33,14 +33,14 @@ export default async function RankingPage() {
     <>
       <ConsumerShell>
         <div className="mx-auto max-w-[900px] px-6 py-12 sm:px-10 sm:py-16">
-          <h1 className="text-[28px] font-extrabold tracking-[-0.03em] text-ink sm:text-[34px]">
+          <h1 className="text-3xl font-extrabold tracking-[-0.03em] text-ink sm:text-4xl">
             {t("title")}
           </h1>
-          <p className="mt-2 text-[15.5px] text-body">{t("subtitle")}</p>
+          <p className="mt-2 text-base text-body">{t("subtitle")}</p>
 
           <Section className="mt-8">
             {sorted.length === 0 ? (
-              <div className="rounded-[16px] border border-dashed border-line-3 bg-card/60 px-6 py-16 text-center text-[15px] text-muted">
+              <div className="rounded-lg border border-dashed border-line-3 bg-card/60 px-6 py-16 text-center text-base text-muted">
                 {t("empty")}
               </div>
             ) : (
@@ -49,25 +49,25 @@ export default async function RankingPage() {
                   <li key={r.streamerId}>
                     <Link
                       href={`/s/${r.handle}`}
-                      className="flex items-center gap-4 rounded-[14px] bg-card p-4 shadow-soft transition-shadow hover:shadow-card"
+                      className="flex items-center gap-4 rounded-lg bg-card p-4 shadow-soft transition-shadow hover:shadow-card"
                     >
                       <CreatorCover
                         handle={r.handle}
                         displayName={r.displayName}
                         className="h-12 w-12 flex-none rounded-full"
-                        markClass="text-[18px]"
+                        markClass="text-lg"
                       />
                       <span className="min-w-0 flex-1">
-                        <span className="block truncate text-[15px] font-bold text-ink">
+                        <span className="block truncate text-base font-bold text-ink">
                           {r.displayName}
                         </span>
-                        <span className="block truncate text-[12.5px] text-muted">
+                        <span className="block truncate text-xs text-muted">
                           {ALL_CATEGORIES.includes(r.category)
                             ? tax(`categories.${r.category}`)
                             : r.category}
                         </span>
                       </span>
-                      <span className="flex flex-none items-center gap-1.5 rounded-full bg-coral-chip px-3 py-1.5 text-[13.5px] font-extrabold text-coral-deep">
+                      <span className="flex flex-none items-center gap-1.5 rounded-full bg-coral-chip px-3 py-1.5 text-sm font-extrabold text-coral-deep">
                         <IconTrophy width={14} height={14} />
                         {t("rankOf", { rank: r.rank, total: r.totalSupporters })}
                       </span>

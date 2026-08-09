@@ -108,11 +108,11 @@ export function ImagePicker({
   const previewClass =
     shape === "circle"
       ? "h-20 w-20 flex-none rounded-full"
-      : "aspect-[16/9] w-full max-w-[280px] rounded-[12px]";
+      : "aspect-[16/9] w-full max-w-[280px] rounded-md";
 
   return (
     <div>
-      <span className="mb-1.5 block text-[13px] font-semibold text-muted-2">
+      <span className="mb-1.5 block text-xs font-semibold text-muted-2">
         {label}
       </span>
       <div
@@ -174,9 +174,9 @@ export function ImagePicker({
         </div>
       </div>
 
-      <p className="mt-1.5 text-[12.5px] text-muted">{t("hint")}</p>
+      <p className="mt-1.5 text-xs text-muted">{t("hint")}</p>
       {error ? (
-        <p className="mt-1 text-[12.5px] font-semibold text-live">
+        <p className="mt-1 text-xs font-semibold text-live">
           {t(`errors.${error}`)}
         </p>
       ) : null}

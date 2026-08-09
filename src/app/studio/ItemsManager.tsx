@@ -86,10 +86,10 @@ export function ItemsManager({
           lines up with the orders column; the "새 아이템" button sits at the right. */}
       <header className="mb-5 flex items-start justify-between gap-4 border-t border-line-2 pt-8">
         <div>
-          <h2 className="text-[22px] font-extrabold tracking-[-0.02em] text-ink">
+          <h2 className="text-xl font-extrabold tracking-[-0.02em] text-ink">
             {t("items.title")}
           </h2>
-          <p className="mt-1 max-w-[560px] text-[14px] text-muted">
+          <p className="mt-1 max-w-[560px] text-sm text-muted">
             {t("items.subtitle")}
           </p>
         </div>
@@ -116,7 +116,7 @@ export function ItemsManager({
       ) : null}
 
       {items.length === 0 && !draft ? (
-        <div className="rounded-[16px] border border-line-2 bg-card p-6 text-[15px] text-muted">
+        <div className="rounded-lg border border-line-2 bg-card p-6 text-base text-muted">
           {t("items.empty")}
         </div>
       ) : null}
@@ -166,9 +166,9 @@ function SuggestionPanel({
   if (groups.length === 0) return null;
 
   return (
-    <div className="rounded-[16px] border border-line-2 bg-card p-5">
+    <div className="rounded-lg border border-line-2 bg-card p-5">
       <div className="flex items-center justify-between gap-3">
-        <h3 className="text-[15px] font-bold text-ink">
+        <h3 className="text-base font-bold text-ink">
           {t("items.suggestions.label")}
         </h3>
         <InfoTooltip
@@ -179,7 +179,7 @@ function SuggestionPanel({
       <div className="mt-4 flex flex-col gap-4">
         {groups.map((group) => (
           <div key={group.key}>
-            <div className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-muted-2">
+            <div className="mb-2 text-2xs font-semibold uppercase tracking-wide text-muted-2">
               {t(`items.suggestions.groups.${group.key}` as never)}
             </div>
             <div className="flex flex-wrap gap-2">
@@ -207,13 +207,13 @@ function SuggestionPanel({
                         fulfillment: s.fulfillment,
                       })
                     }
-                    className="flex items-center gap-1.5 rounded-full border border-line-3 bg-white px-3.5 py-2 text-[13.5px] font-medium text-ink transition-colors hover:border-coral/60 hover:bg-coral-chip"
+                    className="flex items-center gap-1.5 rounded-full border border-line-3 bg-white px-3.5 py-2 text-sm font-medium text-ink transition-colors hover:border-coral/60 hover:bg-coral-chip"
                   >
                     <span aria-hidden="true" className="text-muted-2">
                       +
                     </span>
                     {title}
-                    <span className="flex items-center gap-0.5 text-[12px] text-muted-2">
+                    <span className="flex items-center gap-0.5 text-2xs text-muted-2">
                       <Mochi width={13} height={10} />
                       {formatCount(s.priceMochi)}
                     </span>
@@ -249,7 +249,7 @@ function ItemCard({
   const remaining = item.stock === null ? null : item.stock - item.redeemedCount;
 
   return (
-    <div className="flex h-full flex-col overflow-hidden rounded-[16px] border border-line-2 bg-card">
+    <div className="flex h-full flex-col overflow-hidden rounded-lg border border-line-2 bg-card">
       {item.coverImage ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
@@ -269,14 +269,14 @@ function ItemCard({
         )}
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-[17px] font-extrabold tracking-[-0.02em] text-ink break-keep">
+            <h3 className="text-lg font-extrabold tracking-[-0.02em] text-ink break-keep">
               {item.title}
             </h3>
-            <span className="rounded-full bg-panel px-2.5 py-0.5 text-[12px] font-semibold text-muted-2">
+            <span className="rounded-full bg-panel px-2.5 py-0.5 text-2xs font-semibold text-muted-2">
               {t(`items.types.${item.itemType}`)}
             </span>
             <span
-              className={`rounded-full px-2.5 py-0.5 text-[12px] font-semibold ${
+              className={`rounded-full px-2.5 py-0.5 text-2xs font-semibold ${
                 item.fulfillment === "instant"
                   ? "bg-sage-bg text-sage"
                   : "bg-coral-chip text-coral-deep"
@@ -285,17 +285,17 @@ function ItemCard({
               {t(`items.fulfillment.${item.fulfillment}`)}
             </span>
             {!item.active ? (
-              <span className="rounded-full bg-panel px-2.5 py-0.5 text-[12px] font-semibold text-muted">
+              <span className="rounded-full bg-panel px-2.5 py-0.5 text-2xs font-semibold text-muted">
                 {t("mochi.activeOff")}
               </span>
             ) : null}
           </div>
           {item.description ? (
-            <p className="mt-1.5 text-[14px] text-muted">{item.description}</p>
+            <p className="mt-1.5 text-sm text-muted">{item.description}</p>
           ) : null}
         </div>
       </div>
-      <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px] text-muted">
+      <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted">
         <span className="flex items-center gap-1.5 font-semibold text-body">
           <Mochi width={16} height={12} />
           {formatCount(item.priceMochi)}
@@ -341,7 +341,7 @@ function ThumbnailPicker({
   const t = useTranslations("creatorDashboard");
 
   function swatchClass(selected: boolean) {
-    return `rounded-[12px] p-0.5 transition-shadow ${
+    return `rounded-md p-0.5 transition-shadow ${
       selected
         ? "ring-2 ring-coral ring-offset-1 ring-offset-panel"
         : "ring-1 ring-line-3 hover:ring-coral/50"
@@ -351,10 +351,10 @@ function ThumbnailPicker({
   return (
     <div>
       <span className={FIELD_LABEL_CLASS}>{t("items.thumbnails.label")}</span>
-      <div className="flex flex-col gap-3 rounded-[12px] border border-line-3 bg-white p-3">
+      <div className="flex flex-col gap-3 rounded-md border border-line-3 bg-white p-3">
         {/* Default (itemType-derived) swatch. */}
         <div>
-          <div className="mb-1.5 text-[12px] font-semibold text-muted-2">
+          <div className="mb-1.5 text-2xs font-semibold text-muted-2">
             {t("items.thumbnails.groups.default")}
           </div>
           <button
@@ -369,7 +369,7 @@ function ThumbnailPicker({
 
         {THUMBNAIL_GROUPS.map((group) => (
           <div key={group.key}>
-            <div className="mb-1.5 text-[12px] font-semibold text-muted-2">
+            <div className="mb-1.5 text-2xs font-semibold text-muted-2">
               {t(`items.thumbnails.groups.${group.key}` as never)}
             </div>
             <div className="flex flex-wrap gap-2">
@@ -429,16 +429,16 @@ function FulfillmentPicker({
               type="button"
               aria-pressed={selected}
               onClick={() => onChange(mode)}
-              className={`rounded-[12px] border px-4 py-3 text-left transition-colors ${
+              className={`rounded-md border px-4 py-3 text-left transition-colors ${
                 selected
                   ? "border-coral bg-coral-chip"
                   : "border-line-3 bg-white hover:border-coral/50"
               }`}
             >
-              <span className="block text-[14px] font-bold text-ink">
+              <span className="block text-sm font-bold text-ink">
                 {t(`items.fulfillment.${mode}`)}
               </span>
-              <span className="mt-0.5 block text-[12px] leading-snug text-muted">
+              <span className="mt-0.5 block text-2xs leading-snug text-muted">
                 {t(`items.fulfillment.${mode}Hint`)}
               </span>
             </button>
@@ -519,7 +519,7 @@ function ItemForm({
   return (
     <form
       onSubmit={onSubmit}
-      className="rounded-[16px] border border-line-2 bg-panel p-5"
+      className="rounded-lg border border-line-2 bg-panel p-5"
     >
       <div className="flex flex-col gap-4">
         <Input
@@ -598,9 +598,9 @@ function ItemForm({
             type="checkbox"
             checked={active}
             onChange={(e) => setActive(e.target.checked)}
-            className="h-5 w-5 shrink-0 rounded-[6px] border border-line-3 accent-coral"
+            className="h-5 w-5 shrink-0 rounded-sm border border-line-3 accent-coral"
           />
-          <span className="text-[15px] font-semibold text-ink">
+          <span className="text-base font-semibold text-ink">
             {t("items.active")}
           </span>
         </label>

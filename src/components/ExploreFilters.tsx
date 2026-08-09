@@ -72,7 +72,7 @@ export function ExploreFilters() {
           const value = new FormData(e.currentTarget).get("q");
           setParam("q", typeof value === "string" ? value.trim() : "");
         }}
-        className="flex flex-1 items-center gap-[10px] rounded-[12px] border border-line-3 bg-white px-4 py-[10px]"
+        className="flex flex-1 items-center gap-[10px] rounded-md border border-line-3 bg-white px-4 py-[10px]"
       >
         <IconSearch width={17} height={17} className="flex-none text-muted" />
         <input
@@ -80,7 +80,7 @@ export function ExploreFilters() {
           defaultValue={params.get("q") ?? ""}
           placeholder={t("searchPlaceholder")}
           aria-label={t("searchPlaceholder")}
-          className="w-full bg-transparent text-[14px] outline-none placeholder:text-muted"
+          className="w-full bg-transparent text-sm outline-none placeholder:text-muted"
         />
       </form>
 

@@ -23,10 +23,10 @@ export async function SupporterLeaderboard({
 
   return (
     <section>
-      <h2 className="text-[20px] font-extrabold tracking-[-0.02em] text-ink">
+      <h2 className="text-xl font-extrabold tracking-[-0.02em] text-ink">
         {t("leaderboardTitle")}
       </h2>
-      <p className="mt-1 text-[13px] text-muted">
+      <p className="mt-1 text-xs text-muted">
         {totalSupporters > 0
           ? t("leaderboardSubtitle", { count: totalSupporters })
           : t("leaderboardEmpty")}
@@ -37,16 +37,16 @@ export async function SupporterLeaderboard({
           {entries.map((e) => (
             <li
               key={e.backerId}
-              className="flex items-center gap-2.5 rounded-[12px] bg-panel px-3 py-2.5"
+              className="flex items-center gap-2.5 rounded-md bg-panel px-3 py-2.5"
             >
-              <span className="flex h-6 w-6 flex-none items-center justify-center rounded-full bg-coral-chip text-[11.5px] font-extrabold text-coral-deep">
+              <span className="flex h-6 w-6 flex-none items-center justify-center rounded-full bg-coral-chip text-2xs font-extrabold text-coral-deep">
                 {e.rank}
               </span>
               <Avatar name={e.nickname} src={e.avatarUrl} size={30} />
-              <span className="min-w-0 flex-1 truncate text-[13.5px] font-semibold text-ink">
+              <span className="min-w-0 flex-1 truncate text-sm font-semibold text-ink">
                 {e.nickname}
               </span>
-              <span className="flex flex-none items-center gap-1 text-[12.5px] font-bold text-ink">
+              <span className="flex flex-none items-center gap-1 text-xs font-bold text-ink">
                 <Mochi width={12} height={9.5} />
                 {formatCount(e.mochiEarnedTotal)}
               </span>

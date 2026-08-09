@@ -23,7 +23,7 @@ export function StreamerCard({ streamer }: { streamer: StreamerCardData }) {
   return (
     <Link
       href={`/s/${streamer.handle}`}
-      className="group flex flex-col overflow-hidden rounded-[20px] border border-line-2 bg-card shadow-soft transition-shadow hover:shadow-card"
+      className="group flex flex-col overflow-hidden rounded-xl border border-line-2 bg-card shadow-soft transition-shadow hover:shadow-card"
     >
       <CreatorCover
         handle={streamer.handle}
@@ -34,20 +34,20 @@ export function StreamerCard({ streamer }: { streamer: StreamerCardData }) {
         <div className="flex items-center gap-[9px]">
           <Avatar name={streamer.displayName} size={34} src={streamer.avatarUrl} />
           <div className="min-w-0">
-            <div className="truncate text-[15.5px] font-extrabold">
+            <div className="truncate text-base font-extrabold">
               {streamer.displayName}
             </div>
-            <div className="text-[12px] text-muted">
+            <div className="text-2xs text-muted">
               {facet} · {streamer.avgViewers}명
             </div>
           </div>
         </div>
 
-        <p className="mt-[10px] mb-4 text-[12.5px] text-muted">
+        <p className="mt-[10px] mb-4 text-xs text-muted">
           {t("cardSupporters", { count: streamer.backerCount })}
         </p>
 
-        <div className="mt-auto flex items-center justify-center gap-[7px] rounded-[12px] bg-coral-chip py-[11px] text-[14.5px] font-bold text-coral-deep transition-colors group-hover:bg-coral group-hover:text-white">
+        <div className="mt-auto flex items-center justify-center gap-[7px] rounded-md bg-coral-chip py-[11px] text-base font-bold text-coral-deep transition-colors group-hover:bg-coral group-hover:text-white">
           <Mochi width={17} height={14} /> {tc("backThisStreamer")}
         </div>
       </div>

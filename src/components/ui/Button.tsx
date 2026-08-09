@@ -5,7 +5,7 @@ type Variant = "primary" | "secondary" | "dark" | "ghost" | "onCoral";
 type Size = "md" | "lg";
 
 const base =
-  "inline-flex items-center justify-center gap-2 font-bold rounded-[14px] transition-transform duration-150 active:scale-[.98] focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-60 disabled:active:scale-100";
+  "inline-flex items-center justify-center gap-2 font-bold rounded-lg transition-transform duration-150 active:scale-[.98] focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-60 disabled:active:scale-100";
 
 /**
  * Pending spinner. `currentColor` so it inherits each variant's text color
@@ -52,8 +52,8 @@ const variants: Record<Variant, string> = {
 };
 
 const sizes: Record<Size, string> = {
-  md: "px-5 py-3 text-[15px]",
-  lg: "px-[30px] py-[17px] text-[17px]",
+  md: "px-5 py-3 text-base",
+  lg: "px-[30px] py-[17px] text-lg",
 };
 
 type CommonProps = {

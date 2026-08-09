@@ -48,10 +48,10 @@ export default async function ExplorePage({
     <>
       <ConsumerShell>
       <section className="mx-auto max-w-[900px] px-6 py-12 sm:px-10 sm:py-16">
-        <h1 className="text-[28px] font-extrabold tracking-[-0.03em] text-ink sm:text-[34px]">
+        <h1 className="text-3xl font-extrabold tracking-[-0.03em] text-ink sm:text-4xl">
           {t("title")}
         </h1>
-        <p className="mt-2 text-[15.5px] text-body">{t("subtitle")}</p>
+        <p className="mt-2 text-base text-body">{t("subtitle")}</p>
 
         <div className="mt-7">
           <ExploreFilters />
@@ -59,10 +59,10 @@ export default async function ExplorePage({
 
         {/* no top-earners leaderboard — ranked by real support, never money raised */}
         <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
-          <span className="font-mono text-[12px] tracking-[0.03em] text-muted">
+          <span className="font-mono text-2xs tracking-[0.03em] text-muted">
             {t("rankingNote")}
           </span>
-          <span className="text-[13px] text-muted">
+          <span className="text-xs text-muted">
             {t("resultCount", { count: streamers.length })}
           </span>
         </div>
@@ -74,18 +74,18 @@ export default async function ExplorePage({
             ))}
           </div>
         ) : (
-          <div className="mt-16 flex flex-col items-center rounded-[24px] border border-dashed border-line-3 bg-cream-warm/50 px-6 py-20 text-center">
+          <div className="mt-16 flex flex-col items-center rounded-2xl border border-dashed border-line-3 bg-cream-warm/50 px-6 py-20 text-center">
             <div className="mb-3 flex items-end justify-center gap-1.5">
               <Mochi width={38} height={31} float />
               <Mochi width={50} height={41} float floatDelay={0.5} />
             </div>
-            <h2 className="text-[20px] font-extrabold">{t("empty.title")}</h2>
-            <p className="mt-2 max-w-[360px] text-[15px] text-body">
+            <h2 className="text-xl font-extrabold">{t("empty.title")}</h2>
+            <p className="mt-2 max-w-[360px] text-base text-body">
               {t("empty.body")}
             </p>
             <Link
               href="/explore"
-              className="mt-6 rounded-[12px] bg-ink px-5 py-3 text-[14px] font-bold text-cream"
+              className="mt-6 rounded-md bg-ink px-5 py-3 text-sm font-bold text-cream"
             >
               {t("empty.cta")}
             </Link>

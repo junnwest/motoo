@@ -42,23 +42,23 @@ export default async function RefundPage() {
     <>
       <Nav />
       <main id="main" className="mx-auto w-full max-w-[720px] flex-1 px-6 py-16">
-        <h1 className="break-keep text-[28px] font-extrabold tracking-[-0.02em] text-ink">
+        <h1 className="break-keep text-3xl font-extrabold tracking-[-0.02em] text-ink">
           {t("title")}
         </h1>
-        <p className="mt-2 font-mono text-[12px] tracking-[0.04em] text-muted">
+        <p className="mt-2 font-mono text-2xs tracking-[0.04em] text-muted">
           {t("updated")}
         </p>
-        <p className="mt-6 break-keep text-[15px] leading-[1.7] text-body">
+        <p className="mt-6 break-keep text-base leading-relaxed text-body">
           {t("intro")}
         </p>
 
         <div className="mt-10 flex flex-col gap-9">
           {SECTIONS.map((s) => (
             <div key={s.id}>
-              <h2 className="break-keep text-[17px] font-bold tracking-[-0.01em] text-ink">
+              <h2 className="break-keep text-lg font-bold tracking-[-0.01em] text-ink">
                 {t(`${s.id}.title`)}
               </h2>
-              <p className="mt-3 break-keep text-[15px] leading-[1.7] text-body">
+              <p className="mt-3 break-keep text-base leading-relaxed text-body">
                 {s.richBody
                   ? t.rich(`${s.id}.body`, {
                       // Degrades to plain text if the support channel is ever
@@ -79,7 +79,7 @@ export default async function RefundPage() {
                   : t(`${s.id}.body`)}
               </p>
               {s.note ? (
-                <p className="mt-3 break-keep border-l-2 border-line-2 pl-4 text-[14px] leading-[1.7] text-muted">
+                <p className="mt-3 break-keep border-l-2 border-line-2 pl-4 text-sm leading-relaxed text-muted">
                   {t(`${s.id}.note`)}
                 </p>
               ) : null}
@@ -87,7 +87,7 @@ export default async function RefundPage() {
                   address out so a reader can copy it without hovering. It
                   disappears with the link if SUPPORT_EMAIL is ever unset. */}
               {s.id === "howTo" && SUPPORT_EMAIL ? (
-                <p className="mt-3 text-[15px] leading-[1.7] text-muted">
+                <p className="mt-3 text-base leading-relaxed text-muted">
                   {t("howTo.contact")}{" "}
                   <a
                     href={supportMailto()!}
@@ -103,7 +103,7 @@ export default async function RefundPage() {
 
         <Link
           href="/"
-          className="mt-12 inline-block text-[14px] font-semibold text-coral-deep hover:underline"
+          className="mt-12 inline-block text-sm font-semibold text-coral-deep hover:underline"
         >
           ← {t("back")}
         </Link>

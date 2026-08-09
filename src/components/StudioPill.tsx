@@ -9,7 +9,7 @@ import { IconStudio } from "@/components/ui/Icons";
 // whitespace-nowrap: at 375px the header ran out of room and "스튜디오" wrapped
 // mid-word inside the pill, breaking it across two lines.
 const PILL_CLASS =
-  "ml-1 flex items-center gap-2 whitespace-nowrap rounded-full border border-line-3 bg-white px-3 py-2.5 text-[14px] font-bold text-ink transition-colors hover:border-coral hover:text-coral-deep sm:ml-2 sm:px-4";
+  "ml-1 flex items-center gap-2 whitespace-nowrap rounded-full border border-line-3 bg-white px-3 py-2.5 text-sm font-bold text-ink transition-colors hover:border-coral hover:text-coral-deep sm:ml-2 sm:px-4";
 
 /**
  * The nav's 스튜디오 pill.
@@ -73,16 +73,16 @@ export function StudioPill({
         titleId="studio-gate-title"
         closeLabel={gate.close}
       >
-        <span className="flex h-12 w-12 items-center justify-center rounded-[14px] bg-coral-chip text-coral-deep">
+        <span className="flex h-12 w-12 items-center justify-center rounded-lg bg-coral-chip text-coral-deep">
           <IconStudio width={24} height={24} />
         </span>
         <h2
           id="studio-gate-title"
-          className="mt-4 text-[20px] font-extrabold tracking-[-0.02em] text-ink"
+          className="mt-4 text-xl font-extrabold tracking-[-0.02em] text-ink"
         >
           {gate.title}
         </h2>
-        <p className="mt-2 text-[14.5px] leading-[1.6] text-body">{gate.body}</p>
+        <p className="mt-2 text-base leading-relaxed text-body">{gate.body}</p>
 
         <div className="mt-6 flex flex-col gap-2">
           <ButtonLink

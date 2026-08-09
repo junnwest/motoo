@@ -28,13 +28,13 @@ export default async function CreatorSetupPage() {
             inverted — a mono eyebrow naming the page above a much louder pitch
             line — so the loudest text on screen didn't say where you were. */}
         <header className="mb-8 text-center">
-          <h1 className="text-[28px] font-extrabold tracking-[-0.02em] sm:text-[32px]">
+          <h1 className="text-3xl font-extrabold tracking-[-0.02em] sm:text-4xl">
             {t("title")}
           </h1>
-          <p className="mt-2.5 text-[17px] font-bold text-coral-deep sm:text-[18px]">
+          <p className="mt-2.5 text-lg font-bold text-coral-deep sm:text-lg">
             {t("tagline")}
           </p>
-          <p className="mt-2 text-[15.5px] leading-[1.6] text-body">
+          <p className="mt-2 text-base leading-relaxed text-body">
             {t("subtitle")}
           </p>
         </header>

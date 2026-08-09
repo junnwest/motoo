@@ -59,7 +59,7 @@ export function CancelOrderButton({
         type="button"
         variant="ghost"
         size="md"
-        className="!px-3 !py-1.5 !text-[13px]"
+        className="!px-3 !py-1.5 !text-xs"
         onClick={() => {
           setError(null);
           setOpen(true);
@@ -76,11 +76,11 @@ export function CancelOrderButton({
       >
         <h2
           id={`cancel-order-${orderId}`}
-          className="text-[20px] font-extrabold tracking-[-0.02em] text-ink break-keep"
+          className="text-xl font-extrabold tracking-[-0.02em] text-ink break-keep"
         >
           {t("cancelConfirmTitle")}
         </h2>
-        <p className="mt-2 text-[14.5px] leading-[1.6] text-body break-keep">
+        <p className="mt-2 text-base leading-relaxed text-body break-keep">
           {t("cancelConfirmBody", { item: itemTitle, count: mochiSpent })}
         </p>
 

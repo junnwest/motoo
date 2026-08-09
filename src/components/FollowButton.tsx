@@ -61,12 +61,12 @@ export function FollowButton({
       aria-pressed={following}
       className={
         compact
-          ? `w-full rounded-[8px] border px-2 py-1.5 text-[12px] font-bold transition-colors disabled:opacity-60 ${
+          ? `w-full rounded-sm border px-2 py-1.5 text-2xs font-bold transition-colors disabled:opacity-60 ${
               following
                 ? "border-line-3 bg-white text-ink hover:border-coral/50"
                 : "border-ink bg-ink text-cream hover:bg-ink/90"
             }`
-          : `rounded-[12px] border px-4 py-3 text-[14.5px] font-bold transition-colors disabled:opacity-60 ${
+          : `rounded-md border px-4 py-3 text-base font-bold transition-colors disabled:opacity-60 ${
               following
                 ? "border-line-3 bg-white text-ink hover:border-coral/50"
                 : "border-ink bg-ink text-cream hover:bg-ink/90"

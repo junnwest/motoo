@@ -67,14 +67,14 @@ export function MobileTabBar({
                 aria-current={active ? "page" : undefined}
                 // min-h-[56px] keeps every tap target comfortably past the 44px
                 // floor WCAG 2.5.8 asks for.
-                className={`relative flex min-h-[56px] flex-col items-center justify-center gap-1 text-[11px] font-bold transition-colors ${
+                className={`relative flex min-h-[56px] flex-col items-center justify-center gap-1 text-2xs font-bold transition-colors ${
                   active ? "text-coral-deep" : "text-muted"
                 }`}
               >
                 <span className="relative">
                   <Icon width={22} height={22} />
                   {tab.key === "notifications" && unreadCount > 0 && (
-                    <span className="absolute -right-2 -top-1 flex h-[16px] min-w-[16px] items-center justify-center rounded-full bg-coral px-1 text-[10px] font-bold text-white">
+                    <span className="absolute -right-2 -top-1 flex h-[16px] min-w-[16px] items-center justify-center rounded-full bg-coral px-1 text-2xs font-bold text-white">
                       {unreadCount > 9 ? "9+" : unreadCount}
                     </span>
                   )}

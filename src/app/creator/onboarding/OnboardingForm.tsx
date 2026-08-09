@@ -94,7 +94,7 @@ export function CreatorSetupForm({
   return (
     <form onSubmit={submit} className="flex flex-col gap-6">
       {/* 크리에이터 프로필 */}
-      <section className="rounded-[20px] border border-line-2 bg-card p-6 sm:p-7">
+      <section className="rounded-xl border border-line-2 bg-card p-6 sm:p-7">
         <Eyebrow className="mb-4">{t("sectionProfile")}</Eyebrow>
         <div className="flex flex-col gap-4">
           <Input
@@ -166,9 +166,9 @@ export function CreatorSetupForm({
       </section>
 
       {/* 모찌 발행 */}
-      <section className="rounded-[20px] border border-line-2 bg-card p-6 sm:p-7">
+      <section className="rounded-xl border border-line-2 bg-card p-6 sm:p-7">
         <Eyebrow className="mb-2">{t("sectionMochi")}</Eyebrow>
-        <p className="mb-4 text-[13px] text-muted">{t("sectionMochiHint")}</p>
+        <p className="mb-4 text-xs text-muted">{t("sectionMochiHint")}</p>
         <MochiIssuancePicker minPrice={MOCHI_MIN_PRICE} onChange={onMochiChange} />
       </section>
 

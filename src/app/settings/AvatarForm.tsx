@@ -83,10 +83,10 @@ export function AvatarForm({ initialAvatar }: { initialAvatar: string | null }) 
       </div>
 
       {result?.ok && (
-        <p className="text-[13.5px] font-semibold text-sage">{t("saved")}</p>
+        <p className="text-sm font-semibold text-sage">{t("saved")}</p>
       )}
       {result?.ok === false && (
-        <p className="text-[13.5px] font-semibold text-live">
+        <p className="text-sm font-semibold text-live">
           {t(`errors.${result.error}` as never)}
         </p>
       )}

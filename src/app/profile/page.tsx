@@ -57,11 +57,11 @@ export default async function ProfilePage() {
           <div className="flex flex-wrap items-center gap-5">
             <Avatar name={backer.nickname} src={backer.avatarUrl} size={72} />
             <div className="min-w-0 flex-1">
-              <h1 className="text-[28px] font-extrabold tracking-[-0.03em] text-ink sm:text-[34px]">
+              <h1 className="text-3xl font-extrabold tracking-[-0.03em] text-ink sm:text-4xl">
                 {backer.nickname}
               </h1>
               {backer.handle && (
-                <p className="text-[14px] text-muted">@{backer.handle}</p>
+                <p className="text-sm text-muted">@{backer.handle}</p>
               )}
               {session.user.creator && (
                 <CreatorBadge
@@ -78,12 +78,12 @@ export default async function ProfilePage() {
           {/* Holdings */}
           <Section title={tm("holdingsTitle")} className="mt-10">
             {holdings.length === 0 ? (
-              <div className="flex flex-col items-center rounded-[16px] border border-dashed border-line-3 bg-card/60 px-6 py-16 text-center">
+              <div className="flex flex-col items-center rounded-lg border border-dashed border-line-3 bg-card/60 px-6 py-16 text-center">
                 <div className="mb-3 flex items-end justify-center gap-1.5">
                   <Mochi width={38} height={31} float />
                   <Mochi width={50} height={41} float floatDelay={0.5} />
                 </div>
-                <p className="max-w-[360px] text-[15px] text-body">
+                <p className="max-w-[360px] text-base text-body">
                   {tm("empty")}
                 </p>
                 <ButtonLink
@@ -100,20 +100,20 @@ export default async function ProfilePage() {
                 {holdings.map((h) => (
                   <div
                     key={h.id}
-                    className="flex flex-col rounded-[16px] bg-card p-5 shadow-soft"
+                    className="flex flex-col rounded-lg bg-card p-5 shadow-soft"
                   >
                     <div className="flex items-center gap-3">
                       <CreatorCover
                         handle={h.streamer.handle}
                         displayName={h.streamer.displayName}
                         className="h-11 w-11 flex-none rounded-full"
-                        markClass="text-[17px]"
+                        markClass="text-lg"
                       />
                       <div className="min-w-0">
-                        <div className="truncate text-[16px] font-extrabold tracking-[-0.02em] text-ink">
+                        <div className="truncate text-base font-extrabold tracking-[-0.02em] text-ink">
                           {h.streamer.displayName}
                         </div>
-                        <div className="truncate text-[13px] text-muted">
+                        <div className="truncate text-xs text-muted">
                           {ALL_CATEGORIES.includes(h.streamer.category)
                             ? tax(`categories.${h.streamer.category}`)
                             : h.streamer.category}
@@ -121,8 +121,8 @@ export default async function ProfilePage() {
                       </div>
                     </div>
 
-                    <div className="mt-4 flex items-center rounded-[12px] bg-panel px-4 py-3">
-                      <span className="flex items-center gap-1.5 text-[15px] font-extrabold text-ink">
+                    <div className="mt-4 flex items-center rounded-md bg-panel px-4 py-3">
+                      <span className="flex items-center gap-1.5 text-base font-extrabold text-ink">
                         <Mochi width={16} height={12} />
                         {tm("balance", { count: h.balance })}
                       </span>
@@ -144,11 +144,11 @@ export default async function ProfilePage() {
 
           {/* Order / redemption history */}
           <Section title={tm("historyTitle")} className="mt-6">
-            <p className="-mt-2 mb-4 text-[14px] text-muted">
+            <p className="-mt-2 mb-4 text-sm text-muted">
               {tm("historySubtitle")}
             </p>
             {orders.length === 0 ? (
-              <div className="rounded-[16px] border border-dashed border-line-3 bg-card/60 px-6 py-12 text-center text-[15px] text-muted">
+              <div className="rounded-lg border border-dashed border-line-3 bg-card/60 px-6 py-12 text-center text-base text-muted">
                 {tm("historyEmpty")}
               </div>
             ) : (
@@ -156,7 +156,7 @@ export default async function ProfilePage() {
                 {orders.map((o) => (
                   <li
                     key={o.id}
-                    className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-[14px] bg-card p-4 shadow-soft"
+                    className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg bg-card p-4 shadow-soft"
                   >
                     <Avatar
                       name={o.streamer.displayName}
@@ -164,19 +164,19 @@ export default async function ProfilePage() {
                       size={36}
                     />
                     <div className="min-w-0 flex-1">
-                      <div className="truncate text-[15px] font-bold text-ink">
+                      <div className="truncate text-base font-bold text-ink">
                         {o.item.title}
                       </div>
-                      <div className="truncate text-[13px] text-muted">
+                      <div className="truncate text-xs text-muted">
                         {o.streamer.displayName} · {formatKstDate(o.createdAt)}
                       </div>
                     </div>
-                    <span className="flex items-center gap-1.5 text-[14px] font-extrabold text-ink">
+                    <span className="flex items-center gap-1.5 text-sm font-extrabold text-ink">
                       <Mochi width={15} height={11} />
                       {tm("spent", { count: o.mochiSpent })}
                     </span>
                     <span
-                      className={`rounded-full px-2.5 py-1 text-[12px] font-semibold ${
+                      className={`rounded-full px-2.5 py-1 text-2xs font-semibold ${
                         ORDER_STATUS_CHIP[o.status] ?? "bg-panel text-muted"
                       }`}
                     >

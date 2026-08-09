@@ -80,7 +80,7 @@ export default async function RootLayout({
               before reaching the content. Visually hidden until focused. */}
           <a
             href="#main"
-            className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[200] focus:rounded-[12px] focus:bg-ink focus:px-5 focus:py-3 focus:text-[15px] focus:font-bold focus:text-cream"
+            className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[200] focus:rounded-md focus:bg-ink focus:px-5 focus:py-3 focus:text-base focus:font-bold focus:text-cream"
           >
             {t("skipToContent")}
           </a>

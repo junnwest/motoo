@@ -65,7 +65,7 @@ export function MochiSettingsForm({ issuance }: { issuance: Issuance }) {
   return (
     <form
       onSubmit={onSubmit}
-      className="flex min-h-0 flex-1 flex-col justify-center rounded-[20px] border border-line-2 bg-card p-6"
+      className="flex min-h-0 flex-1 flex-col justify-center rounded-xl border border-line-2 bg-card p-6"
     >
       <div className="flex flex-col gap-5">
         <MochiIssuancePicker
@@ -82,9 +82,9 @@ export function MochiSettingsForm({ issuance }: { issuance: Issuance }) {
             type="checkbox"
             checked={active}
             onChange={(e) => setActive(e.target.checked)}
-            className="h-5 w-5 shrink-0 rounded-[6px] border border-line-3 accent-coral"
+            className="h-5 w-5 shrink-0 rounded-sm border border-line-3 accent-coral"
           />
-          <span className="text-[15px] font-semibold text-ink">
+          <span className="text-base font-semibold text-ink">
             {t("mochi.active")}
           </span>
         </label>
@@ -94,12 +94,12 @@ export function MochiSettingsForm({ issuance }: { issuance: Issuance }) {
             {t("mochi.save")}
           </Button>
           {saved ? (
-            <span className="rounded-full bg-sage-bg px-3 py-1.5 text-[13px] font-semibold text-sage">
+            <span className="rounded-full bg-sage-bg px-3 py-1.5 text-xs font-semibold text-sage">
               {t("mochi.saved")}
             </span>
           ) : null}
           {error ? (
-            <span className="text-[13px] font-semibold text-live">
+            <span className="text-xs font-semibold text-live">
               {errorText}
             </span>
           ) : null}

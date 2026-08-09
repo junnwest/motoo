@@ -31,14 +31,14 @@ export default async function StudioSettingsPage() {
     <div className="mx-auto max-w-[720px]">
       <Link
         href="/"
-        className="text-[13px] font-semibold text-muted hover:text-ink"
+        className="text-xs font-semibold text-muted hover:text-ink"
       >
         ← {t("settings.back")}
       </Link>
-      <h1 className="mt-3 text-[28px] font-extrabold tracking-[-0.02em] text-ink">
+      <h1 className="mt-3 text-3xl font-extrabold tracking-[-0.02em] text-ink">
         {t("settings.title")}
       </h1>
-      <p className="mb-7 mt-1 text-[15px] text-muted">{t("settings.subtitle")}</p>
+      <p className="mb-7 mt-1 text-base text-muted">{t("settings.subtitle")}</p>
 
       <SettingsForm initial={initial} />
     </div>

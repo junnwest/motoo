@@ -43,11 +43,11 @@ export function SignupModal({
         <div className="text-center">
           <h2
             id="signup-modal-title"
-            className="text-[24px] font-extrabold tracking-[-0.02em] text-ink"
+            className="text-2xl font-extrabold tracking-[-0.02em] text-ink"
           >
             {t("signupTitle")}
           </h2>
-          <p className="mt-1 text-[14px] text-muted">
+          <p className="mt-1 text-sm text-muted">
             {t("signupModalSubtitle")}
           </p>
         </div>
@@ -57,17 +57,17 @@ export function SignupModal({
           <Link
             href="/api/fan-signup"
             onClick={onClose}
-            className="group flex flex-col items-center rounded-[18px] border border-line-2 bg-panel px-4 py-6 text-center transition hover:border-coral hover:bg-card hover:shadow-[0_8px_24px_rgba(33,28,24,0.08)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-deep"
+            className="group flex flex-col items-center rounded-xl border border-line-2 bg-panel px-4 py-6 text-center transition hover:border-coral hover:bg-card hover:shadow-[0_8px_24px_rgba(33,28,24,0.08)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-deep"
           >
-            <span className="flex h-12 w-12 items-center justify-center rounded-[14px] bg-coral-chip text-coral-deep transition group-hover:bg-coral group-hover:text-white">
+            <span className="flex h-12 w-12 items-center justify-center rounded-lg bg-coral-chip text-coral-deep transition group-hover:bg-coral group-hover:text-white">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M12 21s-7.5-4.6-10-9.3C.4 8.4 1.9 5 5.1 5c2 0 3.3 1.2 3.9 2.2C9.6 6.2 10.9 5 12.9 5 16.1 5 17.6 8.4 16 11.7 13.5 16.4 12 21 12 21z" />
               </svg>
             </span>
-            <span className="mt-4 text-[12.5px] text-muted">
+            <span className="mt-4 text-xs text-muted">
               {t("roleFanTagline")}
             </span>
-            <span className="mt-0.5 text-[16px] font-extrabold text-ink">
+            <span className="mt-0.5 text-base font-extrabold text-ink">
               {t("roleFan")}
             </span>
           </Link>
@@ -76,21 +76,21 @@ export function SignupModal({
           <Link
             href="/api/become-creator"
             onClick={onClose}
-            className="group flex flex-col items-center rounded-[18px] border border-line-2 bg-panel px-4 py-6 text-center transition hover:border-coral hover:bg-card hover:shadow-[0_8px_24px_rgba(33,28,24,0.08)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-deep"
+            className="group flex flex-col items-center rounded-xl border border-line-2 bg-panel px-4 py-6 text-center transition hover:border-coral hover:bg-card hover:shadow-[0_8px_24px_rgba(33,28,24,0.08)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-deep"
           >
-            <span className="flex h-12 w-12 items-center justify-center rounded-[14px] bg-sage-bg transition group-hover:bg-sage/20">
+            <span className="flex h-12 w-12 items-center justify-center rounded-lg bg-sage-bg transition group-hover:bg-sage/20">
               <Mochi width={26} height={21} />
             </span>
-            <span className="mt-4 text-[12.5px] text-muted">
+            <span className="mt-4 text-xs text-muted">
               {t("roleCreatorTagline")}
             </span>
-            <span className="mt-0.5 text-[16px] font-extrabold text-ink">
+            <span className="mt-0.5 text-base font-extrabold text-ink">
               {t("roleCreator")}
             </span>
           </Link>
         </div>
 
-        <p className="mt-6 text-center text-[13.5px] text-muted">
+        <p className="mt-6 text-center text-sm text-muted">
           {t("haveAccount")}{" "}
           <Link
             href="/login"

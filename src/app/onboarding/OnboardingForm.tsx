@@ -89,7 +89,7 @@ export function OnboardingForm({
   return (
     <form
       onSubmit={submit}
-      className="flex flex-col gap-7 rounded-[24px] border border-line-2 bg-card p-7 sm:p-8"
+      className="flex flex-col gap-7 rounded-2xl border border-line-2 bg-card p-7 sm:p-8"
     >
       {/* Profile */}
       <section className="flex flex-col gap-4">
@@ -107,8 +107,8 @@ export function OnboardingForm({
         <Field label={t("handle")}>
           {(a11y) => (
           <>
-          <div className="flex items-center rounded-[12px] border border-line-3 bg-white pl-3 transition focus-within:border-coral/60">
-            <span className="text-[15px] text-muted">@</span>
+          <div className="flex items-center rounded-md border border-line-3 bg-white pl-3 transition focus-within:border-coral/60">
+            <span className="text-base text-muted">@</span>
             <input
               {...a11y}
               type="text"
@@ -117,12 +117,12 @@ export function OnboardingForm({
               placeholder={t("handlePlaceholder")}
               maxLength={20}
               autoCapitalize="none"
-              className="w-full bg-transparent px-2 py-3 text-[15px] outline-none"
+              className="w-full bg-transparent px-2 py-3 text-base outline-none"
             />
           </div>
           <p
             role="status"
-            className={`mt-1.5 text-[13px] ${
+            className={`mt-1.5 text-xs ${
               handleState === "available"
                 ? "text-sage"
                 : handleState === "taken" || handleState === "invalid"
@@ -149,13 +149,13 @@ export function OnboardingForm({
       <section className="flex flex-col gap-3">
         <Eyebrow>{t("sectionVerify")}</Eyebrow>
         {verified ? (
-          <div className="flex items-center gap-2 rounded-[14px] bg-sage-bg px-4 py-3 text-[14px] font-semibold text-sage">
+          <div className="flex items-center gap-2 rounded-lg bg-sage-bg px-4 py-3 text-sm font-semibold text-sage">
             <span>✓</span>
             {t("verifiedLabel")} · {t("verifiedAdult")}
           </div>
         ) : (
           <>
-            <p className="text-[14px] text-body">{t("verifySubtitle")}</p>
+            <p className="text-sm text-body">{t("verifySubtitle")}</p>
             <Button
               type="button"
               variant="dark"
@@ -166,7 +166,7 @@ export function OnboardingForm({
             >
               {verifyPending ? t("verifying") : t("verifyButton")}
             </Button>
-            <p className="text-[12px] leading-[1.5] text-muted">
+            <p className="text-2xs leading-normal text-muted">
               {t("verifyDemoNote")}
             </p>
           </>
@@ -176,12 +176,12 @@ export function OnboardingForm({
       {/* Terms */}
       <section className="flex flex-col gap-3">
         <Eyebrow>{t("sectionTerms")}</Eyebrow>
-        <label className="flex cursor-pointer items-start gap-2.5 text-[14px] text-ink">
+        <label className="flex cursor-pointer items-start gap-2.5 text-sm text-ink">
           <input
             type="checkbox"
             checked={agreedTerms}
             onChange={(e) => setAgreedTerms(e.target.checked)}
-            className="mt-0.5 h-5 w-5 shrink-0 rounded-[6px] border border-line-3 accent-coral"
+            className="mt-0.5 h-5 w-5 shrink-0 rounded-sm border border-line-3 accent-coral"
           />
           <span>
             {t.rich("termsRequired", {
@@ -198,12 +198,12 @@ export function OnboardingForm({
             })}
           </span>
         </label>
-        <label className="flex cursor-pointer items-start gap-2.5 text-[14px] text-body">
+        <label className="flex cursor-pointer items-start gap-2.5 text-sm text-body">
           <input
             type="checkbox"
             checked={marketing}
             onChange={(e) => setMarketing(e.target.checked)}
-            className="mt-0.5 h-5 w-5 shrink-0 rounded-[6px] border border-line-3 accent-coral"
+            className="mt-0.5 h-5 w-5 shrink-0 rounded-sm border border-line-3 accent-coral"
           />
           <span>{t("marketingOptional")}</span>
         </label>

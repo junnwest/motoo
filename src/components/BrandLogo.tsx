@@ -21,7 +21,7 @@ export function BrandLogo({
     <Link href={href} className="flex items-center gap-[10px]">
       <Mochi width={26} height={21} />
       <span
-        className={`text-[24px] font-extrabold tracking-[-0.04em] ${
+        className={`text-2xl font-extrabold tracking-[-0.04em] ${
           onDark ? "text-cream" : "text-ink"
         }`}
       >

@@ -14,11 +14,11 @@ import { InfoTooltip } from "./InfoTooltip";
 
 function StatTile({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex flex-col justify-center rounded-[16px] border border-line-2 bg-card p-5">
-      <div className="text-[26px] font-extrabold tracking-[-0.02em] text-ink">
+    <div className="flex flex-col justify-center rounded-lg border border-line-2 bg-card p-5">
+      <div className="text-2xl font-extrabold tracking-[-0.02em] text-ink">
         {value}
       </div>
-      <div className="mt-1 text-[13px] text-muted">{label}</div>
+      <div className="mt-1 text-xs text-muted">{label}</div>
     </div>
   );
 }
@@ -65,13 +65,13 @@ function StudioSection({
     <section id={id} className={`scroll-mt-24 ${fill ? "flex flex-col" : ""}`}>
       <header className={`mb-5 ${divider ? "border-t border-line-2 pt-8" : ""}`}>
         <div className="flex items-start justify-between gap-4">
-          <h2 className="text-[22px] font-extrabold tracking-[-0.02em] text-ink">
+          <h2 className="text-xl font-extrabold tracking-[-0.02em] text-ink">
             {title}
           </h2>
           {action ? <div className="flex-none">{action}</div> : null}
         </div>
         {subtitle ? (
-          <p className="mt-1 max-w-[560px] text-[14px] text-muted">{subtitle}</p>
+          <p className="mt-1 max-w-[560px] text-sm text-muted">{subtitle}</p>
         ) : null}
       </header>
       {fill ? (
@@ -155,7 +155,7 @@ export default async function CreatorDashboardHome() {
         <section id="overview" className="flex scroll-mt-24 flex-col">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h1 className="text-[34px] font-extrabold tracking-[-0.02em] text-ink sm:text-[38px]">
+              <h1 className="text-4xl font-extrabold tracking-[-0.02em] text-ink sm:text-5xl">
                 {t("welcome", { name: creator.displayName })}
               </h1>
               <CreatorFacet
@@ -202,8 +202,8 @@ export default async function CreatorDashboardHome() {
             </div>
 
             {issuance ? (
-              <div className="flex flex-1 flex-col justify-center rounded-[16px] border border-line-2 bg-card p-5">
-                <div className="mb-2 flex items-center justify-between text-[13px] font-semibold text-muted-2">
+              <div className="flex flex-1 flex-col justify-center rounded-lg border border-line-2 bg-card p-5">
+                <div className="mb-2 flex items-center justify-between text-xs font-semibold text-muted-2">
                   <span>{t("statGoal")}</span>
                   <span>{t("goalProgress", { percent })}</span>
                 </div>
@@ -217,11 +217,11 @@ export default async function CreatorDashboardHome() {
             ) : null}
 
             {issuance ? (
-              <div className="flex flex-1 flex-col rounded-[16px] border border-line-2 bg-card p-5">
-                <h3 className="mb-3 text-[15px] font-bold text-ink">
+              <div className="flex flex-1 flex-col rounded-lg border border-line-2 bg-card p-5">
+                <h3 className="mb-3 text-base font-bold text-ink">
                   {t("mochi.summaryTitle")}
                 </h3>
-                <dl className="flex flex-1 flex-col justify-between gap-2.5 text-[14px]">
+                <dl className="flex flex-1 flex-col justify-between gap-2.5 text-sm">
                   <SummaryRow
                     label={t("mochi.summaryPrice")}
                     value={`${issuance.pricePerMochiKrw.toLocaleString("ko-KR")}원`}

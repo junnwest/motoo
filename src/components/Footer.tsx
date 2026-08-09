@@ -22,10 +22,10 @@ function FooterCol({ title, links }: { title: string; links: FooterLink[] }) {
 
   return (
     <div>
-      <div className="mb-[14px] font-mono text-[11px] tracking-[0.1em] text-dark-mono">
+      <div className="mb-[14px] font-mono text-2xs tracking-[0.1em] text-dark-mono">
         {title}
       </div>
-      <div className="flex flex-col gap-[10px] text-[14px] text-dark-text-2">
+      <div className="flex flex-col gap-[10px] text-sm text-dark-text-2">
         {live.map((l) => {
           const className = `hover:text-cream ${l.underline ? "underline" : ""}`;
           return l.external ? (
@@ -54,11 +54,11 @@ export function Footer({ variant = "fan" }: { variant?: "fan" | "creator" }) {
           <div className="max-w-[300px]">
             <div className="mb-[14px] flex items-center gap-[9px]">
               <Mochi width={24} height={19} />
-              <span className="text-[22px] font-extrabold tracking-[-0.04em] text-cream">
+              <span className="text-xl font-extrabold tracking-[-0.04em] text-cream">
                 motoo
               </span>
             </div>
-            <p className="text-[14px] leading-[1.6] text-dark-text-3">
+            <p className="text-sm leading-relaxed text-dark-text-3">
               {variant === "creator" ? t("creatorTagline") : t("fanTagline")}
             </p>
           </div>
@@ -121,7 +121,7 @@ export function Footer({ variant = "fan" }: { variant?: "fan" | "creator" }) {
           </div>
         </div>
 
-        <div className="mt-10 border-t border-dark-line pt-[18px] font-mono text-[11px] leading-[1.6] text-dark-mono">
+        <div className="mt-10 border-t border-dark-line pt-[18px] font-mono text-2xs leading-relaxed text-dark-mono">
           {t("businessInfo")}
           {variant === "fan" && (
             <>

@@ -23,15 +23,15 @@ export default async function CreatorNotFound() {
       <ConsumerShell>
         <section className="mx-auto flex max-w-[600px] flex-col items-center px-6 py-32 text-center">
           <IconSearch width={44} height={44} className="mb-4 text-muted" />
-          <h1 className="text-[26px] font-extrabold break-keep">
+          <h1 className="text-2xl font-extrabold break-keep">
             {t("notFoundTitle")}
           </h1>
-          <p className="mt-3 text-[16px] text-body break-keep">
+          <p className="mt-3 text-base text-body break-keep">
             {t("notFoundBody")}
           </p>
           <Link
             href="/explore"
-            className="mt-8 rounded-[12px] bg-ink px-5 py-3 text-[14px] font-bold text-cream transition-transform duration-150 active:scale-[.98]"
+            className="mt-8 rounded-md bg-ink px-5 py-3 text-sm font-bold text-cream transition-transform duration-150 active:scale-[.98]"
           >
             {t("backToExplore")}
           </Link>

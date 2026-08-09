@@ -13,7 +13,7 @@ export function Eyebrow({
   const color = tone === "onDark" ? "text-coral-tint" : "text-coral-deep";
   return (
     <div
-      className={`font-mono text-[13px] tracking-[0.2em] uppercase font-medium ${color} ${className}`}
+      className={`font-mono text-xs tracking-[0.2em] uppercase font-medium ${color} ${className}`}
     >
       {children}
     </div>

@@ -51,7 +51,7 @@ export function NotificationList({
 
   if (rows.length === 0) {
     return (
-      <div className="mt-10 rounded-[20px] border border-dashed border-line-3 bg-cream-warm/50 px-6 py-16 text-center text-[15px] text-muted">
+      <div className="mt-10 rounded-xl border border-dashed border-line-3 bg-cream-warm/50 px-6 py-16 text-center text-base text-muted">
         {emptyLabel}
       </div>
     );
@@ -64,7 +64,7 @@ export function NotificationList({
           type="button"
           onClick={onMarkAll}
           disabled={pending}
-          className="mt-4 text-[13.5px] font-bold text-coral-deep hover:underline disabled:opacity-60"
+          className="mt-4 text-sm font-bold text-coral-deep hover:underline disabled:opacity-60"
         >
           {markAllLabel}
         </button>
@@ -74,7 +74,7 @@ export function NotificationList({
         {rows.map((row) => {
           const content = (
             <div
-              className={`flex items-start gap-3 rounded-[16px] border p-4 transition-colors ${
+              className={`flex items-start gap-3 rounded-lg border p-4 transition-colors ${
                 row.read
                   ? "border-line-2 bg-card"
                   : "border-coral/30 bg-coral-chip/30"
@@ -84,15 +84,15 @@ export function NotificationList({
                 <span className="mt-1.5 h-2 w-2 flex-none rounded-full bg-coral" />
               )}
               <span className={`min-w-0 flex-1 ${row.read ? "pl-5" : ""}`}>
-                <span className="block text-[14.5px] font-bold text-ink">
+                <span className="block text-base font-bold text-ink">
                   {row.title}
                 </span>
                 {row.body && (
-                  <span className="mt-0.5 block text-[13.5px] text-body">
+                  <span className="mt-0.5 block text-sm text-body">
                     {row.body}
                   </span>
                 )}
-                <span className="mt-1.5 block text-[12px] text-muted">
+                <span className="mt-1.5 block text-2xs text-muted">
                   {formatKstDate(new Date(row.createdAt))}
                 </span>
               </span>

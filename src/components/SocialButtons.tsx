@@ -44,7 +44,7 @@ export function SocialButtons({ providers }: { providers: EnabledProviders }) {
 
   return (
     <div>
-      <div className="my-5 flex items-center gap-3 text-[13px] text-muted">
+      <div className="my-5 flex items-center gap-3 text-xs text-muted">
         <span className="h-px flex-1 bg-line-3" />
         {t("orDivider")}
         <span className="h-px flex-1 bg-line-3" />
@@ -55,14 +55,14 @@ export function SocialButtons({ providers }: { providers: EnabledProviders }) {
           type="button"
           onClick={() => social("kakao")}
           disabled={busy}
-          className="relative flex w-full items-center justify-center rounded-[12px] bg-[#FEE500] px-4 py-3 text-[15px] font-bold text-[#191600] transition active:scale-[.99] disabled:opacity-60"
+          className="relative flex w-full items-center justify-center rounded-md bg-[#FEE500] px-4 py-3 text-base font-bold text-[#191600] transition active:scale-[.99] disabled:opacity-60"
         >
           <span className="absolute left-4">
             <KakaoMark />
           </span>
           {t("kakaoContinue")}
           {!providers.kakao && (
-            <span className="absolute right-3 rounded-full bg-black/10 px-2 py-0.5 text-[11px] font-semibold text-[#191600]">
+            <span className="absolute right-3 rounded-full bg-black/10 px-2 py-0.5 text-2xs font-semibold text-[#191600]">
               {t("comingSoonBadge")}
             </span>
           )}
@@ -71,12 +71,12 @@ export function SocialButtons({ providers }: { providers: EnabledProviders }) {
           type="button"
           onClick={() => social("naver")}
           disabled={busy}
-          className="relative flex w-full items-center justify-center rounded-[12px] bg-[#03C75A] px-4 py-3 text-[15px] font-bold text-white transition active:scale-[.99] disabled:opacity-60"
+          className="relative flex w-full items-center justify-center rounded-md bg-[#03C75A] px-4 py-3 text-base font-bold text-white transition active:scale-[.99] disabled:opacity-60"
         >
-          <span className="absolute left-[18px] text-[16px] font-black">N</span>
+          <span className="absolute left-[18px] text-base font-black">N</span>
           {t("naverContinue")}
           {!providers.naver && (
-            <span className="absolute right-3 rounded-full bg-white/25 px-2 py-0.5 text-[11px] font-semibold text-white">
+            <span className="absolute right-3 rounded-full bg-white/25 px-2 py-0.5 text-2xs font-semibold text-white">
               {t("comingSoonBadge")}
             </span>
           )}
@@ -85,14 +85,14 @@ export function SocialButtons({ providers }: { providers: EnabledProviders }) {
           type="button"
           onClick={() => social("google")}
           disabled={busy}
-          className="relative flex w-full items-center justify-center rounded-[12px] border-[1.5px] border-line-3 bg-white px-4 py-3 text-[15px] font-bold text-ink transition hover:border-line-4 active:scale-[.99] disabled:opacity-60"
+          className="relative flex w-full items-center justify-center rounded-md border-[1.5px] border-line-3 bg-white px-4 py-3 text-base font-bold text-ink transition hover:border-line-4 active:scale-[.99] disabled:opacity-60"
         >
-          <span className="absolute left-4 text-[16px] font-black text-[#4285F4]">
+          <span className="absolute left-4 text-base font-black text-[#4285F4]">
             G
           </span>
           {t("googleContinue")}
           {!providers.google && (
-            <span className="absolute right-3 rounded-full bg-panel px-2 py-0.5 text-[11px] font-semibold text-muted">
+            <span className="absolute right-3 rounded-full bg-panel px-2 py-0.5 text-2xs font-semibold text-muted">
               {t("comingSoonBadge")}
             </span>
           )}
@@ -100,7 +100,7 @@ export function SocialButtons({ providers }: { providers: EnabledProviders }) {
       </div>
 
       {note && (
-        <p className="mt-2.5 text-[13px] leading-[1.5] text-muted">
+        <p className="mt-2.5 text-xs leading-normal text-muted">
           {t("socialComingSoon")}
         </p>
       )}

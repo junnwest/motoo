@@ -62,13 +62,13 @@ export default async function FanLandingPage() {
         <div className="absolute bottom-8 left-[16%] hidden h-9 w-9 rounded-[46%_46%_48%_48%/52%_52%_48%_48%] bg-coral-soft/35 sm:block" />
         <div className="relative mx-auto max-w-[720px]">
           <Eyebrow className="mb-[22px]">{t("eyebrow")}</Eyebrow>
-          <h1 className="text-[38px] font-extrabold leading-[1.12] tracking-[-0.035em] sm:text-[60px]">
+          <h1 className="text-5xl font-extrabold leading-tight tracking-[-0.035em] sm:text-7xl">
             {t("heroTitle")}
             <br />
             <span className="text-coral-deep">{t("heroTitleAccent")}</span>
             {t("heroTitleTail")}
           </h1>
-          <p className="mx-auto mt-6 max-w-[520px] text-[17px] leading-[1.6] text-body sm:text-[19px]">
+          <p className="mx-auto mt-6 max-w-[520px] text-lg leading-relaxed text-body sm:text-xl">
             {t("heroSubtitle")}
           </p>
 
@@ -83,7 +83,7 @@ export default async function FanLandingPage() {
               {ta("startAsCreator")}
             </ButtonLink>
           </div>
-          <p className="mt-4 text-[14px] text-muted">
+          <p className="mt-4 text-sm text-muted">
             {ta("alreadyMember")}{" "}
             <Link
               href="/login"
@@ -99,7 +99,7 @@ export default async function FanLandingPage() {
       <section className="mx-auto max-w-[1200px] px-6 py-20 sm:px-14">
         <div className="mb-8">
           <Eyebrow className="mb-3">{t("trendingEyebrow")}</Eyebrow>
-          <h2 className="text-[30px] font-extrabold tracking-[-0.03em] sm:text-[40px]">
+          <h2 className="text-3xl font-extrabold tracking-[-0.03em] sm:text-5xl">
             {t("trendingTitle")}
           </h2>
         </div>
@@ -121,7 +121,7 @@ export default async function FanLandingPage() {
             <Eyebrow tone="onDark" className="mb-4">
               {t("howEyebrow")}
             </Eyebrow>
-            <h2 className="text-[32px] font-extrabold tracking-[-0.03em] text-cream sm:text-[42px]">
+            <h2 className="text-4xl font-extrabold tracking-[-0.03em] text-cream sm:text-5xl">
               {t("howTitle")}
             </h2>
           </div>
@@ -129,15 +129,15 @@ export default async function FanLandingPage() {
             {[1, 2, 3].map((n) => (
               <div
                 key={n}
-                className="rounded-[22px] border border-dark-line bg-ink-2 p-8"
+                className="rounded-2xl border border-dark-line bg-ink-2 p-8"
               >
-                <div className="mb-[18px] font-mono text-[14px] font-semibold text-coral-tint">
+                <div className="mb-[18px] font-mono text-sm font-semibold text-coral-tint">
                   0{n}
                 </div>
-                <h3 className="mb-[10px] text-[22px] font-extrabold text-cream">
+                <h3 className="mb-[10px] text-xl font-extrabold text-cream">
                   {t(`how.step${n}Title` as never)}
                 </h3>
-                <p className="text-[15.5px] leading-[1.6] text-dark-text-3">
+                <p className="text-base leading-relaxed text-dark-text-3">
                   {t(`how.step${n}Body` as never)}
                 </p>
               </div>
@@ -148,7 +148,7 @@ export default async function FanLandingPage() {
 
       {/* Benefits */}
       <section className="mx-auto max-w-[1200px] px-6 py-[92px] sm:px-14">
-        <h2 className="mb-10 text-center text-[30px] font-extrabold tracking-[-0.03em] sm:text-[40px]">
+        <h2 className="mb-10 text-center text-3xl font-extrabold tracking-[-0.03em] sm:text-5xl">
           {t("benefitsTitle")}
         </h2>
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
@@ -176,18 +176,18 @@ export default async function FanLandingPage() {
           ].map((b) => (
             <div
               key={b.key}
-              className="flex items-start gap-5 rounded-[20px] border border-line-2 bg-card p-8"
+              className="flex items-start gap-5 rounded-xl border border-line-2 bg-card p-8"
             >
               <div
-                className={`flex h-12 w-12 flex-none items-center justify-center rounded-[14px] ${b.tile}`}
+                className={`flex h-12 w-12 flex-none items-center justify-center rounded-lg ${b.tile}`}
               >
                 <b.Icon />
               </div>
               <div>
-                <h3 className="mb-[7px] text-[21px] font-extrabold">
+                <h3 className="mb-[7px] text-xl font-extrabold">
                   {t(`benefits.${b.key}Title` as never)}
                 </h3>
-                <p className="text-[15.5px] leading-[1.6] text-body">
+                <p className="text-base leading-relaxed text-body">
                   {t(`benefits.${b.key}Body` as never)}
                 </p>
               </div>
@@ -199,7 +199,7 @@ export default async function FanLandingPage() {
       {/* Spotlight creator */}
       {spotlight && (
         <section className="mx-auto max-w-[1200px] px-6 pb-[92px] sm:px-14">
-          <div className="grid grid-cols-1 overflow-hidden rounded-[24px] border border-line-2 bg-card shadow-card md:grid-cols-2">
+          <div className="grid grid-cols-1 overflow-hidden rounded-2xl border border-line-2 bg-card shadow-card md:grid-cols-2">
             <CreatorCover
               handle={spotlight.handle}
               displayName={spotlight.displayName}
@@ -208,15 +208,15 @@ export default async function FanLandingPage() {
             />
             <div className="p-10 sm:p-11">
               <Eyebrow className="mb-4">{t("spotlightEyebrow")}</Eyebrow>
-              <h2 className="text-[28px] font-extrabold tracking-[-0.03em] sm:text-[34px]">
+              <h2 className="text-3xl font-extrabold tracking-[-0.03em] sm:text-4xl">
                 {spotlight.displayName}
               </h2>
               <div className="mb-7 mt-6 flex gap-7">
                 <div>
-                  <div className="text-[24px] font-extrabold">
+                  <div className="text-2xl font-extrabold">
                     {spotlight.backerCount}
                   </div>
-                  <div className="text-[13px] text-muted">
+                  <div className="text-xs text-muted">
                     {t("spotlightBackers")}
                   </div>
                 </div>
@@ -225,11 +225,11 @@ export default async function FanLandingPage() {
                       this creator's real mochi total, on the homepage of a
                       product whose whole premise is trustworthy support data.
                       The true figure was one query away. */}
-                  <div className="flex items-center gap-[6px] text-[24px] font-extrabold">
+                  <div className="flex items-center gap-[6px] text-2xl font-extrabold">
                     <Mochi width={18} height={14} />
                     {formatCount(spotlightMochi)}
                   </div>
-                  <div className="text-[13px] text-muted">
+                  <div className="text-xs text-muted">
                     {t("spotlightMochi")}
                   </div>
                 </div>
@@ -255,12 +255,12 @@ export default async function FanLandingPage() {
             <Mochi width={56} height={46} />
             <Mochi width={40} height={33} />
           </div>
-          <h3 className="text-[24px] font-extrabold tracking-[-0.02em] sm:text-[28px]">
+          <h3 className="text-2xl font-extrabold tracking-[-0.02em] sm:text-3xl">
             {t.rich("mochiExplainerTitle", {
               accent: (c) => <span className="text-coral-deep">{c}</span>,
             })}
           </h3>
-          <p className="mx-auto mt-3 max-w-[620px] text-[16.5px] leading-[1.6] text-muted-3">
+          <p className="mx-auto mt-3 max-w-[620px] text-base leading-relaxed text-muted-3">
             {t("mochiExplainerBody")}
           </p>
         </div>
@@ -270,10 +270,10 @@ export default async function FanLandingPage() {
       <section className="bg-ink px-6 py-16 sm:px-14">
         <div className="mx-auto flex max-w-[1200px] flex-col items-center justify-between gap-6 text-center sm:flex-row sm:text-left">
           <div>
-            <h3 className="text-[24px] font-extrabold text-cream sm:text-[28px]">
+            <h3 className="text-2xl font-extrabold text-cream sm:text-3xl">
               {t("creatorPromptTitle")}
             </h3>
-            <p className="mt-2 text-[16px] text-dark-text-2">
+            <p className="mt-2 text-base text-dark-text-2">
               {t("creatorPromptBody")}
             </p>
           </div>
@@ -290,10 +290,10 @@ export default async function FanLandingPage() {
         <div className="absolute left-[10%] top-8 h-[50px] w-[50px] rounded-[46%_46%_48%_48%/52%_52%_48%_48%] bg-white/20" />
         <div className="absolute bottom-10 right-[14%] h-[64px] w-[64px] rounded-[46%_46%_48%_48%/52%_52%_48%_48%] bg-black/10" />
         <div className="relative">
-          <h2 className="text-[34px] font-extrabold leading-[1.16] tracking-[-0.03em] sm:text-[48px]">
+          <h2 className="text-4xl font-extrabold leading-tight tracking-[-0.03em] sm:text-6xl">
             {t("finalCtaTitle")}
           </h2>
-          <p className="mb-8 mt-[18px] text-[18px] text-white/85">
+          <p className="mb-8 mt-[18px] text-lg text-white/85">
             {t("finalCtaBody")}
           </p>
           <div className="flex justify-center">

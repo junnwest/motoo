@@ -100,8 +100,8 @@ export function SettingsForm({ initial }: { initial: ProfileValues }) {
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-6">
       {/* Profile */}
-      <section className="rounded-[20px] border border-line-2 bg-card p-6 sm:p-7">
-        <h2 className="mb-4 text-[16px] font-bold text-ink">
+      <section className="rounded-xl border border-line-2 bg-card p-6 sm:p-7">
+        <h2 className="mb-4 text-base font-bold text-ink">
           {to("sectionProfile")}
         </h2>
         <div className="flex flex-col gap-4">
@@ -173,8 +173,8 @@ export function SettingsForm({ initial }: { initial: ProfileValues }) {
       </section>
 
       {/* Platform links */}
-      <section className="rounded-[20px] border border-line-2 bg-card p-6 sm:p-7">
-        <h2 className="mb-4 text-[16px] font-bold text-ink">
+      <section className="rounded-xl border border-line-2 bg-card p-6 sm:p-7">
+        <h2 className="mb-4 text-base font-bold text-ink">
           {t("settings.sectionLinks")}
         </h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -199,12 +199,12 @@ export function SettingsForm({ initial }: { initial: ProfileValues }) {
           {pending ? t("settings.saving") : t("settings.save")}
         </Button>
         {saved ? (
-          <span className="rounded-full bg-sage-bg px-3 py-1.5 text-[13px] font-semibold text-sage">
+          <span className="rounded-full bg-sage-bg px-3 py-1.5 text-xs font-semibold text-sage">
             {t("settings.saved")}
           </span>
         ) : null}
         {error ? (
-          <span className="text-[13px] font-semibold text-live">
+          <span className="text-xs font-semibold text-live">
             {t("saveError")}
           </span>
         ) : null}

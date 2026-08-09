@@ -14,7 +14,7 @@ export function CreatorCover({
   handle,
   displayName,
   className = "",
-  markClass = "text-[46px]",
+  markClass = "text-5xl",
 }: {
   handle: string;
   displayName: string;

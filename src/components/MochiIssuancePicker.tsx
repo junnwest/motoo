@@ -107,7 +107,7 @@ export function MochiIssuancePicker({
                 type="button"
                 onClick={() => setMode(p.key)}
                 aria-pressed={selected}
-                className={`relative flex flex-col items-start rounded-[14px] border px-4 py-3 text-left transition ${
+                className={`relative flex flex-col items-start rounded-lg border px-4 py-3 text-left transition ${
                   selected
                     ? "border-coral bg-coral-chip"
                     : recommended
@@ -116,14 +116,14 @@ export function MochiIssuancePicker({
                 }`}
               >
                 {recommended ? (
-                  <span className="absolute -top-2 right-2 rounded-full bg-coral px-2 py-[1px] text-[10.5px] font-bold text-white">
+                  <span className="absolute -top-2 right-2 rounded-full bg-coral px-2 py-[1px] text-2xs font-bold text-white">
                     {t("recommended")}
                   </span>
                 ) : null}
-                <span className="text-[15px] font-extrabold text-ink">
+                <span className="text-base font-extrabold text-ink">
                   {t(`presets.${p.key}`)}
                 </span>
-                <span className="mt-0.5 text-[11.5px] leading-tight text-muted">
+                <span className="mt-0.5 text-2xs leading-tight text-muted">
                   {t("presetSub", {
                     count: iss.goalQuantity,
                     price: iss.pricePerMochiKrw,
@@ -136,19 +136,19 @@ export function MochiIssuancePicker({
             type="button"
             onClick={() => setMode("custom")}
             aria-pressed={mode === "custom"}
-            className={`flex flex-col items-start justify-center rounded-[14px] border px-4 py-3 text-left transition ${
+            className={`flex flex-col items-start justify-center rounded-lg border px-4 py-3 text-left transition ${
               mode === "custom"
                 ? "border-coral bg-coral-chip"
                 : "border-line-3 bg-white hover:border-coral/50"
             }`}
           >
-            <span className="text-[15px] font-extrabold text-ink">
+            <span className="text-base font-extrabold text-ink">
               {t("presets.custom")}
             </span>
           </button>
         </div>
       ) : (
-        <p className="text-[13px] text-muted">{t("presetsUnavailable")}</p>
+        <p className="text-xs text-muted">{t("presetsUnavailable")}</p>
       )}
 
       {showCustomInputs ? (
@@ -178,16 +178,16 @@ export function MochiIssuancePicker({
           set, i.e. the Studio) the ratchet guidance lives in the section's info
           tooltip instead, so the form stays clean. */}
       {currentPrice === null ? (
-        <p className="mt-3 text-[13px] text-muted">{t("floorHint")}</p>
+        <p className="mt-3 text-xs text-muted">{t("floorHint")}</p>
       ) : null}
 
       {raised ? (
-        <p className="mt-2 rounded-[10px] bg-coral-chip px-3 py-2 text-[13px] font-medium text-coral-deep">
+        <p className="mt-2 rounded-md bg-coral-chip px-3 py-2 text-xs font-medium text-coral-deep">
           {t("raiseWarning")}
         </p>
       ) : null}
 
-      <div className="mt-2 rounded-[16px] bg-panel px-4 py-3 text-[14px] font-semibold text-ink">
+      <div className="mt-2 rounded-lg bg-panel px-4 py-3 text-sm font-semibold text-ink">
         {t("summary", { goal: count, price, total })}
       </div>
 

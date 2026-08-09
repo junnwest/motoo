@@ -35,11 +35,11 @@ export default async function DonateMochiPage({
         <Nav />
         <section className="mx-auto flex max-w-[600px] flex-col items-center px-6 py-32 text-center">
           <IconSearch width={44} height={44} className="mb-4 text-muted" />
-          <h1 className="text-[26px] font-extrabold">{tp("notFoundTitle")}</h1>
-          <p className="mt-3 text-[16px] text-body">{tp("notFoundBody")}</p>
+          <h1 className="text-2xl font-extrabold">{tp("notFoundTitle")}</h1>
+          <p className="mt-3 text-base text-body">{tp("notFoundBody")}</p>
           <Link
             href="/explore"
-            className="mt-8 rounded-[12px] bg-ink px-5 py-3 text-[14px] font-bold text-cream"
+            className="mt-8 rounded-md bg-ink px-5 py-3 text-sm font-bold text-cream"
           >
             {tp("backToExplore")}
           </Link>
@@ -69,7 +69,7 @@ export default async function DonateMochiPage({
       <main id="main" className="mx-auto max-w-[480px] px-6 py-14 sm:py-20">
         <Link
           href={`/s/${handle}`}
-          className="inline-flex items-center gap-1 text-[13.5px] font-semibold text-muted hover:text-ink"
+          className="inline-flex items-center gap-1 text-sm font-semibold text-muted hover:text-ink"
         >
           <IconChevronLeft width={16} height={16} />
           {t("backToProfile")}
@@ -81,7 +81,7 @@ export default async function DonateMochiPage({
             src={streamer.avatarUrl}
             size={44}
           />
-          <div className="text-[16px] font-extrabold text-ink">
+          <div className="text-base font-extrabold text-ink">
             {streamer.displayName}
           </div>
         </div>

@@ -5,7 +5,7 @@ export function SettingsButton({ label }: { label: string }) {
   return (
     <Link
       href="/settings"
-      className="flex flex-none items-center gap-1.5 rounded-full border border-line-3 bg-white px-3.5 py-2 text-[13px] font-semibold text-ink hover:border-coral/50"
+      className="flex flex-none items-center gap-1.5 rounded-full border border-line-3 bg-white px-3.5 py-2 text-xs font-semibold text-ink hover:border-coral/50"
     >
       <svg
         width="15"

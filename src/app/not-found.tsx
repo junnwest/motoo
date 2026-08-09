@@ -25,15 +25,15 @@ export default async function NotFound() {
           <Mochi width={38} height={31} float />
           <Mochi width={50} height={41} float floatDelay={0.5} />
         </div>
-        <h1 className="text-[26px] font-extrabold tracking-[-0.02em] text-ink break-keep sm:text-[30px]">
+        <h1 className="text-2xl font-extrabold tracking-[-0.02em] text-ink break-keep sm:text-3xl">
           {t("notFoundTitle")}
         </h1>
-        <p className="mt-3 max-w-[420px] text-[15.5px] leading-[1.6] text-body break-keep">
+        <p className="mt-3 max-w-[420px] text-base leading-relaxed text-body break-keep">
           {t("notFoundBody")}
         </p>
         <Link
           href="/"
-          className="mt-8 rounded-[14px] bg-ink px-6 py-3 text-[15px] font-bold text-cream transition-transform duration-150 active:scale-[.98]"
+          className="mt-8 rounded-lg bg-ink px-6 py-3 text-base font-bold text-cream transition-transform duration-150 active:scale-[.98]"
         >
           {t("notFoundCta")}
         </Link>

@@ -152,10 +152,10 @@ export default async function StreamerProfilePage({
           <Avatar name={streamer.displayName} size={92} src={streamer.avatarUrl} />
           <div className="flex-1">
             <div className="flex flex-wrap items-center gap-3">
-              <h1 className="text-[28px] font-extrabold tracking-[-0.03em] sm:text-[34px]">
+              <h1 className="text-3xl font-extrabold tracking-[-0.03em] sm:text-4xl">
                 {streamer.displayName}
               </h1>
-              <span className="text-[14px] text-muted">@{streamer.handle}</span>
+              <span className="text-sm text-muted">@{streamer.handle}</span>
             </div>
             <CreatorFacet
               variant="chips"
@@ -172,7 +172,7 @@ export default async function StreamerProfilePage({
               }
             />
             {streamer.bio && (
-              <p className="mt-2 max-w-[560px] text-[15.5px] leading-[1.6] text-body">
+              <p className="mt-2 max-w-[560px] text-base leading-relaxed text-body">
                 {streamer.bio}
               </p>
             )}
@@ -183,7 +183,7 @@ export default async function StreamerProfilePage({
                   href={l.href!}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="rounded-full border border-line-3 bg-white px-3 py-[5px] text-[12.5px] font-medium text-muted-2 hover:border-coral/50"
+                  className="rounded-full border border-line-3 bg-white px-3 py-[5px] text-xs font-medium text-muted-2 hover:border-coral/50"
                 >
                   {l.label} ↗
                 </a>
@@ -209,12 +209,12 @@ export default async function StreamerProfilePage({
           {headlineStats.map((s) => (
             <div
               key={s.label}
-              className="rounded-[16px] border border-line-2 bg-card p-4 text-center"
+              className="rounded-lg border border-line-2 bg-card p-4 text-center"
             >
-              <div className="text-[26px] font-extrabold tracking-[-0.02em]">
+              <div className="text-2xl font-extrabold tracking-[-0.02em]">
                 {s.value}
               </div>
-              <div className="text-[13px] text-muted">{s.label}</div>
+              <div className="text-xs text-muted">{s.label}</div>
             </div>
           ))}
         </div>
@@ -231,13 +231,13 @@ export default async function StreamerProfilePage({
             column for the supporter leaderboard next to the market instead of
             stacked above it. Stacks to one column on narrow viewports. */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-10">
-          <div className="rounded-[20px] border border-line-2 bg-card p-6 lg:col-span-3">
+          <div className="rounded-xl border border-line-2 bg-card p-6 lg:col-span-3">
             <SupporterLeaderboard
               entries={leaderboard.entries}
               totalSupporters={leaderboard.totalSupporters}
             />
           </div>
-          <div className="rounded-[20px] border border-line-2 bg-card p-6 lg:col-span-7">
+          <div className="rounded-xl border border-line-2 bg-card p-6 lg:col-span-7">
             <MarketplaceSection
               handle={streamer.handle}
               balance={balance}
@@ -248,12 +248,12 @@ export default async function StreamerProfilePage({
         </div>
 
         {/* Updates */}
-        <div className="rounded-[20px] border border-line-2 bg-card p-6">
-          <h2 className="mb-4 text-[20px] font-extrabold tracking-[-0.02em]">
+        <div className="rounded-xl border border-line-2 bg-card p-6">
+          <h2 className="mb-4 text-xl font-extrabold tracking-[-0.02em]">
             {t("updatesTitle")}
           </h2>
           {updates.length === 0 ? (
-            <p className="text-[14px] text-body">{t("updatesEmpty")}</p>
+            <p className="text-sm text-body">{t("updatesEmpty")}</p>
           ) : (
             <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {updates.map((u) => {
@@ -267,22 +267,22 @@ export default async function StreamerProfilePage({
                 return (
                   <li
                     key={u.id}
-                    className="rounded-[16px] border border-line-2 bg-panel p-4"
+                    className="rounded-lg border border-line-2 bg-panel p-4"
                   >
                     {locked ? (
                       <>
-                        <div className="flex items-center gap-2 text-[13px] font-semibold text-muted">
+                        <div className="flex items-center gap-2 text-xs font-semibold text-muted">
                           <IconLock width={14} height={14} />
                           {t("backerOnly")}
                         </div>
-                        <p className="mt-1 text-[13.5px] text-body">
+                        <p className="mt-1 text-sm text-body">
                           {t("backerOnlyBody")}
                         </p>
                       </>
                     ) : (
                       <>
-                        <div className="text-[15px] font-bold">{u.title}</div>
-                        <p className="mt-1 line-clamp-2 text-[13.5px] leading-[1.5] text-body">
+                        <div className="text-base font-bold">{u.title}</div>
+                        <p className="mt-1 line-clamp-2 text-sm leading-normal text-body">
                           {u.body}
                         </p>
                       </>

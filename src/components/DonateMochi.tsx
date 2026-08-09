@@ -118,28 +118,28 @@ export function DonateMochi({
   }
 
   return (
-    <div className="rounded-[20px] border border-line-2 bg-card p-6">
+    <div className="rounded-xl border border-line-2 bg-card p-6">
       <Eyebrow>{t("title")}</Eyebrow>
-      <p className="mt-1.5 text-[15px] text-body">
+      <p className="mt-1.5 text-base text-body">
         {t("subtitle", { name: creatorName })}
       </p>
 
       {!open || !issuance ? (
-        <p className="mt-5 text-[15px] text-muted">{t("notOnSale")}</p>
+        <p className="mt-5 text-base text-muted">{t("notOnSale")}</p>
       ) : (
         <div className="mt-5">
           {/* current holding balance */}
-          <div className="flex items-center justify-between rounded-[14px] bg-panel px-4 py-3">
-            <span className="text-[13px] font-semibold text-muted-2">
+          <div className="flex items-center justify-between rounded-lg bg-panel px-4 py-3">
+            <span className="text-xs font-semibold text-muted-2">
               {t("myBalance")}
             </span>
-            <span className="flex items-center gap-1.5 text-[15px] font-extrabold text-ink">
+            <span className="flex items-center gap-1.5 text-base font-extrabold text-ink">
               <Mochi width={16} height={12} />
               {formatCount(balance)}
             </span>
           </div>
 
-          <p className="mt-4 text-[14px] text-muted">
+          <p className="mt-4 text-sm text-muted">
             {t("mochiRate", { price })}
           </p>
 
@@ -148,7 +148,7 @@ export function DonateMochi({
               once 직접 입력 is chosen, so there's no single control this could
               point `htmlFor` at — and a label with no target is worse than
               none. The field carries the same text as its aria-label. */}
-          <span className="mb-1.5 mt-4 block text-[13px] font-semibold text-muted-2">
+          <span className="mb-1.5 mt-4 block text-xs font-semibold text-muted-2">
             {t("amountLabel")}
           </span>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
@@ -204,19 +204,19 @@ export function DonateMochi({
             // The raw number, not a compact form — a limit has to be exact, and
             // "100만" is both imprecise and awkward next to a typed figure. ICU
             // formats the number arg with locale grouping.
-            <p className="mt-1.5 text-[12px] text-muted">
+            <p className="mt-1.5 text-2xs text-muted">
               {t("amountMaxHint", { max: MOCHI_MAX_PURCHASE_KRW })}
             </p>
           )}
 
           {/* derived bonus preview */}
           <div className="mt-4 flex items-center justify-between">
-            <span className="text-[14px] text-muted-2">
+            <span className="text-sm text-muted-2">
               {belowMin ? "" : t("bonusPreview", { count: bonusPreview })}
             </span>
           </div>
           {belowMin && (
-            <p className="mt-1 text-[13px] font-semibold text-live">
+            <p className="mt-1 text-xs font-semibold text-live">
               {t("belowMinHint", { price })}
             </p>
           )}
@@ -229,7 +229,7 @@ export function DonateMochi({
                 style={{ width: `${percent}%` }}
               />
             </div>
-            <p className="mt-1.5 text-[12px] text-muted">
+            <p className="mt-1.5 text-2xs text-muted">
               {t("goalProgress", { percent })}
             </p>
           </div>
@@ -261,8 +261,8 @@ export function DonateMochi({
           </div>
 
           {success !== null && (
-            <div className="mt-3 rounded-[12px] bg-sage-bg px-4 py-3">
-              <p className="text-[14px] font-semibold text-sage">
+            <div className="mt-3 rounded-md bg-sage-bg px-4 py-3">
+              <p className="text-sm font-semibold text-sage">
                 {t("success", { count: success })}
               </p>
               {!nowFollowing && (
@@ -270,7 +270,7 @@ export function DonateMochi({
                   type="button"
                   onClick={onFollowClick}
                   disabled={followPending}
-                  className="mt-2.5 flex items-center gap-1.5 rounded-[10px] bg-white px-3 py-2 text-[13px] font-bold text-ink transition-colors hover:text-coral-deep disabled:opacity-60"
+                  className="mt-2.5 flex items-center gap-1.5 rounded-md bg-white px-3 py-2 text-xs font-bold text-ink transition-colors hover:text-coral-deep disabled:opacity-60"
                 >
                   <IconHeart width={14} height={14} />
                   {t("followNudge", { name: creatorName })}
@@ -285,7 +285,7 @@ export function DonateMochi({
           )}
 
           {/* non-financial disclosure — the refund terms it summarises live at /refund */}
-          <p className="mt-5 text-[12px] leading-[1.6] text-muted">
+          <p className="mt-5 text-2xs leading-relaxed text-muted">
             {t("disclosure")}{" "}
             <Link href="/refund" className="underline hover:text-body">
               {t("disclosureLink")}

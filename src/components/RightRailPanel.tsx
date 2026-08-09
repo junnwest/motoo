@@ -56,18 +56,18 @@ export function RightRailPanel({
         >
           <IconChevronRight width={16} height={16} />
         </button>
-        <h2 className="min-w-0 flex-1 truncate text-[15px] font-extrabold tracking-[-0.01em] text-ink">
+        <h2 className="min-w-0 flex-1 truncate text-base font-extrabold tracking-[-0.01em] text-ink">
           {t("discoverTitle")}
         </h2>
         <Link
           href="/explore"
-          className="flex-none text-[12.5px] font-bold text-coral-deep hover:underline"
+          className="flex-none text-xs font-bold text-coral-deep hover:underline"
         >
           {t("seeAll")} →
         </Link>
       </div>
       {items.length === 0 ? (
-        <p className="text-[13px] leading-relaxed text-muted">
+        <p className="text-xs leading-relaxed text-muted">
           {t("discoverEmpty")}
         </p>
       ) : (
@@ -78,14 +78,14 @@ export function RightRailPanel({
                 <CreatorCover
                   handle={s.handle}
                   displayName={s.displayName}
-                  className="h-[90px] w-full rounded-[10px] transition-opacity group-hover/card:opacity-90"
-                  markClass="text-[22px]"
+                  className="h-[90px] w-full rounded-md transition-opacity group-hover/card:opacity-90"
+                  markClass="text-xl"
                 />
                 <div className="mt-2">
-                  <div className="truncate text-[13px] font-extrabold text-ink">
+                  <div className="truncate text-xs font-extrabold text-ink">
                     {s.displayName}
                   </div>
-                  <div className="mt-0.5 truncate text-[11px] text-muted">
+                  <div className="mt-0.5 truncate text-2xs text-muted">
                     {ALL_CATEGORIES.includes(s.category)
                       ? tax(`categories.${s.category}`)
                       : s.category}

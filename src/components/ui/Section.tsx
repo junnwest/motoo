@@ -37,17 +37,17 @@ export function Section({
 }) {
   return (
     <section
-      className={`${boxed ? "rounded-[20px] bg-cream-warm-2 p-6 sm:p-7" : ""} ${className}`}
+      className={`${boxed ? "rounded-xl bg-cream-warm-2 p-6 sm:p-7" : ""} ${className}`}
     >
       {title && (
         <div className="mb-4 flex items-baseline justify-between gap-4">
-          <h2 className="text-[19px] font-extrabold tracking-[-0.02em] text-ink sm:text-[21px]">
+          <h2 className="text-xl font-extrabold tracking-[-0.02em] text-ink sm:text-xl">
             {title}
           </h2>
           {href && more && (
             <Link
               href={href}
-              className="flex-none text-[13.5px] font-bold text-coral-deep hover:underline"
+              className="flex-none text-sm font-bold text-coral-deep hover:underline"
             >
               {more} →
             </Link>
