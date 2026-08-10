@@ -155,7 +155,7 @@ export default async function StreamerProfilePage({
             with the actions closes the gap and gives the band a right edge. */}
         <div className="flex w-full flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
         <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
-          <Avatar name={streamer.displayName} size={92} src={streamer.avatarUrl} />
+          <Avatar name={streamer.displayName} size={76} src={streamer.avatarUrl} />
           <div className="flex-1">
             <div className="flex flex-wrap items-center gap-3">
               <h1 className="text-3xl font-extrabold tracking-[-0.03em] sm:text-4xl">
@@ -218,9 +218,9 @@ export default async function StreamerProfilePage({
             {headlineStats.map((s) => (
               <div
                 key={s.label}
-                className="rounded-lg bg-white/70 px-6 py-4 text-center lg:min-w-[132px]"
+                className="rounded-lg bg-white/70 px-5 py-3 text-center lg:min-w-[116px]"
               >
-                <div className="text-2xl font-extrabold tracking-[-0.02em]">
+                <div className="text-xl font-extrabold tracking-[-0.02em]">
                   {s.value}
                 </div>
                 <div className="mt-0.5 text-xs text-muted">{s.label}</div>

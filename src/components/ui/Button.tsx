@@ -41,8 +41,9 @@ function Spinner() {
 }
 
 const variants: Record<Variant, string> = {
-  primary:
-    "bg-coral text-white shadow-[0_10px_24px_rgba(224,138,111,.34)] hover:brightness-[1.03]",
+  // The coral glow was 10px down / 24px blur at .34 — a halo that size reads as
+  // a toy button. Same colour, half the presence (the --shadow-coral token).
+  primary: "bg-coral text-white shadow-coral hover:brightness-[1.03]",
   secondary:
     "bg-white text-ink border-[1.5px] border-line-3 hover:border-coral/60",
   dark: "bg-ink text-cream hover:brightness-125",
@@ -51,9 +52,12 @@ const variants: Record<Variant, string> = {
     "bg-white/[.16] text-white border-[1.5px] border-white/50 hover:bg-white/25",
 };
 
+// Control heights, roughly 38px and 46px. They were 46 and 60 — a 60px primary
+// button is a landing-page hero control, not a UI one, and using it everywhere
+// is most of what made the app read as oversized.
 const sizes: Record<Size, string> = {
-  md: "px-5 py-3 text-base",
-  lg: "px-[30px] py-[17px] text-lg",
+  md: "px-4 py-2.5 text-base",
+  lg: "px-6 py-3 text-lg",
 };
 
 type CommonProps = {

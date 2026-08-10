@@ -66,21 +66,24 @@
     as assembled rather than designed. Twelve steps, and a size that isn't one
     of them is a bug, not a nuance.
 
-    `base` is 15px because Korean at Pretendard's metrics reads small — the body
-    default is deliberately one step above the 14px a Latin-first system uses.
+    `base` is 14px. An earlier revision set it to 15 on the theory that Hangul
+    at Pretendard's metrics reads small; in practice that inflated the whole UI
+    and read as unprofessional — Korean products (Toss, Naver) run denser than
+    a Latin-first system, not looser. Density is the correction, and leading
+    (below) is what buys Hangul its legibility instead.
   */
-  --text-2xs: 12px; /* mono labels, legal, timestamps */
-  --text-xs: 13px; /* captions, chips */
-  --text-sm: 14px; /* secondary body, dense rows */
-  --text-base: 15px; /* body copy — the default */
-  --text-lg: 17px; /* lead paragraph, card title */
-  --text-xl: 20px; /* h3 */
-  --text-2xl: 24px; /* h2 */
-  --text-3xl: 28px; /* h1 */
-  --text-4xl: 34px; /* section display, mobile hero */
-  --text-5xl: 40px; /* hero, mobile */
-  --text-6xl: 48px; /* section display, desktop */
-  --text-7xl: 60px; /* hero, desktop */
+  --text-2xs: 11px; /* mono labels, legal, timestamps */
+  --text-xs: 12px; /* captions, chips */
+  --text-sm: 13px; /* secondary body, dense rows */
+  --text-base: 14px; /* body copy — the default */
+  --text-lg: 16px; /* lead paragraph, card title */
+  --text-xl: 18px; /* h3 */
+  --text-2xl: 22px; /* h2 */
+  --text-3xl: 26px; /* h1 */
+  --text-4xl: 32px; /* section display, mobile hero */
+  --text-5xl: 38px; /* hero, mobile */
+  --text-6xl: 46px; /* section display, desktop */
+  --text-7xl: 56px; /* hero, desktop */
 
   /*
     Line height. Same story — twelve values (1.1 … 1.7) collapsed to four.

@@ -29,11 +29,11 @@ import { IconChevronDown } from "@/components/ui/Icons";
  */
 
 const CONTROL_BASE =
-  "w-full rounded-md border border-line-3 bg-white px-4 py-3 text-base outline-none transition focus:border-coral/60";
+  "w-full rounded-md border border-line-3 bg-white px-3.5 py-2.5 text-base outline-none transition focus:border-coral/60";
 
 /** Compact variant for filter-bar controls, which aren't full-width fields. */
 const CONTROL_SM =
-  "rounded-md border border-line-3 bg-white px-3 py-[10px] text-sm font-medium text-ink outline-none transition focus:border-coral";
+  "rounded-md border border-line-3 bg-white px-3 py-2 text-sm font-medium text-ink outline-none transition focus:border-coral";
 
 /**
  * Exported for *group* labels only — a set of choice tiles (thumbnail picker,
