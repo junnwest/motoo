@@ -4,6 +4,29 @@ What shipped, newest first. **This file is history — it is not a resume point.
 For current status and open work see [`PROGRESS.md`](./PROGRESS.md); for *why* a thing is
 the way it is see [`DECISIONS.md`](./DECISIONS.md).
 
+## 2026-08-10 (design pass — on `design/polish`, not yet merged)
+
+- [x] **One type/radius/leading/motion scale.** 41 font sizes → 12, 13 radii →
+  5, 12 line-heights → 4, plus the motion tokens that did not exist. 560 values
+  across 69 files, mapped to the nearest step.
+- [x] **Density correction** after owner feedback that everything read too
+  large — it did, and the first pass caused it. Every type step down one notch;
+  buttons ~46/60px → ~38/46; the primary button's 24px coral halo halved.
+- [x] **Four pages given a hierarchy**: `/s/[handle]` (dead desktop gap closed,
+  three identical panels → three weights, leaderboard podium, coral slabs → the
+  price leads), `/home` (balance elevated, items flat, orders and news become
+  lists), `/` (one section rhythm, one heading scale, one alignment rule),
+  `/studio` (the orders table was breaking 대기 중 one character per line).
+- [x] **motion** on the shared Modal and the donation success state; both
+  respect `prefers-reduced-motion`.
+- [x] **Pretendard self-hosted** as a 92-file dynamic subset; CSP dropped its
+  jsdelivr exception.
+- [x] **`/ranking` deleted.** It rendered the same `getMyRankings` rows as
+  `/home`, linking to the same pages, behind `NOINDEX`. Rank moved to
+  `/profile`'s holdings, where it was missing. No global leaderboard: mochi is
+  not comparable across creators, and the only comparable field would make it a
+  public ranking of who spent the most money. See DECISIONS.
+
 ## 2026-08-10 (production baselined onto migrations; the audit branch is live)
 
 - [x] **Production baselined and deployed.** Six Phase-1 tables and 910 rows dropped,

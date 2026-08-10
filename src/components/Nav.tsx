@@ -7,7 +7,6 @@ import { UserMenu, type MenuItem } from "./UserMenu";
 import { NotificationBell } from "./NotificationBell";
 import { StudioPill } from "./StudioPill";
 import { Mochi } from "./Mochi";
-import { IconTrophy } from "@/components/ui/Icons";
 import { getUnreadCount } from "@/lib/notify";
 import { getAvatarUrl, getSession } from "@/lib/session";
 
@@ -86,13 +85,12 @@ export async function Nav() {
           <div className="flex items-center gap-1.5 sm:gap-2.5">
             {showConsumerChrome && (
               <>
-                <Link
-                  href="/ranking"
-                  aria-label={t("ranking")}
-                  className="flex h-10 w-10 items-center justify-center rounded-full text-ink transition hover:bg-cream-warm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-deep"
-                >
-                  <IconTrophy width={23} height={23} />
-                </Link>
+                {/* The trophy linked to /ranking, which was deleted 2026-08-10:
+                    it rendered the same getMyRankings rows /home already shows,
+                    linking to the same creator pages. Rank now lives where it
+                    is actionable — the /home balance card and the /profile
+                    holding — so the nav slot goes back rather than pointing at
+                    a duplicate. See DECISIONS 2026-08-10. */}
                 <NotificationBell
                   unreadCount={unreadCount}
                   label={t("notifications")}

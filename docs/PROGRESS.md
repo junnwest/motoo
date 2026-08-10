@@ -132,7 +132,9 @@ The audit roadmap is complete through Stage 9. What is left is either **blocked 
 1. **Fulfillment SLA** — creator-set promised-by window on items, shown publicly. The trust
    primitive the Trust Report was reaching for, at a fraction of the cost.
 2. **Rank-as-narrative** — `getSupporterRank` is computed and displayed but changes nothing;
-   "N mochi to the next rank" turns a static number into a loop.
+   "N mochi to the next rank" turns a static number into a loop. It belongs **embedded** —
+   the `/home` balance card, the `/profile` holding, the creator page — not on a page of its
+   own: `/ranking` was deleted on 2026-08-10 for being a duplicate destination (DECISIONS).
 3. **Guided onboarding** — first-follow prompt; the zero-state's three steps all link to
    `/explore`, so it teaches without branching.
 4. **Global search**, **creator analytics**.

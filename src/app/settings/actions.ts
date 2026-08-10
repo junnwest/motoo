@@ -85,7 +85,6 @@ export async function updateAvatar(
     "/profile",
     "/home",
     "/explore",
-    "/ranking",
     "/notifications",
   ]) {
     revalidatePath(path);

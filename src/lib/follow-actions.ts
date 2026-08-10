@@ -41,8 +41,7 @@ export async function toggleFollow(
   // reflected regardless of which page it happened on.
   revalidatePath(`/s/${handle}`);
   revalidatePath("/home");
-  revalidatePath("/explore");
-  revalidatePath("/ranking");
+  revalidatePath("/explore");
   revalidatePath("/notifications");
   revalidatePath("/profile");
   revalidatePath("/settings");

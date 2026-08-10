@@ -72,8 +72,7 @@
     "greeting": "{name}님",
     "home": "홈",
     "notifications": "알림",
-    "notificationsEmpty": "아직 알림이 없어요",
-    "ranking": "랭킹"
+    "notificationsEmpty": "아직 알림이 없어요"
   },
   "footer": {
     "fanTagline": "좋아하는 크리에이터를 응원하는 가장 따뜻한 방법.",
@@ -1021,9 +1020,6 @@
     "followingEmpty": "아직 팔로우한 크리에이터가 없어요."
   },
   "ranking": {
-    "title": "내 랭킹",
-    "subtitle": "후원한 크리에이터별로, 누적 적립 모찌 기준의 내 순위예요.",
-    "empty": "아직 후원한 크리에이터가 없어요.",
     "rankOf": "{total}명 중 {rank}등"
   },
   "settings": {

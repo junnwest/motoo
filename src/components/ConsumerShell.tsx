@@ -19,7 +19,7 @@ import { getUnreadCount } from "@/lib/notify";
  * (each page sets its own max-width) is centered; the shell itself spans the
  * full viewport width, same as `Nav`.
  *
- * Used on /home, /explore, /ranking, /notifications, /profile, /settings,
+ * Used on /home, /explore, /notifications, /profile, /settings,
  * and /s/[handle].
  *
  * Deliberately NOT used on: the logged-out marketing landing (`/`), auth

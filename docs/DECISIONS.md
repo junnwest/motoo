@@ -11,6 +11,8 @@ To pull a single entry, grep its heading with trailing context, e.g.
 
 | Date | Decision |
 | --- | --- |
+| 2026-08-10 | `/ranking` deleted; no global leaderboard, because mochi isn't comparable across creators |
+| 2026-08-10 | One type/radius/leading/motion scale; then a density correction, motion, self-hosted Pretendard |
 | 2026-08-10 | Code pushed to `main` before the prod schema — owner's informed call (rename later converted to a migration on merge) |
 | 2026-08-10 | Design-tier-2/3 pass + de-boxing the landing's repeated cards (owner's call) |
 | 2026-08-10 | 고객센터 wired to the owner's personal email, explicitly as an interim channel |
@@ -81,6 +83,49 @@ To pull a single entry, grep its heading with trailing context, e.g.
 | 2026-07-08 | Prisma pinned to v6 (not v7) |
 | 2026-07-08 | Korean-first, i18n-ready; integer KRW; mock PG |
 
+## 2026-08-10 — `/ranking` deleted, and there will be no global leaderboard
+
+Owner asked whether to delete the page (folding its content into `/profile`) or
+saturate it with global rankings, and asked for the factors rather than a quick
+answer. Both halves resolved against keeping it.
+
+**A global ranking is not buildable on mochi.** Every creator sets their own
+`pricePerMochiKrw` and it ratchets, so 42 mochi from a 200원 creator and 42 from
+a 100원 creator represent twice the difference in money — and an early supporter
+earns more mochi per ₩ than a later one at the *same* creator. `src/lib/ranking.ts`
+already says this in its own docblock: mochi is a rate-distorted proxy for KRW.
+A global mochi board would rank people by which creators they picked and when
+they arrived, look authoritative, and mean nothing.
+
+**The only globally comparable field is `krwPaidTotal`, and that is a different
+product.** It makes the page a public ranking of who spent the most money, which
+collides with the not-a-financial-product constraint (`check:vocab` exists to
+police exactly this register), with privacy (a per-creator board is contextual —
+you opted into that community; a platform-wide spend ledger is not), and
+specifically with Korea, where whale-driven donation leaderboards are an active
+controversy rather than a neutral pattern. `krwPaidTotal` also has exactly one
+consumer today (the account export), so this would be a new public commitment
+built on a dormant field. A global *creator* ranking is defensible but already
+exists as `/explore?sort=backers`, and DECISIONS 2026-07-31 settled on exactly
+one discover surface.
+
+**The page wasn't thin, it was duplicative.** It rendered one row per held
+creator from `getMyRankings`, each with a rank chip linking to `/s/[handle]` —
+the same call, same chip, same destination as `/home`'s balance cards, one nav
+click away. It also couldn't earn its keep any other way: `NOINDEX` and
+signed-in-only means no SEO, no shareability, no acquisition value, while
+costing a permanent nav slot and two `revalidatePath` calls on unrelated writes.
+
+**What replaced it:** `/profile` holdings now carry the rank chip beside the
+balance — the genuine gap, since profile listed holdings with no standing at
+all. `/home` already had it. The nav trophy is gone rather than repointed.
+
+**Counter-argument, acknowledged:** a 내 랭킹 destination is a real retention
+pattern in Korean fandom products, and ranks motivate. Deleted anyway, because
+the motivation comes from seeing progress where you can act on it, and both
+remaining surfaces do. PROGRESS's "rank-as-narrative" idea ("N mochi to the next
+rank") lands better next to a balance than on a page nobody navigates to.
+
 ## 2026-08-10 — Code pushed to `main` before the prod schema, owner's informed call
 > **The outage half of this entry was resolved by the merge into
 > `audit/product-hardening` the same day.** That branch had already moved schema changes
@@ -112,6 +157,42 @@ that don't exist on this machine (`.env.production.local` absent).
 - Not a mistake to walk back: this is the direct, foreseeable consequence of the same
   destructive-rename design decided in the donation-pivot entry, now actually shipped.
   The fix is one command away once someone has prod credentials — see DEPLOYMENT.md.
+
+## 2026-08-10 — One scale, then a density correction, motion, and a self-hosted font
+
+Owner's brief: the site looked "vibe-coded" and should read clean, modern and
+interactive, possibly using third-party libraries. Measuring first changed the
+answer. The palette and tokens in `globals.css` were fine; the components
+ignored them — **41 distinct font sizes** (10, 10.5, 11, 11.5, 12, 12.5, 13,
+13.5, …), 13 corner radii against 3 declared, 12 line-heights, and no motion
+system at all. Nobody consciously sees 13.5px beside 14px; they read the page as
+assembled rather than designed. That, not the colours, was the problem.
+
+- **Deliberately not shadcn/ui.** It is the default recommendation and the wrong
+  one here: it has become the recognisable AI-built-app aesthetic, so adopting
+  it would trade a distinctive warm Korean palette for exactly the look we were
+  trying to escape. Radix (headless, behaviour only) stays on the table; the
+  visual layer stays ours.
+- **One scale**, applied by codemod: 560 values across 69 files → 12 type steps,
+  5 radii, 4 line-heights, plus motion tokens. Mapped to the nearest step so the
+  pass was visually near-neutral.
+- **Then a density correction, on owner feedback that everything looked too
+  big — and they were right.** I had set `base` to 15px reasoning that Hangul
+  reads small, and the codemod rounded ties upward, so the inflation compounded.
+  Korean products run *denser* than a Latin-first system; leading buys Hangul
+  legibility, not size. Every step dropped one notch, buttons went from ~46/60px
+  to ~38/46, and the primary button lost a 24px-blur coral halo. Twelve lines,
+  because the tokens existed — that is the return on doing the boring part
+  first.
+- **motion (framer-motion successor)** in the two places that earn it: the
+  shared Modal (which returned `null` on `!open`, so nothing could ever animate
+  out) and the donation success state, the one emotional moment in the product.
+  Both honour `prefers-reduced-motion` explicitly.
+- **Pretendard self-hosted as a dynamic subset.** It was a CDN `@import` inside
+  `globals.css` — discovered only after CSS parsing, so first paint waited on a
+  third party, and jsdelivr was a single point of failure for the visual
+  identity. 92 subsets now ship from `public/`; `/s/[handle]` fetches 17 of them.
+  CSP dropped its jsdelivr exception in `style-src` and `font-src`.
 
 ## 2026-08-10 — Design-tier-2/3 pass, plus de-boxing the landing's repeated cards
 PROGRESS.md's design-tier-2/3 bucket had 4 items. Checked each against the live code

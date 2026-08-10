@@ -10,9 +10,11 @@ import { Avatar } from "@/components/ui/Placeholder";
 import { CreatorBadge } from "@/components/CreatorBadge";
 import { CancelOrderButton } from "@/components/CancelOrderButton";
 import { CreatorCover } from "@/components/CreatorCover";
+import { IconTrophy } from "@/components/ui/Icons";
 import { Section } from "@/components/ui/Section";
 import { getCurrentBacker, getSession } from "@/lib/session";
 import { getHoldingsForBacker, getOrdersForBacker } from "@/lib/mochi";
+import { getMyRankings } from "@/lib/ranking";
 import { formatKstDate } from "@/lib/format";
 import { ALL_CATEGORIES } from "@/lib/creatorTaxonomy";
 
@@ -39,13 +41,16 @@ export default async function ProfilePage() {
   const tc = await getTranslations("common");
   const tm = await getTranslations("myMochi");
   const tax = await getTranslations("creatorTaxonomy");
+  const tr = await getTranslations("ranking");
   const backer = await getCurrentBacker();
   if (!backer) redirect("/api/session-reset");
 
-  const [holdings, orders] = await Promise.all([
+  const [holdings, orders, rankings] = await Promise.all([
     getHoldingsForBacker(backer.id),
     getOrdersForBacker(backer.id),
+    getMyRankings(backer.id),
   ]);
+  const rankByStreamer = new Map(rankings.map((r) => [r.streamerId, r]));
 
   return (
     <>
@@ -121,11 +126,26 @@ export default async function ProfilePage() {
                       </div>
                     </div>
 
-                    <div className="mt-4 flex items-center rounded-md bg-panel px-4 py-3">
+                    {/* Balance and standing together. Rank used to live only on
+                        /ranking — a signed-in, noindex page that rendered the
+                        same `getMyRankings` rows as /home and linked to the
+                        same place. Profile is where "where do I stand with this
+                        creator" belongs, next to what you hold. */}
+                    <div className="mt-4 flex flex-wrap items-center justify-between gap-2 rounded-md bg-panel px-4 py-3">
                       <span className="flex items-center gap-1.5 text-base font-extrabold text-ink">
                         <Mochi width={16} height={12} />
                         {tm("balance", { count: h.balance })}
                       </span>
+                      {rankByStreamer.get(h.streamerId) && (
+                        <span className="flex items-center gap-1 rounded-full bg-coral-chip px-2 py-0.5 text-2xs font-semibold text-coral-deep">
+                          <IconTrophy width={12} height={12} />
+                          {tr("rankOf", {
+                            rank: rankByStreamer.get(h.streamerId)!.rank,
+                            total: rankByStreamer.get(h.streamerId)!
+                              .totalSupporters,
+                          })}
+                        </span>
+                      )}
                     </div>
 
                     <ButtonLink
