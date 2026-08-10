@@ -1,5 +1,9 @@
-/* Pretendard must be imported before Tailwind so @layer ordering stays correct */
-@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css");
+/* Pretendard must be imported before Tailwind so @layer ordering stays correct.
+   Self-hosted (./pretendard.css) rather than a CDN url() import: this one is
+   inlined at build time by the CSS pipeline, so it costs no runtime request,
+   while the old `@import url(cdn...)` was discovered only after CSS parsing and
+   blocked first paint on a third party. See that file's header. */
+@import "./pretendard.css";
 @import "tailwindcss";
 
 /*

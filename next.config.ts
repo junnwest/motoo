@@ -15,9 +15,11 @@ const isProd = process.env.NODE_ENV === "production";
  * degrading it. Report-Only gives us the violation reports with zero blast
  * radius; enforcement follows once the reports are quiet.
  *
- * `style-src` has to allow the jsdelivr origin because Pretendard is loaded via
- * an `@import` in globals.css. Self-hosting the font (Stage 6) removes that
- * exception and is a prerequisite for tightening this to `'self'`.
+ * The jsdelivr exception in `style-src`/`font-src` is **gone** (2026-08-10):
+ * Pretendard is now self-hosted as a dynamic subset under
+ * `public/fonts/pretendard/`, so no third-party origin is involved in rendering
+ * text at all. What still blocks enforcement is `'unsafe-inline'`, which needs
+ * the nonce work described above — not the font.
  */
 const csp = [
   "default-src 'self'",
@@ -29,8 +31,8 @@ const csp = [
   // and OAuth providers serve avatars from their own hosts.
   "img-src 'self' data: https:",
   "script-src 'self' 'unsafe-inline'" + (isProd ? "" : " 'unsafe-eval'"),
-  "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
-  "font-src 'self' data: https://cdn.jsdelivr.net",
+  "style-src 'self' 'unsafe-inline'",
+  "font-src 'self' data:",
   "connect-src 'self'",
   // NOT `upgrade-insecure-requests`: browsers ignore it in a Report-Only
   // policy and log a console error for it on every single page load. Add it
