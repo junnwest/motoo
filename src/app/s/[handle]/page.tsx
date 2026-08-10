@@ -90,7 +90,7 @@ export default async function StreamerProfilePage({
   const headlineStats = [
     { value: `${leaderboard.totalSupporters}`, label: t("backers") },
     {
-      value: formatCount(leaderboard.totalMochiPurchased),
+      value: formatCount(leaderboard.totalMochiEarned),
       label: t("totalMochi"),
     },
   ];
@@ -152,8 +152,8 @@ export default async function StreamerProfilePage({
               initialFollowing={following}
               signedIn={!!backer}
             />
-            <ButtonLink href={`/s/${streamer.handle}/buy`} size="lg">
-              <Mochi width={18} height={14} /> {tc("sendMochi")}
+            <ButtonLink href={`/s/${streamer.handle}/donate`} size="lg">
+              <Mochi width={18} height={14} /> {tc("donate")}
             </ButtonLink>
           </div>
         </div>
@@ -181,8 +181,8 @@ export default async function StreamerProfilePage({
           (DECISIONS 2026-07-31) — so boxes don't nest as card-on-card. */}
       <div className="flex w-full flex-col gap-6 px-6 py-10 sm:px-10 sm:py-12">
         {/* Ranking (30%) + Marketplace (70%), side by side (DECISIONS
-            2026-08-01) — 모찌 보내기 now routes to its own page
-            (/s/[handle]/buy) instead of an in-page anchor, freeing this
+            2026-08-01) — 후원하기 now routes to its own page
+            (/s/[handle]/donate) instead of an in-page anchor, freeing this
             column for the supporter leaderboard next to the market instead of
             stacked above it. Stacks to one column on narrow viewports. */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-10">

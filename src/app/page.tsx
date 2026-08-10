@@ -225,17 +225,22 @@ export default async function FanLandingPage() {
                   </div>
                 </div>
               </div>
-              <ButtonLink href={`/s/${spotlight.handle}/buy`} size="lg">
-                <Mochi width={18} height={14} /> {tc("sendMochi")}
+              <ButtonLink href={`/s/${spotlight.handle}/donate`} size="lg">
+                <Mochi width={18} height={14} /> {tc("donate")}
               </ButtonLink>
             </div>
           </div>
         </section>
       )}
 
-      {/* Mochi explainer */}
-      <section id="what-is-mochi" className="px-6 pb-20 sm:px-14">
-        <div className="mx-auto max-w-[1200px] rounded-[24px] border border-line-2 bg-cream-warm p-11 text-center">
+      {/* Mochi explainer — full-bleed, not a boxed card (DECISIONS 2026-08-10: matches
+          the Final CTA band below, the one section on this page that already avoided
+          the repeated-card look). */}
+      <section
+        id="what-is-mochi"
+        className="bg-cream-warm px-6 py-20 text-center sm:px-14"
+      >
+        <div className="mx-auto max-w-[680px]">
           <div className="mb-[18px] flex justify-center gap-[10px]">
             <Mochi width={44} height={36} />
             <Mochi width={56} height={46} />
@@ -252,9 +257,9 @@ export default async function FanLandingPage() {
         </div>
       </section>
 
-      {/* Are you a creator? */}
-      <section className="px-6 pb-20 sm:px-14">
-        <div className="mx-auto flex max-w-[1200px] flex-col items-center justify-between gap-6 rounded-[24px] border border-line-2 bg-ink p-10 text-center sm:flex-row sm:text-left">
+      {/* Are you a creator? — full-bleed dark band, same non-boxed treatment. */}
+      <section className="bg-ink px-6 py-16 sm:px-14">
+        <div className="mx-auto flex max-w-[1200px] flex-col items-center justify-between gap-6 text-center sm:flex-row sm:text-left">
           <div>
             <h3 className="text-[24px] font-extrabold text-cream sm:text-[28px]">
               {t("creatorPromptTitle")}

@@ -269,15 +269,15 @@ async function main() {
       });
       items.push(item);
     }
-    // soldQuantity: seed some progress toward the soft goal.
-    const soldQuantity = Math.round(goalQuantity * (0.2 + rand() * 0.5));
+    // grantedQuantity: seed some progress toward the soft goal.
+    const grantedQuantity = Math.round(goalQuantity * (0.2 + rand() * 0.5));
     await prisma.mochiIssuance.create({
       data: {
         streamerId: streamer.id,
         pricePerMochiKrw,
         goalQuantity,
-        soldQuantity,
-        lifetimeSold: soldQuantity, // single seeded tier: lifetime == current tier
+        grantedQuantity,
+        lifetimeGranted: grantedQuantity, // single seeded tier: lifetime == current tier
         active: true,
       },
     });
@@ -513,7 +513,7 @@ async function main() {
         streamerId: flagship.streamerId,
         backerId: demo.id,
         balance: 42,
-        purchasedTotal: 60,
+        mochiEarnedTotal: 60,
         krwPaidTotal: 60 * flagship.pricePerMochiKrw,
       },
     });
@@ -521,14 +521,14 @@ async function main() {
     // A handful of pool fans hold mochi too (so the dashboard shows real holders).
     const holders = backers.filter((b) => b.id !== demo.id).slice(0, 9);
     for (const b of holders) {
-      const purchased = 10 + Math.floor(rand() * 40);
+      const earned = 10 + Math.floor(rand() * 40);
       await prisma.mochiHolding.create({
         data: {
           streamerId: flagship.streamerId,
           backerId: b.id,
-          balance: Math.floor(purchased * (0.3 + rand() * 0.6)),
-          purchasedTotal: purchased,
-          krwPaidTotal: purchased * flagship.pricePerMochiKrw,
+          balance: Math.floor(earned * (0.3 + rand() * 0.6)),
+          mochiEarnedTotal: earned,
+          krwPaidTotal: earned * flagship.pricePerMochiKrw,
         },
       });
     }
@@ -539,14 +539,14 @@ async function main() {
       .filter((c) => c.streamerId !== flagship!.streamerId)
       .slice(0, 3);
     for (const c of alsoSupported) {
-      const purchased = 20 + Math.floor(rand() * 40);
+      const earned = 20 + Math.floor(rand() * 40);
       await prisma.mochiHolding.create({
         data: {
           streamerId: c.streamerId,
           backerId: demo.id,
-          balance: Math.floor(purchased * (0.4 + rand() * 0.5)),
-          purchasedTotal: purchased,
-          krwPaidTotal: purchased * c.pricePerMochiKrw,
+          balance: Math.floor(earned * (0.4 + rand() * 0.5)),
+          mochiEarnedTotal: earned,
+          krwPaidTotal: earned * c.pricePerMochiKrw,
         },
       });
     }
@@ -607,7 +607,7 @@ async function main() {
           streamerId: held.streamerId,
           backerId: kenneth.id,
           balance,
-          purchasedTotal: balance + 15,
+          mochiEarnedTotal: balance + 15,
           krwPaidTotal: (balance + 15) * held.pricePerMochiKrw,
         },
       });

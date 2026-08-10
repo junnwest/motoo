@@ -338,34 +338,39 @@ model TrustReport {
 
 // Per-creator mochi issuance config. The creator sets quantity × price as a SOFT
 // GOAL/target (e.g. 100 × ₩200 = ₩20,000) — a framing device, not a scarce security
-// (see docs/DECISIONS.md). soldQuantity tracks progress toward the goal.
+// (see docs/DECISIONS.md). grantedQuantity tracks progress toward the goal. Mochi is
+// never sold: a fan donates KRW directly to the creator, and mochi is granted
+// afterward as a non-purchased bonus at this rate (see the donation-pivot DECISIONS
+// entry) — pricePerMochiKrw reads as "KRW donated to earn 1 bonus mochi."
 model MochiIssuance {
   id               String   @id @default(cuid())
   streamerId       String   @unique
   streamer         Streamer @relation(fields: [streamerId], references: [id], onDelete: Cascade)
-  pricePerMochiKrw Int // integer KRW price of one mochi unit AT THE CURRENT TIER
-  goalQuantity     Int // availability at the current price (the "X left" meter)
-  soldQuantity     Int      @default(0) // sold IN THE CURRENT TIER; resets to 0 on a price raise
-  lifetimeSold     Int      @default(0) // total mochi ever sold, across all tiers (for stats)
-  active           Boolean  @default(true) // creator can pause sales
+  pricePerMochiKrw Int // integer KRW donated to earn 1 mochi bonus, AT THE CURRENT TIER
+  goalQuantity     Int // bonus-mochi goal at the current tier (the "X left" meter)
+  grantedQuantity  Int      @default(0) // granted IN THE CURRENT TIER; resets to 0 on a rate raise
+  lifetimeGranted  Int      @default(0) // total mochi ever granted, across all tiers (for stats)
+  active           Boolean  @default(true) // creator can pause the donation bonus
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 }
 
-// A user's unspent mochi balance FOR ONE creator. Mochi is non-transferable and
-// scoped to the issuing creator's marketplace. purchasedTotal is lifetime bought
-// (for "supporter" display); balance is what remains spendable.
+// A user's unspent mochi balance FOR ONE creator, earned as a bonus on donations to
+// that creator (never sold — see docs/DECISIONS.md, the donation-pivot entry). Mochi
+// is non-transferable and scoped to the issuing creator's marketplace.
+// mochiEarnedTotal is lifetime earned (for "supporter" display); balance is what
+// remains spendable.
 model MochiHolding {
-  id             String   @id @default(cuid())
-  streamerId     String
-  streamer       Streamer @relation(fields: [streamerId], references: [id], onDelete: Cascade)
-  backerId       String
-  backer         Backer   @relation(fields: [backerId], references: [id], onDelete: Cascade)
-  balance        Int      @default(0) // unspent mochi units held for this creator
-  purchasedTotal Int      @default(0) // lifetime mochi purchased from this creator
-  krwPaidTotal   Int      @default(0) // lifetime KRW paid — basis for future refund-at-paid
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id               String   @id @default(cuid())
+  streamerId       String
+  streamer         Streamer @relation(fields: [streamerId], references: [id], onDelete: Cascade)
+  backerId         String
+  backer           Backer   @relation(fields: [backerId], references: [id], onDelete: Cascade)
+  balance          Int      @default(0) // unspent mochi units held for this creator
+  mochiEarnedTotal Int      @default(0) // lifetime mochi earned as a donation bonus from this creator
+  krwPaidTotal     Int      @default(0) // lifetime KRW donated — the leaderboard/refund ledger
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
   @@unique([streamerId, backerId])
   @@index([streamerId])

@@ -11,6 +11,11 @@ To pull a single entry, grep its heading with trailing context, e.g.
 
 | Date | Decision |
 | --- | --- |
+| 2026-08-10 | Code pushed to `main` before the prod schema — owner's informed call, site 500s until fixed |
+| 2026-08-10 | Design-tier-2/3 pass + de-boxing the landing's repeated cards (owner's call) |
+| 2026-08-10 | 고객센터 wired to the owner's personal email, explicitly as an interim channel |
+| 2026-08-09 | Mochi becomes a donation bonus, not a purchase (the donation pivot) |
+| 2026-08-09 | Dropped the 60% unused-balance refund path; 7-day 청약철회 stays |
 | 2026-08-06 | `/refund` states real positions: 7-day 청약철회, 60% rule, 법령 carve-out |
 | 2026-08-03 | Cross-host hops target the canonical host, not the bare apex |
 | 2026-08-02 | Auth transitions navigate for real; a server-action redirect skipped middleware |
@@ -68,7 +73,180 @@ To pull a single entry, grep its heading with trailing context, e.g.
 | 2026-07-08 | Prisma pinned to v6 (not v7) |
 | 2026-07-08 | Korean-first, i18n-ready; integer KRW; mock PG |
 
+## 2026-08-10 — Code pushed to `main` before the prod schema, owner's informed call
+Asked to "update md files and push." Checking the deploy runbook first surfaced a real
+problem: the donation-pivot rename (previous entry) is a **destructive** schema change —
+first one this project has shipped; everything before it was additive/nullable and safe
+by Prisma's own default refusal-without-`--accept-data-loss` behavior. The Vercel build
+only runs `prisma generate`, never `db push` (DEPLOYMENT.md, standing constraint) — prod
+schema pushes are a manual pre-push step, and this one needs real Supabase credentials
+that don't exist on this machine (`.env.production.local` absent).
+
+- **Put the choice to the owner rather than deciding silently**: push code + prod schema
+  together (owner does the prod push, which only they can — real credentials), hold the
+  push entirely until sorted, or push code now and accept the outage. **Owner picked the
+  third**, explicitly, understanding themotoo.com's mochi-related pages (buy/donate,
+  leaderboards, ranking, Studio dashboard) will 500 until someone with prod credentials
+  runs the `--accept-data-loss` push documented in DEPLOYMENT.md.
+- **Flagged at the top of PROGRESS.md**, not buried — "nothing is half-finished, main is
+  green" was true before this and is not true now, so the file's own framing changed to
+  say so rather than let a stale "all green" line sit above a real outage.
+- Not a mistake to walk back: this is the direct, foreseeable consequence of the same
+  destructive-rename design decided in the donation-pivot entry, now actually shipped.
+  The fix is one command away once someone has prod credentials — see DEPLOYMENT.md.
+
+## 2026-08-10 — Design-tier-2/3 pass, plus de-boxing the landing's repeated cards
+PROGRESS.md's design-tier-2/3 bucket had 4 items. Checked each against the live code
+before touching anything — 2 were real, 2 turned out stale — then, separately, tackled the
+5th thing PROGRESS flagged as still open: the landing repeating one bordered-card template.
+
+- **Real: Latin eyebrows.** `Eyebrow`'s CSS is `uppercase`, so `fanLanding`/`creatorLanding`
+  copy like `"discover"`/`"how mochi works"` rendered as `DISCOVER`/`HOW MOCHI WORKS` — the
+  one Latin-script surface left on an otherwise Korean-first landing. Translated the 5
+  live eyebrow keys (`fanLanding.eyebrow/trendingEyebrow/howEyebrow`,
+  `creatorLanding.eyebrow/howEyebrow`) plus one dead one (`explore.eyebrow`, unused but
+  cheap to fix in passing). English locale untouched — English eyebrows in `en.json` are
+  correct as English.
+- **Real, but not what it looked like: unstyled `<select>`s.** The 4 filters in
+  `ExploreFilters.tsx` already had real border/padding styling — what was missing was
+  hiding the OS's own disclosure-arrow glyph, which no `className` can touch, and drawing
+  the design system's own chevron in its place (`appearance-none` + a new
+  `IconChevronDown` in `src/components/ui/Icons.tsx`, absolutely positioned via a small
+  local `FilterSelect` wrapper). Verified via the server-rendered HTML: 4 `<select>`s, 4
+  matching chevron SVGs, 1:1 — no headless-browser tool available in this environment to
+  confirm the pixel alignment beyond that, worth a manual look.
+- **Stale: `STRONG`/`EMERGING` badges.** Live in `src/lib/grades.ts` — the retired Trust
+  Report grading (DECISIONS 2026-08-01). Confirmed **zero imports** anywhere in `src/`.
+  Nothing renders them; this item had already been resolved by the Trust Report's removal
+  and PROGRESS just hadn't caught up. `grades.ts` itself stays (Prisma schema still
+  dormant, per the standing "consciously left" note) — only the copy-fix framing was wrong.
+- **Stale, and mislocated: "퍼크 still on explore."** No 퍼크 reference exists anywhere in
+  the `explore` namespace or its components — grepped clean. The real, live 퍼크 mentions
+  were on the fan/creator **landing pages** instead (`fanLanding.benefits.perksBody`/
+  `.dashboardBody`, `creatorLanding.how.step2Body`), reworded to 혜택/아이템 to match
+  current terminology. Left `perkTitle`/`perkBody`/`tierPerks` alone (zero imports, same
+  dead-code class as `grades.ts` — not a live copy problem to fix).
+- **The repeated bordered-card sections — asked before touching, given past precedent.**
+  A previous session guessed at "the Spotify pattern" for `/home`/`/profile`/`/ranking`
+  and got corrected directly by the owner (DECISIONS 2026-07-31, "Sections are bare, not
+  boxed") — the same risk applied here, so rather than guess again, three options went to
+  the owner: de-box the single-item sections, keep every section boxed but vary color, or
+  hold for a mockup. **Owner picked de-boxing.** "Mochi explainer" and "Are you a
+  creator?" (both single-item, `rounded-[24px] border border-line-2` cards on the default
+  background) became full-bleed color bands (cream-warm / dark ink) — the exact treatment
+  the page's own Final CTA section already used, and the one section that didn't read as
+  repetitive. Benefits (4 distinct items) and Spotlight (a real profile chunk) kept their
+  card treatment; both hold genuinely separate content, unlike the two that changed.
+  Verified via the server-rendered HTML: the old `rounded-[24px] border border-line-2`
+  markup is gone from both changed sections, the new full-bleed classes are present, and
+  the Benefits/Spotlight card markup is untouched.
+
+## 2026-08-10 — 고객센터 wired to the owner's personal email, explicitly as an interim channel
+`/refund` and the footer had promised a 고객센터 that didn't exist — flagged repeatedly, most
+recently as an explicit open item in PROGRESS. Owner supplied `junn223@gmail.com` to unblock it.
+
+- **One constant, `SUPPORT_MAILTO` in `src/lib/support.ts`**, consumed by the footer's
+  `support.help`/`company.help` links (fan and creator variants) and `/refund`'s "how to
+  request" section (`howTo.body`, now rendered via `t.rich()` with a real `<a href="mailto:...">`
+  instead of plain text naming a channel that didn't link anywhere). Swapping to a real
+  channel later is a one-line change.
+- **Deliberately did not touch** `support.faq`/`support.safety`/`company.about`/`company.notice`
+  — those are unbuilt informational pages, not a contact channel; wiring them to an email
+  would misrepresent what they are. Only the two links that actually mean "contact us" changed.
+- **Flagged, not resolved, in `docs/legal/privacy-draft.md`**: a personal Gmail as the
+  official 개인정보 보호책임자 contact and as `/refund`'s only channel is fine as a
+  pre-registration stopgap, but is its own review point for counsel — carried as review-point 4,
+  distinct from (and smaller than) the "no channel at all" problem it replaces.
+
+## 2026-08-09 — Mochi becomes a donation bonus, not a purchase (the donation pivot)
+Owner's call, following straight on from the 60%-rule drop below and a legal-research pass on
+Korean prepaid-instrument regulation (전자금융거래법, amended 2024 after the 머지포인트 사태;
+전자상거래법's 선지급식 통신판매 rules). The core mechanism change: `buyMochi()` — pick a mochi
+quantity, pay `quantity × price` — becomes `donateMochi()` — donate a KRW amount directly to the
+creator, mochi is granted afterward as a non-purchased bonus computed from the same rate.
+
+- **The legal theory**: 선불전자지급수단 regulation hinges on the token being issued *in exchange
+  for payment* (대가관계). If mochi is never sold — donation money goes straight to the creator,
+  mochi is a gratuitous bonus layered on top — it plausibly falls outside that regime, landing in
+  the much lighter 마일리지/적립금 (loyalty points) bucket instead. **Not settled**: whether
+  "donate and automatically receive a proportional bonus" still reads as a 대가관계 despite the
+  relabeling is exactly the kind of question a label doesn't resolve — flagged explicitly for
+  counsel in `docs/legal/terms-draft.md` (제6조, 제8조, and item 6 of its review-points list),
+  not decided here.
+- **금전적 실질은 그대로다**: motoo already routed 100% of `amountKrw` to the creator's
+  sub-merchant with no fee deduction (`settleToStreamer`, unchanged) — the 0%-cut goal was
+  already true structurally. What changed is what the transaction *is legally shaped as*, not
+  the money path.
+- **The ratchet mechanism needed zero mechanical changes.** `MochiIssuance.pricePerMochiKrw` and
+  the price-only-rises rule (`src/app/studio/actions.ts`'s `updateIssuance`) mean the same thing
+  read forwards ("cost to buy 1 mochi") or backwards ("KRW needed to earn 1 bonus mochi") — a
+  rate rising in one framing is a bonus shrinking in the other, same "early supporters got in
+  cheaper" feel. `src/lib/issuance.ts` and `MochiIssuancePicker.tsx` are untouched; only
+  surrounding copy changed from 발행/판매 (issue/sell) framing to 보너스 지급 (bonus-grant) framing.
+- **Three field renames** (`MochiHolding.purchasedTotal` → `mochiEarnedTotal`,
+  `MochiIssuance.soldQuantity` → `grantedQuantity`, `.lifetimeSold` → `lifetimeGranted`) — the old
+  names actively lied about the new semantics, the same standard this project already holds copy
+  to (백커→팬). `krwPaidTotal` keeps its name — a fan still genuinely pays KRW to the PG.
+- **`donateMochi()` computes `mochiGranted = floor(donationAmountKrw / pricePerMochiKrw)` before
+  charging**, independent of the PG (`PaymentProvider.donate` no longer returns a
+  `mochiGranted` field at all — that was always motoo's math standing in a PG-owned response
+  field, an architectural smell now cleaned up). A donation below the current rate is rejected
+  (`DONATION_BELOW_MIN`) rather than silently accepted for a confusing 0-mochi "bonus" — owner's
+  call, over silently accepting it.
+- **Leaderboard/ranking basis stays mochi-earned, not KRW-donated** — a deliberate choice, made
+  knowing it's now a rate-distorted proxy (early donors earn more mochi per ₩ than later ones
+  under the ratchet, so a small early donor can outrank a larger later one). `krwPaidTotal` exists
+  on `MochiHolding` as the undistorted alternative if this needs revisiting later.
+- **`/refund`'s 7-day 청약철회 mechanic is preserved, not re-derived.** The copy was reworded
+  away from "구매" (purchase) framing to "후원" (donation) framing without changing the
+  underlying promise (7 days, wholly-unused, full KRW back) — mirroring the exact discipline the
+  2026-08-06 postmortem already established (disclosure copy must never assert something the
+  policy doesn't back). Whether the 7-day right *should* still apply to a donation the way it
+  did to a purchase is an open question, explicitly not resolved by this rewording — see
+  `docs/legal/terms-draft.md`'s 제8조 and review-point 6.
+- Route `/s/[handle]/buy` → `/s/[handle]/donate` (permanent redirect in `next.config.ts`);
+  `BuyMochi.tsx` → `DonateMochi.tsx`; `messages/*.json`'s `marketplace` namespace split into a
+  new `donate` namespace (acquisition copy) and a trimmed `marketplace` namespace (redemption
+  copy, unchanged). The buy-flow disclosure, onboarding subtitle, signup hero, and "how mochi
+  works" landing copy were all swept for "구매"/"buy" mochi language — the copy is the clearest
+  evidence of "was this a sale," so it got the most attention.
+- `redeemItem`, `cancelOrder`, `fulfillOrder`, and the Order/MarketplaceItem spend-side model are
+  entirely unchanged — the marketplace itself (spending earned mochi on creator items) was never
+  in question, only mochi's acquisition path.
+
+## 2026-08-09 — Dropped the 60% unused-balance refund path
+Owner's call, prompted by asking "can purchases just be non-refundable?" — the same question
+that produced the 2026-08-01 flat no-refund line, which was reverted six days later because
+전자상거래법 §17's 7-day 청약철회 right on a wholly-unused purchase isn't something a ToS
+clause can just declare away. That constraint is real and stays. The 60% rule was different:
+it was never claimed to be a statutory floor, only a 신유형 상품권 표준약관 *convention* —
+so unlike the 7-day right, dropping it doesn't reopen the exact risk that was already flagged
+and reverted once.
+
+- **`/refund` now has two refund paths, not three**: 주문 취소 (mochi back, unchanged) and
+  청약철회 (KRW back, 7-day/wholly-unused, unchanged), plus the 법령 carve-out. Once *any*
+  mochi from a purchase is spent, there is no further voluntary refund path — the remaining
+  balance just stays spendable in that creator's market.
+- **This is the narrowest defensible position, not a settled one.** Whether the 7-day right
+  itself can be narrowed or excluded for this product (e.g. a digital-content exemption with
+  explicit prior consumer consent) is still an open, counsel-only question — dropping the
+  60% rule doesn't answer it, it just stops adding voluntary refund surface on top of it.
+  Carried forward as an explicit question in `docs/legal/terms-draft.md`.
+- **`krwPaidTotal` on `MochiHolding` loses its main consumer.** 2026-08-06 had made it "the
+  ledger for both KRW paths"; with the balance path gone it reverts to being relevant mainly
+  to the 법령 carve-out (e.g. refunding a minor's full purchase), which is closer to its
+  original 2026-08-01 framing. Still unread by any code — no PG exists to pay through yet.
+- Updated: `/refund` copy (ko/en), `messages/*.json`'s `refund` namespace (section removed,
+  intro and the withdrawal note reworded, remaining sections renumbered 1–5), `CLAUDE.md`,
+  `README.md`, and `docs/legal/terms-draft.md`'s 제8조. `PROGRESS.md`'s refund review item
+  updated to match — the termination sub-item no longer reads as "60% rule vs termination"
+  since there's no 60% rule to weigh it against anymore.
+
 ## 2026-08-06 — `/refund` states real positions: 7-day 청약철회, 60% rule, 법령 carve-out
+> **The 60%-rule half of this entry is superseded by 2026-08-09**, which dropped the
+> unused-balance refund path entirely (never a statutory floor, just a 표준약관 convention).
+> The 7-day 청약철회 path and the 법령 carve-out below are unchanged.
+
 The 환불·청약철회 page had been a placeholder since the non-refundable decision (2026-08-01)
 flagged it as the one open item that was a liability rather than a nicety. It now exists,
 and the flat "구매한 모찌는 환불되지 않아요" line it was sitting against is gone.

@@ -2,23 +2,24 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
+import { SUPPORT_MAILTO } from "@/lib/support";
 
 /**
  * The 환불·청약철회 policy. Ordered as a reader hits the questions: who is
- * actually the seller, then the three distinct paths money can come back —
- * an order reversed in mochi, a purchase withdrawn in KRW, an unused balance
- * cashed out — then the statutory carve-out that overrides all of them.
+ * actually the seller, then the two paths money can come back — an order
+ * reversed in mochi, a purchase withdrawn in KRW — then the statutory
+ * carve-out that overrides both.
  *
  * `note` is the qualifier that keeps each rule honest (what it does NOT cover),
- * so only the three rule sections carry one.
+ * so only the two rule sections carry one. `howTo` alone gets `richBody`: its
+ * copy names 고객센터/support, which is now a real mailto link, not just text.
  */
-const SECTIONS: { id: string; note?: boolean }[] = [
+const SECTIONS: { id: string; note?: boolean; richBody?: boolean }[] = [
   { id: "seller" },
   { id: "orderCancel", note: true },
   { id: "withdrawal", note: true },
-  { id: "balance", note: true },
   { id: "legalException" },
-  { id: "howTo" },
+  { id: "howTo", richBody: true },
   { id: "noResale" },
 ];
 
@@ -45,7 +46,18 @@ export default async function RefundPage() {
                 {t(`${s.id}.title`)}
               </h2>
               <p className="mt-3 break-keep text-[15px] leading-[1.7] text-body">
-                {t(`${s.id}.body`)}
+                {s.richBody
+                  ? t.rich(`${s.id}.body`, {
+                      a: (chunks) => (
+                        <a
+                          href={SUPPORT_MAILTO}
+                          className="font-semibold text-coral-deep underline"
+                        >
+                          {chunks}
+                        </a>
+                      ),
+                    })
+                  : t(`${s.id}.body`)}
               </p>
               {s.note ? (
                 <p className="mt-3 break-keep border-l-2 border-line-2 pl-4 text-[14px] leading-[1.7] text-muted">

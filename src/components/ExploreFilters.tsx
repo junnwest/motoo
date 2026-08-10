@@ -2,14 +2,35 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useCallback } from "react";
-import { IconSearch } from "@/components/ui/Icons";
+import { useCallback, type SelectHTMLAttributes } from "react";
+import { IconSearch, IconChevronDown } from "@/components/ui/Icons";
 import {
   CREATOR_TYPES,
   CATEGORIES_BY_TYPE,
   ALL_CATEGORIES,
   isCreatorType,
 } from "@/lib/creatorTaxonomy";
+
+/** A native `<select>` with the OS's default arrow hidden and the design
+ * system's own chevron drawn in its place — same fix for all four filters. */
+function FilterSelect({
+  className,
+  children,
+  ...props
+}: SelectHTMLAttributes<HTMLSelectElement>) {
+  return (
+    <div className="relative">
+      <select className={className} {...props}>
+        {children}
+      </select>
+      <IconChevronDown
+        width={16}
+        height={16}
+        className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted"
+      />
+    </div>
+  );
+}
 
 /** URL-driven filter/sort bar for Explore. Ranking never includes money raised. */
 export function ExploreFilters() {
@@ -48,7 +69,7 @@ export function ExploreFilters() {
       : ALL_CATEGORIES;
 
   const selectClass =
-    "rounded-[12px] border border-line-3 bg-white px-3 py-[10px] text-[14px] font-medium text-ink outline-none focus:border-coral";
+    "appearance-none rounded-[12px] border border-line-3 bg-white py-[10px] pl-3 pr-9 text-[14px] font-medium text-ink outline-none focus:border-coral";
 
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
@@ -66,7 +87,7 @@ export function ExploreFilters() {
         />
       </form>
 
-      <select
+      <FilterSelect
         aria-label={t("filterType")}
         className={selectClass}
         value={activeType}
@@ -78,9 +99,9 @@ export function ExploreFilters() {
             {tax(`types.${ty}`)}
           </option>
         ))}
-      </select>
+      </FilterSelect>
 
-      <select
+      <FilterSelect
         aria-label={t("filterCategory")}
         className={selectClass}
         value={params.get("category") ?? "all"}
@@ -92,9 +113,9 @@ export function ExploreFilters() {
             {tax(`categories.${c}`)}
           </option>
         ))}
-      </select>
+      </FilterSelect>
 
-      <select
+      <FilterSelect
         aria-label={t("filterBackers")}
         className={selectClass}
         value={params.get("backerRange") ?? "all"}
@@ -107,9 +128,9 @@ export function ExploreFilters() {
               : t(`backerCountRanges.${r}` as never)}
           </option>
         ))}
-      </select>
+      </FilterSelect>
 
-      <select
+      <FilterSelect
         aria-label={t("sortLabel")}
         className={selectClass}
         value={params.get("sort") ?? "backers"}
@@ -120,7 +141,7 @@ export function ExploreFilters() {
             {t(`sort.${s}` as never)}
           </option>
         ))}
-      </select>
+      </FilterSelect>
     </div>
   );
 }

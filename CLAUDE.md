@@ -1,7 +1,9 @@
 # CLAUDE.md — start here
 
 **motoo** is a Korean creator-support **mochi-marketplace**: each creator issues their own
-mochi, users buy it and spend it in that creator's marketplace. (The original Trust Report
+mochi, users donate directly to a creator (100% passthrough, motoo takes 0%) and earn
+mochi afterward as a bonus, then spend it in that creator's marketplace — **mochi is
+never sold** (2026-08-09, "the donation pivot"; see DECISIONS). (The original Trust Report
 thesis has been removed from the website for 1.0.0 — grades/report schema stays in Prisma,
 fully dormant, no remaining UI surface. See DECISIONS 2026-08-01.)
 
@@ -25,8 +27,9 @@ instant follow). Both are collapsible with state persisted across navigation
 creator straight to `/studio`; a fan gets a modal explaining they aren't registered as a
 creator yet, with enrolling as the deliberate next step (never a silent jump into creator
 setup) — mirrored on the Studio host by a **motoo pill** that routes back to the consumer app. A creator's own supporters get a live
-leaderboard by lifetime mochi purchased (`getSupporterLeaderboard`, `src/lib/ranking.ts`) on
-their `/s/[handle]` page; buying mochi is its own focused page, `/s/[handle]/buy`. A bell
+leaderboard by lifetime mochi earned (`getSupporterLeaderboard`, `src/lib/ranking.ts`) on
+their `/s/[handle]` page; donating is its own focused page, `/s/[handle]/donate` (`/buy`
+301s here). A bell
 icon surfaces `/notifications` (order/item/price events, best-effort via `src/lib/notify.ts`,
 never inside `mochi.ts`'s transactions). `/profile` (identity + holdings + history) and
 `/settings` (profile picture / nickname / handle / password) round out the avatar dropdown.
@@ -62,13 +65,19 @@ relative `Location` and loops. Dev: `studio.localhost:PORT`. See DECISIONS 2026-
 - **Not a financial product.** No investment/return vocabulary in user-facing copy (spec §2).
   Run `pnpm check:vocab` after touching copy. Mochi = prepaid marketplace credit:
   non-transferable, no resale. **Refunds are narrow but real** — 7-day 청약철회 on a wholly
-  unused purchase, 잔액 환불 once 60% is spent, plus the 법령 carve-out (a minor's payment).
+  unused purchase, plus the 법령 carve-out (a minor's payment). No refund path once any mochi
+  from a purchase has been spent — the 60% unused-balance rule was dropped 2026-08-09; it was
+  never a statutory floor, just a 신유형 상품권 표준약관 convention, and the owner chose the
+  narrowest defensible surface instead.
   **`/refund` is the single source of truth; any copy touching refunds must agree with it**
   — the buy-flow disclosure contradicted it for one commit and that was the actual bug.
   The positions are the owner's, not counsel's: sign-off gates `PAYMENT_PROVIDER` leaving
-  `mock`. See DECISIONS 2026-08-06 (supersedes the flat no-refund line of 2026-08-01).
+  `mock`. See DECISIONS 2026-08-09 (drops the 60% rule) and 2026-08-06 (supersedes the flat
+  no-refund line of 2026-08-01). Mochi itself stopped being sold the same day (2026-08-09,
+  "the donation pivot") — it's now a bonus on a direct donation, not a purchase; see below
+  and DECISIONS.
 - **Money logic is tested.** Run `pnpm test` (node:test via tsx, needs `pnpm db:up`)
-  after touching `src/lib/mochi.ts` — it asserts the buy/redeem/cancel invariants
+  after touching `src/lib/mochi.ts` — it asserts the donate/redeem/cancel invariants
   and the concurrency guards (no oversell, no negative balance).
 - Money is **integer KRW**, never floats.
 - Korean-first, **no hardcoded strings** — all copy in `messages/*.json` (next-intl).

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Mochi } from "./Mochi";
+import { SUPPORT_MAILTO } from "@/lib/support";
 
 function FooterCol({
   title,
@@ -81,11 +82,11 @@ export function Footer({ variant = "fan" }: { variant?: "fan" | "creator" }) {
                 variant === "creator"
                   ? [
                       { label: t("company.about"), href: "#" },
-                      { label: t("company.help"), href: "#" },
+                      { label: t("company.help"), href: SUPPORT_MAILTO },
                       { label: t("company.notice"), href: "#" },
                     ]
                   : [
-                      { label: t("support.help"), href: "#" },
+                      { label: t("support.help"), href: SUPPORT_MAILTO },
                       { label: t("support.faq"), href: "#" },
                       { label: t("support.safety"), href: "#" },
                     ]

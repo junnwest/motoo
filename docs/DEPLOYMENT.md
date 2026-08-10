@@ -1,6 +1,6 @@
 # motoo — Deployment
 
-_Last updated: 2026-07-20_
+_Last updated: 2026-08-10_
 
 **Live at [themotoo.com](https://themotoo.com)** (consumer app) and
 **[studio.themotoo.com](https://studio.themotoo.com)** (creator console). Both are the
@@ -20,7 +20,7 @@ preview deploys per PR.
 | Prisma `directUrl` + `vercel.json` (icn1) | ✅ done |
 | Supabase project (Seoul, Data API off) | ✅ created — ref `nrfhwhefabahsfzuyxqu` |
 | Push code to GitHub `junnwest/motoo` | ✅ done (main, via HTTPS remote) |
-| Schema push + seed to Supabase | ✅ done 2026-07-19 (via `.env.production.local` DIRECT_URL); re-pushed 2026-08-01/02 for `MarketplaceItem.coverImage` + `Backer.tokenVersion` — see "Schema changes" below, it's a **manual pre-deploy step** |
+| Schema push + seed to Supabase | ⚠️ **out of date since 2026-08-10** — code for the donation-pivot rename is on `main`, the prod schema push isn't done yet (needs `--accept-data-loss`, needs real prod credentials nobody used this session). Mochi-related pages are 500ing on production until this runs. See "Schema changes" below. |
 | Vercel project + env vars + deploy | ✅ done 2026-07-20 (project `motoo`, auto-deploy on `main`) |
 | Custom domain `themotoo.com` | ✅ done — Squarespace DNS → Vercel (A `76.76.21.21` + CNAME `www`), Let's Encrypt TLS; **www is primary**, apex 308-redirects |
 | Studio subdomain `studio.themotoo.com` | ✅ done 2026-07-24 — Squarespace `studio` CNAME → `cname.vercel-dns.com`, added on the same Vercel project; serves the creator console (host-split in `src/proxy.ts`) |
@@ -102,10 +102,25 @@ npx -y dotenv-cli -e .env.production.local -- npx prisma db push --skip-generate
 `DATABASE_URL` in your shell by hand instead, **close the window afterwards** —
 `pnpm db:seed` opens with `deleteMany()` and would wipe production from that shell.
 
-Additive, nullable columns are safe (that's all we've shipped so far). Without
+Additive, nullable columns are safe (that's all we'd shipped through 2026-08-02). Without
 `--accept-data-loss`, Prisma refuses anything destructive rather than guessing. Data
 here is reseedable; if that stops being true, switch to `prisma migrate deploy` in the
 Vercel build so this stops being a manual step.
+
+> **2026-08-10 — first destructive schema push, and it went out of order.** The donation
+> pivot (DECISIONS 2026-08-09/10) renamed `MochiHolding.purchasedTotal` →
+> `mochiEarnedTotal`, `MochiIssuance.soldQuantity` → `grantedQuantity`, `.lifetimeSold` →
+> `lifetimeGranted` — a real rename, not additive, so it needs `--accept-data-loss` on
+> the prod push, unlike everything before it. **The code was pushed to `main` before the
+> prod schema was**, owner's explicit call, accepting that mochi-related pages
+> (buy/donate, leaderboards, ranking, Studio dashboard) 500 on production until this
+> command runs:
+> ```bash
+> npx -y dotenv-cli -e .env.production.local -- npx prisma db push --accept-data-loss --skip-generate
+> ```
+> No local machine used this session has `.env.production.local` — this step still needs
+> to be run by someone with real Supabase prod credentials. **This is the most urgent
+> open item in PROGRESS.md** until it's done.
 
 Applied this way so far: `MarketplaceItem.coverImage` and `Backer.tokenVersion`
 (2026-08-01/02).

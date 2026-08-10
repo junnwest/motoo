@@ -1,16 +1,19 @@
 # motoo
 
 A two-sided Korean creator-support platform. **Current direction: a mochi-marketplace** —
-each creator issues their own **mochi** (prepaid marketplace credit, minted on purchase),
-users buy it and spend it in that creator's marketplace. Price ratchets up in tiers
-(early supporters get in cheaper); mochi is never a security. See
+each creator issues their own **mochi** (prepaid marketplace credit). Users donate
+directly to a creator (100% passthrough, motoo takes 0%) and earn mochi afterward as a
+bonus, then spend it in that creator's marketplace — mochi is never sold (2026-08-09,
+"the donation pivot"). The bonus rate ratchets up in tiers (early supporters earn more
+per ₩ donated); mochi is never a security. See
 [`motoo-product-description.md`](./motoo-product-description.md) for the original product
 spec and [`design-handoff/`](./design-handoff/) for the visual system.
 
 > **motoo is not a financial product.** Mochi is prepaid support credit, not an
 > investment — non-transferable, no resale, no securities. Refunds are narrow and
-> defined in [the 환불·청약철회 policy](./src/app/refund/page.tsx) (7-day withdrawal on an
-> unused purchase, balance refund past 60% use, plus legally-required cases). See
+> defined in [the 환불·청약철회 policy](./src/app/refund/page.tsx) (7-day withdrawal on a
+> wholly-unused donation, plus legally-required cases — no unused-balance refund past that).
+> See
 > §2 of the product doc. A CI-style check (`pnpm check:vocab`) guards against banned
 > investment vocabulary in user-facing copy.
 
@@ -24,7 +27,8 @@ spec and [`design-handoff/`](./design-handoff/) for the visual system.
 **Live at [themotoo.com](https://themotoo.com)** (consumer app) + **[studio.themotoo.com](https://studio.themotoo.com)** (creator console) — same Vercel project + codebase, host-split in `src/proxy.ts` with a session cookie shared across `.themotoo.com`. Supabase Seoul; auto-deploys on push to `main`.
 
 **Current direction:** the **mochi-marketplace** is built and deployed — creators
-issue their own mochi, users buy it and spend it in each creator's marketplace. Accounts
+issue their own mochi, users donate to a creator and earn mochi as a bonus to spend in
+their marketplace. Accounts
 are **additive**: everyone is a user (fan); a **creator** is a user who *also* owns a
 **Studio**. The original **Streamer Trust Report** thesis has been removed from the
 website entirely (not part of 1.0.0) — its schema stays in Prisma, fully dormant, no
@@ -36,13 +40,13 @@ remaining UI.
 | --- | --- |
 | `/` | Marketing landing (logged-out only). Signed-in, it's the routing fork: **fans → `/home`, creators → the Studio** |
 | `/home` | **The app home.** A single column: mochi status (balance + rank per creator) → items you can afford right now → in-flight orders → news. Adaptive — holds no mochi yet → a how-it-works primer instead of the status column. Flanked by `ConsumerShell`'s two persistent, collapsible rails (Sidebar left, RightRail right) — not page-local |
-| `/ranking` | Your rank among each held creator's supporters, by lifetime mochi purchased |
+| `/ranking` | Your rank among each held creator's supporters, by lifetime mochi earned |
 | `/notifications` | Full notification history (order fulfilled/cancelled, a supported creator adds an item or raises their price) — mark-all-read. A bell icon in the nav shows the unread count |
 | `/profile` | Identity + mochi holdings + order history (absorbs the old `/me/mochi`, which now redirects here) |
 | `/settings` | **Profile picture** + nickname/handle + password change (apex-only; distinct from the Studio host's own `/settings`) |
 | `/explore` | Creators grid — the dedicated browse page (filters, search, sort — all by live support, no Trust Report signals) |
-| `/s/[handle]` | Creator profile: **marketplace** (spend mochi on items) beside a live **supporter leaderboard** (ranked by lifetime mochi purchased), plus updates. The one ConsumerShell page that fills its column and boxes each section instead of using the shared 900px cap |
-| `/s/[handle]/buy` | Focused **buy-mochi** flow, its own page (routed from the profile's 모찌 보내기 button) — no ConsumerShell chrome, just a way back to the profile |
+| `/s/[handle]` | Creator profile: **marketplace** (spend mochi on items) beside a live **supporter leaderboard** (ranked by lifetime mochi earned), plus updates. The one ConsumerShell page that fills its column and boxes each section instead of using the shared 900px cap |
+| `/s/[handle]/donate` | Focused **donate** flow, its own page (routed from the profile's 후원하기 button) — no ConsumerShell chrome, just a way back to the profile. `/buy` 301s here |
 | `/me/mochi` | "My mochi": per-creator holdings + order/redemption history |
 | `/login` · `/signup` | Real auth — social-first (Kakao/Naver/Google) + email; password policy + confirm. One **회원가입** button opens a 후원자/크리에이터 role modal (login stays unified). Role CTAs route through `/api/fan-signup` or `/api/become-creator`, which *set* the creator intent either way — never link straight to `/signup` |
 | `/onboarding` | New-user gate: nickname, unique `@handle`, **본인인증** (age/identity), terms |
@@ -70,13 +74,13 @@ real 본인인증 (NICE/PASS/간편인증), Kakao login. Mocks stand in behind p
 - **Postgres + Prisma 6** — money is integer KRW, never floats
 - **next-intl** — `ko` default, `en` scaffold, no hardcoded strings ([`messages/`](./messages/))
 - **Auth.js v5** — credentials + **Google/Naver live** (Kakao scaffold); edge `auth.config.ts` + Node `auth.ts` split; `src/proxy.ts` middleware enforces onboarding
-- **Provider abstractions** — `PaymentProvider` (mochi charges) and `VerificationProvider` (본인인증), both `mock` in dev, swapped via `PAYMENT_PROVIDER` / `VERIFICATION_PROVIDER`
+- **Provider abstractions** — `PaymentProvider` (donation charges) and `VerificationProvider` (본인인증), both `mock` in dev, swapped via `PAYMENT_PROVIDER` / `VERIFICATION_PROVIDER`
 
 ## Key invariants (enforced + tested)
 
 - **Mochi is money**: `src/lib/mochi.ts` uses row-locked conditional updates so concurrent
   redemptions can't oversell stock or drive a holding negative. `pnpm test` proves it
-  (buy/redeem/cancel invariants + concurrency guards).
+  (donate/redeem/cancel invariants + concurrency guards).
 - **Not a financial product**: no investment vocabulary in copy (`pnpm check:vocab`). The
   same check also fails on **retired product vocabulary** — 백커 is gone; fans are 팬/후원자.
 - **Uploaded images never become files**: there's no object storage, so profile pictures and

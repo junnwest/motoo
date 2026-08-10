@@ -8,11 +8,17 @@
 import { describe, it, before, beforeEach, after } from "node:test";
 import assert from "node:assert/strict";
 import { prisma } from "@/lib/db";
-import { buyMochi, redeemItem, cancelOrder, getHolding } from "@/lib/mochi";
+import { donateMochi, redeemItem, cancelOrder, getHolding } from "@/lib/mochi";
 
 const CREATOR_EMAIL = "moneytest-creator@motoo.test";
 const FAN_EMAIL = "moneytest-fan@motoo.test";
 const HANDLE = "moneytest_creator";
+
+// Fixture rate: 200 KRW donated earns 1 mochi. Below-price-only donations
+// (100, 200×N) map to the exact same resulting mochi counts the old
+// quantity-driven fixtures produced, so downstream assertions didn't need to
+// change — only the input shape (an amount, not a quantity) did.
+const PRICE = 200;
 
 let streamerId: string;
 let backerId: string;
@@ -52,7 +58,7 @@ before(async () => {
   });
   streamerId = streamer.id;
   await prisma.mochiIssuance.create({
-    data: { streamerId, pricePerMochiKrw: 200, goalQuantity: 100, soldQuantity: 0, active: true },
+    data: { streamerId, pricePerMochiKrw: PRICE, goalQuantity: 100, grantedQuantity: 0, active: true },
   });
   const fan = await prisma.backer.create({
     data: { email: FAN_EMAIL, nickname: "MT Fan", role: "backer", ageVerified: true },
@@ -69,37 +75,51 @@ beforeEach(async () => {
   await prisma.order.deleteMany({ where: { streamerId } });
   await prisma.marketplaceItem.deleteMany({ where: { streamerId } });
   await prisma.mochiHolding.deleteMany({ where: { streamerId } });
-  await prisma.mochiIssuance.update({ where: { streamerId }, data: { soldQuantity: 0, active: true } });
+  await prisma.mochiIssuance.update({ where: { streamerId }, data: { grantedQuantity: 0, active: true } });
 });
 
-describe("buyMochi", () => {
-  it("credits the holding and advances soldQuantity; charges qty × price", async () => {
-    const r = await buyMochi({ backerId, streamerId, quantity: 10, idempotencyKey: "k" });
+describe("donateMochi", () => {
+  it("credits the holding and advances grantedQuantity; grants floor(amount/price) mochi", async () => {
+    const r = await donateMochi({ backerId, streamerId, donationAmountKrw: 10 * PRICE, idempotencyKey: "k" });
     assert.equal(r.balance, 10);
+    assert.equal(r.mochiGranted, 10);
     assert.equal(r.amountKrw, 2000);
     const iss = await prisma.mochiIssuance.findUniqueOrThrow({ where: { streamerId } });
-    assert.equal(iss.soldQuantity, 10);
+    assert.equal(iss.grantedQuantity, 10);
   });
 
-  it("rejects when issuance is paused", async () => {
-    await prisma.mochiIssuance.update({ where: { streamerId }, data: { active: false } });
+  it("floors an uneven donation and keeps the full KRW with the creator", async () => {
+    const r = await donateMochi({ backerId, streamerId, donationAmountKrw: 2050, idempotencyKey: "k" });
+    assert.equal(r.mochiGranted, 10); // floor(2050 / 200) = 10, not 10.25
+    assert.equal(r.amountKrw, 2050); // full amount still charged/settled — no mochi "change"
+  });
+
+  it("rejects a donation below the current per-mochi rate", async () => {
     await assert.rejects(
-      () => buyMochi({ backerId, streamerId, quantity: 1, idempotencyKey: "k" }),
-      /MOCHI_NOT_ON_SALE/,
+      () => donateMochi({ backerId, streamerId, donationAmountKrw: 100, idempotencyKey: "k" }),
+      /DONATION_BELOW_MIN/,
     );
   });
 
-  it("rejects a non-positive quantity", async () => {
+  it("rejects when the bonus is paused", async () => {
+    await prisma.mochiIssuance.update({ where: { streamerId }, data: { active: false } });
     await assert.rejects(
-      () => buyMochi({ backerId, streamerId, quantity: 0, idempotencyKey: "k" }),
-      /INVALID_QUANTITY/,
+      () => donateMochi({ backerId, streamerId, donationAmountKrw: PRICE, idempotencyKey: "k" }),
+      /MOCHI_BONUS_PAUSED/,
+    );
+  });
+
+  it("rejects a non-positive donation amount", async () => {
+    await assert.rejects(
+      () => donateMochi({ backerId, streamerId, donationAmountKrw: 0, idempotencyKey: "k" }),
+      /INVALID_AMOUNT/,
     );
   });
 });
 
 describe("redeemItem", () => {
   it("debits balance, records a pending order, and bumps redeemedCount", async () => {
-    await buyMochi({ backerId, streamerId, quantity: 10, idempotencyKey: "k" });
+    await donateMochi({ backerId, streamerId, donationAmountKrw: 10 * PRICE, idempotencyKey: "k" });
     const item = await newItem(3);
     const r = await redeemItem({ backerId, itemId: item.id, note: "hi" });
     assert.equal(r.mochiSpent, 3);
@@ -113,18 +133,18 @@ describe("redeemItem", () => {
   });
 
   it("auto-fulfills an instant item on redemption (no pending order)", async () => {
-    await buyMochi({ backerId, streamerId, quantity: 10, idempotencyKey: "k" });
+    await donateMochi({ backerId, streamerId, donationAmountKrw: 10 * PRICE, idempotencyKey: "k" });
     const item = await newItem(3, null, "instant");
     const r = await redeemItem({ backerId, itemId: item.id });
     assert.equal(r.instant, true);
-    assert.equal(r.balance, 7); // money still moves
+    assert.equal(r.balance, 7); // mochi still moves
     const order = await prisma.order.findUniqueOrThrow({ where: { id: r.orderId } });
     assert.equal(order.status, "fulfilled");
     assert.ok(order.fulfilledAt); // stamped at redemption
   });
 
   it("rejects when balance is insufficient (and leaves balance untouched)", async () => {
-    await buyMochi({ backerId, streamerId, quantity: 2, idempotencyKey: "k" });
+    await donateMochi({ backerId, streamerId, donationAmountKrw: 2 * PRICE, idempotencyKey: "k" });
     const item = await newItem(5);
     await assert.rejects(() => redeemItem({ backerId, itemId: item.id }), /INSUFFICIENT_MOCHI/);
     const h = await getHolding(streamerId, backerId);
@@ -132,7 +152,7 @@ describe("redeemItem", () => {
   });
 
   it("rejects when stock is exhausted", async () => {
-    await buyMochi({ backerId, streamerId, quantity: 100, idempotencyKey: "k" });
+    await donateMochi({ backerId, streamerId, donationAmountKrw: 100 * PRICE, idempotencyKey: "k" });
     const item = await newItem(1, 1);
     await redeemItem({ backerId, itemId: item.id });
     await assert.rejects(() => redeemItem({ backerId, itemId: item.id }), /OUT_OF_STOCK/);
@@ -141,7 +161,7 @@ describe("redeemItem", () => {
 
 describe("cancelOrder", () => {
   it("refunds the exact mochi and frees the stock", async () => {
-    await buyMochi({ backerId, streamerId, quantity: 10, idempotencyKey: "k" });
+    await donateMochi({ backerId, streamerId, donationAmountKrw: 10 * PRICE, idempotencyKey: "k" });
     const item = await newItem(4, 2);
     const r = await redeemItem({ backerId, itemId: item.id });
     const c = await cancelOrder(r.orderId, streamerId);
@@ -153,7 +173,7 @@ describe("cancelOrder", () => {
   });
 
   it("refuses to cancel another creator's order", async () => {
-    await buyMochi({ backerId, streamerId, quantity: 10, idempotencyKey: "k" });
+    await donateMochi({ backerId, streamerId, donationAmountKrw: 10 * PRICE, idempotencyKey: "k" });
     const item = await newItem(4);
     const r = await redeemItem({ backerId, itemId: item.id });
     await assert.rejects(() => cancelOrder(r.orderId, "some-other-streamer"), /NOT_FOUND/);
@@ -162,7 +182,7 @@ describe("cancelOrder", () => {
 
 describe("concurrency safety (the review fix)", () => {
   it("never overspends a holding under concurrent redemptions", async () => {
-    await buyMochi({ backerId, streamerId, quantity: 10, idempotencyKey: "k" });
+    await donateMochi({ backerId, streamerId, donationAmountKrw: 10 * PRICE, idempotencyKey: "k" });
     const item = await newItem(3);
     const results = await Promise.allSettled(
       Array.from({ length: 6 }, () => redeemItem({ backerId, itemId: item.id })),
@@ -175,7 +195,7 @@ describe("concurrency safety (the review fix)", () => {
   });
 
   it("never oversells limited stock under concurrent redemptions", async () => {
-    await buyMochi({ backerId, streamerId, quantity: 1000, idempotencyKey: "k" });
+    await donateMochi({ backerId, streamerId, donationAmountKrw: 1000 * PRICE, idempotencyKey: "k" });
     const item = await newItem(1, 2);
     const results = await Promise.allSettled(
       Array.from({ length: 8 }, () => redeemItem({ backerId, itemId: item.id })),

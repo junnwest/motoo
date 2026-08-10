@@ -3,30 +3,31 @@
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { getCurrentBacker } from "@/lib/session";
-import { buyMochi, redeemItem } from "@/lib/mochi";
+import { donateMochi, redeemItem } from "@/lib/mochi";
 
 /**
- * User-side buy/spend server actions for the mochi marketplace.
+ * User-side donate/spend server actions for the mochi marketplace.
  * Return shape is always { ok:true, ... } | { ok:false, error:string }, where
- * `error` is an i18n key suffix under the "marketplace.errors" namespace.
+ * `error` is an i18n key suffix under the "donate.errors" / "marketplace.errors"
+ * namespace respectively.
  */
 
-const buySchema = z.object({
+const donateSchema = z.object({
   handle: z.string(),
   streamerId: z.string(),
-  quantity: z.number().int().positive(),
-  // Per-purchase idempotency token from the client (a retried click reuses it).
+  donationAmountKrw: z.number().int().positive(),
+  // Per-donation idempotency token from the client (a retried click reuses it).
   idempotencyKey: z.string().min(1).max(200).optional(),
 });
 
-export type BuyMochiActionResult =
-  | { ok: true; balance: number; amountKrw: number }
+export type DonateMochiActionResult =
+  | { ok: true; balance: number; mochiGranted: number; amountKrw: number }
   | { ok: false; error: string };
 
-export async function buyMochiAction(
-  input: z.infer<typeof buySchema>,
-): Promise<BuyMochiActionResult> {
-  const parsed = buySchema.safeParse(input);
+export async function donateMochiAction(
+  input: z.infer<typeof donateSchema>,
+): Promise<DonateMochiActionResult> {
+  const parsed = donateSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: "generic" };
   const data = parsed.data;
 
@@ -34,18 +35,20 @@ export async function buyMochiAction(
   if (!backer) return { ok: false, error: "login" };
 
   try {
-    const { balance, amountKrw } = await buyMochi({
+    const { balance, mochiGranted, amountKrw } = await donateMochi({
       backerId: backer.id,
       streamerId: data.streamerId,
-      quantity: data.quantity,
+      donationAmountKrw: data.donationAmountKrw,
       idempotencyKey: data.idempotencyKey,
     });
     revalidatePath(`/s/${data.handle}`);
-    revalidatePath(`/s/${data.handle}/buy`);
-    return { ok: true, balance, amountKrw };
+    revalidatePath(`/s/${data.handle}/donate`);
+    return { ok: true, balance, mochiGranted, amountKrw };
   } catch (e) {
     const msg = e instanceof Error ? e.message : "";
-    if (msg === "MOCHI_NOT_ON_SALE") return { ok: false, error: "notOnSale" };
+    if (msg === "MOCHI_BONUS_PAUSED")
+      return { ok: false, error: "donationClosed" };
+    if (msg === "DONATION_BELOW_MIN") return { ok: false, error: "belowMin" };
     return { ok: false, error: "generic" };
   }
 }
@@ -77,7 +80,7 @@ export async function redeemItemAction(
       note: data.note ?? null,
     });
     revalidatePath(`/s/${data.handle}`);
-    revalidatePath(`/s/${data.handle}/buy`);
+    revalidatePath(`/s/${data.handle}/donate`);
     return { ok: true, balance, mochiSpent, instant };
   } catch (e) {
     const msg = e instanceof Error ? e.message : "";

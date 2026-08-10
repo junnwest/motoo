@@ -6,7 +6,7 @@
     "search": "Search",
     "seeAll": "Explore all",
     "backThisStreamer": "Back",
-    "sendMochi": "Send mochi",
+    "donate": "Donate",
     "loading": "Loading…",
     "collapse": "Collapse",
     "expand": "Expand",
@@ -170,7 +170,7 @@
       "step2Title": "Fill your market",
       "step2Body": "List perks and items in your market for fans to use with their mochi.",
       "step3Title": "Check the supporter ranking",
-      "step3Body": "See your most dedicated fans at a glance, ranked by lifetime purchases."
+      "step3Body": "See your most dedicated fans at a glance, ranked by lifetime mochi earned."
     },
     "mochiExplainerTitle": "Mochi is <accent>support</accent> — not an investment.",
     "mochiExplainerBody": "There is no refund of value, resale, or financial return. What you receive is your fans' heart and trust, and the data. Payment is delivered directly to the creator via a licensed PG.",
@@ -231,8 +231,8 @@
     "tierLimit": "{remaining} spots left",
     "tierBackButton": "Back this tier",
     "leaderboardTitle": "Supporter ranking",
-    "leaderboardSubtitle": "By lifetime purchased · {count}",
-    "leaderboardEmpty": "No one has bought mochi here yet.",
+    "leaderboardSubtitle": "By lifetime mochi earned · {count}",
+    "leaderboardEmpty": "No one has donated here yet.",
     "updatesTitle": "Recent updates",
     "updatesEmpty": "No updates yet.",
     "backerOnly": "Backer-only update",
@@ -255,7 +255,7 @@
     },
     "ageGate": {
       "title": "Let's verify your age first",
-      "body": "Age verification is required before buying mochi. Under 19 requires guardian consent and has a spending cap.",
+      "body": "Age verification is required before donating. Under 19 requires guardian consent and has a spending cap.",
       "adultLabel": "I am 19 or older",
       "minorLabel": "I am under 19 and have guardian consent",
       "birthdate": "Date of birth",
@@ -376,8 +376,8 @@
     "socialComingSoon": "Social login is coming soon. You can start with email for now.",
     "comingSoonBadge": "Soon",
     "signupHeroTitle": "The warmest way to support the creators you love",
-    "signupHeroSubtitle": "Buy mochi and spend it in your creators' markets.",
-    "signupBenefit1": "Buy a creator's mochi",
+    "signupHeroSubtitle": "Donate to creators, earn mochi as a bonus, and spend it in their markets.",
+    "signupBenefit1": "Donate to a creator and earn mochi",
     "signupBenefit2": "Redeem the items you want in their market",
     "signupBenefit3": "Manage every creator you support in one place"
   },
@@ -442,7 +442,7 @@
   },
   "creatorDashboard": {
     "navHome": "Home",
-    "navMochi": "Mochi",
+    "navMochi": "Mochi bonus",
     "navItems": "Market items",
     "navOrders": "Orders",
     "viewPublic": "View public page ↗",
@@ -468,39 +468,39 @@
         "fanCafe": "Fan cafe"
       }
     },
-    "statSold": "Mochi sold",
-    "statGoal": "Issuance goal",
+    "statSold": "Mochi granted",
+    "statGoal": "Bonus goal",
     "statHolders": "Fans holding mochi",
     "statPendingOrders": "Orders to handle",
     "statItems": "Market items",
     "goalProgress": "{percent}% of goal",
-    "notOnboarded": "You haven't set up mochi issuance yet.",
-    "setupMochi": "Set up mochi issuance →",
+    "notOnboarded": "You haven't set up a mochi bonus yet.",
+    "setupMochi": "Set up your mochi bonus →",
     "saveError": "Couldn't save. Please check your inputs.",
     "mochi": {
-      "title": "Issue more mochi",
-      "subtitle": "Set the price of one mochi and your issuance goal. The goal is a soft target — going past it is fine.",
-      "price": "Price per mochi (KRW)",
-      "goal": "Issuance goal (quantity)",
-      "active": "On sale",
-      "activeOn": "Fans can buy your mochi right now.",
-      "activeOff": "Sales are paused.",
-      "sold": "{count} sold so far",
+      "title": "Set your mochi bonus rate",
+      "subtitle": "Set how much mochi a donation earns and your bonus goal. The goal is a soft target — going past it is fine.",
+      "price": "KRW donated per mochi",
+      "goal": "Bonus goal (quantity)",
+      "active": "Bonus active",
+      "activeOn": "Fans can donate and earn mochi right now.",
+      "activeOff": "The bonus is paused.",
+      "sold": "{count} granted so far",
       "save": "Save",
       "saved": "Saved",
       "floorHint": "At least 100 KRW each, 10 mochi, and 50,000 KRW total.",
-      "priceMin": "Each mochi must be at least 100 KRW.",
-      "countMin": "You must issue at least 10 mochi.",
-      "totalMin": "Total issuance must be at least 50,000 KRW.",
-      "summaryTitle": "Issuance summary",
-      "summaryTotal": "Total issuance",
-      "summarySold": "Sold",
+      "priceMin": "Each mochi must cost at least 100 KRW in donations.",
+      "countMin": "The bonus goal must be at least 10 mochi.",
+      "totalMin": "The total bonus goal must be at least 50,000 KRW.",
+      "summaryTitle": "Bonus summary",
+      "summaryTotal": "Total bonus goal",
+      "summarySold": "Granted",
       "summaryRemaining": "Remaining",
-      "summaryPrice": "Price per mochi",
-      "priceOnlyUp": "Mochi price can only go up.",
-      "priceOnlyUpHint": "Price can only increase. Fans who already bought are unaffected.",
-      "raiseWarning": "Raising the price discards the remaining supply at the old price and resets the sold count.",
-      "twoActions": "Add more supply at the same price, or raise the price. Price can't go down."
+      "summaryPrice": "KRW per mochi",
+      "priceOnlyUp": "The mochi bonus rate can only go up.",
+      "priceOnlyUpHint": "The rate can only increase. Fans who already donated are unaffected.",
+      "raiseWarning": "Raising the rate discards the remaining goal at the old rate and resets the granted count.",
+      "twoActions": "Add more to the goal at the same rate, or raise the rate. The rate can't go down."
     },
     "items": {
       "title": "Market items",
@@ -687,19 +687,32 @@
       "cancel": "Cancel & refund"
     }
   },
-  "marketplace": {
+  "donate": {
     "backToProfile": "Back to profile",
-    "buyTitle": "Buy mochi",
-    "buySubtitle": "Buy {name}'s mochi to use it in their market.",
-    "pricePerMochi": "₩{price} per mochi",
-    "quantityLabel": "Quantity",
-    "youPay": "You pay",
-    "notOnSale": "Mochi isn't on sale right now.",
+    "title": "Donate",
+    "subtitle": "Donate to {name}. Your donation goes straight to the creator.",
+    "mochiRate": "{price} KRW per mochi",
+    "amountLabel": "Donation amount",
+    "customAmount": "Custom amount",
+    "bonusPreview": "This much earns you {count} mochi as a bonus",
+    "belowMinHint": "Donate at least {price} KRW to earn a mochi bonus",
+    "notOnSale": "Not accepting donations right now.",
     "myBalance": "My mochi balance",
-    "buyButton": "Pay ₩{amount}",
-    "buying": "Processing…",
-    "bought": "You got {count} mochi!",
-    "goalProgress": "{percent}% of the issuance goal",
+    "submitButton": "Donate ₩{amount}",
+    "submitting": "Donating…",
+    "success": "You earned {count} mochi as a bonus!",
+    "goalProgress": "{percent}% of the bonus goal",
+    "disclosure": "This donation goes straight to the creator (motoo takes 0% — only the PG's own processing fee applies). Mochi is granted as a thank-you bonus for this donation, not sold. It can only be used in this creator's market and can't be transferred or resold.",
+    "disclosureLink": "Read the refund policy",
+    "followNudge": "Follow {name} to hear from them",
+    "errors": {
+      "login": "Please log in to continue.",
+      "donationClosed": "Not accepting donations right now.",
+      "belowMin": "That donation is too small. Enter a larger amount to earn mochi.",
+      "generic": "We couldn't process that. Please try again shortly."
+    }
+  },
+  "marketplace": {
     "marketTitle": "Market",
     "marketSubtitle": "Items you can use your mochi on.",
     "marketEmpty": "No market items yet.",
@@ -711,7 +724,7 @@
     "redeemed": "Done! The creator will prepare it soon.",
     "redeemedInstant": "Applied right away!",
     "notePlaceholder": "Leave a note about your request (optional)",
-    "needMore": "Not enough mochi. Please buy some first.",
+    "needMore": "Not enough mochi. Please donate first.",
     "types": {
       "digital": "Digital / experience",
       "access": "Access / membership",
@@ -722,16 +735,12 @@
       "instant": "Instant",
       "request": "Request"
     },
-    "disclosure": "Mochi is prepaid credit for use only in this creator's market. It cannot be transferred or resold. Within 7 days of purchase, and provided you have not spent a single mochi from it, you may withdraw the purchase.",
-    "disclosureLink": "Read the refund & withdrawal policy",
     "errors": {
       "login": "Please log in to continue.",
-      "notOnSale": "Mochi isn't on sale right now.",
       "outOfStock": "This item is sold out.",
       "insufficient": "Not enough mochi.",
       "generic": "We couldn't process that. Please try again shortly."
-    },
-    "followNudge": "Follow {name} to hear from them"
+    }
   },
   "myMochi": {
     "title": "My mochi",
@@ -754,7 +763,7 @@
   "onboarding": {
     "eyebrow": "Welcome",
     "title": "Finish your profile to get started",
-    "subtitle": "Just a couple of checks before you can buy mochi and use the market.",
+    "subtitle": "Just a couple of checks before you can donate and use the market.",
     "sectionProfile": "Profile",
     "nickname": "Nickname",
     "nicknamePlaceholder": "The name other fans will see",
@@ -793,11 +802,11 @@
   },
   "refund": {
     "title": "Refund & Withdrawal Policy",
-    "updated": "Last revised: 6 August 2026",
-    "intro": "Mochi is prepaid credit usable only in one creator's market. Order cancellations, withdrawal of purchase, and refunds of unused balance are handled as set out below.",
+    "updated": "Last revised: 9 August 2026",
+    "intro": "Mochi is prepaid credit usable only in one creator's market, granted as a bonus when you donate to them. Order cancellations and withdrawal of a donation are handled as set out below.",
     "seller": {
       "title": "Who sells, and who holds the money",
-      "body": "Each creator issues and sells their own mochi. motoo provides the marketplace as an intermediary and does not hold payment funds. Payment passes through a licensed PG directly to the creator, and the refund obligation likewise sits with the creator as seller. motoo receives requests and assists with processing."
+      "body": "Each creator sells the items in their own market. Your donation passes through a licensed PG directly to the creator, and motoo does not hold the funds. Mochi is granted as a bonus for that donation, not sold. motoo provides the marketplace as an intermediary, and the refund obligation sits with the creator as seller. motoo receives requests and assists with processing."
     },
     "orderCancel": {
       "title": "1. Order cancellation — returned as mochi",
@@ -805,26 +814,21 @@
       "note": "Instant items complete at the moment of ordering, so they cannot be cancelled."
     },
     "withdrawal": {
-      "title": "2. Withdrawal of purchase — within 7 days",
-      "body": "If it is within 7 days of your purchase and you have not spent a single mochi from that purchase, you may withdraw it. The full amount paid is returned to your original payment method.",
-      "note": "If any mochi from that purchase has been spent, withdrawal no longer applies. See the unused-balance section below instead."
-    },
-    "balance": {
-      "title": "3. Unused balance — once 60% has been spent",
-      "body": "Once you have spent 60% or more of the mochi you bought from a creator, you may request a refund of what remains. The remaining mochi is refunded at the price you paid for it.",
-      "note": "For example: buy 1,000 mochi for ₩100,000, spend 700, and the remaining 300 mochi are refundable at ₩30,000."
+      "title": "2. Withdrawal of a donation — within 7 days",
+      "body": "If it is within 7 days of your donation and you have not spent a single mochi earned from it, you may withdraw it. The full amount you donated is returned to your original payment method.",
+      "note": "If any mochi earned from that donation has been spent, withdrawal no longer applies. The remaining mochi stays usable in the creator's market."
     },
     "legalException": {
-      "title": "4. Refunds required by law",
+      "title": "3. Refunds required by law",
       "body": "Separately from the above, where the law requires a refund we process it accordingly. A payment made by a minor without their legal guardian's consent is the principal example."
     },
     "howTo": {
-      "title": "5. How to request",
-      "body": "Contact support. We confirm the purchase and the grounds for the request, tell you the outcome, and — where a withdrawal is confirmed — return the payment within the statutory 3 business days. Depending on your payment method, the money may take a few days more to appear."
+      "title": "4. How to request",
+      "body": "<a>Contact support</a>. We confirm your donation history and the grounds for the request, tell you the outcome, and — where a withdrawal is confirmed — return the payment within the statutory 3 business days. Depending on your payment method, the money may take a few days more to appear."
     },
     "noResale": {
-      "title": "6. Transfer and resale",
-      "body": "Mochi cannot be transferred or resold to anyone else, and cannot be moved between creators. Refunds are made only to the person who bought it."
+      "title": "5. Transfer and resale",
+      "body": "Mochi cannot be transferred or resold to anyone else, and cannot be moved between creators. Refunds are made only to the person who donated."
     },
     "back": "Back"
   },
@@ -858,20 +862,20 @@
       "l": "1M KRW",
       "custom": "Custom"
     },
-    "presetSub": "{count} mochi · {price} KRW each",
+    "presetSub": "{count} mochi goal · {price} KRW each",
     "recommended": "Recommended",
-    "customPrice": "Price per mochi (KRW)",
-    "customCount": "Number of mochi",
+    "customPrice": "KRW donated per mochi",
+    "customCount": "Bonus goal (mochi)",
     "floorHint": "At least 100 KRW each, 10 mochi, and 50,000 KRW total.",
     "summary": "Total {total} KRW · {goal} mochi · {price} KRW each",
-    "priceOnlyUpHint": "Price can only increase. Fans who already bought are unaffected.",
-    "raiseWarning": "Raising the price discards the remaining supply at the old price and resets the sold count.",
-    "presetsUnavailable": "After a price raise, use Custom to adjust the amount and price.",
+    "priceOnlyUpHint": "The rate can only increase. Fans who already donated are unaffected.",
+    "raiseWarning": "Raising the rate discards the remaining goal at the old rate and resets the granted count.",
+    "presetsUnavailable": "After raising the rate, use Custom to adjust the amount and rate.",
     "errors": {
-      "priceMin": "Each mochi must be at least 100 KRW.",
-      "countMin": "You must issue at least 10 mochi.",
-      "totalMin": "Total issuance must be at least 50,000 KRW.",
-      "priceOnlyUp": "Mochi price can only go up."
+      "priceMin": "Each mochi must cost at least 100 KRW in donations.",
+      "countMin": "The bonus goal must be at least 10 mochi.",
+      "totalMin": "The total bonus goal must be at least 50,000 KRW.",
+      "priceOnlyUp": "The mochi bonus rate can only go up."
     }
   },
   "home": {
@@ -893,8 +897,8 @@
     "startTitle": "How mochi works",
     "step1Title": "Find a creator",
     "step1Body": "Browse and pick a creator you want to cheer on.",
-    "step2Title": "Send mochi",
-    "step2Body": "Buy that creator's mochi to show your heart.",
+    "step2Title": "Donate",
+    "step2Body": "Donate to that creator and earn mochi as a bonus.",
     "step3Title": "Use it in their market",
     "step3Body": "Spend mochi on that creator's items.",
     "railTitle": "Creators you support",
@@ -923,8 +927,8 @@
   },
   "ranking": {
     "title": "My ranking",
-    "subtitle": "Your standing among each creator's supporters, by lifetime mochi purchased.",
-    "empty": "No creators bought yet.",
+    "subtitle": "Your standing among each creator's supporters, by lifetime mochi earned.",
+    "empty": "No creators donated to yet.",
     "rankOf": "#{rank} of {total}"
   },
   "settings": {
