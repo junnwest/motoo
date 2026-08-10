@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
 /**
  * Shared modal shell: backdrop, centered card, close button, and the three
@@ -33,6 +34,9 @@ export function Modal({
   className?: string;
 }) {
   const cardRef = useRef<HTMLDivElement>(null);
+  // Honoured explicitly rather than left to the library: someone who has asked
+  // their OS to reduce motion gets the fade and none of the movement.
+  const reduceMotion = useReducedMotion();
 
   useEffect(() => {
     if (!open) return;
@@ -52,7 +56,9 @@ export function Modal({
         card.querySelectorAll<HTMLElement>(
           'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])',
         ),
-      ).filter((el) => el.offsetParent !== null || el === document.activeElement);
+      ).filter(
+        (el) => el.offsetParent !== null || el === document.activeElement,
+      );
     }
 
     function onKey(e: KeyboardEvent) {
@@ -104,50 +110,73 @@ export function Modal({
     };
   }, [open, onClose]);
 
-  if (!open || typeof document === "undefined") return null;
+  // Note the shape: the portal stays mounted and `open` is tested *inside*
+  // AnimatePresence. Returning null on !open — which this did — means React
+  // unmounts before anything can animate out, so a dialog would fade in and
+  // then vanish. The focus-trap effect above still keys off `open`, so focus
+  // returns the moment it closes, not when the animation finishes.
+  if (typeof document === "undefined") return null;
 
   return createPortal(
-    <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby={titleId}
-    >
-      <button
-        type="button"
-        aria-label={closeLabel}
-        onClick={onClose}
-        className="absolute inset-0 cursor-default bg-ink/40 backdrop-blur-[2px]"
-      />
-
-      <div
-        ref={cardRef}
-        tabIndex={-1}
-        className={`relative w-full max-w-[420px] rounded-2xl border border-line-2 bg-card p-7 shadow-[0_24px_70px_rgba(33,28,24,0.28)] outline-none sm:p-8 ${className}`}
-      >
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label={closeLabel}
-          data-modal-close
-          className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full text-muted transition hover:bg-cream-warm hover:text-ink"
+    <AnimatePresence>
+      {open && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={titleId}
         >
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            aria-hidden="true"
+          <motion.button
+            type="button"
+            aria-label={closeLabel}
+            onClick={onClose}
+            className="absolute inset-0 cursor-default bg-ink/40 backdrop-blur-[2px]"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+          />
+
+          <motion.div
+            ref={cardRef}
+            tabIndex={-1}
+            className={`relative w-full max-w-[420px] rounded-2xl border border-line-2 bg-card p-7 shadow-[0_24px_70px_rgba(33,28,24,0.28)] outline-none sm:p-8 ${className}`}
+            // Rises 8px into place. Small on purpose: a dialog that flies in
+            // from off-screen is the kind of motion that reads as decoration.
+            initial={
+              reduceMotion ? { opacity: 0 } : { opacity: 0, y: 8, scale: 0.98 }
+            }
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={
+              reduceMotion ? { opacity: 0 } : { opacity: 0, y: 4, scale: 0.99 }
+            }
+            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
           >
-            <path d="M18 6 6 18M6 6l12 12" />
-          </svg>
-        </button>
-        {children}
-      </div>
-    </div>,
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label={closeLabel}
+              data-modal-close
+              className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full text-muted transition hover:bg-cream-warm hover:text-ink"
+            >
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                aria-hidden="true"
+              >
+                <path d="M18 6 6 18M6 6l12 12" />
+              </svg>
+            </button>
+            {children}
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>,
     document.body,
   );
 }

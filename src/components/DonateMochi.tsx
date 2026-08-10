@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -66,6 +67,7 @@ export function DonateMochi({
   // stay independent), so this nudges instead.
   const [nowFollowing, setNowFollowing] = useState(!!following);
   const [followPending, startFollowTransition] = useTransition();
+  const reduceMotion = useReducedMotion();
 
   function onFollowClick() {
     startFollowTransition(async () => {
@@ -260,24 +262,43 @@ export function DonateMochi({
             )}
           </div>
 
-          {success !== null && (
-            <div className="mt-3 rounded-md bg-sage-bg px-4 py-3">
-              <p className="text-sm font-semibold text-sage">
-                {t("success", { count: success })}
-              </p>
-              {!nowFollowing && (
-                <button
-                  type="button"
-                  onClick={onFollowClick}
-                  disabled={followPending}
-                  className="mt-2.5 flex items-center gap-1.5 rounded-md bg-white px-3 py-2 text-xs font-bold text-ink transition-colors hover:text-coral-deep disabled:opacity-60"
-                >
-                  <IconHeart width={14} height={14} />
-                  {t("followNudge", { name: creatorName })}
-                </button>
-              )}
-            </div>
-          )}
+          {/* The one genuinely emotional moment in the product — a fan just sent
+              money to someone they like — and it used to appear as an instant
+              green rectangle. It now rises in, and the follow nudge arrives a
+              beat later so the two aren't competing for the same glance. */}
+          <AnimatePresence>
+            {success !== null && (
+              <motion.div
+                className="mt-3 rounded-md bg-sage-bg px-4 py-3"
+                initial={
+                  reduceMotion
+                    ? { opacity: 0 }
+                    : { opacity: 0, y: 6, scale: 0.98 }
+                }
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+              >
+                <p className="text-sm font-semibold text-sage">
+                  {t("success", { count: success })}
+                </p>
+                {!nowFollowing && (
+                  <motion.button
+                    type="button"
+                    onClick={onFollowClick}
+                    disabled={followPending}
+                    className="mt-2.5 flex items-center gap-1.5 rounded-md bg-white px-3 py-2 text-xs font-bold text-ink transition-colors hover:text-coral-deep disabled:opacity-60"
+                    initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.18, duration: 0.24 }}
+                  >
+                    <IconHeart width={14} height={14} />
+                    {t("followNudge", { name: creatorName })}
+                  </motion.button>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
           {error && (
             <InlineMessage tone="error" className="mt-3">
               {t(`errors.${error}`)}
