@@ -102,7 +102,7 @@ export async function ConsumerShell({
               page used `variant="fan"`, so this is the one place it needs to
               be. Pages outside the shell (landing, auth, legal) still own
               theirs. */}
-          <Footer variant="fan" />
+          <Footer variant="fan" tone="light" />
         </main>
         {backerId && <RightRail backerId={backerId} />}
       </div>
