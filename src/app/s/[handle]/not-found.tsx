@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { ConsumerShell } from "@/components/ConsumerShell";
-import { Footer } from "@/components/Footer";
 import { IconSearch } from "@/components/ui/Icons";
 
 /**
@@ -36,8 +35,7 @@ export default async function CreatorNotFound() {
             {t("backToExplore")}
           </Link>
         </section>
-      </ConsumerShell>
-      <Footer variant="fan" />
+      </ConsumerShell>
     </>
   );
 }

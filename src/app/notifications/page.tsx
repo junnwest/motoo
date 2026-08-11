@@ -4,7 +4,6 @@ import { NOINDEX } from "@/lib/metadata";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { ConsumerShell } from "@/components/ConsumerShell";
-import { Footer } from "@/components/Footer";
 import { NotificationList } from "./NotificationList";
 import { getNotificationsForBacker } from "@/lib/notify";
 
@@ -45,8 +44,7 @@ export default async function NotificationsPage() {
           emptyLabel={t("empty")}
         />
       </div>
-      </ConsumerShell>
-      <Footer variant="fan" />
+      </ConsumerShell>
     </>
   );
 }

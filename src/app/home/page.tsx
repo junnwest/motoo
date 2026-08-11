@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { NOINDEX } from "@/lib/metadata";
 import { redirect } from "next/navigation";
 import { ConsumerShell } from "@/components/ConsumerShell";
-import { Footer } from "@/components/Footer";
 import { HomeSignedIn } from "@/components/HomeSignedIn";
 import { getCurrentBacker, getSession } from "@/lib/session";
 
@@ -30,8 +29,7 @@ export default async function HomePage() {
     <>
       <ConsumerShell>
         <HomeSignedIn backerId={backer.id} nickname={backer.nickname} />
-      </ConsumerShell>
-      <Footer variant="fan" />
+      </ConsumerShell>
     </>
   );
 }

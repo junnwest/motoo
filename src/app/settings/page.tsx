@@ -3,7 +3,6 @@ import { NOINDEX } from "@/lib/metadata";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { ConsumerShell } from "@/components/ConsumerShell";
-import { Footer } from "@/components/Footer";
 import { Section } from "@/components/ui/Section";
 import { getCurrentBacker, getSession } from "@/lib/session";
 import { getHoldingsForBacker } from "@/lib/mochi";
@@ -77,8 +76,7 @@ export default async function SettingsPage() {
             />
           </div>
         </div>
-      </ConsumerShell>
-      <Footer variant="fan" />
+      </ConsumerShell>
     </>
   );
 }

@@ -107,6 +107,25 @@ short line reads as a line that failed to finish. All three columns are now
   white-on-white would have made every inner card look like a box in a box.
   Owner was shown this trade explicitly (the alternative was leaving the middle
   column bare) and chose all three boxed.
+Three follow-ups the same day, all consequences of boxing rather than separate
+ideas:
+
+- **The shell no longer scrolls; the middle box does.** Boxes that scroll away
+  with the page aren't boxes — their bottom edges leave the window and you're
+  back to looking at unterminated verticals. The row is now `100dvh - 64px` with
+  `overflow-hidden`, the middle column is `overflow-y-auto`, and each rail
+  scrolls its own content. `dvh` rather than `vh` because `100vh` on mobile is
+  the *tallest* the viewport ever gets, so a `vh` shell hides its last rows
+  behind the address bar until it collapses.
+- **The footer moved inside the middle column.** Outside it, a non-scrolling
+  page could never reach it — and it spanned the full window, cutting across the
+  bottom of three boxes it had nothing to do with. Every consumer page passed
+  `variant="fan"`, so `ConsumerShell` now renders it once and the seven pages
+  dropped theirs. Pages outside the shell (landing, auth, legal) still own one.
+- **The rule under the navbar is gone.** With the boxes drawing their own top
+  edges a few pixels below it, the nav border read as a fourth horizontal line
+  competing with them.
+
 - **Boxing costs horizontal space**, and the first attempt showed it: gutters
   plus gaps took ~80px off the middle column, which ellipsised every
   leaderboard name (`데모…`, `포근…`) and wrapped market titles to three lines.

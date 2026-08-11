@@ -46,7 +46,7 @@ export function SidebarPanel({
 
   if (collapsed) {
     return (
-      <aside className="sticky top-20 hidden h-[calc(100vh-96px)] w-12 flex-none rounded-xl border border-line-2 bg-panel py-6 lg:block">
+      <aside className="hidden h-full w-12 flex-none rounded-xl border border-line-2 bg-panel py-6 lg:block">
         <button
           type="button"
           onClick={() => toggle(false)}
@@ -60,7 +60,7 @@ export function SidebarPanel({
   }
 
   return (
-    <aside className="group sticky top-20 hidden max-h-[calc(100vh-96px)] w-[224px] flex-none overflow-y-auto rounded-xl border border-line-2 bg-panel px-3 py-6 lg:block">
+    <aside className="group hidden h-full w-[224px] flex-none overflow-y-auto rounded-xl border border-line-2 bg-panel px-3 py-6 lg:block">
       <nav className="flex flex-col gap-0.5">
         <SidebarLink
           href="/home"

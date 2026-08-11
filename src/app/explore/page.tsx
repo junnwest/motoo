@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { ConsumerShell } from "@/components/ConsumerShell";
-import { Footer } from "@/components/Footer";
 import { Mochi } from "@/components/Mochi";
 import { StreamerCard } from "@/components/StreamerCard";
 import { ExploreFilters } from "@/components/ExploreFilters";
@@ -92,9 +91,7 @@ export default async function ExplorePage({
           </div>
         )}
       </section>
-      </ConsumerShell>
-
-      <Footer variant="fan" />
+      </ConsumerShell>
     </>
   );
 }

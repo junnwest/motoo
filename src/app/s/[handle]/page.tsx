@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { ConsumerShell } from "@/components/ConsumerShell";
-import { Footer } from "@/components/Footer";
 import { ButtonLink } from "@/components/ui/Button";
 import { Mochi } from "@/components/Mochi";
 import { Avatar } from "@/components/ui/Placeholder";
@@ -309,9 +308,7 @@ export default async function StreamerProfilePage({
           )}
         </div>
       </div>
-      </ConsumerShell>
-
-      <Footer variant="fan" />
+      </ConsumerShell>
     </>
   );
 }

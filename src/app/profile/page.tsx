@@ -3,7 +3,6 @@ import { NOINDEX } from "@/lib/metadata";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { ConsumerShell } from "@/components/ConsumerShell";
-import { Footer } from "@/components/Footer";
 import { ButtonLink } from "@/components/ui/Button";
 import { Mochi } from "@/components/Mochi";
 import { Avatar } from "@/components/ui/Placeholder";
@@ -217,8 +216,7 @@ export default async function ProfilePage() {
             )}
           </Section>
         </div>
-      </ConsumerShell>
-      <Footer variant="fan" />
+      </ConsumerShell>
     </>
   );
 }

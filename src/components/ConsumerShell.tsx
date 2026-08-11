@@ -4,6 +4,7 @@ import { Nav } from "@/components/Nav";
 import { Sidebar } from "@/components/Sidebar";
 import { RightRail } from "@/components/RightRail";
 import { MobileTabBar } from "@/components/MobileTabBar";
+import { Footer } from "@/components/Footer";
 import { getUnreadCount } from "@/lib/notify";
 
 /**
@@ -12,12 +13,14 @@ import { getUnreadCount } from "@/lib/notify";
  * persistent right RightRail (discovery suggestions) — universal, no
  * per-page exceptions, including a creator's public `/s/[handle]` (that page
  * folded its own Buy Mochi/Report/Updates into a single middle column to make
- * room). Only the middle (`children`) changes per page. Both rails are
- * `sticky` and flush to the true viewport edge — **not** centered inside a
- * max-width wrapper, which would leave them stranded away from the window
- * edge on any screen wider than the cap. Only the middle column's own content
- * (each page sets its own max-width) is centered; the shell itself spans the
- * full viewport width, same as `Nav`.
+ * room). Only the middle (`children`) changes per page.
+ *
+ * **The shell is one viewport tall and does not scroll.** The middle box is the
+ * scroller and each rail scrolls its own content, so the three boxes stay put
+ * and keep their bottom edges on screen (2026-08-11). The rails were `sticky`
+ * when the page itself scrolled; inside a fixed-height row they simply fill it.
+ * The shell spans the full viewport width, same as `Nav`; only the middle
+ * column's own content is centered, per page.
  *
  * Used on /home, /explore, /notifications, /profile, /settings,
  * and /s/[handle].
@@ -64,7 +67,16 @@ export async function ConsumerShell({
           card, not a truncated line. Gap + padding here so the boxes have air
           to be boxes in; `items-stretch` is what makes the three tops and
           bottoms line up. */}
-      <div className="flex w-full items-stretch gap-3 px-3 py-4 min-h-[calc(100vh-64px)] sm:gap-4 sm:px-4">
+      {/* The row is exactly one viewport tall and never scrolls; the middle box
+          is the scroller (`overflow-y-auto` below), and each rail scrolls its
+          own content. That is what makes the three boxes read as boxes: with
+          the page scrolling underneath them, they slid out of the window and
+          their bottom edges left with them.
+
+          `dvh`, not `vh`: on mobile browsers `100vh` is the tallest the
+          viewport ever gets, so a `vh`-sized shell hides its own last rows
+          behind the address bar until it collapses. */}
+      <div className="flex h-[calc(100dvh-64px)] w-full items-stretch gap-3 overflow-hidden px-3 py-4 sm:gap-4 sm:px-4">
         {backerId && <Sidebar backerId={backerId} />}
         {/* The `main` landmark and the skip link's target for every consumer
             page, declared once here instead of per page (several pages had no
@@ -80,9 +92,17 @@ export async function ConsumerShell({
             in a container, which is what they are. */}
         <main
           id="main"
-          className="min-w-0 flex-1 overflow-hidden rounded-xl border border-line-2 bg-panel pb-[72px] lg:pb-0"
+          className="min-w-0 flex-1 overflow-y-auto rounded-xl border border-line-2 bg-panel pb-[72px] lg:pb-0"
         >
           {children}
+          {/* The footer lives *inside* the scrolling column rather than under
+              the shell. Outside it, a non-scrolling page could never reach it,
+              and it spanned the full window width — cutting straight across the
+              bottom of three boxes it had nothing to do with. Every consumer
+              page used `variant="fan"`, so this is the one place it needs to
+              be. Pages outside the shell (landing, auth, legal) still own
+              theirs. */}
+          <Footer variant="fan" />
         </main>
         {backerId && <RightRail backerId={backerId} />}
       </div>

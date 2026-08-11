@@ -72,7 +72,7 @@ export async function Nav() {
       ];
 
   return (
-    <header className="sticky top-0 z-40 border-b border-line bg-cream/90 backdrop-blur">
+    <header className="sticky top-0 z-40 bg-cream/90 backdrop-blur">
       <nav className="flex h-16 w-full items-center justify-between px-5 sm:px-8">
         {/* Signed in on the consumer app, the brand goes to the app home;
             everywhere else it goes to "/" (marketing landing / Studio root). */}
