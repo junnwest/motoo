@@ -146,6 +146,53 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+/*
+  Scrollbars.
+
+  Since the shell became three boxes with their own scroll containers
+  (2026-08-11), the browser's default bar sits *inside* a cream card — a grey
+  OS-chrome strip with a hard-edged track, cutting down the side of a rounded
+  box. It reads as someone else's UI dropped into ours.
+
+  Thumb only: the track is transparent, and the 3px transparent border with
+  `background-clip: content-box` is what makes the thumb look inset and slim
+  rather than a bar wedged against the edge. Colours come from the same line
+  tokens the borders use, so it belongs to the palette instead of the platform.
+
+  Untouched on purpose: macOS/iOS overlay scrollbars, which already fade out
+  and are drawn by the OS — these rules only apply where a classic bar exists.
+*/
+* {
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: var(--color-line-3) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--color-line-3);
+  border: 3px solid transparent;
+  background-clip: content-box;
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-muted);
+}
+
+/* The corner where a vertical and horizontal bar meet, which otherwise renders
+   as a small grey square in the rounded box's bottom-right. */
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
 /* Visible keyboard focus — quality floor requirement */
 :focus-visible {
   outline: 2px solid var(--color-coral-deep);
