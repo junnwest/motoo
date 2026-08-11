@@ -66,7 +66,7 @@ export async function HomeSignedIn({
   const hasMochi = holdings.length > 0;
 
   return (
-    <div className="mx-auto max-w-[900px] px-6 py-12 sm:px-10 sm:py-16">
+    <div className="w-full px-6 py-10 sm:px-8 sm:py-12">
       <h1 className="text-3xl font-extrabold tracking-[-0.03em] text-ink sm:text-4xl">
         {t("greeting", { name: nickname })}
       </h1>
@@ -78,7 +78,7 @@ export async function HomeSignedIn({
         {hasMochi ? (
           <>
             <Section title={t("statusTitle")}>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 2xl:grid-cols-3">
                 {holdings.map((h) => {
                   const r = rankByStreamer.get(h.streamerId);
                   return (
@@ -126,7 +126,7 @@ export async function HomeSignedIn({
             {/* Spend: what this balance actually buys, right now. */}
             {affordable.length > 0 && (
               <Section title={t("affordableTitle")}>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 2xl:grid-cols-3">
                   {affordable.map(({ item, streamer, balance }) => (
                     // Flat, bordered, no shadow — one step below the balance
                     // cards above, which is the whole point of the distinction.
@@ -226,9 +226,15 @@ export async function HomeSignedIn({
             {/* A feed, so it reads as one — the page used to end in eight more
                 white pills, which is what made the whole column look like a
                 dump of identical boxes however good each box was. */}
-            <ul className="divide-y divide-line-2 border-y border-line-2">
+            {/* Two columns once the box is wide, rather than one list running
+                the full 1350px. Filling the width is the goal, but a paragraph
+                that wide is a worse read than the whitespace it replaced —
+                columns use the space *and* keep the line length sane. Hairlines
+                move to each item (`border-b`) instead of `divide-y`, which
+                would draw them across the gap between columns. */}
+            <ul className="border-t border-line-2 2xl:grid 2xl:grid-cols-2 2xl:gap-x-10">
               {updates.map((u) => (
-                <li key={u.id}>
+                <li key={u.id} className="border-b border-line-2">
                   <Link
                     href={`/s/${u.streamer.handle}`}
                     className="group flex h-full flex-col py-4 transition-colors duration-swift"

@@ -46,7 +46,7 @@ export default async function ExplorePage({
   return (
     <>
       <ConsumerShell>
-      <section className="mx-auto max-w-[900px] px-6 py-12 sm:px-10 sm:py-16">
+      <section className="w-full px-6 py-10 sm:px-8 sm:py-12">
         <h1 className="text-3xl font-extrabold tracking-[-0.03em] text-ink sm:text-4xl">
           {t("title")}
         </h1>
@@ -67,7 +67,7 @@ export default async function ExplorePage({
         </div>
 
         {streamers.length > 0 ? (
-          <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
             {streamers.map((s) => (
               <StreamerCard key={s.handle} streamer={s} />
             ))}

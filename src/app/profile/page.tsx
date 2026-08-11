@@ -54,7 +54,7 @@ export default async function ProfilePage() {
   return (
     <>
       <ConsumerShell>
-        <div className="mx-auto max-w-[900px] px-6 py-12 sm:px-10 sm:py-16">
+        <div className="w-full px-6 py-10 sm:px-8 sm:py-12">
           {/* Identity. Accounts are additive, so owning a Studio is the only
               thing that distinguishes a creator — surfaced here (and in the nav
               dropdown) rather than left implicit. */}
@@ -100,7 +100,7 @@ export default async function ProfilePage() {
                 </ButtonLink>
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 2xl:grid-cols-3">
                 {holdings.map((h) => (
                   <div
                     key={h.id}
