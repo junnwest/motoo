@@ -120,19 +120,19 @@ model Streamer {
 // has role=streamer and owns a Streamer profile via Streamer.owner. (Named "Backer"
 // for Phase-1 continuity; treat it as the account/user table.)
 model Backer {
-  id              String   @id @default(cuid())
-  email           String   @unique
+  id              String               @id @default(cuid())
+  email           String               @unique
   nickname        String
-  handle          String?  @unique // public fan @handle, chosen at onboarding
+  handle          String?              @unique // public fan @handle, chosen at onboarding
   // Profile picture: a small square JPEG data URL the user uploads in /settings
   // (motoo has no object storage — see src/lib/imageUpload.ts). Null = the
   // initials monogram. Deliberately NOT carried in the JWT: a data URL would
   // blow past the 4KB session-cookie limit.
   avatarUrl       String?
-  currencyBalance Int      @default(0) // legacy Phase-1 global mochi; dormant — Phase 2 uses per-creator MochiHolding
-  role            Role     @default(backer)
+  currencyBalance Int                  @default(0) // legacy Phase-1 global mochi; dormant — Phase 2 uses per-creator MochiHolding
+  role            Role                 @default(backer)
   passwordHash    String? // dev credentials login only
-  createdAt       DateTime @default(now())
+  createdAt       DateTime             @default(now())
   // Session revocation counter. Sessions are stateless JWTs, so signing out can
   // only ask the browser to drop the cookie — the token itself stays valid until
   // it expires, and any request still carrying it gets a working session back
@@ -140,7 +140,8 @@ model Backer {
   // increments this; a token carrying a stale version is rejected. An exact
   // counter rather than an issued-at cutoff, so there's no same-second race
   // between logging out and logging straight back in. See DECISIONS 2026-08-02.
-  tokenVersion    Int      @default(0)
+  tokenVersion    Int                  @default(0)
+  passwordResets  PasswordResetToken[]
 
   // Account deletion is a scheduled state, not an immediate purge: the user
   // gets a grace period (ACCOUNT_DELETION_GRACE_DAYS) in which signing back in
@@ -351,4 +352,26 @@ model RateLimit {
 
   @@unique([key, windowStart])
   @@index([windowStart])
+}
+
+// A single-use, expiring password-reset grant.
+//
+// Stores a SHA-256 *hash* of the token, never the token itself: the emailed
+// value is the only copy, so a leaked database dump cannot be replayed into
+// account takeovers. Same reasoning as passwordHash sitting next to it.
+//
+// Rows are kept after use (usedAt set) rather than deleted, so "this link was
+// already used" is answerable — a user clicking an old link deserves that
+// message rather than a generic failure. The purge cron sweeps expired rows.
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  backerId  String
+  backer    Backer    @relation(fields: [backerId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique // sha256 of the emailed token, hex
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([backerId])
+  @@index([expiresAt])
 }

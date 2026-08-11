@@ -420,7 +420,37 @@
     "signupBenefit1": "크리에이터를 후원하고 모찌를 받아요",
     "signupBenefit2": "마켓에서 원하는 아이템을 이용해요",
     "signupBenefit3": "응원한 크리에이터를 한곳에서 관리해요",
-    "tooMany": "시도가 너무 잦아요. 잠시 후 다시 시도해 주세요."
+    "tooMany": "시도가 너무 잦아요. 잠시 후 다시 시도해 주세요.",
+    "forgotLink": "비밀번호를 잊으셨나요?",
+    "reset": {
+      "requestTitle": "비밀번호 재설정",
+      "requestSubtitle": "가입하신 이메일 주소를 알려주시면 재설정 링크를 보내드려요.",
+      "emailLabel": "이메일",
+      "requestSubmit": "재설정 링크 받기",
+      "requestSending": "보내는 중…",
+      "requestSentTitle": "메일을 보냈어요",
+      "requestSentBody": "해당 이메일로 가입된 계정이 있다면 재설정 링크가 도착해요. 링크는 30분 동안만 사용할 수 있어요.",
+      "backToLogin": "로그인으로 돌아가기",
+      "newTitle": "새 비밀번호 설정",
+      "newSubtitle": "새로 사용할 비밀번호를 입력해 주세요.",
+      "passwordLabel": "새 비밀번호",
+      "passwordHint": "영문과 숫자를 포함해 8자 이상",
+      "confirmLabel": "새 비밀번호 확인",
+      "submit": "비밀번호 변경",
+      "submitting": "변경하는 중…",
+      "doneTitle": "비밀번호를 변경했어요",
+      "doneBody": "보안을 위해 기존에 로그인되어 있던 기기에서는 모두 로그아웃했어요. 새 비밀번호로 다시 로그인해 주세요.",
+      "loginCta": "로그인하기",
+      "invalidTitle": "사용할 수 없는 링크예요",
+      "errors": {
+        "unknown": "유효하지 않은 링크예요. 재설정을 다시 요청해 주세요.",
+        "expired": "링크가 만료됐어요. 재설정을 다시 요청해 주세요.",
+        "used": "이미 사용한 링크예요. 재설정을 다시 요청해 주세요.",
+        "weakPassword": "영문과 숫자를 포함해 8자 이상으로 입력해 주세요.",
+        "mismatch": "두 비밀번호가 일치하지 않아요.",
+        "generic": "처리하지 못했어요. 잠시 후 다시 시도해 주세요."
+      }
+    }
   },
   "creatorOnboarding": {
     "title": "크리에이터 시작하기",

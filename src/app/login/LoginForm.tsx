@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Field";
@@ -52,6 +53,16 @@ export function LoginForm({ providers }: { providers: EnabledProviders }) {
           onChange={(e) => setPassword(e.target.value)}
           required
         />
+
+        {/* The only entry point to account recovery. Under the password field
+            rather than below the submit button: it is what someone reaches for
+            at the moment the password fails them. */}
+        <Link
+          href="/forgot"
+          className="-mt-1 self-end text-xs font-semibold text-muted hover:text-coral-deep"
+        >
+          {t("forgotLink")}
+        </Link>
 
         {error && <InlineMessage tone="error">{t("invalid")}</InlineMessage>}
 

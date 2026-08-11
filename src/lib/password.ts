@@ -1,7 +1,9 @@
 import { scryptSync, randomBytes, timingSafeEqual } from "node:crypto";
 
-/** Password policy shared by signup and settings: 8+ chars, letter + number. */
-export const PASSWORD_RE = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/;
+// The policy itself lives in ./passwordPolicy so client components can import
+// it without pulling node:crypto (above) into the browser bundle. Re-exported
+// here so the server-side importers that already reach for it are unchanged.
+export { PASSWORD_RE } from "./passwordPolicy";
 
 /**
  * Password hashing for the credentials login path (email+password, live in

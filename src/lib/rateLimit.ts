@@ -36,6 +36,9 @@ export const RATE_LIMITS = {
   /** Credential stuffing is the thing being slowed here. */
   login: { limit: 10, windowSec: 300 },
   signup: { limit: 5, windowSec: 3600 },
+  // Password reset: keyed on the submitted email. Tight, because each request
+  // sends mail to an address the requester does not have to own.
+  passwordReset: { limit: 3, windowSec: 3600 },
   /** Cheap but unbounded writes. */
   follow: { limit: 60, windowSec: 60 },
   /** Deleting an account, and the export that dumps everything about one. */
