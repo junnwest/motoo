@@ -54,7 +54,17 @@ export async function ConsumerShell({
           made it the tallest item in the row and shoved the footer down by up
           to ~176px. With the floor, the row is never shorter than the strip, so
           the footer sits in the same place whatever the rails are doing. */}
-      <div className="flex w-full items-start min-h-[calc(100vh-64px)]">
+      {/* Three boxes, not two divider lines. Each rail used to draw its own
+          `border-r`/`border-l` while being content-sized, so each line stopped
+          wherever that rail's content happened to end — and since the two rails
+          hold different amounts, the left and right lines ended at different
+          heights (the ragged edge noted in DECISIONS 2026-08-02, left alone
+          because the obvious fix was forcing full height and losing the rails'
+          scroll behaviour). Boxing sidesteps it: a short box reads as a short
+          card, not a truncated line. Gap + padding here so the boxes have air
+          to be boxes in; `items-stretch` is what makes the three tops and
+          bottoms line up. */}
+      <div className="flex w-full items-stretch gap-3 px-3 py-4 min-h-[calc(100vh-64px)] sm:gap-4 sm:px-4">
         {backerId && <Sidebar backerId={backerId} />}
         {/* The `main` landmark and the skip link's target for every consumer
             page, declared once here instead of per page (several pages had no
@@ -62,7 +72,16 @@ export async function ConsumerShell({
             pb below `lg` clears the fixed MobileTabBar, which would otherwise
             sit on top of the last ~56px of every page; zero from `lg` up,
             where the bar is hidden and the Sidebar takes over. */}
-        <main id="main" className="min-w-0 flex-1 pb-[72px] lg:pb-0">
+        {/* The middle box is `bg-panel`, not `bg-card`. Panel is the same tone
+            as the page, so the box reads as an outlined region rather than a
+            white slab — which matters because /s/[handle] and /home box their
+            own sections inside it. White-on-white would have made every inner
+            card look like a box in a box; on panel they read as cards sitting
+            in a container, which is what they are. */}
+        <main
+          id="main"
+          className="min-w-0 flex-1 overflow-hidden rounded-xl border border-line-2 bg-panel pb-[72px] lg:pb-0"
+        >
           {children}
         </main>
         {backerId && <RightRail backerId={backerId} />}

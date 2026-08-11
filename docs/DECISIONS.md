@@ -11,6 +11,7 @@ To pull a single entry, grep its heading with trailing context, e.g.
 
 | Date | Decision |
 | --- | --- |
+| 2026-08-11 | The shell is three boxes, not two divider lines (fixes the ragged rail edges) |
 | 2026-08-10 | `/ranking` deleted; no global leaderboard, because mochi isn't comparable across creators |
 | 2026-08-10 | One type/radius/leading/motion scale; then a density correction, motion, self-hosted Pretendard |
 | 2026-08-10 | Code pushed to `main` before the prod schema — owner's informed call (rename later converted to a migration on merge) |
@@ -82,6 +83,37 @@ To pull a single entry, grep its heading with trailing context, e.g.
 | 2026-07-08 | `FoundingMembership` table for the founding-number invariant |
 | 2026-07-08 | Prisma pinned to v6 (not v7) |
 | 2026-07-08 | Korean-first, i18n-ready; integer KRW; mock PG |
+
+## 2026-08-11 — The shell is three boxes, not two divider lines
+
+Owner: the three sections' borders "are not vertically complete", and each
+section should be a rectangle rather than something separated by lines.
+
+The cause was structural. Each rail drew its own `border-r` / `border-l` while
+being **content-sized** (`max-h-[calc(100vh-64px)]`), so each line stopped
+wherever that rail's content happened to end — and because the two rails hold
+different amounts, the left and right lines ended at different heights. It was
+already logged (DECISIONS 2026-08-02, PROGRESS) and deliberately left, because
+the obvious fix is forcing both rails to full height, which costs their
+content-sized scroll behaviour.
+
+Boxing sidesteps the whole problem: a short box reads as a short box, while a
+short line reads as a line that failed to finish. All three columns are now
+`rounded-xl border border-line-2 bg-panel`, on a gapped, padded row.
+
+- **`bg-panel`, not `bg-card`.** Panel is the same tone as the page, so each box
+  reads as an outlined region rather than a white slab. This matters because
+  `/s/[handle]` and `/home` box their own sections *inside* the middle column —
+  white-on-white would have made every inner card look like a box in a box.
+  Owner was shown this trade explicitly (the alternative was leaving the middle
+  column bare) and chose all three boxed.
+- **Boxing costs horizontal space**, and the first attempt showed it: gutters
+  plus gaps took ~80px off the middle column, which ellipsised every
+  leaderboard name (`데모…`, `포근…`) and wrapped market titles to three lines.
+  Fixed by paying it back where it was cheapest — the page's own inset shrank
+  (the box is the frame now), rails went 260/300 → 224/272, and the market grid
+  goes 2-up at `xl` rather than `sm`, since two Korean titles plus their chips
+  do not fit side by side in a half-column.
 
 ## 2026-08-10 — `/ranking` deleted, and there will be no global leaderboard
 

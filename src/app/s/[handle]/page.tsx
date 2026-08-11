@@ -147,7 +147,7 @@ export default async function StreamerProfilePage({
           at 900px (DECISIONS 2026-08-01): the rails already narrow the middle
           column, and a second cap inside them left the market grid stranded in
           whitespace. The page fills its column and boxes each section instead. */}
-      <section className="border-b border-line bg-cream-warm px-6 py-12 sm:px-10">
+      <section className="border-b border-line bg-cream-warm px-6 py-10 sm:px-7">
         {/* Two columns at desktop: identity left, actions + stats right. As one
             row with the CTA pinned right, the band left a dead gap the width of
             half the screen between the bio and the buttons — the stats were
@@ -239,7 +239,7 @@ export default async function StreamerProfilePage({
           recessed (panel tint, no shadow) because it's context for the market
           rather than a peer of it, and updates stay flat. Same system, three
           depths; no section was de-boxed. */}
-      <div className="flex w-full flex-col gap-6 px-6 py-10 sm:px-10 sm:py-12">
+      <div className="flex w-full flex-col gap-6 px-6 py-8 sm:px-7 sm:py-10">
         {/* Ranking (30%) + Marketplace (70%), side by side (DECISIONS
             2026-08-01) — 후원하기 now routes to its own page
             (/s/[handle]/donate) instead of an in-page anchor, freeing this

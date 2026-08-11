@@ -84,7 +84,10 @@ ignored.
   is invisible in production.
 - [ ] **No pagination anywhere.** Explore is capped at 60, orders at 50, notifications at 30 —
   bounded, but with no "load more".
-- [ ] Expanded rails' dividers end where their content ends (DECISIONS 2026-08-02).
+- [x] ~~Expanded rails' dividers end where their content ends~~ — **fixed 2026-08-11** by
+  boxing all three shell columns instead of dividing them with lines. The fix everyone
+  reached for (force the rails to full height) would have cost their content-sized scroll
+  behaviour; a box just reads as a short box. See DECISIONS 2026-08-11.
 - [ ] The edge middleware doesn't check `tokenVersion` — Prisma-free by design, so a revoked
   token can still satisfy the *routing* gate for one request. Every page-level `auth()` does the
   real check. **No action recommended.**
