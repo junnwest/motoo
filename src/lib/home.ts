@@ -164,3 +164,59 @@ export async function getUpdatesForBacker(backerId: string, take = 4) {
     },
   });
 }
+
+/**
+ * The mirror of `getAffordableItems`: things this fan can't reach yet, with how
+ * much more they'd need. Same shape and the same reason for it — the
+ * affordability threshold differs per creator, so the per-row condition lives
+ * in a pass over rows rather than in the query planner.
+ *
+ * Cheapest-first, unlike affordable items (priciest-first): the useful answer
+ * to "what can't I afford" is the thing you're closest to, not the thing you're
+ * furthest from. Items priced at or below the balance are excluded — those are
+ * already the other section's job.
+ */
+export async function getOutOfReachItems(backerId: string, take = 3) {
+  const holdings = await prisma.mochiHolding.findMany({
+    where: { backerId },
+    include: { streamer: { select: { handle: true, displayName: true } } },
+  });
+  if (holdings.length === 0) return [];
+
+  const items = await prisma.marketplaceItem.findMany({
+    where: {
+      active: true,
+      OR: holdings.map((h) => ({
+        streamerId: h.streamerId,
+        priceMochi: { gt: h.balance },
+      })),
+    },
+    orderBy: { priceMochi: "asc" },
+  });
+
+  const byStreamer = new Map(holdings.map((h) => [h.streamerId, h]));
+  const seen = new Map<string, number>();
+  const out: {
+    item: (typeof items)[number];
+    balance: number;
+    shortfall: number;
+    streamer: { handle: string; displayName: string };
+  }[] = [];
+
+  for (const item of items) {
+    // One per creator, so a single creator's price list can't fill the section.
+    if ((seen.get(item.streamerId) ?? 0) >= 1) continue;
+    seen.set(item.streamerId, (seen.get(item.streamerId) ?? 0) + 1);
+    const h = byStreamer.get(item.streamerId)!;
+    out.push({
+      item,
+      balance: h.balance,
+      shortfall: item.priceMochi - h.balance,
+      streamer: h.streamer,
+    });
+  }
+
+  // Closest to reach first, across creators.
+  out.sort((a, b) => a.shortfall - b.shortfall);
+  return out.slice(0, take);
+}

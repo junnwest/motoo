@@ -995,7 +995,18 @@
     "ofBalance": "/ 보유 {count}",
     "railFollowing": "팔로잉",
     "statusTitle": "내 모찌 현황",
-    "discoverEmpty": "지금은 추천할 새로운 크리에이터가 없어요."
+    "discoverEmpty": "지금은 추천할 새로운 크리에이터가 없어요.",
+    "summaryMochi": "보유 모찌",
+    "summaryCreators": "응원 중인 크리에이터",
+    "summaryPending": "진행 중인 주문",
+    "summaryUnit": "{count}명",
+    "summaryCount": "{count}건",
+    "reachTitle": "조금만 더 모으면",
+    "reachShort": "{count} 모찌 더",
+    "historyTitle": "지난 주문",
+    "historyEmpty": "아직 완료된 주문이 없어요.",
+    "statusFulfilled": "완료",
+    "statusCancelled": "취소"
   },
   "notifications": {
     "title": "알림",
