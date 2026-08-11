@@ -1,6 +1,6 @@
 ﻿# motoo — Progress Tracker
 
-_Last updated: 2026-08-10_
+_Last updated: 2026-08-11_
 
 **Read this whole file — it is short on purpose.** Everything in it is either open, blocked,
 or a live constraint. Shipped history lives in [`CHANGELOG.md`](./CHANGELOG.md) and does not
@@ -11,6 +11,11 @@ state is in [`DEPLOYMENT.md`](./DEPLOYMENT.md).
 A ten-stage audit ran on 2026-08-06/07 — findings and the plan are in
 [`AUDIT-2026-08-06.md`](./AUDIT-2026-08-06.md), what shipped is in CHANGELOG. **The audit doc
 is history now, except for its "Open questions" section, which is still live.**
+
+**Pre-launch scope:** [`PRELAUNCH.md`](./PRELAUNCH.md) is the exhaustive list of what is left
+that 사업자등록 would *not* unblock (compiled 2026-08-11 by sweeping the code, 35 items). The
+headline: there is no password reset and no email delivery at all, so a forgotten password is
+a permanent lockout.
 
 ## Open items — read this first when resuming
 
@@ -66,14 +71,14 @@ ignored.
 - [ ] **Lighthouse** ≥ 90 performance / ≥ 95 SEO on `/` and `/s/[handle]` — not runnable headless
   here.
 - [ ] **CSP is Report-Only.** Watch the violation reports for a week, then enforce. Enforcing
-  needs a per-request nonce (Next injects inline scripts, Tailwind inline styles), and
-  `style-src 'self'` additionally needs Pretendard self-hosted — see below.
+  needs a per-request nonce (Next injects inline scripts, Tailwind inline styles). The font is
+  no longer part of this — it was self-hosted 2026-08-11 and the jsdelivr exception is gone.
 
 **Known gaps, consciously left**
-- [ ] **Pretendard still loads from a CDN `@import`** in `globals.css` — render-blocking, a
-  third-party SPOF, and the reason CSP can't tighten to `style-src 'self'`. Self-hosting needs a
-  font binary in the repo (Pretendard ships as many woff2 subsets); it is a real size/coverage
-  decision, not a mechanical change.
+- [x] ~~Pretendard loads from a CDN `@import`~~ — **self-hosted 2026-08-11** as a 92-file
+  dynamic subset in `public/fonts/pretendard/` (3.1MB in the repo; a page fetches only the
+  unicode ranges it renders — `/s/[handle]` pulls 17). CSP dropped its jsdelivr exception in
+  `style-src` and `font-src`; what still blocks enforcing is `unsafe-inline`, not the font.
 - [ ] **`/home` and `/s/[handle]` still issue 22 and 19 queries** (down from 44 and 50). Getting
   materially below that means consolidating reads, not more caching.
 - [ ] **The following list is desktop-only.** The mobile tab bar covers the four primary
