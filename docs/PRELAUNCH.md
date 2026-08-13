@@ -54,7 +54,7 @@ real 본인인증, Kakao login, real refund execution, and creator payouts.
 | 17 | **No analytics** — no funnel, no idea where signup or donation drops off. | already in PROGRESS |
 | 18 | **No uptime or health monitoring**, no alerting. | — |
 | 19 | **No CI.** `.github/workflows/` does not exist, so `tsc`, `lint`, `check:vocab`, `check:emoji` and the money suite only ever run when someone remembers locally. | `ls .github/workflows` → none |
-| 20 | **Tests are money-only.** 26 tests over `mochi.ts`; no component tests, no e2e, nothing covering auth, onboarding, the Studio or the middleware. | `test/` contains one file |
+| 20 | **Thin test coverage.** 51 tests now — money (26), password reset (13), email verification (12) — but still no component tests, no e2e, and nothing covering onboarding, the Studio or the middleware. | `test/` |
 | 21 | **Preview deploys have no database** (env scoped Production-only on 2026-08-10 to stop a preview migrating prod). Correct as a stopgap, but it means no working preview until Preview gets its own Supabase branch. | DEPLOYMENT.md |
 | 22 | **No staging environment.** | — |
 | 23 | **Backups never restore-tested.** Supabase PITR exists; nobody has proven a restore. | DEPLOYMENT.md |
