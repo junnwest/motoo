@@ -20,11 +20,11 @@ real 본인인증, Kakao login, real refund execution, and creator payouts.
 
 | # | Item | Evidence |
 | --- | --- | --- |
-| 1 | **Password reset / forgot-password.** No route, no token model, nothing. Signup is credentials-based, so a forgotten password is a permanent lockout with no self-service path. | no `forgot`/`reset-password` match anywhere in `src/` |
-| 2 | **Email delivery. There is none.** No `nodemailer`/`resend`/`sendgrid`/SES anywhere. This is the dependency under #1, and also under every receipt, order update and deletion warning. | no mail dependency in `package.json` or `src/` |
-| 3 | **Email verification at signup.** Nothing proves the address belongs to the person signing up, so an account can be created on someone else's email and a later "reset" flow would inherit that weakness. | no `emailVerified` field or check |
-| 4 | **Change email in settings.** `/settings` covers avatar, nickname, handle and password only. A user whose email changes has no route back into their account. | `src/app/settings/` — three forms, none for email |
-| 5 | **`CRON_SECRET` unset in Vercel**, so `/api/cron/purge-accounts` refuses to run. The UI promises deletion after a 30-day grace period; in production that purge has never executed. Config-only fix. | `vercel env ls` — five vars, no `CRON_SECRET` |
+| ~~1~~ | ✅ **Password reset — shipped 2026-08-11.** `/forgot` → mailed link → `/reset/[token]`. Hash-only storage, single use, 30 min, no account enumeration, revokes every session on completion. 13 tests. | `src/lib/passwordReset.ts` |
+| ~~2~~ | ✅ **Email delivery — shipped 2026-08-11.** `EmailProvider` behind the same abstraction as payments/verification, mock default that prints the message. Swapping in Resend or SES is one adapter + `EMAIL_PROVIDER`. | `src/lib/email/` |
+| ~~3~~ | ✅ **Email verification — shipped 2026-08-13.** Sent on signup (best-effort, never fails the signup), resend from `/settings`, `emailVerifiedAt` on `Backer`. Surfaced, deliberately **not** enforced — gating money on an email click is a product call nobody has made. | `src/lib/emailVerification.ts` |
+| ~~4~~ | ✅ **Change email — shipped 2026-08-13.** Password-gated, confirmation to the new address, security notice to the old, and the account does not move until the new owner clicks. 12 tests including the claimed-in-between race. | `src/app/settings/EmailForm.tsx` |
+| 5 | **`CRON_SECRET` unset in Vercel**, so `/api/cron/purge-accounts` refuses to run. The UI promises deletion after a 30-day grace period; in production that purge has never executed. Config-only fix. **Now also sweeps the two token tables** (`purgeStaleResetTokens`, `purgeStaleEmailTokens`) — wire those into the route when the secret lands. | `vercel env ls` — five vars, no `CRON_SECRET` |
 
 ## Tier 2 — legal / compliance surface you are already asserting
 
@@ -85,9 +85,8 @@ real 본인인증, Kakao login, real refund execution, and creator payouts.
 
 ## Suggested order
 
-1. **#2 → #1 → #3 → #4** (email, then password reset, then verification, then
-   email change). One dependency chain, and it is the only thing on this list
-   that makes the product unusable for a real person today.
+1. ~~**#2 → #1 → #3 → #4**~~ — **done 2026-08-11/13.** The whole account-access
+   chain: email delivery, password reset, verification, email change.
 2. **#5** — one env var, and it makes a promise in the UI true again.
 3. **#16 + #19** — error tracking and CI. Cheap, and everything after this is
    safer to ship with them in place.

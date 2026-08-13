@@ -142,6 +142,11 @@ model Backer {
   // between logging out and logging straight back in. See DECISIONS 2026-08-02.
   tokenVersion    Int                  @default(0)
   passwordResets  PasswordResetToken[]
+  emailTokens     EmailToken[]
+  /// Set when the address on the account has been confirmed by clicking a
+  /// mailed link. Null means unconfirmed — surfaced, not blocked (see
+  /// src/lib/emailVerification.ts).
+  emailVerifiedAt DateTime?
 
   // Account deletion is a scheduled state, not an immediate purge: the user
   // gets a grace period (ACCOUNT_DELETION_GRACE_DAYS) in which signing back in
@@ -371,6 +376,37 @@ model PasswordResetToken {
   expiresAt DateTime
   usedAt    DateTime?
   createdAt DateTime  @default(now())
+
+  @@index([backerId])
+  @@index([expiresAt])
+}
+
+// Why an email token needs a purpose: verifying the address already on the
+// account and moving the account to a new address are the same mechanism (mail
+// a secret, click it, prove control) with one difference — a change carries the
+// address it is moving *to*, and that address must not become the account's
+// until the click happens. Two tables would have been the same columns twice.
+enum EmailTokenPurpose {
+  verify // confirm the address already on the account
+  change // move the account to `newEmail`, once its owner clicks
+}
+
+// Same storage rules as PasswordResetToken: the emailed value is never stored,
+// only its SHA-256 hash, and a consumed row is kept (usedAt) so a second click
+// can be answered honestly.
+model EmailToken {
+  id        String            @id @default(cuid())
+  backerId  String
+  backer    Backer            @relation(fields: [backerId], references: [id], onDelete: Cascade)
+  purpose   EmailTokenPurpose
+  tokenHash String            @unique // sha256 of the emailed token, hex
+  /// Only set for `change`: the address this token would move the account to.
+  /// Not unique — two people may both be mid-change to the same address, and
+  /// the loser finds out at consume time, where the real uniqueness check is.
+  newEmail  String?
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime          @default(now())
 
   @@index([backerId])
   @@index([expiresAt])

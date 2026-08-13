@@ -11,6 +11,7 @@ import { ACCOUNT_DELETION_GRACE_DAYS } from "@/lib/accountDeletion";
 import { IdentityForm } from "./SettingsForm";
 import { AvatarForm } from "./AvatarForm";
 import { PasswordForm } from "./PasswordForm";
+import { EmailForm } from "./EmailForm";
 
 /** Signed-in surface: one person’s balances and history. Never indexed. */
 export const metadata: Metadata = { robots: NOINDEX };
@@ -50,6 +51,17 @@ export default async function SettingsPage() {
             <AvatarForm initialAvatar={backer.avatarUrl} />
           </Section>
 
+          {/* Above identity on purpose: the address is what account recovery
+              runs through, so an unconfirmed one is the most consequential
+              thing on this page. */}
+          <Section title={t("email.sectionTitle")} boxed className="mt-6">
+            <EmailForm
+              email={backer.email}
+              verified={!!backer.emailVerifiedAt}
+              canChange={!!backer.passwordHash}
+            />
+          </Section>
+
           <Section title={t("identityTitle")} boxed className="mt-6">
             <IdentityForm
               initialNickname={backer.nickname}
@@ -76,7 +88,7 @@ export default async function SettingsPage() {
             />
           </div>
         </div>
-      </ConsumerShell>
+      </ConsumerShell>
     </>
   );
 }

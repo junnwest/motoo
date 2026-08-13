@@ -1,8 +1,10 @@
 "use server";
 
 import { z } from "zod";
+import { headers } from "next/headers";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
+import { sendVerificationEmail } from "@/lib/emailVerification";
 import { hashPassword, PASSWORD_RE } from "@/lib/password";
 import { signIn } from "@/auth";
 import { AuthError } from "next-auth";
@@ -48,8 +50,9 @@ export async function signupUser(
   const email = parsed.data.email.toLowerCase();
   const { password, nickname } = parsed.data;
 
+  let created: { id: string };
   try {
-    await prisma.backer.create({
+    created = await prisma.backer.create({
       data: {
         email,
         nickname,
@@ -57,6 +60,7 @@ export async function signupUser(
         role: "backer",
         // Not onboarded/verified yet — the middleware routes them to /onboarding.
       },
+      select: { id: true },
     });
   } catch (e) {
     if (
@@ -66,6 +70,18 @@ export async function signupUser(
       return { ok: false, error: "emailTaken" };
     }
     return { ok: false, error: "signupGeneric" };
+  }
+
+  // Best-effort, and deliberately not awaited into the failure path: a mail
+  // provider having a bad minute must not fail a signup whose account already
+  // exists. The address stays unverified and /settings offers a resend.
+  try {
+    const h = await headers();
+    const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000";
+    const proto = h.get("x-forwarded-proto") ?? "http";
+    await sendVerificationEmail(created.id, `${proto}://${host}`);
+  } catch {
+    // swallowed on purpose — see above
   }
 
   try {

@@ -450,6 +450,21 @@
         "mismatch": "두 비밀번호가 일치하지 않아요.",
         "generic": "처리하지 못했어요. 잠시 후 다시 시도해 주세요."
       }
+    },
+    "verify": {
+      "verifiedTitle": "이메일 주소를 확인했어요",
+      "verifiedBody": "이제 비밀번호를 잊어도 이 주소로 재설정 링크를 받을 수 있어요.",
+      "changedTitle": "이메일 주소를 변경했어요",
+      "changedBody": "앞으로는 새 주소로 로그인해 주세요.",
+      "failedTitle": "확인하지 못했어요",
+      "continueCta": "홈으로 가기",
+      "settingsCta": "설정에서 다시 보내기",
+      "errors": {
+        "unknown": "유효하지 않은 링크예요. 설정에서 다시 요청해 주세요.",
+        "expired": "링크가 만료됐어요. 설정에서 다시 요청해 주세요.",
+        "used": "이미 사용한 링크예요.",
+        "taken": "이미 다른 계정이 사용 중인 이메일이에요."
+      }
     }
   },
   "creatorOnboarding": {
@@ -1111,6 +1126,32 @@
       "creatorAccount": "크리에이터 계정은 여기서 삭제할 수 없어요. 고객센터로 문의해 주세요.",
       "login": "로그인이 필요해요.",
       "generic": "처리하지 못했어요. 잠시 후 다시 시도해 주세요."
+    },
+    "email": {
+      "sectionTitle": "이메일",
+      "current": "현재 이메일",
+      "unverified": "아직 확인되지 않은 주소예요",
+      "unverifiedBody": "확인해 두면 비밀번호를 잊었을 때 이 주소로 재설정 링크를 받을 수 있어요.",
+      "verified": "확인 완료",
+      "resend": "확인 메일 다시 보내기",
+      "resending": "보내는 중…",
+      "resent": "확인 메일을 보냈어요.",
+      "changeTitle": "이메일 변경",
+      "newEmail": "새 이메일",
+      "currentPassword": "현재 비밀번호",
+      "changeSubmit": "변경 링크 받기",
+      "changeSubmitting": "보내는 중…",
+      "changeSent": "새 주소로 확인 메일을 보냈어요. 링크를 열면 변경이 완료돼요.",
+      "oauthOnly": "소셜 로그인 계정은 이메일을 변경할 수 없어요.",
+      "errors": {
+        "login": "로그인이 필요해요. 다시 로그인해 주세요.",
+        "invalidEmail": "올바른 이메일 주소를 입력해 주세요.",
+        "wrongPassword": "현재 비밀번호가 일치하지 않아요.",
+        "taken": "이미 사용 중인 이메일이에요.",
+        "same": "지금 사용 중인 주소와 같아요.",
+        "tooMany": "요청이 너무 잦아요. 잠시 후 다시 시도해 주세요.",
+        "generic": "처리하지 못했어요. 잠시 후 다시 시도해 주세요."
+      }
     }
   },
   "imagePicker": {
