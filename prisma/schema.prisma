@@ -75,33 +75,39 @@ enum FulfillmentMode {
 }
 
 model Streamer {
-  id            String         @id @default(cuid())
-  handle        String         @unique
-  displayName   String
-  avatarUrl     String?
-  bio           String?
-  category      String
+  id              String         @id @default(cuid())
+  handle          String         @unique
+  displayName     String
+  avatarUrl       String?
+  bio             String?
+  category        String
   // Phase 2 creator onboarding fields
-  creatorType   String? // what kind of creator (게임/버추얼/음악/아트…); free-form for v1
-  gender        Gender?
-  age           Int?
+  creatorType     String? // what kind of creator (게임/버추얼/음악/아트…); free-form for v1
+  gender          Gender?
+  age             Int?
   // The account (Backer, role=streamer) that owns/operates this creator profile.
   // Null for legacy Phase-1 seeds with no login. One account owns at most one profile.
-  ownerId       String?        @unique
-  owner         Backer?        @relation("CreatorOwner", fields: [ownerId], references: [id])
+  ownerId         String?        @unique
+  owner           Backer?        @relation("CreatorOwner", fields: [ownerId], references: [id])
   // platformLinks
-  chzzk         String?
-  soop          String?
-  youtube       String?
-  twitch        String?
-  discordUrl    String?
-  fanCafeUrl    String?
-  status        StreamerStatus @default(pending)
-  subMerchantId String?
-  avgViewers    Int            @default(0)
-  followerCount Int            @default(0)
-  createdAt     DateTime       @default(now())
-  approvedAt    DateTime?
+  chzzk           String?
+  soop            String?
+  youtube         String?
+  twitch          String?
+  discordUrl      String?
+  fanCafeUrl      String?
+  status          StreamerStatus @default(pending)
+  /// Who suspended this creator, when, and why. On the row rather than only in
+  /// a log, because "why can't I take donations?" has to be answerable, and an
+  /// unexplained suspension is indistinguishable from a bug.
+  suspendedAt     DateTime?
+  suspendedReason String?
+  suspendedBy     String? // admin email, from the ADMIN_EMAILS allowlist
+  subMerchantId   String?
+  avgViewers      Int            @default(0)
+  followerCount   Int            @default(0)
+  createdAt       DateTime       @default(now())
+  approvedAt      DateTime?
 
   updates Update[]
 

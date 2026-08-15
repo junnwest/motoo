@@ -40,10 +40,10 @@ real 본인인증, Kakao login, real refund execution, and creator payouts.
 
 | # | Item | Evidence |
 | --- | --- | --- |
-| 11 | **Creator registration auto-approves.** `status: "approved"` is set inline at the end of creator onboarding — no review, no impersonation check. Anyone can be "@your-favourite-streamer" and start taking donations within a minute. | `src/app/creator/onboarding/actions.ts:71` |
+| ~11~ | ◐ **Suspension enforced — 2026-08-16.** Registration still auto-approves (owner's call: keep self-serve, moderate after), but `suspended` is now a real state. `donateMochi` refuses anything but `approved`, so a suspension stops new money even from a page that was already open. **Still open:** nothing prevents impersonation at registration time; the strongest fix is gating on real 본인인증, which needs 사업자등록. | `src/lib/mochi.ts` |
 | 12 | **No report/abuse flow** for a creator, an item, or an update. No 신고 string exists in the copy catalogue. | `grep 신고 messages/ko.json` → none |
 | 13 | **No block or mute.** | — |
-| 14 | **No admin console.** There is no way to suspend a creator, hide an item, refund out-of-band, or answer a support mail with any authority. Today the only lever is a SQL client against production. | `docs/PROGRESS.md` lists it as not built |
+| ~~14~~ | ✅ **Admin console — shipped 2026-08-16.** `/admin`, gated on `Role.admin` (a manual DB update — there is deliberately no UI to grant it), 404 rather than 403 for everyone else. Lists creators, suspends with a required reason, restores. Suspension is audited on the row (`suspendedAt/Reason/By`) and reported to the log. | `src/app/admin/` |
 | 15 | **No moderation of user content.** Uploaded images are validated for format and byte size only (`parseImageDataUrl`); item titles, updates and order notes are free text with no review. | `src/lib/imageUpload.ts` |
 
 ## Tier 4 — operations: you cannot see the product failing

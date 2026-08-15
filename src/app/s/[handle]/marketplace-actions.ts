@@ -73,6 +73,8 @@ export async function donateMochiAction(
     return { ok: true, balance, mochiGranted, amountKrw };
   } catch (e) {
     const msg = e instanceof Error ? e.message : "";
+    if (msg === "CREATOR_UNAVAILABLE")
+      return { ok: false, error: "creatorUnavailable" };
     if (msg === "MOCHI_BONUS_PAUSED")
       return { ok: false, error: "donationClosed" };
     if (msg === "DONATION_BELOW_MIN") return { ok: false, error: "belowMin" };

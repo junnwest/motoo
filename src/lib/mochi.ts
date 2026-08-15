@@ -104,6 +104,24 @@ export async function donateMochi(
   // an unverified account or a minor without guardian consent.
   await assertCanPurchase(input.backerId);
 
+  // Suspension has to be enforced *here*, not only in the page queries. Those
+  // stop a suspended creator being found; they do nothing about a donate page
+  // already open when the suspension lands, or a hand-crafted action call. A
+  // moderation state that money can walk past is not a moderation state.
+  //
+  // Donations only. `redeemItem` deliberately does NOT check this: spending
+  // mochi you already hold is not new money reaching the creator, and blocking
+  // it would strand balances behind someone else's misconduct — the same
+  // forfeiture problem the account-deletion decision already ran into
+  // (DECISIONS 2026-08-07).
+  const creator = await prisma.streamer.findUnique({
+    where: { id: input.streamerId },
+    select: { status: true },
+  });
+  if (!creator || creator.status !== "approved") {
+    throw new Error("CREATOR_UNAVAILABLE");
+  }
+
   const issuance = await prisma.mochiIssuance.findUnique({
     where: { streamerId: input.streamerId },
   });

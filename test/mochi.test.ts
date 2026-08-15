@@ -121,6 +121,12 @@ beforeEach(async () => {
   // The rate is reset too: the ceiling tests below move it to isolate which cap
   // binds, and every other test reasons in multiples of PRICE.
   await prisma.mochiIssuance.update({ where: { streamerId }, data: { grantedQuantity: 0, active: true, pricePerMochiKrw: PRICE } });
+  // …and the status, since the suspension tests move it and every other test
+  // assumes an approved creator.
+  await prisma.streamer.update({
+    where: { id: streamerId },
+    data: { status: "approved" },
+  });
 });
 
 describe("donateMochi", () => {
@@ -236,6 +242,57 @@ describe("donateMochi — per-donation ceilings", () => {
  * only honour if it evaluates it. Adults pass; minors need recorded guardian
  * consent; unverified accounts never reach the PG at all.
  */
+/**
+ * Suspension. The page queries already refuse to find a suspended creator, but
+ * that does nothing about a donate page open when the suspension lands, or a
+ * hand-crafted action call — so the rule lives in the money path and is tested
+ * here with the rest of them.
+ */
+describe("donateMochi — suspended creator", () => {
+  it("refuses a donation to a suspended creator", async () => {
+    await prisma.streamer.update({
+      where: { id: streamerId },
+      data: { status: "suspended" },
+    });
+    await assert.rejects(
+      () =>
+        donateMochi({
+          backerId,
+          streamerId,
+          donationAmountKrw: 10 * PRICE,
+          idempotencyKey: "k",
+        }),
+      /CREATOR_UNAVAILABLE/,
+    );
+    assert.equal(
+      await getHolding(streamerId, backerId),
+      null,
+      "nothing credited",
+    );
+  });
+
+  it("still lets a fan spend mochi they already earned", async () => {
+    // The deliberate asymmetry: suspension stops new money reaching the
+    // creator, but must not strand a balance a fan already holds — that would
+    // punish the fan for someone else's conduct (cf. DECISIONS 2026-08-07 on
+    // forfeiture).
+    await donateMochi({
+      backerId,
+      streamerId,
+      donationAmountKrw: 10 * PRICE,
+      idempotencyKey: "k",
+    });
+    await prisma.streamer.update({
+      where: { id: streamerId },
+      data: { status: "suspended" },
+    });
+
+    const item = await newItem(4);
+    const r = await redeemItem({ backerId, itemId: item.id });
+    assert.equal(r.balance, 6);
+  });
+});
+
 describe("donateMochi — donor eligibility", () => {
   it("rejects a donor who has not completed 본인인증", async () => {
     await assert.rejects(

@@ -823,7 +823,8 @@
       "verifyRequired": "본인인증이 필요해요. 인증을 마친 뒤 다시 시도해 주세요.",
       "guardianRequired": "만 19세 미만은 법정대리인 동의가 있어야 후원할 수 있어요.",
       "tooMany": "요청이 너무 잦아요. 잠시 후 다시 시도해 주세요.",
-      "generic": "처리하지 못했어요. 잠시 후 다시 시도해 주세요."
+      "generic": "처리하지 못했어요. 잠시 후 다시 시도해 주세요.",
+      "creatorUnavailable": "지금은 이 크리에이터를 후원할 수 없어요."
     }
   },
   "marketplace": {
@@ -1163,6 +1164,25 @@
     "errors": {
       "tooLarge": "이미지가 너무 커요. 다른 사진을 선택해 주세요.",
       "failed": "이미지를 읽지 못했어요. 다른 사진을 선택해 주세요."
+    }
+  },
+  "admin": {
+    "title": "운영 콘솔",
+    "subtitle": "크리에이터 상태를 확인하고, 필요하면 후원을 중지할 수 있어요.",
+    "supporters": "후원자 {count}명",
+    "suspend": "후원 중지",
+    "confirmSuspend": "중지하기",
+    "restore": "다시 활성화",
+    "reasonLabel": "중지 사유 (기록에 남아요)",
+    "status": {
+      "pending": "대기 중",
+      "approved": "정상",
+      "suspended": "중지됨"
+    },
+    "errors": {
+      "forbidden": "권한이 없어요.",
+      "notFound": "크리에이터를 찾을 수 없어요.",
+      "reasonRequired": "중지 사유를 3자 이상 입력해 주세요."
     }
   }
 }

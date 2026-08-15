@@ -1,8 +1,9 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { Nav } from "@/components/Nav";
 import { Avatar } from "@/components/ui/Placeholder";
-import { IconChevronLeft, IconSearch } from "@/components/ui/Icons";
+import { IconChevronLeft } from "@/components/ui/Icons";
 import { DonateMochi } from "@/components/DonateMochi";
 import { getStreamerMarketplace } from "@/lib/streamers";
 import { getCurrentBacker } from "@/lib/session";
@@ -24,29 +25,15 @@ export default async function DonateMochiPage({
   params: Promise<{ handle: string }>;
 }) {
   const { handle } = await params;
-  const t = await getTranslations("donate");
-  const tp = await getTranslations("profile");
+  const t = await getTranslations("donate");
 
   const streamer = await getStreamerMarketplace(handle);
 
-  if (!streamer) {
-    return (
-      <>
-        <Nav />
-        <section className="mx-auto flex max-w-[600px] flex-col items-center px-6 py-32 text-center">
-          <IconSearch width={44} height={44} className="mb-4 text-muted" />
-          <h1 className="text-2xl font-extrabold">{tp("notFoundTitle")}</h1>
-          <p className="mt-3 text-base text-body">{tp("notFoundBody")}</p>
-          <Link
-            href="/explore"
-            className="mt-8 rounded-md bg-ink px-5 py-3 text-sm font-bold text-cream"
-          >
-            {tp("backToExplore")}
-          </Link>
-        </section>
-      </>
-    );
-  }
+  // A real 404, not a 200 with "not found" in the body. The profile page was
+  // fixed this way during the audit; this sibling was missed, so an unknown —
+  // or newly suspended — creator's donate page still answered 200 and stayed
+  // indexable. `../not-found.tsx` renders the same copy with the right status.
+  if (!streamer) notFound();
 
   const backer = await getCurrentBacker();
   const [holding, following] = await Promise.all([
