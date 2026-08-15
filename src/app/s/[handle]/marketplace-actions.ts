@@ -11,6 +11,7 @@ import {
 } from "@/lib/mochi";
 import { MOCHI_MAX_PURCHASE_KRW } from "@/lib/issuance";
 import { checkRateLimit } from "@/lib/rateLimit";
+import { reportError } from "@/lib/report";
 
 /**
  * User-side donate/spend server actions for the mochi marketplace.
@@ -81,6 +82,18 @@ export async function donateMochiAction(
     if (msg === "GUARDIAN_CONSENT_REQUIRED") {
       return { ok: false, error: "guardianRequired" };
     }
+    // Everything above is a rule the product is enforcing on purpose, and the
+    // user gets told which. Reaching here means something else broke, and
+    // "generic" is all the user should see — but it is not all *we* should
+    // know, which is what this line is for.
+    reportError(e, {
+      scope: "donateMochiAction",
+      meta: {
+        backerId: backer.id,
+        streamerId: data.streamerId,
+        amountKrw: data.donationAmountKrw,
+      },
+    });
     return { ok: false, error: "generic" };
   }
 }
@@ -121,6 +134,10 @@ export async function redeemItemAction(
     const msg = e instanceof Error ? e.message : "";
     if (msg === "OUT_OF_STOCK") return { ok: false, error: "outOfStock" };
     if (msg === "INSUFFICIENT_MOCHI") return { ok: false, error: "insufficient" };
+    reportError(e, {
+      scope: "redeemItemAction",
+      meta: { backerId: backer.id, itemId: data.itemId },
+    });
     return { ok: false, error: "generic" };
   }
 }
@@ -158,7 +175,13 @@ export async function cancelOrderAction(
     // NOT_PENDING covers both "already fulfilled" and "someone cancelled it a
     // moment ago" — from the buyer's side those read the same: it's too late.
     if (msg === "NOT_PENDING") return { ok: false, error: "notPending" };
+    // NOT_FOUND is also expected: it is what an order belonging to someone else
+    // looks like, and the ownership check is supposed to produce it.
     if (msg === "NOT_FOUND") return { ok: false, error: "generic" };
+    reportError(e, {
+      scope: "cancelOrderAction",
+      meta: { backerId: backer.id, orderId: parsed.data.orderId },
+    });
     return { ok: false, error: "generic" };
   }
 }

@@ -1,0 +1,89 @@
+name: CI
+
+# Every check this repo already has, run by something that doesn't forget.
+# Until now `tsc`, `lint`, `check:vocab`, `check:emoji` and the test suite only
+# ran when a human remembered locally (docs/PRELAUNCH.md #19).
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# A second push to the same branch cancels the first: nobody needs the results
+# of a commit that has already been superseded.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    # The money and auth suites talk to a real Postgres on purpose — they test
+    # transactions, unique constraints and concurrent writes, none of which a
+    # mock would catch. Same image and port as docker-compose so DATABASE_URL
+    # matches what the tests expect locally.
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: motoo
+          POSTGRES_PASSWORD: motoo
+          POSTGRES_DB: motoo
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd "pg_isready -U motoo"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://motoo:motoo@localhost:5433/motoo?schema=public
+      DIRECT_URL: postgresql://motoo:motoo@localhost:5433/motoo?schema=public
+      # Auth.js refuses to start without one; value is irrelevant in CI.
+      AUTH_SECRET: ci-not-a-real-secret
+      # Explicit rather than relying on the default, so a change to the default
+      # can never silently start sending real mail from CI.
+      EMAIL_PROVIDER: mock
+      PAYMENT_PROVIDER: mock
+      VERIFICATION_PROVIDER: mock
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # Migrations, not db push: this is the same path production takes, so a
+      # broken migration fails here rather than at deploy.
+      - run: pnpm exec prisma migrate deploy
+
+      - run: pnpm exec prisma generate
+
+      - name: Typecheck
+        run: pnpm exec tsc --noEmit
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Banned vocabulary
+        run: pnpm check:vocab
+
+      - name: No emoji in UI
+        run: pnpm check:emoji
+
+      - name: Tests
+        run: pnpm test
+
+      # Last, because it is the slowest and the least likely to fail alone —
+      # anything that breaks the build usually breaks tsc first.
+      - name: Build
+        run: pnpm exec next build

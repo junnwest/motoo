@@ -3,6 +3,7 @@ import { Prisma, type OrderStatus } from "@prisma/client";
 import { prisma } from "./db";
 import { getPaymentProvider } from "./payments";
 import { validatePurchase } from "./issuance";
+import { reportError, reportWarning } from "./report";
 
 /**
  * Phase 3 — donation-bonus core.
@@ -187,10 +188,29 @@ export async function donateMochi(
       return holding;
     });
   } catch (e) {
+    // The fan has been charged and the credit failed: the single worst state
+    // this product can reach, and until now it was invisible. Reported before
+    // the void is attempted, so it is recorded even if the void also fails.
+    reportError(e, {
+      scope: "donateMochi.creditFailed",
+      meta: {
+        backerId: input.backerId,
+        streamerId: input.streamerId,
+        amountKrw: donationAmountKrw,
+        idempotencyKey,
+      },
+    });
     await getPaymentProvider()
       .voidCharge({ idempotencyKey, amountKrw: donationAmountKrw })
-      .catch(() => {
+      .catch((voidError) => {
         // Best-effort void; a real adapter would enqueue a reconciliation job.
+        // Until it does, this warning is the only trace that a charge is
+        // outstanding with nothing credited against it — the one case here
+        // that needs a human.
+        reportWarning(voidError, {
+          scope: "donateMochi.voidFailed",
+          meta: { idempotencyKey, amountKrw: donationAmountKrw },
+        });
       });
     throw e;
   }

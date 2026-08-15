@@ -50,10 +50,10 @@ real 본인인증, Kakao login, real refund execution, and creator payouts.
 
 | # | Item | Evidence |
 | --- | --- | --- |
-| 16 | **No error tracking.** Server actions log to `console`; a failing donation is invisible in production. For a money product this belongs *before* real payments, not after. | already in PROGRESS |
+| ~16~ | ◐ **Error reporting — shipped 2026-08-15, half done.** `reportError` / `reportWarning` behind a `REPORT_PROVIDER` abstraction; the console adapter emits one line of JSON, which is what a log drain wants. Wired into the money-path catch sites, including the charged-but-not-credited case that was previously invisible. **Still open:** a real backend (the Sentry adapter is a commented stub) and alerting — a log nobody is paged on is not monitoring. | `src/lib/report.ts` |
 | 17 | **No analytics** — no funnel, no idea where signup or donation drops off. | already in PROGRESS |
 | 18 | **No uptime or health monitoring**, no alerting. | — |
-| 19 | **No CI.** `.github/workflows/` does not exist, so `tsc`, `lint`, `check:vocab`, `check:emoji` and the money suite only ever run when someone remembers locally. | `ls .github/workflows` → none |
+| ~~19~~ | ✅ **CI — shipped 2026-08-15.** `.github/workflows/ci.yml` runs typecheck, lint, `check:vocab`, `check:emoji`, the 51-test suite against a real Postgres service, and the production build — on every push to `main` and every PR. Migrations are applied with `migrate deploy`, the same path production takes, so a broken migration fails in CI rather than at deploy. | `.github/workflows/ci.yml` |
 | 20 | **Thin test coverage.** 51 tests now — money (26), password reset (13), email verification (12) — but still no component tests, no e2e, and nothing covering onboarding, the Studio or the middleware. | `test/` |
 | 21 | **Preview deploys have no database** (env scoped Production-only on 2026-08-10 to stop a preview migrating prod). Correct as a stopgap, but it means no working preview until Preview gets its own Supabase branch. | DEPLOYMENT.md |
 | 22 | **No staging environment.** | — |

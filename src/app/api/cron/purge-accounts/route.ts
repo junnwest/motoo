@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { purgeExpiredAccounts } from "@/lib/accountDeletion";
 import { pruneRateLimits } from "@/lib/rateLimit";
+import { purgeStaleResetTokens } from "@/lib/passwordReset";
+import { purgeStaleEmailTokens } from "@/lib/emailVerification";
 
 /**
  * Runs the account purge. Scheduled by `vercel.json`'s cron entry.
@@ -34,8 +36,19 @@ export async function GET(req: Request) {
 
   const result = await purgeExpiredAccounts();
   // Piggy-backed on the same run: closed rate-limit windows are dead rows and
-  // nothing else would ever remove them.
+  // nothing else would ever remove them. Same for spent and expired auth
+  // tokens — a consumed reset link is kept only long enough to answer "already
+  // used", and an expired one answers nothing at all.
   const prunedRateLimits = await pruneRateLimits();
-  console.log("[cron] purge-accounts", { ...result, prunedRateLimits });
-  return NextResponse.json({ ok: true, ...result, prunedRateLimits });
+  const prunedResetTokens = await purgeStaleResetTokens();
+  const prunedEmailTokens = await purgeStaleEmailTokens();
+
+  const summary = {
+    ...result,
+    prunedRateLimits,
+    prunedResetTokens,
+    prunedEmailTokens,
+  };
+  console.log("[cron] purge-accounts", summary);
+  return NextResponse.json({ ok: true, ...summary });
 }
