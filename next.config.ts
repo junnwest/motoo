@@ -6,39 +6,13 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 const isProd = process.env.NODE_ENV === "production";
 
 /**
- * Content-Security-Policy, shipped in **Report-Only** first.
+ * Content-Security-Policy is NOT here.
  *
- * Enforcing straight away would break the app: Next injects inline bootstrap
- * scripts and Tailwind emits inline styles, so a strict policy needs a
- * per-request nonce threaded through the middleware. That's a bigger change
- * than this stage, and getting it wrong takes the site down rather than
- * degrading it. Report-Only gives us the violation reports with zero blast
- * radius; enforcement follows once the reports are quiet.
- *
- * The jsdelivr exception in `style-src`/`font-src` is **gone** (2026-08-10):
- * Pretendard is now self-hosted as a dynamic subset under
- * `public/fonts/pretendard/`, so no third-party origin is involved in rendering
- * text at all. What still blocks enforcement is `'unsafe-inline'`, which needs
- * the nonce work described above — not the font.
+ * It needs a per-request nonce to stop allowing inline script, and a static
+ * header cannot carry one — so it is built and set in `src/proxy.ts`, where the
+ * nonce is generated. See `src/lib/csp.ts` for the policy and the reasoning.
+ * Everything below is genuinely static and stays.
  */
-const csp = [
-  "default-src 'self'",
-  "base-uri 'self'",
-  "form-action 'self'",
-  "frame-ancestors 'none'",
-  "object-src 'none'",
-  // Uploaded images are data: URLs in Postgres (see src/lib/imageUpload.ts),
-  // and OAuth providers serve avatars from their own hosts.
-  "img-src 'self' data: https:",
-  "script-src 'self' 'unsafe-inline'" + (isProd ? "" : " 'unsafe-eval'"),
-  "style-src 'self' 'unsafe-inline'",
-  "font-src 'self' data:",
-  "connect-src 'self'",
-  // NOT `upgrade-insecure-requests`: browsers ignore it in a Report-Only
-  // policy and log a console error for it on every single page load. Add it
-  // back in the same change that flips this header to enforcing, where it
-  // actually does something. (HSTS already covers the prod case anyway.)
-].join("; ");
 
 const securityHeaders = [
   /**
@@ -71,7 +45,6 @@ const securityHeaders = [
     key: "Permissions-Policy",
     value: "camera=(), microphone=(), geolocation=(), payment=(), usb=()",
   },
-  { key: "Content-Security-Policy-Report-Only", value: csp },
 ];
 
 const nextConfig: NextConfig = {

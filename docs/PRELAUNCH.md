@@ -78,7 +78,7 @@ real 본인인증, Kakao login, real refund execution, and creator payouts.
 | # | Item | Evidence |
 | --- | --- | --- |
 | 33 | **No screen-reader or Axe pass.** Focus, landmarks and names were verified programmatically; no real AT run, heading order unaudited. | already in PROGRESS |
-| 34 | **CSP is still Report-Only.** Enforcing needs a per-request nonce, since Next injects inline scripts and Tailwind inline styles. The font is no longer the blocker (self-hosted 2026-08-11). | `next.config.ts` |
+| ~~34~~ | ✅ **Enforced — 2026-08-18.** Per-request nonce generated in `src/proxy.ts` and threaded onto the request, so Next stamps its inline scripts; `'unsafe-inline'` is gone from `script-src`. `'strict-dynamic'` was tried and **rejected on evidence**: against a real production build Next emits one un-nonced async chunk per shell page, which it would have blocked on every signed-in page. `style-src` keeps `'unsafe-inline'` because a nonce cannot cover `style=""` attributes and Safari lacks `style-src-attr`. Rollback is `CSP_MODE=report-only`, no code change. | `src/lib/csp.ts` |
 | 35 | **Query counts.** `/home` now issues 7 parallel queries after the 2026-08-11 sections; `/s/[handle]` ~19. Parallel and narrow, but the number moved. | PROGRESS tracks this |
 
 ---

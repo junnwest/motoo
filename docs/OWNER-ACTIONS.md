@@ -39,7 +39,13 @@ called), and there is no point wiring a route that can't run.
 | C2 | Review `/refund` and `/youth` against C1 once they land. | `/refund` is the single source of truth for refund copy and must not contradict the terms. The positions in it are **yours, not counsel's** — that was fine while nothing collected money, and stops being fine at the same moment the PG does. | **OPEN** |
 | C3 | Decide who is named as 청소년보호책임자 on `/youth`. | The page ships with the 고객센터 address as the contact. KR convention is a named person; substitute one when there is a business entity to name them under. | **OPEN** |
 
-## D. Blocked on 사업자등록 — for completeness, not action
+## D. If the site breaks after a deploy
+
+| | Symptom | Fix | Status |
+| --- | --- | --- | --- |
+| D0 | Pages load but nothing is interactive, console shows `Refused to execute inline script` | The CSP went enforcing on 2026-08-18. Set `CSP_MODE=report-only` in Vercel (Production) and redeploy — no code change. Then tell me what the violation report said. | reference |
+
+## E. Blocked on 사업자등록 — for completeness, not action
 
 Nothing here is doable before registration, and none of it is in PRELAUNCH:
 the real PG (`PAYMENT_PROVIDER` leaving `mock`), real 본인인증
@@ -51,13 +57,13 @@ the audit trail all work now, and approving is deliberately separate from
 "환불 완료" so the record never claims a payment that hasn't happened. When the
 PG lands, the approved-but-not-refunded rows are exactly the worklist.
 
-## E. Decisions I should not make for you
+## F. Decisions I should not make for you
 
 | | Question | Where it bites | Status |
 | --- | --- | --- | --- |
-| E1 | Should email verification be **enforced** before donating? | Built and surfaced, deliberately not gating anything (PRELAUNCH #3). Enforcing it costs conversion and buys accountability; that trade is a product call. | **OPEN** |
-| E2 | Analytics: which vendor, and self-hosted or not? | PRELAUNCH #17, and it drags #10 (cookie banner) in with it — the banner is not required today precisely because there are no third-party scripts. | **OPEN** |
-| E3 | Error backend: Sentry, or a log drain? | PRELAUNCH #16 is half-built behind `REPORT_PROVIDER`; the adapter is ~20 lines once the vendor is chosen. A log nobody is paged on isn't monitoring. | **OPEN** |
+| F1 | Should email verification be **enforced** before donating? | Built and surfaced, deliberately not gating anything (PRELAUNCH #3). Enforcing it costs conversion and buys accountability; that trade is a product call. | **OPEN** |
+| F2 | Analytics: which vendor, and self-hosted or not? | PRELAUNCH #17, and it drags #10 (cookie banner) in with it — the banner is not required today precisely because there are no third-party scripts. | **OPEN** |
+| F3 | Error backend: Sentry, or a log drain? | PRELAUNCH #16 is half-built behind `REPORT_PROVIDER`; the adapter is ~20 lines once the vendor is chosen. A log nobody is paged on isn't monitoring. | **OPEN** |
 
 ---
 

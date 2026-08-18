@@ -1,6 +1,7 @@
 import NextAuth from "next-auth";
 import { NextResponse } from "next/server";
 import { authConfig, isOnboardingExempt } from "./auth.config";
+import { buildCsp, cspHeaderName } from "./lib/csp";
 
 // Edge middleware — uses the Prisma-free config so it can run at the edge. The
 // session (incl. `user.creator`, the Studio handle) rides in the JWT, so the
@@ -70,6 +71,35 @@ function splitEnabled(host: string): boolean {
 
 const isProd = process.env.NODE_ENV === "production";
 
+/**
+ * The per-request nonce that lets the CSP stop allowing inline script
+ * (docs/PRELAUNCH.md #34).
+ *
+ * Next reads it back off the *request's* own CSP header and stamps it onto the
+ * script tags it injects, so it has to be set on the request as well as the
+ * response — which is why every pass-through below rebuilds the request headers
+ * instead of calling a bare NextResponse.next().
+ *
+ * crypto.randomUUID() rather than Math.random(): a guessable nonce is not one,
+ * and the edge runtime has WebCrypto.
+ */
+function withCsp(
+  req: Parameters<Parameters<typeof auth>[0]>[0],
+  make: (requestHeaders: Headers) => NextResponse,
+): NextResponse {
+  const nonce = crypto.randomUUID();
+  const csp = buildCsp(nonce, isProd);
+  const requestHeaders = new Headers(req.headers);
+  requestHeaders.set("x-nonce", nonce);
+  // Next looks for this exact header on the request. Always the enforcing name
+  // here even when the response reports only, or Next finds no nonce to use.
+  requestHeaders.set("Content-Security-Policy", csp);
+
+  const res = make(requestHeaders);
+  res.headers.set(cspHeaderName(), csp);
+  return res;
+}
+
 export default auth((req) => {
   const url = req.nextUrl;
   const path = url.pathname;
@@ -112,7 +142,11 @@ export default auth((req) => {
     // same-host loop. Since this hop is pure prod behavior, dev just serves the
     // page inline instead (no redirect, no loop).
     if (!isStudioPage(path)) {
-      return isProd ? crossHost(apexHost, path) : NextResponse.next();
+      return isProd
+        ? crossHost(apexHost, path)
+        : withCsp(req, (headers) =>
+            NextResponse.next({ request: { headers } }),
+          );
     }
     // Creator gate (JWT-only, no DB). Auth + become-creator run on the apex.
     // In dev the JWT is empty (nobody's signed in), but getCurrentCreator()
@@ -123,7 +157,9 @@ export default auth((req) => {
     // Rewrite the clean subdomain URL into the internal /studio route group.
     const rewritten = url.clone();
     rewritten.pathname = path === "/" ? "/studio" : `/studio${path}`;
-    return NextResponse.rewrite(rewritten);
+    return withCsp(req, (headers) =>
+      NextResponse.rewrite(rewritten, { request: { headers } }),
+    );
   }
 
   if (canSplit && !onStudioHost) {
@@ -144,7 +180,7 @@ export default auth((req) => {
     return NextResponse.redirect(new URL("/onboarding", url));
   }
 
-  return NextResponse.next();
+  return withCsp(req, (headers) => NextResponse.next({ request: { headers } }));
 });
 
 export const config = {
