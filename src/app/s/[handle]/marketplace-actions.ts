@@ -83,6 +83,8 @@ export async function donateMochiAction(
     if (msg === "QUANTITY_TOO_LARGE") return { ok: false, error: "quantityMax" };
     if (msg === "AMOUNT_TOO_LARGE") return { ok: false, error: "amountMax" };
     if (msg === "NOT_VERIFIED") return { ok: false, error: "verifyRequired" };
+    if (msg === "EMAIL_NOT_VERIFIED")
+      return { ok: false, error: "emailNotVerified" };
     if (msg === "GUARDIAN_CONSENT_REQUIRED") {
       return { ok: false, error: "guardianRequired" };
     }

@@ -88,7 +88,7 @@ before(async () => {
   // `verifiedAt` is required now, not just `ageVerified` — donateMochi gates on
   // a completed 본인인증 before it gates on age.
   const fan = await prisma.backer.create({
-    data: { email: FAN_EMAIL, nickname: "MT Fan", role: "backer", verifiedAt: new Date(), ageVerified: true },
+    data: { email: FAN_EMAIL, nickname: "MT Fan", role: "backer", verifiedAt: new Date(), ageVerified: true, emailVerifiedAt: new Date() },
   });
   backerId = fan.id;
 
@@ -100,13 +100,13 @@ before(async () => {
 
   // Verified as a minor, guardian never asked (guardianConsent stays false).
   const minor = await prisma.backer.create({
-    data: { email: MINOR_EMAIL, nickname: "MT Minor", role: "backer", verifiedAt: new Date(), ageVerified: false, guardianConsent: false },
+    data: { email: MINOR_EMAIL, nickname: "MT Minor", role: "backer", verifiedAt: new Date(), ageVerified: false, guardianConsent: false, emailVerifiedAt: new Date() },
   });
   minorId = minor.id;
 
   // Verified as a minor, guardian consent recorded — allowed to transact.
   const consented = await prisma.backer.create({
-    data: { email: CONSENTED_MINOR_EMAIL, nickname: "MT Minor OK", role: "backer", verifiedAt: new Date(), ageVerified: false, guardianConsent: true },
+    data: { email: CONSENTED_MINOR_EMAIL, nickname: "MT Minor OK", role: "backer", verifiedAt: new Date(), ageVerified: false, guardianConsent: true, emailVerifiedAt: new Date() },
   });
   consentedMinorId = consented.id;
 });
@@ -889,5 +889,42 @@ describe("fulfillment promise", () => {
     // An instant order is already fulfilled — a deadline on it would be a
     // promise about something that has happened.
     assert.equal((await prisma.order.findUniqueOrThrow({ where: { id: b.orderId } })).dueAt, null);
+  });
+});
+
+/**
+ * The email gate (docs/PRELAUNCH.md #3, owner's call 2026-08-18).
+ *
+ * Not about identity — 본인인증 covers that — but about reachability. `/refund`
+ * is a live obligation, and a refund decision or cancellation notice sent to an
+ * address nobody owns is a promise the product cannot keep.
+ */
+describe("donateMochi — email verification", () => {
+  it("refuses a donor whose address was never confirmed", async () => {
+    await prisma.backer.update({
+      where: { id: backerId },
+      data: { emailVerifiedAt: null },
+    });
+    await assert.rejects(
+      () => donateMochi({ backerId, streamerId, donationAmountKrw: PRICE, idempotencyKey: "e1" }),
+      /EMAIL_NOT_VERIFIED/,
+    );
+    // Nothing was charged and nothing was written.
+    assert.equal(await prisma.donation.count({ where: { streamerId } }), 0);
+    assert.equal(await getHolding(streamerId, backerId), null);
+
+    await prisma.backer.update({
+      where: { id: backerId },
+      data: { emailVerifiedAt: new Date() },
+    });
+  });
+
+  // Ordering matters: an unverified account should be told the actual reason,
+  // not the first gate that happens to fire.
+  it("still reports the identity gate first for an unverified account", async () => {
+    await assert.rejects(
+      () => donateMochi({ backerId: unverifiedId, streamerId, donationAmountKrw: PRICE, idempotencyKey: "e2" }),
+      /NOT_VERIFIED/,
+    );
   });
 });

@@ -307,6 +307,13 @@ export function DonateMochi({
                   /guardian-consent existed there was nowhere to send them, so
                   this said no and stopped there. `next` brings them back to
                   the creator they were trying to support. */}
+              {/* Both refusals a fan can act on get a way out. Without this the
+                  gate is just a wall with an explanation. */}
+              {error === "emailNotVerified" && (
+                <Link href="/settings" className="mt-1.5 block font-bold underline">
+                  {t("emailVerifyCta")}
+                </Link>
+              )}
               {error === "guardianRequired" && (
                 <Link
                   href={`/guardian-consent?next=${encodeURIComponent(`/s/${handle}/donate`)}`}

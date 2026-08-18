@@ -126,6 +126,9 @@ async function main() {
     verifiedName: "홍길동",
     birthYear: 1997,
     ageVerified: true,
+    // Donating requires a confirmed address since 2026-08-18. Without this the
+    // demo fan cannot donate, which is the first thing anyone tries in dev.
+    emailVerifiedAt: new Date("2026-06-01"),
   };
   const backers = [];
   for (let i = 0; i < 60; i++) {

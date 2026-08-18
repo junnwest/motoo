@@ -889,9 +889,11 @@
       "tooMany": "요청이 너무 잦아요. 잠시 후 다시 시도해 주세요.",
       "generic": "처리하지 못했어요. 잠시 후 다시 시도해 주세요.",
       "creatorUnavailable": "지금은 이 크리에이터를 후원할 수 없어요.",
-      "blockedByCreator": "이 크리에이터는 지금 새로운 후원을 받지 않고 있어요. 가지고 있는 모찌는 그대로 사용할 수 있어요."
+      "blockedByCreator": "이 크리에이터는 지금 새로운 후원을 받지 않고 있어요. 가지고 있는 모찌는 그대로 사용할 수 있어요.",
+      "emailNotVerified": "이메일 인증이 필요해요. 가입하신 주소로 보낸 인증 메일을 확인해 주세요. 환불이나 주문 안내를 받으실 주소예요."
     },
-    "guardianCta": "법정대리인 동의하러 가기"
+    "guardianCta": "법정대리인 동의하러 가기",
+    "emailVerifyCta": "이메일 인증하러 가기"
   },
   "marketplace": {
     "marketTitle": "마켓",

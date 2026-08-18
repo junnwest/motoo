@@ -85,7 +85,7 @@ export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
   ],
   callbacks: {
     ...authConfig.callbacks,
-    async jwt({ token, user, trigger }) {
+    async jwt({ token, user, trigger, account }) {
       // ── Revocation gate ────────────────────────────────────────────────
       // Sessions are stateless JWTs, so signing out can only ask the browser to
       // drop the cookie — the token itself stays valid until it expires. That
@@ -121,6 +121,17 @@ export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
       // On sign-in, ensure a Backer exists (OAuth users are provisioned lazily).
       if (user?.email) {
         const email = user.email.toLowerCase();
+        // An OAuth sign-in *is* proof of the address: Google and Naver only
+        // hand over an email the account owner has already confirmed to them.
+        // Recording that matters now that donating requires a verified address
+        // (assertCanPurchase) — without it, the users whose email is most
+        // certainly real would be the ones blocked, and mailing them a
+        // confirmation link for an address they just proved they control would
+        // be a rude way to ask a question we already know the answer to.
+        //
+        // `update` only ever sets it, never clears it, so a credentials user
+        // who later links the same address does not lose their verification.
+        const viaOAuth = account?.type === "oauth" || account?.type === "oidc";
         const backer = await prisma.backer.upsert({
           where: { email },
           update: {},
@@ -128,8 +139,18 @@ export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
             email,
             nickname: user.name ?? email.split("@")[0],
             avatarUrl: user.image ?? null,
+            ...(viaOAuth ? { emailVerifiedAt: new Date() } : {}),
           },
         });
+        // Guarded on `null` so signing in again does not keep rewriting the
+        // timestamp — "verified at" should mean when it was first proven, not
+        // when they last logged in.
+        if (viaOAuth) {
+          await prisma.backer.updateMany({
+            where: { id: backer.id, emailVerifiedAt: null },
+            data: { emailVerifiedAt: new Date() },
+          });
+        }
         // Signing back in *is* the cancellation gesture for a scheduled
         // deletion — the user shouldn't have to find a setting to undo it, and
         // returning to the product is the clearest possible statement of

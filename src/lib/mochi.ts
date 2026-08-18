@@ -54,10 +54,29 @@ import { isBlockedByCreator } from "./blocks";
 async function assertCanPurchase(backerId: string): Promise<void> {
   const backer = await prisma.backer.findUnique({
     where: { id: backerId },
-    select: { verifiedAt: true, ageVerified: true, guardianConsent: true },
+    select: {
+      verifiedAt: true,
+      ageVerified: true,
+      guardianConsent: true,
+      emailVerifiedAt: true,
+    },
   });
   if (!backer) throw new Error("BACKER_NOT_FOUND");
   if (!backer.verifiedAt) throw new Error("NOT_VERIFIED");
+  // A confirmed address, required since 2026-08-18 (owner's call, PRELAUNCH #3).
+  //
+  // The reason is not identity — 본인인증 above already covers that. It is
+  // reachability: /refund is a live obligation, and a refund decision, a
+  // dispute reply or a "your order was cancelled" notice that goes to an
+  // address nobody owns is a promise the product cannot keep. It costs
+  // conversion at the worst possible moment, which is exactly why it is
+  // enforced here rather than only in the UI: a rule worth that price is worth
+  // applying to a page that was already open.
+  //
+  // OAuth sign-ins arrive already verified (src/auth.ts) — Google and Naver
+  // only release an address the owner has confirmed to them, so this gate does
+  // not fall on the users least likely to deserve it.
+  if (!backer.emailVerifiedAt) throw new Error("EMAIL_NOT_VERIFIED");
   // Adults pass. A minor needs guardian consent explicitly recorded as true —
   // `null` (never asked) and `false` (asked, not granted) both stop here.
   if (!backer.ageVerified && backer.guardianConsent !== true) {

@@ -177,6 +177,41 @@ If `SENTRY_DSN` is missing it logs a warning and falls back to console rather th
 going quiet — silence would look exactly like "no errors", which is the one failure
 mode worth engineering against.
 
+## A5 — email delivery ⚠️ now blocks donating
+
+**Read this one.** You chose to require a verified email before donating
+(2026-08-18), and it is enforced in the money path. Production has no email
+provider configured, so it falls back to the mock, which *prints* mail to the
+Vercel function log instead of sending it. Right now that means:
+
+> **Nobody can donate on themotoo.com, and nobody can fix it themselves**, because
+> the verification mail they need never arrives.
+
+That is tolerable today — payments are mocked and the only accounts are yours —
+but it has to be closed before anyone real signs up. The adapter is written; it
+needs an account and a key:
+
+1. resend.com → sign up → **Domains** → add `themotoo.com` and add the DNS records
+   it gives you (SPF/DKIM) at your registrar. Verification usually takes minutes.
+2. **API Keys** → create one with send permission.
+3. Vercel → Environment Variables → **Production**:
+   - `EMAIL_PROVIDER` = `resend`
+   - `RESEND_API_KEY` = the key
+   - `EMAIL_FROM` = `motoo <no-reply@themotoo.com>` (optional; this is the default)
+4. Redeploy.
+
+**Verify:** sign up with a real address on the live site and check the mail
+arrives. If `RESEND_API_KEY` is missing the app throws loudly on the first send
+rather than silently dropping it — a password reset that fails quietly is the
+failure mode worth refusing.
+
+**Interim, if you need to donate before the domain verifies:** the mock still
+prints the verification link to the Vercel function logs (Deployments → Logs),
+and clicking it works.
+
+Your seven existing accounts are all unverified, so they are all currently
+blocked. Once email works they can each use the resend link in `/settings`.
+
 ## C. Legal — counsel's clock, not yours
 
 | | Action | Why it matters |
@@ -217,7 +252,7 @@ approved-but-not-refunded rows are exactly the reconciliation worklist.
 
 | | Question | What hangs on it |
 | --- | --- | --- |
-| F1 | Should email verification be **required** before donating? | Built, surfaced, and deliberately gating nothing (PRELAUNCH #3). Requiring it costs conversion and buys accountability. That trade is a product call, not a technical one. |
+| ~~F1~~ | ✅ **Required — decided and shipped 2026-08-18.** Enforced in `assertCanPurchase`, so a page already open cannot walk past it. OAuth sign-ins arrive pre-verified. **Has a prerequisite: A5.** |
 | ~~F2~~ | ✅ **Vercel Analytics — chosen and shipped 2026-08-18.** No cookies, no third-party host, so no consent banner is needed and #10 is closed with it. Nothing for you to configure; it is on by default for the project. Not a funnel tool — say so if you later want one and we'll weigh the banner against it. |
 | ~~F3~~ | ✅ **Sentry — chosen and built 2026-08-18.** Two env vars away from live; see A4. |
 

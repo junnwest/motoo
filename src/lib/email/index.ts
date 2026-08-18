@@ -1,14 +1,15 @@
 import type { EmailProvider } from "./types";
 import { MockEmailProvider } from "./mock";
+import { ResendEmailProvider } from "./resend";
 
 export * from "./types";
 
 let provider: EmailProvider | null = null;
 
 /**
- * Resolve the active email provider from env. Only "mock" is implemented;
- * "resend" / "ses" are the intended adapters and need a verified sending domain
- * (themotoo.com) plus an API key — neither of which needs 사업자등록.
+ * Resolve the active email provider from env. "mock" prints; "resend" delivers
+ * and needs a verified sending domain (themotoo.com) plus an API key — neither
+ * of which needs 사업자등록.
  *
  * Same shape as `getPaymentProvider` / `getVerificationProvider`, including the
  * throw on an unknown value: a typo in EMAIL_PROVIDER should fail loudly at the
@@ -23,11 +24,12 @@ export function getEmailProvider(): EmailProvider {
     case "mock":
       provider = new MockEmailProvider();
       break;
-    // case "resend": provider = new ResendEmailProvider(); break;
-    // case "ses": provider = new SesEmailProvider(); break;
+    case "resend":
+      provider = new ResendEmailProvider();
+      break;
     default:
       throw new Error(
-        `Unknown EMAIL_PROVIDER "${kind}". Only "mock" is implemented so far.`,
+        `Unknown EMAIL_PROVIDER "${kind}". Implemented: "mock", "resend".`,
       );
   }
   return provider;
