@@ -14,19 +14,24 @@ is history now, except for its "Open questions" section, which is still live.**
 
 **Pre-launch scope:** [`PRELAUNCH.md`](./PRELAUNCH.md) is the exhaustive list of what is left
 that 사업자등록 would *not* unblock (compiled 2026-08-11 by sweeping the code, 35 items).
-**20 of the 35 are now done and 3 are partial** (2026-08-11 → 08-18). What remains is almost
-entirely things a developer cannot close: console access, counsel, or a vendor choice.
+**25 of 36 are done and 3 are partial** (2026-08-11 → 08-18; #36 was added on the 18th when
+the dev seed turned up in the production database). What remains is almost entirely things a
+developer cannot close: an API key, counsel, or an infrastructure choice.
 
 **[`OWNER-ACTIONS.md`](./OWNER-ACTIONS.md) is the file to open first.** Everything waiting on
-Kenneth is collected there — the Vercel env vars, one SQL statement, counsel, three product
-decisions — so it can be done in one sitting. Two of them are load-bearing today:
-`CRON_SECRET` is unset (so the account deletion the UI promises has never run in production),
-and **nobody holds `Role.admin`, so the report, refund and dispute queues are unreachable on
-the live site.**
+Kenneth is collected there. As of 2026-08-18 the console work is done — `CRON_SECRET`, OAuth,
+and admin access are all live — and the three product decisions are made (Sentry, Vercel
+Analytics, email required to donate).
+
+**The one that blocks the product right now is A5.** Donating requires a confirmed email, and
+production has no email provider, so the verification mail is printed to a Vercel log instead
+of sent: **nobody can donate, and nobody can fix it themselves.** Tolerable while payments are
+mocked and every account is a test one; not tolerable the day a real person signs up. The
+Resend adapter is written and needs an account, a verified domain and two env vars.
 
 ## Open items — read this first when resuming
 
-`main` is green: `pnpm build`, `pnpm test` (**96**), `check:vocab`, `check:emoji`,
+`main` is green: `pnpm build`, `pnpm test` (**108**), `check:vocab`, `check:emoji`,
 `check:a11y` and `pnpm lint` all pass. Ordered by what would hurt most if ignored.
 
 **Blocks a real launch**
@@ -53,17 +58,6 @@ the live site.**
     leaving out, and more exposed since the 60% path went: past the 7-day window there is now
     no voluntary refund route at all. Account deletion currently *refuses* creator accounts
     for this reason.
-  - [x] **고객센터 resolves to something** (2026-08-10) — the footer support link and
-    `/refund`'s "신청 방법" section point at `src/lib/support.ts`, a `mailto:` to the owner's
-    personal email. Real, but **explicitly interim**: a personal Gmail as the official contact
-    channel (and as the 개인정보 보호책임자 contact in `docs/legal/privacy-draft.md`) is fine
-    pre-registration, not something to carry into a launch. Swap the one constant.
-- [x] ~~`CRON_SECRET` must be set in Vercel~~ — **set by the owner 2026-08-18**, so the daily
-  `/api/cron/purge-accounts` run works and the 30-day deletion grace period finally expires.
-  (An earlier note claimed the token purges still needed wiring; they were already wired.)
-- [ ] **Nobody holds `Role.admin` in production** (OWNER-ACTIONS B1), so `/admin` — the report
-  queue, refund queue, escalated disputes, suspension and takedown — 404s for everyone. There is
-  deliberately no UI to grant it; it is one `UPDATE`.
 - [ ] **`/terms` and `/privacy` are still one-line placeholders**, linked from the footer and
   agreed to at onboarding. Blocked on counsel text; the page structure is ready. Lawyer-review
   drafts exist at `docs/legal/terms-draft.md` and `docs/legal/privacy-draft.md` (2026-08-09) —
@@ -80,59 +74,20 @@ the live site.**
   locally, but Kakao/X/Facebook debuggers need a public host.
 - [ ] **Lighthouse** ≥ 90 performance / ≥ 95 SEO on `/` and `/s/[handle]` — not runnable headless
   here.
-- [x] ~~CSP is Report-Only~~ — **enforcing since 2026-08-18**, with a per-request nonce from
-  `src/proxy.ts`. `'strict-dynamic'` was tried and rejected on evidence (Next emits one
-  un-nonced chunk per shell page). Rollback is `CSP_MODE=report-only`, no code change. Verified
-  on the live site.
 
 **Known gaps, consciously left**
-- [x] ~~Pretendard loads from a CDN `@import`~~ — **self-hosted 2026-08-11** as a 92-file
-  dynamic subset in `public/fonts/pretendard/` (3.1MB in the repo; a page fetches only the
-  unicode ranges it renders — `/s/[handle]` pulls 17). CSP dropped its jsdelivr exception in
-  `style-src` and `font-src`; what still blocks enforcing is `unsafe-inline`, not the font.
 - [ ] **`/home` and `/s/[handle]` issue 18 and 13 queries**, measured 2026-08-18 with
   `DEBUG_QUERIES=1` rather than remembered — the previous numbers in this file were both wrong.
   About six of each are the shell, on every signed-in page. Getting materially below that means
   consolidating reads, not more caching.
-- [x] ~~The following list is desktop-only~~ — **an avatar strip at the top of `/home` below
-  `lg` (2026-08-18)**, which needed no drawer and no focus management.
 - [ ] **No screen-reader pass.** `pnpm check:a11y` (axe over 11 rendered pages) is clean as of
   2026-08-18 and found two missing `main` landmarks on the way. That covers about a third of
   real barriers; a human AT run is still owed, and interaction states are outside what it audits.
-- [ ] **No analytics, and no error *backend*.** `reportError`/`reportWarning` exist behind
-  `REPORT_PROVIDER` and are wired into the money path, but the only adapter prints JSON to the
-  console — a log nobody is paged on is not monitoring. Both need a vendor choice
-  (OWNER-ACTIONS F2/F3).
-- [x] ~~No pagination anywhere~~ — **explore, notifications and both `/profile` lists page on
-  their own query keys (2026-08-18)**. The real work was moving explore's sort and supporter-band
-  filter into the database; both ran in JavaScript over a capped fetch, which is wrong the moment
-  there are pages.
-- [x] ~~Expanded rails' dividers end where their content ends~~ — **fixed 2026-08-11** by
-  boxing all three shell columns instead of dividing them with lines. The fix everyone
-  reached for (force the rails to full height) would have cost their content-sized scroll
-  behaviour; a box just reads as a short box. See DECISIONS 2026-08-11.
 - [ ] The edge middleware doesn't check `tokenVersion` — Prisma-free by design, so a revoked
   token can still satisfy the *routing* gate for one request. Every page-level `auth()` does the
   real check. **No action recommended.**
 
 **Maintenance**
-- [x] **`package.json#prisma` → `prisma.config.ts`** (2026-08-10, from `main`) — the seed
-  command moved and `package.json`'s dead `pnpm.onlyBuiltDependencies` (superseded by
-  `pnpm-workspace.yaml`'s `allowBuilds`) went with it. Still the classic engine, not the
-  Prisma 7 driver-adapter jump. Gotcha: a `prisma.config.ts` turns off Prisma's automatic
-  `.env` loading, so the config calls `process.loadEnvFile()` itself.
-- [x] **Production baselined onto migrations and deployed** (2026-08-10). The six Phase-1
-  tables and their 910 rows are dropped, `RateLimit` / `Backer.pendingDeletionAt` /
-  `_prisma_migrations` are present, `0_init` is marked applied, and the build applied
-  `20260810020000_donation_pivot_rename` for real — so the lifetime totals survived the
-  rename instead of being reset by a drop-and-add. Live data came through intact (70
-  backers, 12 streamers, 11 holdings, 5 orders) and `/s/[handle]`, `/donate` and the OG
-  image all render 200 with a populated leaderboard. `pnpm check:drift` stays as the
-  read-only way to ask.
-- [x] **`DATABASE_URL` / `DIRECT_URL` scoped to Production only.** Preview builds run
-  `prisma migrate deploy` too, so a shared connection string meant any unmerged PR's
-  preview could apply migrations to production once prod had `_prisma_migrations`. P3005
-  had been masking it; baselining would have removed that accident of protection.
   - **Do this in the dashboard, never `vercel env rm NAME preview`** — that CLI command
     deletes the *whole* variable rather than one target, and re-adding by piping a value
     to `vercel env add` silently stored something P1013-invalid, which failed the first
@@ -152,21 +107,21 @@ the live site.**
 
 ## Current focus
 
-The audit roadmap is complete through Stage 9. What is left is either **blocked on counsel /
-사업자등록**, or the growth features that were explicitly scoped out of Stage 9:
+The pre-launch sweep (PRELAUNCH.md) is done to the limit of what a developer can close.
+**Fulfillment SLA and global search shipped on 2026-08-18** and are struck from this list.
+What is left, in the order it is worth doing:
 
-1. **Fulfillment SLA** — creator-set promised-by window on items, shown publicly. The trust
-   primitive the Trust Report was reaching for, at a fraction of the cost.
-2. **Rank-as-narrative** — `getSupporterRank` is computed and displayed but changes nothing;
+1. **A5 — email delivery.** Blocks donating in production today. See the top of this file.
+2. **A4 — Sentry DSN**, and then alerting, which is a Sentry-side setting. `reportError` is
+   already wired into the money path, including the charged-but-not-credited case.
+3. **Rank-as-narrative** — `getSupporterRank` is computed and displayed but changes nothing;
    "N mochi to the next rank" turns a static number into a loop. It belongs **embedded** —
    the `/home` balance card, the `/profile` holding, the creator page — not on a page of its
    own: `/ranking` was deleted on 2026-08-10 for being a duplicate destination (DECISIONS).
-3. **Guided onboarding** — first-follow prompt; the zero-state's three steps all link to
+4. **Guided onboarding** — first-follow prompt; the zero-state's three steps all link to
    `/explore`, so it teaches without branching.
-4. **Global search**, **creator analytics**.
-
-The design tier 2/3 pass that came in with the donation pivot (Korean eyebrows, styled
-selects, 퍼크 cleanup, de-boxed landing sections) is complete — see CHANGELOG 2026-08-10.
+5. **Creator analytics** — the Studio now shows money (`설정 정산`, 2026-08-18) but nothing
+   about reach: which items sell, which posts are read.
 
 ## Not built (need a business registration + paid contract — same blocker class)
 

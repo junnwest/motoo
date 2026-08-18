@@ -5,7 +5,7 @@ For current status and open work see [`PROGRESS.md`](./PROGRESS.md); for *why* a
 the way it is see [`DECISIONS.md`](./DECISIONS.md).
 
 
-## 2026-08-18 — the pre-launch sweep (20 of PRELAUNCH's 35)
+## 2026-08-18 — the pre-launch sweep (25 of 36)
 
 Worked straight down [`PRELAUNCH.md`](./PRELAUNCH.md). Everything below is on `main`
 and deployed. What is left there is almost entirely owner-side — see
@@ -48,7 +48,27 @@ and deployed. What is left there is almost entirely owner-side — see
   build. `DEBUG_QUERIES=1` showed the tracked query counts in this repo were both wrong.
   axe found two missing `main` landmarks.
 
-Tests 26 → 96. `pnpm check:a11y` added.
+### Later the same day — the owner's decisions, and what production actually contained
+
+- [x] **Production was running the dev seed.** Found while debugging admin access:
+  `fan*@motoo.dev` accounts were in the live database, so **63 of 70 accounts and 10 of 12
+  creators** were fixtures counted in every supporter total on the site. The seed's
+  `admin@motoo.dev` (password `motoo`, in a **public** repo) was a live admin login.
+  Passwords nulled immediately, then removed properly with `pnpm seed:audit` /
+  `pnpm seed:remove` — the audit caught that a blind `DELETE` would have cascaded through a
+  real mochi holding. Production is now 7 accounts, 2 creators.
+- [x] **Sentry** behind `REPORT_PROVIDER`, server-side only — the browser half would need
+  Sentry's host in the enforced CSP *and* a third-party script, which would drag the cookie
+  banner in.
+- [x] **Vercel Analytics** (#17), chosen because it needs no banner and no CSP widening.
+  Closes #10 with it.
+- [x] **A confirmed email is now required to donate** (#3, owner's call) — plus the
+  **Resend adapter** (#2's other half), because enforcing the gate while production ran the
+  mock provider would have meant nobody could donate and nobody could fix it.
+- [x] **Routing tests** (#20) — the host predicates moved out of `proxy.ts` to be testable
+  at all.
+
+Tests 26 → 108. `pnpm check:a11y`, `pnpm seed:audit`, `pnpm seed:remove` added.
 
 ## 2026-08-10 (design pass — on `design/polish`, not yet merged)
 

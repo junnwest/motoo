@@ -11,6 +11,11 @@ To pull a single entry, grep its heading with trailing context, e.g.
 
 | Date | Decision |
 | --- | --- |
+| 2026-08-18 | A confirmed email is required to donate, and OAuth counts as confirmation |
+| 2026-08-18 | Blocking is asymmetric: it stops money in, never mochi already held |
+| 2026-08-18 | Refund eligibility is a rule about totals, not about identity of units |
+| 2026-08-18 | CSP enforces without `'strict-dynamic'` — rejected on evidence, not taste |
+| 2026-08-18 | Analytics chosen for what it does not drag in (no banner, no CSP change) |
 | 2026-08-11 | The shell is three boxes, not two divider lines (fixes the ragged rail edges) |
 | 2026-08-10 | `/ranking` deleted; no global leaderboard, because mochi isn't comparable across creators |
 | 2026-08-10 | One type/radius/leading/motion scale; then a density correction, motion, self-hosted Pretendard |
@@ -83,6 +88,111 @@ To pull a single entry, grep its heading with trailing context, e.g.
 | 2026-07-08 | `FoundingMembership` table for the founding-number invariant |
 | 2026-07-08 | Prisma pinned to v6 (not v7) |
 | 2026-07-08 | Korean-first, i18n-ready; integer KRW; mock PG |
+
+## 2026-08-18 — A confirmed email is required to donate, and OAuth counts as confirmation
+
+**Decision.** `assertCanPurchase` refuses a donor without `emailVerifiedAt`. An
+OAuth sign-in sets it on the spot.
+
+**Why.** Not identity — 본인인증 already covers that, and this is partly redundant
+with it. The reason is *reachability*. `/refund` is a live obligation, and a
+refund decision, a dispute reply or a cancellation notice sent to an address
+nobody owns is a promise the product cannot keep. That is worth a conversion cost
+at the worst possible moment (someone with their wallet out), which is why it is
+a gate in the tested money surface and not a banner: a rule worth that price is
+worth applying to a page that was already open.
+
+Google and Naver only release an address the owner has confirmed to them, so
+treating an OAuth sign-in as proof is not a shortcut — the alternative was
+blocking the users whose email is *most* certainly real and then mailing them a
+confirmation link for an address they had just proved they control.
+
+**Constraint it creates.** The gate cannot be satisfied without a working email
+provider. Enforcing it while production ran the mock provider meant nobody could
+donate and nobody could fix it, so the Resend adapter shipped in the same change.
+Owner still has to set `EMAIL_PROVIDER=resend` and `RESEND_API_KEY`
+(OWNER-ACTIONS A5). Every account that predates this is unverified and blocked
+until it verifies.
+
+## 2026-08-18 — Blocking is asymmetric: it stops money in, never mochi already held
+
+**Decision.** A creator blocking a fan stops new donations, follows, and
+leaderboard presence. It deliberately does **not** stop that fan redeeming mochi
+they already hold: `donateMochi` checks the block, `redeemItem` pointedly does
+not.
+
+**Why.** Blocking someone who holds your currency would otherwise confiscate it.
+Refusing someone's money is a creator's right in a way that keeping it is not.
+The same reasoning already governs suspension (DECISIONS 2026-08-07 on
+forfeiture) — a moderation action must not strand a balance somebody paid for.
+
+**Constraint it creates.** A creator may still owe fulfilment to someone they
+have blocked, and the confirmation dialog says so before the click rather than
+leaving it to be discovered. The fan-side direction ("숨기기") is curation and
+carries none of this: it changes what they are shown, nothing about what they may
+do.
+
+## 2026-08-18 — Refund eligibility is a rule about totals, not about identity of units
+
+**Decision.** A donation is refundable while the holding balance covers that
+donation **and every donation after it**.
+
+**Why.** `/refund` promises the 7-day 청약철회 only if "not one mochi from that
+donation has been spent", and mochi is fungible — a holding is one balance, not
+per-donation buckets — so the promise needs an interpretation. The obvious one
+("balance ≥ what this donation granted") is wrong: a fan can spend a donation,
+donate again, and watch the first turn eligible again, because the bar never
+rises. A test written to assert it could not be gamed is what caught it.
+
+The rule used instead is sufficient rather than exact: if a single unit granted
+since that donation were missing, the sum would exceed the balance, so nothing
+from it can have been spent — whichever units you imagine went first.
+
+**Constraint it creates.** It is deliberately conservative and will occasionally
+refuse a donation that a per-unit ledger would allow. Stated in `refunds.ts`
+because a future reader will otherwise assume the check is exact.
+
+## 2026-08-18 — CSP enforces without `'strict-dynamic'` — rejected on evidence, not taste
+
+**Decision.** `script-src 'self' 'nonce-…'`, enforced, with a per-request nonce
+from `src/proxy.ts`. No `'strict-dynamic'`. `style-src` keeps `'unsafe-inline'`.
+
+**Why.** `'strict-dynamic'` is the stronger policy and was tried first. Against a
+real production build, Next emits one async chunk per ConsumerShell page with no
+nonce on it — under `'strict-dynamic'`, which makes a browser ignore `'self'`,
+that is the entire shell blocked on every signed-in page. Found by serving a
+production build and counting un-nonced script tags, which is the only way it was
+going to show up.
+
+What the weaker policy still buys is the attack this product actually has a
+surface for: an injected `<script>` in a creator bio or an item title carries no
+nonce and does not run. What it gives up is an attacker who can place a `.js`
+file on our own origin, and there is no upload path that writes files at all.
+
+`style-src` keeps `'unsafe-inline'` because a nonce covers `<style>` elements but
+not `style=""` attributes, which React writes for every inline style prop, and
+the CSP-3 answer (`style-src-attr`) is not implemented in Safari.
+
+**Constraint it creates.** Rollback is `CSP_MODE=report-only`, no code change.
+Worth re-testing after a Next upgrade: if that chunk starts arriving nonced,
+`'strict-dynamic'` is available for free. Any future third-party script (a
+browser-side Sentry, a product-analytics tool) needs its host added here.
+
+## 2026-08-18 — Analytics chosen for what it does not drag in
+
+**Decision.** Vercel Analytics, not PostHog or similar. Sentry stays server-side
+only.
+
+**Why.** Vercel Analytics sets no cookies and is served from this origin, so the
+consent banner (PRELAUNCH #10) stays unnecessary and the enforced CSP needs no
+widening. Both alternatives were better tools for the question actually being
+asked — "which step of the donation flow lost them" — and both would have cost a
+banner, a CSP change, and a privacy-policy section that lands on counsel's desk.
+
+**Constraint it creates.** There is no funnel. The dashboard answers "is /donate
+visited and do people leave", not "which step lost them". When that becomes the
+binding question, PostHog is the answer and a consent banner is its price — the
+tradeoff is recorded here so it is re-decided rather than rediscovered.
 
 ## 2026-08-11 — The shell is three boxes, not two divider lines
 

@@ -79,10 +79,21 @@ relative `Location` and loops. Dev: `studio.localhost:PORT`. See DECISIONS 2026-
   "the donation pivot") — it's now a bonus on a direct donation, not a purchase; see below
   and DECISIONS.
 - **Money logic is tested.** Run `pnpm test` (node:test via tsx, needs `pnpm db:up`) after
-  touching `src/lib/mochi.ts` — 26 tests covering the donate/redeem/cancel invariants, the
-  per-donation ceilings, donor eligibility (본인인증 + minor/guardian consent), and the
-  concurrency guards: no oversell, no negative balance, and **no double refund** when a buyer
-  and a creator cancel the same order at once.
+  touching `src/lib/mochi.ts` — **108 tests** covering the donate/redeem/cancel invariants, the
+  per-donation ceilings, the concurrency guards (no oversell, no negative balance, no double
+  refund when a buyer and creator cancel at once), refund eligibility, blocking, and the
+  fulfilment promise.
+- **`donateMochi` gates on four things**, all enforced there rather than only in the UI, so a
+  page that was already open cannot walk past them: completed 본인인증; a **confirmed email**
+  (2026-08-18 — reachability, not identity: `/refund` is an obligation and a refund notice to an
+  address nobody owns is a promise the product can't keep); guardian consent if 본인인증 says
+  minor; and neither creator-suspension nor a creator→fan block. `redeemItem` deliberately
+  checks **none** of the money-in gates — spending mochi you already hold is not new money, and
+  blocking it would strand a balance somebody paid for.
+- **Every donation is a row.** `Donation` is written inside `donateMochi`'s transaction
+  (2026-08-18). Before that only running totals existed, which made `/refund`'s "within 7 days,
+  if not one mochi from that donation has been spent" literally uncomputable. Eligibility is a
+  rule about totals, not units — see `src/lib/refunds.ts`, and DECISIONS 2026-08-18.
 - **`pnpm lint` exits 0 and should stay that way.** It was non-zero for months; the errors
   were real (a cascading-render effect, a misplaced eslint-disable) and were fixed rather than
   suppressed. `design-handoff/` is ignored — it is reference material, not source.
@@ -129,7 +140,13 @@ need a personal account that survives reseeds, add it to `prisma/seed.ts` the wa
 creator (`getCurrentCreator`) when nobody's signed in. New signups are forced through
 `/onboarding` before the app; existing/seeded accounts are grandfathered.
 
-`pnpm test` (money logic), `pnpm check:vocab` (banned copy), `pnpm check:emoji`, `pnpm lint`.
+`pnpm test` (money logic), `pnpm check:vocab` (banned copy), `pnpm check:emoji`, `pnpm lint`,
+`pnpm check:a11y` (axe over 11 pages — needs `pnpm dev` running).
+
+**Never run `pnpm db:seed` against production.** It was run there at some point and left 63
+fake accounts and 10 fake creators in the live database — including `admin@motoo.dev`, whose
+password is in this public repo. Cleaned up 2026-08-18 with `pnpm seed:audit` /
+`pnpm seed:remove`; those two exist so it can be checked rather than assumed.
 Google/Naver OAuth are live in dev (`.env`, gitignored); Kakao + real 본인인증 + real PG all
 need a business registration (`사업자등록`) — mocks stand in until then.
 
@@ -147,5 +164,11 @@ the env-var list and the runbook.
 ## Stack
 Next.js 16 (App Router) · TypeScript · Tailwind v4 · Prisma 6 + Postgres · next-intl ·
 Auth.js v5 (credentials + Google/Naver live, Kakao scaffold; edge `auth.config.ts` +
-Node `auth.ts` split, `src/proxy.ts` middleware) · `PaymentProvider` + `VerificationProvider`
-abstractions (both `mock` in dev, swap via `PAYMENT_PROVIDER` / `VERIFICATION_PROVIDER`).
+Node `auth.ts` split, `src/proxy.ts` middleware) · `PaymentProvider`, `VerificationProvider`,
+`EmailProvider` (mock | **resend**) and `Reporter` (console | **sentry**) abstractions — swap
+via `PAYMENT_PROVIDER` / `VERIFICATION_PROVIDER` / `EMAIL_PROVIDER` / `REPORT_PROVIDER` ·
+Vercel Analytics (no cookies, same-origin — which is why there is no consent banner).
+
+**CSP is enforced**, with a per-request nonce generated in `src/proxy.ts` (2026-08-18). Adding
+any third-party script means widening `script-src`/`connect-src` in `src/lib/csp.ts` **and**
+re-opening the cookie-banner question. `CSP_MODE=report-only` is the rollback.
