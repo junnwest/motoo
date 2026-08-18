@@ -17,6 +17,7 @@
 
 import { cache } from "react";
 import { prisma } from "@/lib/db";
+import { getBlockedBackerIds } from "@/lib/blocks";
 
 export type MyRanking = {
   streamerId: string;
@@ -148,20 +149,27 @@ export const getSupporterLeaderboard = cache(async (
   totalSupporters: number;
   totalMochiEarned: number;
 }> => {
+  // A blocked supporter comes off the creator's public leaderboard. Leaving
+  // them on it would make the block cosmetic in the one place the creator's own
+  // audience looks, and a name on someone's page is exactly what a harasser
+  // wants. Their holding and balance are untouched — only the listing changes.
+  const blocked = await getBlockedBackerIds(streamerId);
+  const notBlocked = blocked.length > 0 ? { backerId: { notIn: blocked } } : {};
+
   const [holdings, totalSupporters, sum] = await Promise.all([
     prisma.mochiHolding.findMany({
-      where: { streamerId, mochiEarnedTotal: { gt: 0 } },
+      where: { streamerId, mochiEarnedTotal: { gt: 0 }, ...notBlocked },
       orderBy: { mochiEarnedTotal: "desc" },
       take: limit,
       include: { backer: { select: { nickname: true, avatarUrl: true } } },
     }),
     prisma.mochiHolding.count({
-      where: { streamerId, mochiEarnedTotal: { gt: 0 } },
+      where: { streamerId, mochiEarnedTotal: { gt: 0 }, ...notBlocked },
     }),
     // Sum across ALL supporters, not just the top `limit` shown in `entries`
     // — used for the profile page's headline stat (DECISIONS 2026-08-01).
     prisma.mochiHolding.aggregate({
-      where: { streamerId },
+      where: { streamerId, ...notBlocked },
       _sum: { mochiEarnedTotal: true },
     }),
   ]);

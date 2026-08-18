@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 import { getTranslations } from "next-intl/server";
 import { getCurrentCreator } from "@/lib/session";
 import { getCreatorDashboard, getUpdatesForCreator } from "@/lib/streamers";
+import { getSupportersForStudio } from "@/lib/blocks";
 import { formatCount } from "@/lib/format";
 import { CreatorFacet } from "@/components/CreatorFacet";
 import { isCreatorType, ALL_CATEGORIES } from "@/lib/creatorTaxonomy";
@@ -10,6 +11,7 @@ import { MochiSettingsForm } from "./MochiSettingsForm";
 import { ItemsManager, type DashboardItem } from "./ItemsManager";
 import { OrdersTable, type DashboardOrder } from "./OrdersTable";
 import { UpdatesManager } from "./UpdatesManager";
+import { SupportersTable } from "./SupportersTable";
 import { InfoTooltip } from "./InfoTooltip";
 
 function StatTile({ label, value }: { label: string; value: string }) {
@@ -93,9 +95,10 @@ export default async function CreatorDashboardHome() {
   const creator = await getCurrentCreator();
   if (!creator) return null;
 
-  const [data, updates] = await Promise.all([
+  const [data, updates, supporters] = await Promise.all([
     getCreatorDashboard(creator.id),
     getUpdatesForCreator(creator.id),
+    getSupportersForStudio(creator.id),
   ]);
   if (!data) return null;
 
@@ -284,6 +287,13 @@ export default async function CreatorDashboardHome() {
         }
       >
         <OrdersTable orders={orders} />
+      </StudioSection>
+
+      {/* Directly under orders, because that is where a creator meets the fan
+          they may need this for — an order note is the one place a stranger
+          gets to write to them. */}
+      <StudioSection id="supporters" title={t("supporters.title")}>
+        <SupportersTable supporters={supporters} />
       </StudioSection>
 
       {/* Row 3 — the two composer surfaces, side by side. Both own their

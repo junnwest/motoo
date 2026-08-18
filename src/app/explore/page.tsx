@@ -5,6 +5,8 @@ import { ConsumerShell } from "@/components/ConsumerShell";
 import { Mochi } from "@/components/Mochi";
 import { StreamerCard } from "@/components/StreamerCard";
 import { ExploreFilters } from "@/components/ExploreFilters";
+import { getCurrentBacker } from "@/lib/session";
+import { getHiddenStreamerIds } from "@/lib/blocks";
 import {
   getExploreStreamers,
   type ExploreParams,
@@ -41,7 +43,13 @@ export default async function ExplorePage({
     sort: (typeof sp.sort === "string" ? sp.sort : "backers") as ExploreSort,
   };
 
-  const streamers = await getExploreStreamers(params);
+  // Hidden creators are dropped in the query, not filtered afterwards, so a
+  // hidden creator never eats one of the 60 slots the page loads.
+  const viewer = await getCurrentBacker();
+  const streamers = await getExploreStreamers({
+    ...params,
+    hiddenStreamerIds: viewer ? await getHiddenStreamerIds(viewer.id) : [],
+  });
 
   return (
     <>
@@ -91,7 +99,7 @@ export default async function ExplorePage({
           </div>
         )}
       </section>
-      </ConsumerShell>
+      </ConsumerShell>
     </>
   );
 }

@@ -11,11 +11,13 @@ import { SupporterLeaderboard } from "@/components/SupporterLeaderboard";
 import { MarketplaceSection } from "@/components/MarketplaceSection";
 import { FollowButton } from "@/components/FollowButton";
 import { ReportButton } from "@/components/ReportButton";
+import { HideCreatorButton } from "@/components/HideCreatorButton";
 import { getStreamerProfile } from "@/lib/streamers";
 import { getCurrentBacker } from "@/lib/session";
 import { getHolding } from "@/lib/mochi";
 import { isFollowing } from "@/lib/follows";
 import { getSupporterLeaderboard } from "@/lib/ranking";
+import { getHiddenStreamerIds } from "@/lib/blocks";
 import { formatCount } from "@/lib/format";
 import { isCreatorType, ALL_CATEGORIES } from "@/lib/creatorTaxonomy";
 
@@ -103,11 +105,15 @@ export default async function StreamerProfilePage({
   // Phase 2: mochi issuance + marketplace (from the profile query) + the
   // viewer's holding balance (depends on both the streamer and the account) +
   // the supporter leaderboard (also live-computed, DECISIONS 2026-08-01).
-  const [holding, following, leaderboard] = await Promise.all([
+  const [holding, following, leaderboard, hiddenIds] = await Promise.all([
     backer ? getHolding(streamer.id, backer.id) : null,
     backer ? isFollowing(streamer.id, backer.id) : false,
     getSupporterLeaderboard(streamer.id),
+    backer ? getHiddenStreamerIds(backer.id) : ([] as string[]),
   ]);
+  // A hidden creator's page stays reachable by direct link — hiding is about
+  // what gets pushed at you, not a wall. The control just shows its undo.
+  const hidden = hiddenIds.includes(streamer.id);
   const balance = holding?.balance ?? 0;
   // Has this viewer ever earned this creator's mochi? Gates supporter-only posts.
   const isSupporter = (holding?.mochiEarnedTotal ?? 0) > 0;
@@ -231,7 +237,13 @@ export default async function StreamerProfilePage({
           {/* Quiet, and last. Reporting is rare and sits next to a page whose
               main action moves money — a prominent control here would collect
               mis-taps, not reports. */}
-          <div className="lg:text-right">
+          <div className="flex items-center gap-1 lg:justify-end lg:text-right">
+            <HideCreatorButton
+              streamerId={streamer.id}
+              creatorName={streamer.displayName}
+              hidden={hidden}
+              signedIn={!!backer}
+            />
             <ReportButton
               targetType="creator"
               targetId={streamer.id}

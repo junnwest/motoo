@@ -2,6 +2,7 @@ import { RightRailPanel } from "@/components/RightRailPanel";
 import { getHoldingsForBacker } from "@/lib/mochi";
 import { getFollowList } from "@/lib/follows";
 import { getTrendingCreators } from "@/lib/streamers";
+import { getHiddenStreamerIds } from "@/lib/blocks";
 
 /**
  * The persistent right rail — discovery suggestions, mirroring the left
@@ -33,7 +34,14 @@ export async function RightRail({ backerId }: { backerId: string }) {
   let discover: Awaited<ReturnType<typeof getTrendingCreators>> = [];
   try {
     const trending = await getTrendingCreators();
-    discover = trending.filter((s) => !supportedHandles.has(s.handle)).slice(0, 6);
+    // Hidden creators are filtered here rather than in the query, because the
+    // trending list is `unstable_cache`d and shared across every user — it
+    // cannot be personalised without giving up that cache, which is the whole
+    // reason the rail stopped being the most repeated query on the site.
+    const hidden = new Set(await getHiddenStreamerIds(backerId));
+    discover = trending
+      .filter((s) => !supportedHandles.has(s.handle) && !hidden.has(s.id))
+      .slice(0, 6);
   } catch {
     discover = [];
   }

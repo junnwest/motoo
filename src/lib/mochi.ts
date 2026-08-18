@@ -4,6 +4,7 @@ import { prisma } from "./db";
 import { getPaymentProvider } from "./payments";
 import { validatePurchase } from "./issuance";
 import { reportError, reportWarning } from "./report";
+import { isBlockedByCreator } from "./blocks";
 
 /**
  * Phase 3 — donation-bonus core.
@@ -118,6 +119,16 @@ export async function donateMochi(
     where: { id: input.streamerId },
     select: { status: true },
   });
+  // A creator who has blocked this fan does not take their money. Checked here
+  // rather than only by hiding the button, for the same reason as suspension: a
+  // page already open would otherwise still transact. Note the asymmetry — this
+  // stops donations, and `redeemItem` deliberately does not check it, so a
+  // blocked fan can still spend the mochi they already hold. Blocking a
+  // supporter must not confiscate their balance.
+  if (await isBlockedByCreator(input.streamerId, input.backerId)) {
+    throw new Error("BLOCKED_BY_CREATOR");
+  }
+
   if (!creator || creator.status !== "approved") {
     throw new Error("CREATOR_UNAVAILABLE");
   }

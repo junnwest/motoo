@@ -59,7 +59,31 @@ export async function getStakeholderBackerIds(
       select: { backerId: true },
     }),
   ]);
-  return [...holders, ...followers].map((r) => r.backerId);
+  return dropBlocked(
+    streamerId,
+    [...holders, ...followers].map((r) => r.backerId),
+  );
+}
+
+/**
+ * Blocking is a rule about contact, so it is applied where recipients are
+ * chosen rather than at each call site — every notice a creator generates goes
+ * through one of the two helpers here, and a new one inherits the rule for
+ * free. Either direction removes someone: a fan who hid a creator does not want
+ * their posts, and a creator who blocked a fan does not want to reach them.
+ */
+async function dropBlocked(
+  streamerId: string,
+  backerIds: string[],
+): Promise<string[]> {
+  if (backerIds.length === 0) return [];
+  const blocked = await prisma.block.findMany({
+    where: { streamerId, backerId: { in: backerIds } },
+    select: { backerId: true },
+  });
+  if (blocked.length === 0) return backerIds;
+  const drop = new Set(blocked.map((b) => b.backerId));
+  return backerIds.filter((id) => !drop.has(id));
 }
 
 /** Just the holders — used for money-adjacent notices like a price raise. */
@@ -68,7 +92,10 @@ export async function getHolderBackerIds(streamerId: string): Promise<string[]> 
     where: { streamerId },
     select: { backerId: true },
   });
-  return holders.map((r) => r.backerId);
+  return dropBlocked(
+    streamerId,
+    holders.map((r) => r.backerId),
+  );
 }
 
 export async function getNotificationsForBacker(backerId: string, take = 30) {

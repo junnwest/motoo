@@ -290,7 +290,8 @@
     "notFoundBody": "주소가 정확한지 확인하거나 둘러보기에서 다시 찾아보세요.",
     "backToExplore": "둘러보기로 →",
     "follow": "팔로우",
-    "following": "팔로잉"
+    "following": "팔로잉",
+    "followBlocked": "지금은 이 크리에이터를 팔로우할 수 없어요."
   },
   "backing": {
     "title": "{name} 응원하기",
@@ -802,6 +803,27 @@
       "deleteConfirm": "이 소식을 삭제할까요?",
       "chipPublic": "전체 공개",
       "chipBackers": "팬 전용"
+    },
+    "supporters": {
+      "title": "후원자",
+      "empty": "아직 후원자가 없어요.",
+      "earned": "누적 {count, number}모찌",
+      "balance": "보유 {count, number}모찌",
+      "block": "차단",
+      "unblock": "차단 해제",
+      "blockedBadge": "차단됨",
+      "confirmTitle": "{name}님을 차단할까요?",
+      "confirmBody": "차단하면 이 후원자는 더 이상 나를 후원하거나 팔로우할 수 없고, 후원자 순위에서도 보이지 않아요.",
+      "confirmNote": "이미 가지고 있는 {count, number}모찌는 그대로 남고, 마켓에서 사용할 수 있어요. 차단은 새 후원을 막는 것이지 이미 받은 후원을 되돌리는 것이 아니에요.",
+      "reasonLabel": "차단 사유 (선택)",
+      "reasonPlaceholder": "예: 반복적인 부적절한 주문 메모",
+      "reasonHelp": "나만 볼 수 있어요. 차단당한 후원자에게는 보이지 않아요.",
+      "errors": {
+        "forbidden": "권한이 없어요.",
+        "notFound": "후원자를 찾을 수 없어요.",
+        "self": "자기 자신은 차단할 수 없어요.",
+        "generic": "처리하지 못했어요. 잠시 후 다시 시도해 주세요."
+      }
     }
   },
   "donate": {
@@ -833,7 +855,8 @@
       "guardianRequired": "만 19세 미만은 법정대리인 동의가 있어야 후원할 수 있어요. 동의를 기록한 뒤 다시 시도해 주세요.",
       "tooMany": "요청이 너무 잦아요. 잠시 후 다시 시도해 주세요.",
       "generic": "처리하지 못했어요. 잠시 후 다시 시도해 주세요.",
-      "creatorUnavailable": "지금은 이 크리에이터를 후원할 수 없어요."
+      "creatorUnavailable": "지금은 이 크리에이터를 후원할 수 없어요.",
+      "blockedByCreator": "이 크리에이터는 지금 새로운 후원을 받지 않고 있어요. 가지고 있는 모찌는 그대로 사용할 수 있어요."
     },
     "guardianCta": "법정대리인 동의하러 가기"
   },
@@ -1367,5 +1390,17 @@
       "generic": "기록하지 못했어요. 잠시 후 다시 시도해 주세요."
     },
     "policyLink": "청소년보호정책 보기 →"
+  },
+  "hideCreator": {
+    "cta": "숨기기",
+    "undo": "숨김 해제",
+    "confirmTitle": "{name}님을 숨길까요?",
+    "confirmBody": "둘러보기와 추천, 알림에서 이 크리에이터가 보이지 않게 돼요. 팔로우 중이었다면 팔로우도 해제돼요.",
+    "confirmNote": "가지고 있는 모찌와 주문 내역은 그대로예요. 언제든 이 페이지에서 다시 되돌릴 수 있어요.",
+    "confirm": "숨기기",
+    "cancel": "그만두기",
+    "sectionTitle": "숨긴 크리에이터",
+    "empty": "숨긴 크리에이터가 없어요.",
+    "sectionHelp": "숨김을 해제하면 둘러보기와 추천에 다시 나타나요."
   }
 }

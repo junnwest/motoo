@@ -14,6 +14,8 @@ import { PasswordForm } from "./PasswordForm";
 import { EmailForm } from "./EmailForm";
 import { MarketingConsentForm } from "./MarketingConsentForm";
 import { GuardianConsentSection } from "./GuardianConsentSection";
+import { HiddenCreators } from "./HiddenCreators";
+import { getHiddenCreators } from "@/lib/blocks";
 import { formatKstDate } from "@/lib/format";
 
 /** Signed-in surface: one person’s balances and history. Never indexed. */
@@ -31,12 +33,16 @@ export default async function SettingsPage() {
 
   const t = await getTranslations("settings");
   const tg = await getTranslations("guardian");
+  const th = await getTranslations("hideCreator");
   const backer = await getCurrentBacker();
   if (!backer) redirect("/api/session-reset");
 
   // Stated in the delete confirmation: what happens to unspent mochi is the
   // part of leaving that users actually care about.
-  const holdings = await getHoldingsForBacker(backer.id);
+  const [holdings, hiddenCreators] = await Promise.all([
+    getHoldingsForBacker(backer.id),
+    getHiddenCreators(backer.id),
+  ]);
   const unspentMochi = holdings.reduce((sum, h) => sum + h.balance, 0);
 
   // Comes from 본인인증, never self-reported — `ageVerified` is only false once
@@ -97,6 +103,13 @@ export default async function SettingsPage() {
               />
             </Section>
           )}
+
+          {/* The only place a hidden creator can be found again — see the
+              component's header. Rendered even when empty, so it reads as a
+              setting that exists rather than one that appears mysteriously. */}
+          <Section title={th("sectionTitle")} boxed className="mt-6">
+            <HiddenCreators creators={hiddenCreators} />
+          </Section>
 
           <Section title={t("identityTitle")} boxed className="mt-6">
             <IdentityForm

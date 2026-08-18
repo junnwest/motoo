@@ -16,6 +16,7 @@ import {
   getHolding,
 } from "@/lib/mochi";
 import { checkRefundEligibility } from "@/lib/refunds";
+import { getSupporterLeaderboard } from "@/lib/ranking";
 import {
   MOCHI_MAX_PURCHASE_QTY,
   MOCHI_MAX_PURCHASE_KRW,
@@ -122,6 +123,7 @@ beforeEach(async () => {
   // donations, so leaving rows behind would make every test after the first a
   // duplicate-key failure.
   await prisma.donation.deleteMany({ where: { streamerId } });
+  await prisma.block.deleteMany({ where: { streamerId } });
   await prisma.marketplaceItem.deleteMany({ where: { streamerId } });
   await prisma.mochiHolding.deleteMany({ where: { streamerId } });
   // The rate is reset too: the ceiling tests below move it to isolate which cap
@@ -769,5 +771,62 @@ describe("guardian consent unblocks a minor", () => {
       () => donateMochi({ backerId: minorId, streamerId, donationAmountKrw: PRICE, idempotencyKey: "g3" }),
       /GUARDIAN_CONSENT_REQUIRED/,
     );
+  });
+});
+
+/**
+ * Blocking, and specifically the line it must not cross.
+ *
+ * A creator blocking a supporter stops new donations. It deliberately does NOT
+ * stop that supporter spending mochi they already hold — blocking someone who
+ * holds your currency would otherwise confiscate it, and refusing someone's
+ * money is a creator's right in a way that keeping it is not. The asymmetry is
+ * the whole design, so it is the thing worth testing.
+ */
+describe("creator blocks", () => {
+  it("refuses a new donation from a blocked supporter", async () => {
+    await prisma.block.create({
+      data: { backerId, streamerId, initiator: "creator" },
+    });
+    await assert.rejects(
+      () => donateMochi({ backerId, streamerId, donationAmountKrw: PRICE, idempotencyKey: "b1" }),
+      /BLOCKED_BY_CREATOR/,
+    );
+    assert.equal(await prisma.donation.count({ where: { streamerId } }), 0);
+  });
+
+  it("still lets a blocked supporter spend the mochi they already hold", async () => {
+    await donateMochi({ backerId, streamerId, donationAmountKrw: 10 * PRICE, idempotencyKey: "b2" });
+    await prisma.block.create({
+      data: { backerId, streamerId, initiator: "creator" },
+    });
+    const item = await newItem(4);
+    const r = await redeemItem({ backerId, itemId: item.id });
+    assert.equal(r.balance, 6);
+  });
+
+  it("does not stop a donation when the fan is the one who hid the creator", async () => {
+    // A fan-side hide is curation, not a refusal — it changes what they are
+    // shown, and nothing about what they may do.
+    await prisma.block.create({
+      data: { backerId, streamerId, initiator: "fan" },
+    });
+    const r = await donateMochi({ backerId, streamerId, donationAmountKrw: PRICE, idempotencyKey: "b3" });
+    assert.equal(r.balance, 1);
+  });
+
+  it("takes a blocked supporter off the public leaderboard without touching their balance", async () => {
+    await donateMochi({ backerId, streamerId, donationAmountKrw: 5 * PRICE, idempotencyKey: "b4" });
+    const before = await getSupporterLeaderboard(streamerId);
+    assert.equal(before.totalSupporters, 1);
+
+    await prisma.block.create({
+      data: { backerId, streamerId, initiator: "creator" },
+    });
+    const after = await getSupporterLeaderboard(streamerId);
+    assert.equal(after.totalSupporters, 0);
+    assert.equal(after.totalMochiEarned, 0);
+    // The listing changed; the money did not.
+    assert.equal((await getHolding(streamerId, backerId))?.balance, 5);
   });
 });

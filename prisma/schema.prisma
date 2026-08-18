@@ -118,6 +118,7 @@ model Streamer {
   orders           Order[]
   follows          Follow[]
   donations        Donation[]
+  blocks           Block[]
 
   @@index([status])
   @@index([category])
@@ -152,6 +153,7 @@ model Backer {
   emailTokens     EmailToken[]
   reports         Report[]
   donations       Donation[]
+  blocks          Block[]
   refundRequests  RefundRequest[]
   /// Set when the address on the account has been confirmed by clicking a
   /// mailed link. Null means unconfirmed — surfaced, not blocked (see
@@ -205,6 +207,38 @@ enum GuardianRelation {
   grandparent
   sibling
   other
+}
+
+enum BlockInitiator {
+  fan // a fan hiding a creator
+  creator // a creator blocking a fan
+}
+
+// A severed connection between one fan and one creator.
+//
+// Both directions live in one table because the *checks* are symmetric — every
+// query that hides a creator from a fan is the mirror of one hiding a fan from
+// a creator — while the *effects* are not, which is what `initiator` records.
+//
+// What a creator block deliberately does NOT do: stop the fan redeeming mochi
+// they already hold. Blocking someone who holds your currency would otherwise
+// confiscate it, and a creator is entitled to refuse someone's money, not to
+// keep it. See redeemItem.
+model Block {
+  id         String         @id @default(cuid())
+  backerId   String
+  backer     Backer         @relation(fields: [backerId], references: [id], onDelete: Cascade)
+  streamerId String
+  streamer   Streamer       @relation(fields: [streamerId], references: [id], onDelete: Cascade)
+  initiator  BlockInitiator
+  /// Creator-side only, and never shown to the blocked fan — it exists so a
+  /// creator can remember why, and so an admin reviewing a report can see it.
+  reason     String?
+  createdAt  DateTime       @default(now())
+
+  @@unique([backerId, streamerId, initiator])
+  @@index([backerId, initiator])
+  @@index([streamerId, initiator])
 }
 
 model Update {

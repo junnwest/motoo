@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { getCurrentBacker } from "@/lib/session";
 import { checkRateLimit } from "@/lib/rateLimit";
+import { isBlockedEitherWay } from "@/lib/blocks";
 
 /**
  * Follow mutations. Split out of `lib/follows.ts` so that module can drop its
@@ -24,10 +25,16 @@ export async function toggleFollow(
     return { ok: false, error: "tooMany" };
   }
 
+  // A block in either direction ends the relationship, so it must also stop it
+  // being re-established. Unfollowing stays open regardless — being blocked
+  // should never trap someone in a follow they no longer want.
   const existing = await prisma.follow.findUnique({
     where: { streamerId_backerId: { streamerId, backerId: backer.id } },
     select: { id: true },
   });
+  if (!existing && (await isBlockedEitherWay(streamerId, backer.id))) {
+    return { ok: false, error: "blocked" };
+  }
 
   if (existing) {
     await prisma.follow.delete({ where: { id: existing.id } });
@@ -41,7 +48,7 @@ export async function toggleFollow(
   // reflected regardless of which page it happened on.
   revalidatePath(`/s/${handle}`);
   revalidatePath("/home");
-  revalidatePath("/explore");
+  revalidatePath("/explore");
   revalidatePath("/notifications");
   revalidatePath("/profile");
   revalidatePath("/settings");

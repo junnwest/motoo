@@ -46,6 +46,8 @@ export interface ExploreParams {
   category?: string;
   backerRange?: "all" | "under50" | "50to200" | "over200";
   sort?: ExploreSort;
+  /** Creators the signed-in fan has hidden. Omitted when nobody is signed in. */
+  hiddenStreamerIds?: string[];
 }
 
 /**
@@ -73,9 +75,15 @@ export const EXPLORE_PAGE_SIZE = 60;
 export async function getExploreStreamers(
   params: ExploreParams = {},
 ): Promise<StreamerCard[]> {
+  // Creators this fan has hidden are gone from browse entirely. Passed in by
+  // the caller rather than read here, because this function also serves the
+  // signed-out landing, where there is nobody to have hidden anything.
+  const hidden = params.hiddenStreamerIds ?? [];
+
   const streamers = await prisma.streamer.findMany({
     where: {
       status: "approved",
+      ...(hidden.length > 0 ? { id: { notIn: hidden } } : {}),
       ...(params.type && params.type !== "all"
         ? { creatorType: params.type }
         : {}),
