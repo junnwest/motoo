@@ -7,6 +7,8 @@ import { UserMenu, type MenuItem } from "./UserMenu";
 import { NotificationBell } from "./NotificationBell";
 import { StudioPill } from "./StudioPill";
 import { Mochi } from "./Mochi";
+import { SearchBox } from "./SearchBox";
+import { IconSearch } from "./ui/Icons";
 import { getUnreadCount } from "@/lib/notify";
 import { getAvatarUrl, getSession } from "@/lib/session";
 
@@ -81,10 +83,33 @@ export async function Nav() {
           studio={onStudioHost}
         />
 
+        {/* Search sits between the brand and the actions, where every product
+            that has one puts it. Consumer host only: the Studio is a console
+            over one creator's own data, and a box that searched the public
+            catalogue from inside it would be answering a different question
+            than the one the page is about. Hidden below `sm`, where the mobile
+            tab bar carries the entry instead. */}
+        {showConsumerChrome && (
+          <div className="mx-4 hidden max-w-[360px] flex-1 sm:block">
+            <SearchBox compact />
+          </div>
+        )}
+
         {authed ? (
           <div className="flex items-center gap-1.5 sm:gap-2.5">
             {showConsumerChrome && (
               <>
+                {/* Below `sm` the box above is hidden and the mobile tab bar
+                    has no room for a fifth entry, so search would be reachable
+                    from nowhere on a phone. An icon-link to the page, which
+                    carries its own input, closes that. */}
+                <Link
+                  href="/search"
+                  aria-label={t("search")}
+                  className="flex h-9 w-9 items-center justify-center rounded-full text-ink transition-colors hover:bg-cream-warm hover:text-coral-deep sm:hidden"
+                >
+                  <IconSearch width={18} height={18} aria-hidden />
+                </Link>
                 {/* The trophy linked to /ranking, which was deleted 2026-08-10:
                     it rendered the same getMyRankings rows /home already shows,
                     linking to the same creator pages. Rank now lives where it

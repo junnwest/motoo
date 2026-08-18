@@ -80,7 +80,8 @@
     "greeting": "{name}님",
     "home": "홈",
     "notifications": "알림",
-    "notificationsEmpty": "아직 알림이 없어요"
+    "notificationsEmpty": "아직 알림이 없어요",
+    "search": "검색"
   },
   "footer": {
     "fanTagline": "좋아하는 크리에이터를 응원하는 가장 따뜻한 방법.",
@@ -1408,5 +1409,21 @@
     "prev": "← 이전",
     "next": "다음 →",
     "current": "{page}페이지"
+  },
+  "search": {
+    "title": "검색",
+    "inputLabel": "크리에이터, 아이템, 소식 검색",
+    "placeholder": "크리에이터, 아이템, 소식 검색",
+    "tooShort": "{min}글자 이상 입력해 주세요.",
+    "creators": "크리에이터",
+    "items": "마켓 아이템",
+    "updates": "소식",
+    "supporters": "후원자 {count, number}명",
+    "price": "{count, number}모찌",
+    "empty": {
+      "title": "'{q}'에 대한 결과가 없어요",
+      "body": "철자를 확인하거나 다른 말로 찾아보세요.",
+      "cta": "둘러보기"
+    }
   }
 }

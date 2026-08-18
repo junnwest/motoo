@@ -8,6 +8,7 @@ import {
   IconChevronLeft,
   IconChevronRight,
   IconCompass,
+  IconSearch,
   IconHome,
 } from "@/components/ui/Icons";
 import { ALL_CATEGORIES } from "@/lib/creatorTaxonomy";
@@ -75,6 +76,16 @@ export function SidebarPanel({
           icon={<IconCompass width={22} height={22} />}
         >
           {tn("explore")}
+        </SidebarLink>
+        {/* Also in the nav as a box. Listed here too because this rail is the
+            standing answer to "where do I go", and an entry that exists only as
+            an unlabelled field at the top of the window is easy to miss. */}
+        <SidebarLink
+          href="/search"
+          active={pathname.startsWith("/search")}
+          icon={<IconSearch width={22} height={22} />}
+        >
+          {tn("search")}
         </SidebarLink>
       </nav>
 
