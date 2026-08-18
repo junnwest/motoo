@@ -8,6 +8,7 @@ import { Mochi } from "@/components/Mochi";
 import { Avatar } from "@/components/ui/Placeholder";
 import { CreatorBadge } from "@/components/CreatorBadge";
 import { CancelOrderButton } from "@/components/CancelOrderButton";
+import { OrderIssueButton } from "@/components/OrderIssueButton";
 import { RefundRequestButton } from "@/components/RefundRequestButton";
 import { CreatorCover } from "@/components/CreatorCover";
 import { IconTrophy } from "@/components/ui/Icons";
@@ -310,6 +311,16 @@ export default async function ProfilePage({
                         orderId={o.id}
                         itemTitle={o.item.title}
                         mochiSpent={o.mochiSpent}
+                      />
+                    )}
+                    {/* Cancelling covers a pending order; this covers the one
+                        that was marked done and never arrived, which had no
+                        recourse at all. A cancelled order needs neither. */}
+                    {o.status !== "cancelled" && (
+                      <OrderIssueButton
+                        orderId={o.id}
+                        itemTitle={o.item.title}
+                        issue={o.issue}
                       />
                     )}
                   </li>

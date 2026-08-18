@@ -525,6 +525,9 @@ export async function getOrdersForBacker(
     include: {
       item: { select: { title: true } },
       streamer: { select: { handle: true, displayName: true, avatarUrl: true } },
+      issue: {
+        select: { id: true, status: true, creatorReply: true },
+      },
     },
   });
 }

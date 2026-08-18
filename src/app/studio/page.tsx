@@ -140,6 +140,15 @@ export default async function CreatorDashboardHome() {
     note: o.note,
     status: o.status,
     createdAt: o.createdAt.toISOString(),
+    issue: o.issue
+      ? {
+          id: o.issue.id,
+          reason: o.issue.reason,
+          detail: o.issue.detail,
+          status: o.issue.status,
+          creatorReply: o.issue.creatorReply,
+        }
+      : null,
   }));
 
   const pendingOrders = data.orders.filter(

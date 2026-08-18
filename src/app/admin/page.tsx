@@ -9,6 +9,7 @@ import { formatKstDate } from "@/lib/format";
 import { CreatorRow } from "./CreatorRow";
 import { ReportRow } from "./ReportRow";
 import { RefundRow } from "./RefundRow";
+import { IssueRow } from "./IssueRow";
 
 export const metadata: Metadata = { robots: NOINDEX };
 
@@ -63,6 +64,29 @@ export default async function AdminPage() {
           amountKrw: true,
           mochiGranted: true,
           createdAt: true,
+          streamer: { select: { displayName: true } },
+        },
+      },
+    },
+  });
+
+  // Escalated only. An open dispute is between the fan and the creator; routing
+  // every one of them here would bury the ones that actually need motoo.
+  const escalatedIssues = await prisma.orderIssue.findMany({
+    where: { status: "escalated" },
+    orderBy: { escalatedAt: "asc" },
+    take: 100,
+    select: {
+      id: true,
+      reason: true,
+      detail: true,
+      creatorReply: true,
+      escalatedAt: true,
+      order: {
+        select: {
+          mochiSpent: true,
+          item: { select: { title: true } },
+          backer: { select: { nickname: true } },
           streamer: { select: { displayName: true } },
         },
       },
@@ -180,6 +204,30 @@ export default async function AdminPage() {
                 detail={r.detail}
                 eligibleAtRequest={r.eligibleAtRequest}
                 status={r.status as "open" | "approved"}
+              />
+            ))}
+          </div>
+        )}
+
+        <h2 className="mt-10 text-xl font-extrabold text-ink">
+          {t("issues.title")}
+        </h2>
+        {escalatedIssues.length === 0 ? (
+          <p className="mt-2 text-sm text-muted">{t("issues.empty")}</p>
+        ) : (
+          <div className="mt-2">
+            {escalatedIssues.map((i) => (
+              <IssueRow
+                key={i.id}
+                issueId={i.id}
+                itemTitle={i.order.item.title}
+                buyer={i.order.backer.nickname}
+                creatorName={i.order.streamer.displayName}
+                reason={i.reason}
+                detail={i.detail}
+                creatorReply={i.creatorReply}
+                mochiSpent={i.order.mochiSpent}
+                escalatedAt={formatKstDate(i.escalatedAt ?? new Date())}
               />
             ))}
           </div>

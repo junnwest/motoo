@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { Mochi } from "@/components/Mochi";
 import { formatCount } from "@/lib/format";
 import { fulfill, cancel } from "./actions";
+import { OrderIssueReply } from "./OrderIssueReply";
 
 export type DashboardOrder = {
   id: string;
@@ -17,6 +18,14 @@ export type DashboardOrder = {
   note: string | null;
   status: OrderStatus;
   createdAt: string; // ISO string
+  /** A dispute the buyer raised on this order, if any (PRELAUNCH #30). */
+  issue: {
+    id: string;
+    reason: string;
+    detail: string;
+    status: "open" | "replied" | "resolved" | "escalated";
+    creatorReply: string | null;
+  } | null;
 };
 
 /** ISO → YYYY.MM.DD in KST, so an evening-KST order shows the local calendar day. */
@@ -118,6 +127,21 @@ function OrderRow({ order }: { order: DashboardOrder }) {
         {formatDate(order.createdAt)}
       </td>
       <td className="px-3 py-3">
+        {/* A dispute is shown on the row it is about rather than in a separate
+            queue: the creator already has the order, the note and the buyer in
+            front of them here, and the fix is usually the cancel button two
+            cells over. */}
+        {order.issue && order.issue.status !== "resolved" ? (
+          <div className="mb-2">
+            <OrderIssueReply
+              issueId={order.issue.id}
+              reason={order.issue.reason}
+              detail={order.issue.detail}
+              status={order.issue.status}
+              creatorReply={order.issue.creatorReply}
+            />
+          </div>
+        ) : null}
         {order.status === "pending" ? (
           <div className="flex flex-col items-stretch gap-1.5 whitespace-nowrap">
             <Button

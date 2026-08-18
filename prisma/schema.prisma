@@ -352,6 +352,8 @@ model Order {
   createdAt   DateTime        @default(now())
   fulfilledAt DateTime?
 
+  issue OrderIssue?
+
   @@index([streamerId])
   @@index([backerId])
   @@index([itemId])
@@ -382,12 +384,57 @@ model Follow {
 
 // What triggers a Notification. Kept to events with a clear, unambiguous
 // audience (see src/lib/notify.ts for exactly who receives each type).
+
+enum OrderIssueReason {
+  not_delivered // marked fulfilled, nothing arrived
+  not_as_described
+  other
+}
+
+enum OrderIssueStatus {
+  open // waiting on the creator
+  replied // creator has answered; the fan can accept or escalate
+  resolved // closed by either side
+  escalated // handed to motoo
+}
+
+// A dispute about one order (docs/PRELAUNCH.md #30).
+//
+// Cancelling already covers a *pending* order — the fan takes the mochi back
+// themselves. The gap this fills is a **fulfilled** one: the creator marked it
+// done and nothing arrived, and until now the fan's only options were a public
+// report about the creator or nothing at all. Neither is a way to sort out one
+// order.
+//
+// Deliberately not a chat. One statement, one reply, and an escalation — enough
+// to resolve or to hand over, without building an inbox, a moderation surface
+// for it, and the expectation that anyone is reading it at 2am.
+model OrderIssue {
+  id           String           @id @default(cuid())
+  orderId      String           @unique
+  order        Order            @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  reason       OrderIssueReason
+  detail       String
+  status       OrderIssueStatus @default(open)
+  creatorReply String?
+  repliedAt    DateTime?
+  /// Set when the fan hands it to motoo. Kept distinct from `status` so an
+  /// escalation is still visible after it is resolved.
+  escalatedAt  DateTime?
+  resolvedAt   DateTime?
+  resolvedBy   String? // "fan" | "creator" | an admin email
+  createdAt    DateTime         @default(now())
+
+  @@index([status, createdAt])
+}
+
 enum NotificationType {
   order_fulfilled // creator marked your order done
   order_cancelled // creator cancelled your order; mochi was refunded
   new_item // a creator you hold mochi in or follow added a marketplace item
   price_raised // a creator you hold mochi in raised their mochi price (new tier)
   new_update // a creator you hold mochi in or follow posted an update
+  order_issue // a dispute on an order you are party to moved (opened, replied, escalated)
 }
 
 // One opt-out. A row exists only when someone has turned a type OFF, so the

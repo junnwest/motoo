@@ -259,6 +259,9 @@ export async function getCreatorDashboard(streamerId: string) {
         include: {
           item: { select: { title: true } },
           backer: { select: { nickname: true } },
+          // The dispute rides along with the order it is about — the Studio
+          // shows it on that row rather than in a queue of its own.
+          issue: true,
         },
       },
       _count: { select: { mochiHoldings: true } },
