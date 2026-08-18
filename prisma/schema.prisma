@@ -117,6 +117,7 @@ model Streamer {
   marketplaceItems MarketplaceItem[]
   orders           Order[]
   follows          Follow[]
+  donations        Donation[]
 
   @@index([status])
   @@index([category])
@@ -150,6 +151,8 @@ model Backer {
   passwordResets  PasswordResetToken[]
   emailTokens     EmailToken[]
   reports         Report[]
+  donations       Donation[]
+  refundRequests  RefundRequest[]
   /// Set when the address on the account has been confirmed by clicking a
   /// mailed link. Null means unconfirmed — surfaced, not blocked (see
   /// src/lib/emailVerification.ts).
@@ -468,5 +471,79 @@ model Report {
   resolution String?
 
   @@unique([reporterId, targetType, targetId])
+  @@index([status, createdAt])
+}
+
+// One row per donation.
+//
+// Until 2026-08-18 donations existed only as running totals on MochiHolding
+// (krwPaidTotal, mochiEarnedTotal), which meant /refund promised something the
+// data could not answer: the 7-day 청약철회 window needs a date per donation,
+// and "not one mochi from that donation spent" needs to know what that donation
+// granted. It also meant a fan had no donation history and no receipt.
+//
+// Written inside donateMochi's transaction, so a donation row and the credit it
+// describes cannot disagree.
+model Donation {
+  id               String    @id @default(cuid())
+  backerId         String
+  backer           Backer    @relation(fields: [backerId], references: [id], onDelete: Cascade)
+  streamerId       String
+  streamer         Streamer  @relation(fields: [streamerId], references: [id], onDelete: Cascade)
+  amountKrw        Int
+  mochiGranted     Int
+  /// The rate at the time. Kept because the creator's rate ratchets, so it
+  /// cannot be recovered later — and a receipt that cannot explain its own
+  /// arithmetic is not a receipt.
+  pricePerMochiKrw Int
+  /// The PG idempotency token. Unique, so a retried charge can never produce a
+  /// second ledger row for one payment.
+  idempotencyKey   String    @unique
+  createdAt        DateTime  @default(now())
+  refundedAt       DateTime?
+
+  refundRequests RefundRequest[]
+
+  @@index([backerId, createdAt])
+  @@index([streamerId, createdAt])
+}
+
+enum RefundReason {
+  withdrawal // 7-day 청약철회 on a wholly unused donation
+  legal // the 법령 carve-out (a minor's payment without guardian consent)
+  other
+}
+
+enum RefundStatus {
+  open
+  approved // agreed; the money leg still needs a real PG
+  rejected
+  refunded // money actually returned
+}
+
+// A fan's request to have a donation refunded.
+//
+// Intake only. /refund states real positions but there was no way to *ask*
+// (docs/PRELAUNCH.md #8) — and the money leg genuinely needs the PG, while the
+// request and its audit trail do not.
+model RefundRequest {
+  id                String       @id @default(cuid())
+  backerId          String
+  backer            Backer       @relation(fields: [backerId], references: [id], onDelete: Cascade)
+  donationId        String
+  donation          Donation     @relation(fields: [donationId], references: [id], onDelete: Cascade)
+  reason            RefundReason
+  detail            String?
+  /// What the eligibility check said at submission time, kept verbatim. The
+  /// window closes and balances move, so re-deriving it during review would
+  /// answer a different question than the one the fan was shown.
+  eligibleAtRequest Boolean
+  status            RefundStatus @default(open)
+  createdAt         DateTime     @default(now())
+  reviewedAt        DateTime?
+  reviewedBy        String?
+  resolution        String?
+
+  @@unique([donationId])
   @@index([status, createdAt])
 }

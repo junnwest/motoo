@@ -8,12 +8,14 @@ import { Mochi } from "@/components/Mochi";
 import { Avatar } from "@/components/ui/Placeholder";
 import { CreatorBadge } from "@/components/CreatorBadge";
 import { CancelOrderButton } from "@/components/CancelOrderButton";
+import { RefundRequestButton } from "@/components/RefundRequestButton";
 import { CreatorCover } from "@/components/CreatorCover";
 import { IconTrophy } from "@/components/ui/Icons";
 import { Section } from "@/components/ui/Section";
 import { getCurrentBacker, getSession } from "@/lib/session";
 import { getHoldingsForBacker, getOrdersForBacker } from "@/lib/mochi";
 import { getMyRankings } from "@/lib/ranking";
+import { getDonationsWithEligibility } from "@/lib/refunds";
 import { formatKstDate } from "@/lib/format";
 import { ALL_CATEGORIES } from "@/lib/creatorTaxonomy";
 
@@ -44,10 +46,11 @@ export default async function ProfilePage() {
   const backer = await getCurrentBacker();
   if (!backer) redirect("/api/session-reset");
 
-  const [holdings, orders, rankings] = await Promise.all([
+  const [holdings, orders, rankings, donations] = await Promise.all([
     getHoldingsForBacker(backer.id),
     getOrdersForBacker(backer.id),
     getMyRankings(backer.id),
+    getDonationsWithEligibility(backer.id),
   ]);
   const rankByStreamer = new Map(rankings.map((r) => [r.streamerId, r]));
 
@@ -161,6 +164,73 @@ export default async function ProfilePage() {
             )}
           </Section>
 
+          {/* Donation history. Until the ledger landed (2026-08-18) donations
+              existed only as running totals, so a fan could see what they held
+              but never what they had given — no dates, no receipts, and no way
+              to point at the one donation a refund request is about. */}
+          <Section title={t("donationsTitle")} className="mt-6">
+            <p className="-mt-2 mb-4 text-sm text-muted">
+              {t("donationsSubtitle")}
+            </p>
+            {donations.length === 0 ? (
+              <div className="rounded-lg border border-dashed border-line-3 bg-card/60 px-6 py-12 text-center text-base text-muted">
+                {t("donationsEmpty")}
+              </div>
+            ) : (
+              <ul className="flex flex-col gap-3">
+                {donations.map((d) => (
+                  <li
+                    key={d.id}
+                    className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg bg-card p-4 shadow-soft"
+                  >
+                    <CreatorCover
+                      handle={d.streamer.handle}
+                      displayName={d.streamer.displayName}
+                      className="h-9 w-9 flex-none rounded-full"
+                      markClass="text-sm"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate text-base font-bold text-ink">
+                        {d.streamer.displayName}
+                      </div>
+                      <div className="truncate text-xs text-muted">
+                        {formatKstDate(d.createdAt)}
+                      </div>
+                    </div>
+                    <span className="text-sm font-extrabold text-ink">
+                      {t("donatedAmount", { amount: d.amountKrw })}
+                    </span>
+                    <span className="flex items-center gap-1.5 text-sm font-bold text-coral-deep">
+                      <Mochi width={15} height={11} />
+                      {t("donationBonus", { count: d.mochiGranted })}
+                    </span>
+                    {/* One request per donation, so once asked the row states
+                        where it stands instead of offering to ask again. */}
+                    {d.refundedAt ? (
+                      <span className="rounded-full bg-panel px-2.5 py-1 text-2xs font-semibold text-muted">
+                        {t("refundStatus.refunded")}
+                      </span>
+                    ) : d.requestStatus ? (
+                      <span className="rounded-full bg-panel px-2.5 py-1 text-2xs font-semibold text-muted">
+                        {t(`refundStatus.${d.requestStatus}` as never)}
+                      </span>
+                    ) : (
+                      <RefundRequestButton
+                        donationId={d.id}
+                        creatorName={d.streamer.displayName}
+                        amountKrw={d.amountKrw}
+                        eligible={d.eligibility.eligible}
+                        ineligibleReason={
+                          d.eligibility.eligible ? null : d.eligibility.reason
+                        }
+                      />
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Section>
+
           {/* Order / redemption history */}
           <Section title={tm("historyTitle")} className="mt-6">
             <p className="-mt-2 mb-4 text-sm text-muted">
@@ -216,7 +286,7 @@ export default async function ProfilePage() {
             )}
           </Section>
         </div>
-      </ConsumerShell>
+      </ConsumerShell>
     </>
   );
 }

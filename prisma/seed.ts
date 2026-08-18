@@ -102,6 +102,8 @@ const ITEM_TEMPLATES: {
 async function main() {
   console.log("Resetting data…");
   // Phase 2 tables first (FKs point at streamer/backer/item).
+  await prisma.refundRequest.deleteMany();
+  await prisma.donation.deleteMany();
   await prisma.order.deleteMany();
   await prisma.marketplaceItem.deleteMany();
   await prisma.mochiHolding.deleteMany();
@@ -317,6 +319,27 @@ async function main() {
         krwPaidTotal: 60 * flagship.pricePerMochiKrw,
       },
     });
+
+    // …and the donations that produced it. A holding without a ledger behind it
+    // renders an empty 후원 내역 and no refundable donation, so the refund flow
+    // would be unreachable in dev. Dated so both eligibility answers are
+    // reachable: one inside the 7-day window, one outside it.
+    for (const [ageDays, mochi] of [
+      [2, 20],
+      [30, 40],
+    ] as const) {
+      await prisma.donation.create({
+        data: {
+          backerId: demo.id,
+          streamerId: flagship.streamerId,
+          amountKrw: mochi * flagship.pricePerMochiKrw,
+          mochiGranted: mochi,
+          pricePerMochiKrw: flagship.pricePerMochiKrw,
+          idempotencyKey: `seed-flagship-${ageDays}`,
+          createdAt: new Date(Date.now() - ageDays * 24 * 60 * 60 * 1000),
+        },
+      });
+    }
 
     // A handful of pool fans hold mochi too (so the dashboard shows real holders).
     const holders = backers.filter((b) => b.id !== demo.id).slice(0, 9);

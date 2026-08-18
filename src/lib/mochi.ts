@@ -193,6 +193,20 @@ export async function donateMochi(
         },
       });
 
+      // The ledger row, written in the same transaction as the credit it
+      // describes — a donation and its record cannot disagree, and the unique
+      // idempotencyKey means a retried charge cannot produce a second row.
+      await tx.donation.create({
+        data: {
+          backerId: input.backerId,
+          streamerId: input.streamerId,
+          amountKrw: donationAmountKrw,
+          mochiGranted,
+          pricePerMochiKrw: issuance.pricePerMochiKrw,
+          idempotencyKey,
+        },
+      });
+
       // Advance the current tier's meter (soft goal — donating past it is
       // allowed) and the lifetime total (which survives rate-raise resets).
       await tx.mochiIssuance.update({

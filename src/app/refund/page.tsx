@@ -61,6 +61,18 @@ export default async function RefundPage() {
               <p className="mt-3 break-keep text-base leading-relaxed text-body">
                 {s.richBody
                   ? t.rich(`${s.id}.body`, {
+                      // The request now has a route in the product (profile →
+                      // 후원 내역), so the policy names it first. Email stays as
+                      // the fallback for anyone who cannot sign in — which,
+                      // for a payment made by a minor, is a real case.
+                      profile: (chunks) => (
+                        <Link
+                          href="/profile"
+                          className="font-semibold text-coral-deep underline"
+                        >
+                          {chunks}
+                        </Link>
+                      ),
                       // Degrades to plain text if the support channel is ever
                       // unset — a dead link labelled 고객센터 is worse than
                       // none, because it looks live.

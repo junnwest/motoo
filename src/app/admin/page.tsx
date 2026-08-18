@@ -8,6 +8,7 @@ import { requireAdmin } from "@/lib/admin";
 import { formatKstDate } from "@/lib/format";
 import { CreatorRow } from "./CreatorRow";
 import { ReportRow } from "./ReportRow";
+import { RefundRow } from "./RefundRow";
 
 export const metadata: Metadata = { robots: NOINDEX };
 
@@ -41,6 +42,30 @@ export default async function AdminPage() {
       detail: true,
       createdAt: true,
       reporter: { select: { nickname: true } },
+    },
+  });
+
+  // Approved requests stay in the queue until the money actually moves — see
+  // the section comment below.
+  const refundRequests = await prisma.refundRequest.findMany({
+    where: { status: { in: ["open", "approved"] } },
+    orderBy: { createdAt: "asc" },
+    take: 100,
+    select: {
+      id: true,
+      reason: true,
+      detail: true,
+      eligibleAtRequest: true,
+      status: true,
+      backer: { select: { nickname: true, email: true } },
+      donation: {
+        select: {
+          amountKrw: true,
+          mochiGranted: true,
+          createdAt: true,
+          streamer: { select: { displayName: true } },
+        },
+      },
     },
   });
 
@@ -125,6 +150,36 @@ export default async function AdminPage() {
                 detail={r.detail}
                 reporter={r.reporter.nickname}
                 createdAt={formatKstDate(r.createdAt)}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Refunds sit with reports because they are the same kind of thing —
+            someone asked motoo to do something and is waiting. Approved ones
+            stay in the list: with PAYMENT_PROVIDER=mock, agreeing to refund
+            moves no money, so an approval that dropped out of view would be a
+            promise nobody could see was outstanding. */}
+        <h2 className="mt-10 text-xl font-extrabold text-ink">
+          {t("refunds.title")}
+        </h2>
+        {refundRequests.length === 0 ? (
+          <p className="mt-2 text-sm text-muted">{t("refunds.empty")}</p>
+        ) : (
+          <div className="mt-2">
+            {refundRequests.map((r) => (
+              <RefundRow
+                key={r.id}
+                requestId={r.id}
+                creatorName={r.donation.streamer.displayName}
+                backerLabel={`${r.backer.nickname} · ${r.backer.email}`}
+                amountKrw={r.donation.amountKrw}
+                mochiGranted={r.donation.mochiGranted}
+                donatedAt={formatKstDate(r.donation.createdAt)}
+                reason={r.reason}
+                detail={r.detail}
+                eligibleAtRequest={r.eligibleAtRequest}
+                status={r.status as "open" | "approved"}
               />
             ))}
           </div>

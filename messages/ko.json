@@ -956,7 +956,7 @@
     "howTo": {
       "contact": "문의:",
       "title": "4. 신청 방법",
-      "body": "<a>고객센터</a>로 신청해 주세요. 후원 내역과 신청 사유를 확인한 뒤 결과를 알려드리고, 청약철회가 확정되면 법령이 정한 기한인 3영업일 이내에 대금을 돌려드려요. 결제 수단에 따라 실제 입금까지 며칠이 더 걸릴 수 있어요."
+      "body": "<profile>프로필 > 후원 내역</profile>에서 해당 후원의 [환불 요청]을 눌러 신청해 주세요. 로그인이 어렵다면 <a>고객센터</a>로 알려 주셔도 돼요. 후원 내역과 신청 사유를 확인한 뒤 결과를 알려드리고, 청약철회가 확정되면 법령이 정한 기한인 3영업일 이내에 대금을 돌려드려요. 결제 수단에 따라 실제 입금까지 며칠이 더 걸릴 수 있어요."
     },
     "noResale": {
       "title": "5. 양도 · 재판매",
@@ -1070,7 +1070,18 @@
   },
   "myProfile": {
     "title": "프로필",
-    "editProfile": "프로필 편집"
+    "editProfile": "프로필 편집",
+    "donationsTitle": "후원 내역",
+    "donationsSubtitle": "후원한 금액과 그때 받은 모찌예요. 후원일로부터 7일 이내이고 받은 모찌를 그대로 가지고 있다면 청약철회를 요청할 수 있어요.",
+    "donationsEmpty": "아직 후원한 내역이 없어요.",
+    "donatedAmount": "{amount, number}원",
+    "donationBonus": "+{count, number}모찌",
+    "refundStatus": {
+      "open": "환불 검토 중",
+      "approved": "환불 승인됨",
+      "rejected": "환불 불가",
+      "refunded": "환불 완료"
+    }
   },
   "sidebar": {
     "followingTitle": "팔로잉",
@@ -1189,7 +1200,8 @@
     "errors": {
       "forbidden": "권한이 없어요.",
       "notFound": "크리에이터를 찾을 수 없어요.",
-      "reasonRequired": "중지 사유를 3자 이상 입력해 주세요."
+      "reasonRequired": "중지 사유를 3자 이상 입력해 주세요.",
+      "generic": "처리하지 못했어요. 잠시 후 다시 시도해 주세요."
     },
     "reportsTitle": "신고 대기열",
     "reportsEmpty": "처리할 신고가 없어요.",
@@ -1204,7 +1216,18 @@
     "hideItem": "아이템 내리기",
     "unhideItem": "다시 노출",
     "hiddenBadge": "내려짐",
-    "itemsTitle": "신고된 아이템"
+    "itemsTitle": "신고된 아이템",
+    "refunds": {
+      "title": "환불 요청",
+      "empty": "처리할 환불 요청이 없어요.",
+      "amount": "{amount, number}원",
+      "granted": "지급 {count, number}모찌",
+      "eligible": "요건 충족",
+      "ineligible": "요건 미충족",
+      "approve": "승인",
+      "reject": "불가",
+      "markRefunded": "환불 완료로 표시"
+    }
   },
   "report": {
     "trigger": "신고",
@@ -1226,6 +1249,41 @@
       "login": "로그인이 필요해요.",
       "tooMany": "신고가 너무 잦아요. 잠시 후 다시 시도해 주세요.",
       "generic": "접수하지 못했어요. 잠시 후 다시 시도해 주세요."
+    }
+  },
+  "refundRequest": {
+    "cta": "환불 요청",
+    "title": "환불을 요청할게요",
+    "subtitle": "{creator}님께 후원한 {amount, number}원에 대한 요청이에요.",
+    "eligible": "청약철회 요건에 해당해요. 후원일로부터 7일이 지나지 않았고, 이 후원으로 받은 모찌를 아직 그대로 가지고 있어요.",
+    "ineligible": {
+      "expired": "후원일로부터 7일이 지났어요. 청약철회 기간은 끝났지만, 법령에 따른 사유가 있다면 요청을 남겨 주세요. 개별적으로 확인해 드릴게요.",
+      "spent": "이 후원으로 받은 모찌 중 일부를 이미 사용했어요. 청약철회 요건에는 해당하지 않지만, 법령에 따른 사유가 있다면 요청을 남겨 주세요. 개별적으로 확인해 드릴게요.",
+      "alreadyRequested": "이미 이 후원에 대한 요청을 받았어요."
+    },
+    "reasonLabel": "요청 사유",
+    "reasons": {
+      "withdrawal": "단순 변심 — 7일 이내 청약철회",
+      "legal": "미성년자가 법정대리인 동의 없이 결제했어요",
+      "other": "그 밖의 사유 (아래에 적어 주세요)"
+    },
+    "detailLabel": "자세한 내용 (선택)",
+    "detailPlaceholder": "확인에 도움이 될 내용을 적어 주세요.",
+    "policyNote": "환불 기준은 <link>환불 정책</link>을 따라요. 요청을 남기면 확인 후 가입하신 이메일로 안내해 드릴게요.",
+    "submit": "요청 보내기",
+    "cancel": "그만두기",
+    "status": {
+      "open": "검토 중",
+      "approved": "승인됨",
+      "rejected": "불가",
+      "refunded": "환불 완료"
+    },
+    "errors": {
+      "generic": "요청을 보내지 못했어요. 잠시 후 다시 시도해 주세요.",
+      "login": "로그인이 필요해요.",
+      "tooMany": "요청이 너무 잦아요. 잠시 후 다시 시도해 주세요.",
+      "notFound": "후원 내역을 찾을 수 없어요.",
+      "alreadyRequested": "이미 이 후원에 대한 요청을 받았어요."
     }
   }
 }

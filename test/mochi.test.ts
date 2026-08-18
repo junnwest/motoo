@@ -15,6 +15,7 @@ import {
   cancelOrderByBuyer,
   getHolding,
 } from "@/lib/mochi";
+import { checkRefundEligibility } from "@/lib/refunds";
 import {
   MOCHI_MAX_PURCHASE_QTY,
   MOCHI_MAX_PURCHASE_KRW,
@@ -116,6 +117,11 @@ after(async () => {
 
 beforeEach(async () => {
   await prisma.order.deleteMany({ where: { streamerId } });
+  // Ledger rows too — most tests donate with idempotencyKey "k", and the
+  // unique index on it is exactly what stops a retried charge becoming two
+  // donations, so leaving rows behind would make every test after the first a
+  // duplicate-key failure.
+  await prisma.donation.deleteMany({ where: { streamerId } });
   await prisma.marketplaceItem.deleteMany({ where: { streamerId } });
   await prisma.mochiHolding.deleteMany({ where: { streamerId } });
   // The rate is reset too: the ceiling tests below move it to isolate which cap
@@ -543,5 +549,184 @@ describe("concurrency safety (the review fix)", () => {
     assert.equal(ok, 2, "only `stock` redemptions should succeed");
     const after = await prisma.marketplaceItem.findUniqueOrThrow({ where: { id: item.id } });
     assert.equal(after.redeemedCount, 2);
+  });
+});
+
+describe("the donation ledger", () => {
+  it("writes exactly one row per donation, with the rate that applied", async () => {
+    await donateMochi({ backerId, streamerId, donationAmountKrw: 10 * PRICE, idempotencyKey: "k" });
+    const rows = await prisma.donation.findMany({ where: { streamerId, backerId } });
+    assert.equal(rows.length, 1);
+    assert.equal(rows[0].amountKrw, 10 * PRICE);
+    assert.equal(rows[0].mochiGranted, 10);
+    // The rate ratchets, so it cannot be recovered later — a receipt that can't
+    // explain its own arithmetic isn't a receipt.
+    assert.equal(rows[0].pricePerMochiKrw, PRICE);
+  });
+
+  it("records the amount actually donated, not the mochi-equivalent", async () => {
+    await donateMochi({ backerId, streamerId, donationAmountKrw: 2050, idempotencyKey: "k" });
+    const row = await prisma.donation.findFirstOrThrow({ where: { streamerId, backerId } });
+    assert.equal(row.amountKrw, 2050); // the full amount reaches the creator
+    assert.equal(row.mochiGranted, 10); // floor(2050/200)
+  });
+
+  it("writes no row when the donation is refused", async () => {
+    await assert.rejects(
+      () => donateMochi({ backerId, streamerId, donationAmountKrw: 100, idempotencyKey: "k" }),
+      /DONATION_BELOW_MIN/,
+    );
+    assert.equal(await prisma.donation.count({ where: { streamerId } }), 0);
+  });
+
+  it("refuses a second row for one payment (a retried charge)", async () => {
+    await donateMochi({ backerId, streamerId, donationAmountKrw: PRICE, idempotencyKey: "dup" });
+    await assert.rejects(() =>
+      donateMochi({ backerId, streamerId, donationAmountKrw: PRICE, idempotencyKey: "dup" }),
+    );
+    assert.equal(await prisma.donation.count({ where: { streamerId } }), 1);
+    // …and the credit rolled back with it: the ledger and the balance cannot
+    // disagree, because they are written in one transaction.
+    assert.equal((await getHolding(streamerId, backerId))?.balance, 1);
+  });
+
+  it("keeps the ledger and the running totals in agreement", async () => {
+    await donateMochi({ backerId, streamerId, donationAmountKrw: 3 * PRICE, idempotencyKey: "a" });
+    await donateMochi({ backerId, streamerId, donationAmountKrw: 7 * PRICE, idempotencyKey: "b" });
+    const rows = await prisma.donation.findMany({ where: { streamerId, backerId } });
+    const holding = await getHolding(streamerId, backerId);
+    assert.equal(
+      rows.reduce((sum, r) => sum + r.amountKrw, 0),
+      holding?.krwPaidTotal,
+    );
+    assert.equal(
+      rows.reduce((sum, r) => sum + r.mochiGranted, 0),
+      holding?.mochiEarnedTotal,
+    );
+  });
+});
+
+describe("refund eligibility", () => {
+  it("is eligible while inside the window with the mochi untouched", async () => {
+    await donateMochi({ backerId, streamerId, donationAmountKrw: 10 * PRICE, idempotencyKey: "k" });
+    const d = await prisma.donation.findFirstOrThrow({ where: { streamerId } });
+    assert.deepEqual(await checkRefundEligibility(d.id), { eligible: true });
+  });
+
+  it("is not eligible once the 7-day window has passed", async () => {
+    await donateMochi({ backerId, streamerId, donationAmountKrw: 10 * PRICE, idempotencyKey: "k" });
+    const d = await prisma.donation.findFirstOrThrow({ where: { streamerId } });
+    await prisma.donation.update({
+      where: { id: d.id },
+      data: { createdAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000) },
+    });
+    assert.deepEqual(await checkRefundEligibility(d.id), {
+      eligible: false,
+      reason: "expired",
+    });
+  });
+
+  it("is not eligible once any of it has been spent", async () => {
+    await donateMochi({ backerId, streamerId, donationAmountKrw: 10 * PRICE, idempotencyKey: "k" });
+    const d = await prisma.donation.findFirstOrThrow({ where: { streamerId } });
+    const item = await newItem(1);
+    await redeemItem({ backerId, itemId: item.id });
+    assert.deepEqual(await checkRefundEligibility(d.id), {
+      eligible: false,
+      reason: "spent",
+    });
+  });
+
+  // Mochi is fungible, so "not one mochi from *that* donation" is enforced as
+  // "the balance still covers it". A later donation therefore raises the bar it
+  // has to clear, rather than papering over spending from an earlier one.
+  it("does not let a later donation revive an already-spent one", async () => {
+    await donateMochi({ backerId, streamerId, donationAmountKrw: 10 * PRICE, idempotencyKey: "a" });
+    const first = await prisma.donation.findFirstOrThrow({ where: { streamerId } });
+    const item = await newItem(4);
+    await redeemItem({ backerId, itemId: item.id }); // balance 10 → 6
+    await donateMochi({ backerId, streamerId, donationAmountKrw: 5 * PRICE, idempotencyKey: "b" });
+    // Balance is 11 now, but the second donation granted 5 of that, so the
+    // first's 10 is still not covered.
+    assert.deepEqual(await checkRefundEligibility(first.id), {
+      eligible: false,
+      reason: "spent",
+    });
+  });
+
+  it("refuses a second request for one donation", async () => {
+    await donateMochi({ backerId, streamerId, donationAmountKrw: PRICE, idempotencyKey: "k" });
+    const d = await prisma.donation.findFirstOrThrow({ where: { streamerId } });
+    await prisma.refundRequest.create({
+      data: { backerId, donationId: d.id, reason: "withdrawal", eligibleAtRequest: true },
+    });
+    assert.deepEqual(await checkRefundEligibility(d.id), {
+      eligible: false,
+      reason: "alreadyRequested",
+    });
+    await assert.rejects(() =>
+      prisma.refundRequest.create({
+        data: { backerId, donationId: d.id, reason: "legal", eligibleAtRequest: false },
+      }),
+    );
+  });
+});
+
+/**
+ * A completed refund takes the mochi back with the money. Without this, asking
+ * for a refund would be a way to keep the bonus and the cash, and the creator's
+ * lifetime totals would keep counting a donation that no longer exists.
+ *
+ * Tested at the Prisma layer for the same reason the report tests are: the
+ * action needs an admin session these tests don't have, and what matters is the
+ * arithmetic, not the button.
+ */
+describe("refund completion", () => {
+  it("removes the granted mochi and the lifetime totals it added", async () => {
+    await donateMochi({ backerId, streamerId, donationAmountKrw: 10 * PRICE, idempotencyKey: "k" });
+    const d = await prisma.donation.findFirstOrThrow({ where: { streamerId } });
+
+    await prisma.$transaction(async (tx) => {
+      await tx.donation.update({ where: { id: d.id }, data: { refundedAt: new Date() } });
+      const h = await tx.mochiHolding.findUniqueOrThrow({
+        where: { streamerId_backerId: { streamerId, backerId } },
+      });
+      await tx.mochiHolding.update({
+        where: { id: h.id },
+        data: {
+          balance: Math.max(0, h.balance - d.mochiGranted),
+          mochiEarnedTotal: { decrement: d.mochiGranted },
+          krwPaidTotal: { decrement: d.amountKrw },
+        },
+      });
+    });
+
+    const h = await getHolding(streamerId, backerId);
+    assert.equal(h?.balance, 0);
+    assert.equal(h?.mochiEarnedTotal, 0);
+    assert.equal(h?.krwPaidTotal, 0);
+  });
+
+  it("stops a refunded donation from holding a later one hostage", async () => {
+    await donateMochi({ backerId, streamerId, donationAmountKrw: 4 * PRICE, idempotencyKey: "a" });
+    const first = await prisma.donation.findFirstOrThrow({ where: { streamerId } });
+    await donateMochi({ backerId, streamerId, donationAmountKrw: 6 * PRICE, idempotencyKey: "b" });
+    const second = await prisma.donation.findFirstOrThrow({
+      where: { streamerId, id: { not: first.id } },
+    });
+
+    // Refund the first: 10 → 6 mochi, and its 4 leave the "granted since" sum.
+    await prisma.$transaction(async (tx) => {
+      await tx.donation.update({ where: { id: first.id }, data: { refundedAt: new Date() } });
+      const h = await tx.mochiHolding.findUniqueOrThrow({
+        where: { streamerId_backerId: { streamerId, backerId } },
+      });
+      await tx.mochiHolding.update({
+        where: { id: h.id },
+        data: { balance: h.balance - first.mochiGranted },
+      });
+    });
+
+    assert.deepEqual(await checkRefundEligibility(second.id), { eligible: true });
   });
 });
