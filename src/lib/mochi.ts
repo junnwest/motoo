@@ -515,11 +515,12 @@ export const getHoldingsForBacker = cache(async (backerId: string) => {
  */
 export async function getOrdersForBacker(
   backerId: string,
-  opts: { status?: OrderStatus; take?: number } = {},
+  opts: { status?: OrderStatus; take?: number; skip?: number } = {},
 ) {
   return prisma.order.findMany({
     where: { backerId, ...(opts.status ? { status: opts.status } : {}) },
     orderBy: { createdAt: "desc" },
+    skip: opts.skip ?? 0,
     take: opts.take ?? 50,
     include: {
       item: { select: { title: true } },

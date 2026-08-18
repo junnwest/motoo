@@ -12,6 +12,7 @@ import { RefundRequestButton } from "@/components/RefundRequestButton";
 import { CreatorCover } from "@/components/CreatorCover";
 import { IconTrophy } from "@/components/ui/Icons";
 import { Section } from "@/components/ui/Section";
+import { Pager } from "@/components/Pager";
 import { getCurrentBacker, getSession } from "@/lib/session";
 import { getHoldingsForBacker, getOrdersForBacker } from "@/lib/mochi";
 import { getMyRankings } from "@/lib/ranking";
@@ -34,7 +35,11 @@ const ORDER_STATUS_CHIP: Record<string, string> = {
  * reached from the avatar dropdown instead of a standalone nav link. /me/mochi
  * redirects here.
  */
-export default async function ProfilePage() {
+export default async function ProfilePage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const session = await getSession();
   if (!session?.user) redirect("/");
 
@@ -46,12 +51,31 @@ export default async function ProfilePage() {
   const backer = await getCurrentBacker();
   if (!backer) redirect("/api/session-reset");
 
-  const [holdings, orders, rankings, donations] = await Promise.all([
+  // Two independent lists on one page, so they page on their own query keys
+  // rather than a shared `?page` that would move both at once.
+  const sp = await searchParams;
+  const donationPage = Math.max(0, (Number(sp.donations) || 1) - 1);
+  const orderPage = Math.max(0, (Number(sp.orders) || 1) - 1);
+  const ORDERS_PER_PAGE = 20;
+  const DONATIONS_PER_PAGE = 10;
+
+  const [holdings, orderRows, rankings, donations] = await Promise.all([
     getHoldingsForBacker(backer.id),
-    getOrdersForBacker(backer.id),
+    // One extra row, dropped below — the same "is there another page" trick the
+    // other paged queries use, without a second COUNT.
+    getOrdersForBacker(backer.id, {
+      skip: orderPage * ORDERS_PER_PAGE,
+      take: ORDERS_PER_PAGE + 1,
+    }),
     getMyRankings(backer.id),
-    getDonationsWithEligibility(backer.id),
+    getDonationsWithEligibility(
+      backer.id,
+      DONATIONS_PER_PAGE,
+      donationPage * DONATIONS_PER_PAGE,
+    ),
   ]);
+  const orders = orderRows.slice(0, ORDERS_PER_PAGE);
+  const hasMoreOrders = orderRows.length > ORDERS_PER_PAGE;
   const rankByStreamer = new Map(rankings.map((r) => [r.streamerId, r]));
 
   return (
@@ -168,17 +192,17 @@ export default async function ProfilePage() {
               existed only as running totals, so a fan could see what they held
               but never what they had given — no dates, no receipts, and no way
               to point at the one donation a refund request is about. */}
-          <Section title={t("donationsTitle")} className="mt-6">
+          <Section title={t("donationsTitle")} className="mt-6" id="donations">
             <p className="-mt-2 mb-4 text-sm text-muted">
               {t("donationsSubtitle")}
             </p>
-            {donations.length === 0 ? (
+            {donations.rows.length === 0 ? (
               <div className="rounded-lg border border-dashed border-line-3 bg-card/60 px-6 py-12 text-center text-base text-muted">
                 {t("donationsEmpty")}
               </div>
             ) : (
               <ul className="flex flex-col gap-3">
-                {donations.map((d) => (
+                {donations.rows.map((d) => (
                   <li
                     key={d.id}
                     className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg bg-card p-4 shadow-soft"
@@ -229,10 +253,18 @@ export default async function ProfilePage() {
                 ))}
               </ul>
             )}
+            <Pager
+              basePath="/profile"
+              searchParams={sp}
+              page={donationPage}
+              hasMore={donations.hasMore}
+              param="donations"
+              anchor="donations"
+            />
           </Section>
 
           {/* Order / redemption history */}
-          <Section title={tm("historyTitle")} className="mt-6">
+          <Section title={tm("historyTitle")} className="mt-6" id="orders">
             <p className="-mt-2 mb-4 text-sm text-muted">
               {tm("historySubtitle")}
             </p>
@@ -284,6 +316,14 @@ export default async function ProfilePage() {
                 ))}
               </ul>
             )}
+            <Pager
+              basePath="/profile"
+              searchParams={sp}
+              page={orderPage}
+              hasMore={hasMoreOrders}
+              param="orders"
+              anchor="orders"
+            />
           </Section>
         </div>
       </ConsumerShell>

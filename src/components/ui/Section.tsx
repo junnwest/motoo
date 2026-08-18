@@ -17,6 +17,7 @@ import Link from "next/link";
  * it earns its keep (e.g. Settings).
  */
 export function Section({
+  id,
   title,
   href,
   more,
@@ -24,6 +25,9 @@ export function Section({
   className = "",
   children,
 }: {
+  /** Anchor target, so a link can land on this section rather than the top of
+   * the page — used by the paged lists on /profile. */
+  id?: string;
   /** Omit on a page that already has its own <h1> covering the same ground
    * (e.g. a single-list page) — repeating the title right below it reads
    * redundant. */
@@ -37,7 +41,10 @@ export function Section({
 }) {
   return (
     <section
-      className={`${boxed ? "rounded-xl bg-cream-warm-2 p-6 sm:p-7" : ""} ${className}`}
+      id={id}
+      // Clears the sticky nav when jumped to, the same way the Studio's own
+      // sections do.
+      className={`${id ? "scroll-mt-24" : ""} ${boxed ? "rounded-xl bg-cream-warm-2 p-6 sm:p-7" : ""} ${className}`}
     >
       {title && (
         <div className="mb-4 flex items-baseline justify-between gap-4">

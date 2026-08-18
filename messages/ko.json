@@ -1402,5 +1402,11 @@
     "sectionTitle": "숨긴 크리에이터",
     "empty": "숨긴 크리에이터가 없어요.",
     "sectionHelp": "숨김을 해제하면 둘러보기와 추천에 다시 나타나요."
+  },
+  "pager": {
+    "label": "페이지 이동",
+    "prev": "← 이전",
+    "next": "다음 →",
+    "current": "{page}페이지"
   }
 }

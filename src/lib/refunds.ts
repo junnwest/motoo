@@ -96,11 +96,13 @@ export async function checkRefundEligibility(
 export async function getDonationsWithEligibility(
   backerId: string,
   take = 20,
+  skip = 0,
 ) {
   const donations = await prisma.donation.findMany({
     where: { backerId },
     orderBy: { createdAt: "desc" },
-    take,
+    skip,
+    take: take + 1, // the extra row answers "is there another page"
     select: {
       id: true,
       amountKrw: true,
@@ -112,11 +114,13 @@ export async function getDonationsWithEligibility(
     },
   });
 
-  return Promise.all(
-    donations.map(async (d) => ({
+  const hasMore = donations.length > take;
+  const rows = await Promise.all(
+    donations.slice(0, take).map(async (d) => ({
       ...d,
       requestStatus: d.refundRequests[0]?.status ?? null,
       eligibility: await checkRefundEligibility(d.id),
     })),
   );
+  return { rows, hasMore };
 }

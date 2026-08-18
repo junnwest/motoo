@@ -63,8 +63,8 @@ real 본인인증, Kakao login, real refund execution, and creator payouts.
 
 | # | Item | Evidence |
 | --- | --- | --- |
-| 24 | **No pagination anywhere.** Explore caps at 60, orders 50, notifications 30 — bounded, but with no "load more", so the 61st creator is unreachable. | already in PROGRESS |
-| 25 | **No loading states.** Zero `loading.tsx` in the app; every navigation waits on the server render with no skeleton. | `find src/app -name loading.tsx` → 0 |
+| ~~24~~ | ✅ **Shipped — 2026-08-18.** Explore, notifications and both profile lists page on their own query keys. The real work was underneath: explore sorted and range-filtered **in JavaScript after a capped fetch**, which is survivable for one list and simply wrong with a pager — "most supported" would have meant "most supported among the 60 rows this page loaded". Both moved into the database (relation-count `orderBy` with a tiebreak so the order is total; a grouped `having` query for the supporter bands). Plain links, not "load more", so a page survives refresh, back and sharing. | `src/components/Pager.tsx` |
+| ~~25~~ | ✅ **Shipped — 2026-08-18.** `loading.tsx` on every consumer route plus the Studio. `ShellSkeleton` renders the real `Nav` (a cookie decode and two indexed reads — cheap, and a copy would drift) with static rails at their exact widths, so nothing moves when the page arrives. `aria-busy` and `motion-reduce:animate-none`, since a pulsing page is what that setting is for. | `src/components/ShellSkeleton.tsx` |
 | 26 | **Follow list is desktop-only.** | already in PROGRESS |
 | 27 | **Search is explore-scoped only** — no global search across creators, items or updates. | `ExploreFilters` only |
 | 28 | **No notification preferences.** Every event type is on, with no per-type mute and no channel choice. | no preference model |

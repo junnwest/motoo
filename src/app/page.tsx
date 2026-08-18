@@ -40,7 +40,7 @@ export default async function FanLandingPage() {
 
   let trending: CardData[] = [];
   try {
-    trending = (await getExploreStreamers({ sort: "backers" })).slice(0, 4);
+    trending = (await getExploreStreamers({ sort: "backers", pageSize: 4 })).cards;
   } catch {
     trending = [];
   }

@@ -48,6 +48,9 @@ export interface ExploreParams {
   sort?: ExploreSort;
   /** Creators the signed-in fan has hidden. Omitted when nobody is signed in. */
   hiddenStreamerIds?: string[];
+  /** Zero-based page. */
+  page?: number;
+  pageSize?: number;
 }
 
 /**
@@ -72,18 +75,88 @@ export interface ExploreParams {
  */
 export const EXPLORE_PAGE_SIZE = 60;
 
+/**
+ * The ids matching a supporter-count band.
+ *
+ * `backerCount` is a live relation count, and Prisma cannot filter on one in a
+ * `where` — which is why this filter used to run in JavaScript *after* the
+ * query, over whichever rows the page happened to load. That was survivable
+ * while the page was a single capped list and becomes wrong the moment there
+ * are pages: page 2 would filter a different 60 rows and the counts would not
+ * add up.
+ *
+ * A grouped query with `having` answers it in the database instead. Note the
+ * inversion for `under50`: creators with no supporters at all have no rows in
+ * MochiHolding, so they can only be found by excluding everyone who *does*
+ * clear the bar.
+ */
+async function idsForBackerRange(
+  range: NonNullable<ExploreParams["backerRange"]>,
+): Promise<{ in?: string[]; notIn?: string[] }> {
+  if (range === "under50") {
+    const atLeast50 = await prisma.mochiHolding.groupBy({
+      by: ["streamerId"],
+      _count: { _all: true },
+      having: { streamerId: { _count: { gte: 50 } } },
+    });
+    return { notIn: atLeast50.map((r) => r.streamerId) };
+  }
+
+  const rows = await prisma.mochiHolding.groupBy({
+    by: ["streamerId"],
+    _count: { _all: true },
+    having:
+      range === "50to200"
+        ? { streamerId: { _count: { gte: 50, lte: 200 } } }
+        : { streamerId: { _count: { gt: 200 } } },
+  });
+  return { in: rows.map((r) => r.streamerId) };
+}
+
+export interface ExplorePage {
+  cards: StreamerCard[];
+  /** Whether a further page exists — the pager needs this, not a total count. */
+  hasMore: boolean;
+}
+
+/**
+ * One page of the explore listing.
+ *
+ * Sorting and filtering both moved into the database (docs/PRELAUNCH.md #24).
+ * They used to happen in memory over a capped fetch, which was fine for a
+ * single unpaged list and is simply incorrect with a pager: "most supported"
+ * would have meant "most supported among the 60 rows this page happened to
+ * load", and page 2 would have re-sorted a different 60.
+ *
+ * `take: size + 1` is how `hasMore` is known without a second count query — the
+ * extra row is asked for and then dropped.
+ */
 export async function getExploreStreamers(
   params: ExploreParams = {},
-): Promise<StreamerCard[]> {
+): Promise<ExplorePage> {
   // Creators this fan has hidden are gone from browse entirely. Passed in by
   // the caller rather than read here, because this function also serves the
   // signed-out landing, where there is nobody to have hidden anything.
   const hidden = params.hiddenStreamerIds ?? [];
+  const page = Math.max(0, params.page ?? 0);
+  const size = params.pageSize ?? EXPLORE_PAGE_SIZE;
+
+  const range =
+    params.backerRange && params.backerRange !== "all"
+      ? await idsForBackerRange(params.backerRange)
+      : null;
+
+  // Both constraints land on `id`, so they are merged rather than written twice
+  // — the later spread would otherwise silently drop the earlier one.
+  const idFilter: { in?: string[]; notIn?: string[] } = {};
+  if (range?.in) idFilter.in = range.in;
+  const excluded = [...hidden, ...(range?.notIn ?? [])];
+  if (excluded.length > 0) idFilter.notIn = excluded;
 
   const streamers = await prisma.streamer.findMany({
     where: {
       status: "approved",
-      ...(hidden.length > 0 ? { id: { notIn: hidden } } : {}),
+      ...(Object.keys(idFilter).length > 0 ? { id: idFilter } : {}),
       ...(params.type && params.type !== "all"
         ? { creatorType: params.type }
         : {}),
@@ -103,38 +176,24 @@ export async function getExploreStreamers(
     include: {
       _count: { select: { mochiHoldings: true } },
     },
-    // `newest` is orderable in the database; `backers` is a relation count and
-    // is still sorted below. The take applies either way, so the unbounded
-    // fetch is gone regardless of sort.
-    ...(params.sort === "newest"
-      ? { orderBy: { createdAt: "desc" as const } }
-      : {}),
-    take: EXPLORE_PAGE_SIZE,
+    orderBy:
+      (params.sort ?? "backers") === "newest"
+        ? { createdAt: "desc" }
+        : // Ordering by a relation count, which Postgres does with a join and
+          // a GROUP BY rather than the in-memory sort this replaces. `handle`
+          // breaks ties so the order is total: without it, equal-count rows can
+          // come back in a different order per query and a creator could appear
+          // on two pages or on none.
+          [{ mochiHoldings: { _count: "desc" as const } }, { handle: "asc" as const }],
+    skip: page * size,
+    take: size + 1,
   });
 
-  let cards = streamers.map(toStreamerCard);
-
-  if (params.backerRange && params.backerRange !== "all") {
-    cards = cards.filter((c) => {
-      if (params.backerRange === "under50") return c.backerCount < 50;
-      if (params.backerRange === "50to200")
-        return c.backerCount >= 50 && c.backerCount <= 200;
-      return c.backerCount > 200;
-    });
-  }
-
-  const sort = params.sort ?? "backers";
-  cards.sort((a, b) => {
-    switch (sort) {
-      case "newest":
-        return b.createdAt.getTime() - a.createdAt.getTime();
-      case "backers":
-      default:
-        return b.backerCount - a.backerCount;
-    }
-  });
-
-  return cards;
+  const hasMore = streamers.length > size;
+  return {
+    cards: streamers.slice(0, size).map(toStreamerCard),
+    hasMore,
+  };
 }
 
 /**
@@ -220,7 +279,9 @@ export async function getCreatorDashboard(streamerId: string) {
  * reflect a new filter, follow, or creator immediately.
  */
 export const getTrendingCreators = unstable_cache(
-  async () => getExploreStreamers({ sort: "backers" }),
+  // Just the cards: the rail shows six and has no pager, so `hasMore`
+  // would only be a cached value nobody reads.
+  async () => (await getExploreStreamers({ sort: "backers" })).cards,
   ["trending-creators"],
   { revalidate: 60, tags: ["creators"] },
 );

@@ -5,18 +5,27 @@ import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { ConsumerShell } from "@/components/ConsumerShell";
 import { NotificationList } from "./NotificationList";
-import { getNotificationsForBacker } from "@/lib/notify";
+import { getNotificationPage } from "@/lib/notify";
+import { Pager } from "@/components/Pager";
 
 /** Signed-in surface: one person’s balances and history. Never indexed. */
 export const metadata: Metadata = { robots: NOINDEX };
 
 /** Full notification history — the page the bell's "전체 보기" hands off to. */
-export default async function NotificationsPage() {
+export default async function NotificationsPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const session = await getSession();
   if (!session?.user) redirect("/");
 
   const t = await getTranslations("notifications");
-  const rows = await getNotificationsForBacker(session.user.id!, 60);
+  const sp = await searchParams;
+  const page = Math.max(0, (Number(sp.page) || 1) - 1);
+  // Paged rather than capped at 60: older notices used to be unreachable, which
+  // included the money-adjacent ones (a creator raising their rate).
+  const { rows, hasMore } = await getNotificationPage(session.user.id!, page);
   const hasUnread = rows.some((r) => !r.read);
 
   return (
@@ -43,8 +52,16 @@ export default async function NotificationsPage() {
           markAllLabel={t("markAllRead")}
           emptyLabel={t("empty")}
         />
+
+        <Pager
+          basePath="/notifications"
+          searchParams={sp}
+          page={page}
+          hasMore={hasMore}
+        />
       </div>
-      </ConsumerShell>
+      </ConsumerShell>
+
     </>
   );
 }

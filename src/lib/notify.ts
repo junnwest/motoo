@@ -106,6 +106,28 @@ export async function getNotificationsForBacker(backerId: string, take = 30) {
   });
 }
 
+/**
+ * One page of notification history (docs/PRELAUNCH.md #24).
+ *
+ * The list was capped at 60 with no way past it, so a busy account's older
+ * notices — including the money-adjacent ones, like a price raise — were simply
+ * unreachable. `take: size + 1` answers "is there another page" without a
+ * second COUNT.
+ */
+export async function getNotificationPage(
+  backerId: string,
+  page = 0,
+  size = 30,
+) {
+  const rows = await prisma.notification.findMany({
+    where: { backerId },
+    orderBy: { createdAt: "desc" },
+    skip: Math.max(0, page) * size,
+    take: size + 1,
+  });
+  return { rows: rows.slice(0, size), hasMore: rows.length > size };
+}
+
 // Rendered by both Nav and ConsumerShell on every signed-in page.
 export const getUnreadCount = cache(async (backerId: string) => {
   return prisma.notification.count({ where: { backerId, read: false } });

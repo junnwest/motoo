@@ -5,6 +5,7 @@ import { ConsumerShell } from "@/components/ConsumerShell";
 import { Mochi } from "@/components/Mochi";
 import { StreamerCard } from "@/components/StreamerCard";
 import { ExploreFilters } from "@/components/ExploreFilters";
+import { Pager } from "@/components/Pager";
 import { getCurrentBacker } from "@/lib/session";
 import { getHiddenStreamerIds } from "@/lib/blocks";
 import {
@@ -41,12 +42,15 @@ export default async function ExplorePage({
       ? sp.backerRange
       : undefined) as ExploreParams["backerRange"],
     sort: (typeof sp.sort === "string" ? sp.sort : "backers") as ExploreSort,
+    // Zero-based internally, one-based in the URL — ?page=1 is the first page,
+    // because a link that reads page=0 looks like a bug to anyone who sees it.
+    page: Math.max(0, (Number(sp.page) || 1) - 1),
   };
 
   // Hidden creators are dropped in the query, not filtered afterwards, so a
   // hidden creator never eats one of the 60 slots the page loads.
   const viewer = await getCurrentBacker();
-  const streamers = await getExploreStreamers({
+  const { cards: streamers, hasMore } = await getExploreStreamers({
     ...params,
     hiddenStreamerIds: viewer ? await getHiddenStreamerIds(viewer.id) : [],
   });
@@ -70,6 +74,10 @@ export default async function ExplorePage({
             {t("rankingNote")}
           </span>
           <span className="text-xs text-muted">
+            {/* Counts this page, not the whole result set. A total would need a
+                second COUNT over the same filters on every request, to show a
+                number nobody acts on — the pager already answers "is there
+                more". */}
             {t("resultCount", { count: streamers.length })}
           </span>
         </div>
@@ -98,6 +106,12 @@ export default async function ExplorePage({
             </Link>
           </div>
         )}
+        <Pager
+          basePath="/explore"
+          searchParams={sp}
+          page={params.page ?? 0}
+          hasMore={hasMore}
+        />
       </section>
       </ConsumerShell>
     </>
