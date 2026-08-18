@@ -4,6 +4,52 @@ What shipped, newest first. **This file is history — it is not a resume point.
 For current status and open work see [`PROGRESS.md`](./PROGRESS.md); for *why* a thing is
 the way it is see [`DECISIONS.md`](./DECISIONS.md).
 
+
+## 2026-08-18 — the pre-launch sweep (20 of PRELAUNCH's 35)
+
+Worked straight down [`PRELAUNCH.md`](./PRELAUNCH.md). Everything below is on `main`
+and deployed. What is left there is almost entirely owner-side — see
+[`OWNER-ACTIONS.md`](./OWNER-ACTIONS.md).
+
+- [x] **Refunds (#8), and the ledger underneath them.** `/refund` had promised a 7-day
+  청약철회 "if not one mochi from that donation has been spent" since 2026-08-06, and
+  donations were never recorded — only summed — so neither half was answerable. A
+  `Donation` row now writes inside `donateMochi`'s transaction. Request form on `/profile`,
+  triage queue in `/admin`. Eligibility needed an interpretation and the obvious one was
+  wrong: "balance ≥ what this donation granted" lets a fan spend a donation, donate again,
+  and watch the first turn eligible. The rule is the balance covering this donation *and
+  every one after it*. A completed refund also claws the mochi back.
+- [x] **청소년보호정책 (#9) + guardian consent (#31).** The money path had refused
+  unconsented minors since the eligibility work and nothing could ever record consent, so the
+  branch was correct, tested and unreachable. `/guardian-consent` records a declaration —
+  gated on 본인인증, never on the form — and says plainly that it is not a verification.
+- [x] **Blocking, both directions (#13).** A fan hides a creator (curation); a creator blocks
+  a fan (safety). A creator block stops donations, follows and leaderboard presence but
+  deliberately **not** spending mochi already held — blocking a supporter must not confiscate
+  their balance.
+- [x] **Loading states (#25) and pagination (#24).** `loading.tsx` everywhere via
+  `ShellSkeleton`. Pagination's real work was moving explore's sort and supporter-band filter
+  into the database; both ran in JavaScript over a capped fetch.
+- [x] **Global search (#27).** Creators, items and posts, in three grouped sets.
+  Supporter-only posts are excluded outright rather than listed-and-locked.
+- [x] **Notification preferences (#28).** Mutable for a creator's activity, mandatory for
+  outcomes on your own order.
+- [x] **Creator settlement view (#29)** — built on the donation ledger, with both caveats
+  printed: donated ≠ paid out, and the ledger starts 2026-08-18.
+- [x] **Order disputes (#30).** Cancelling covered a pending order; this covers a fulfilled
+  one that never arrived. Closing belongs to the fan.
+- [x] **Fulfillment promises (#32).** Stamped onto the order at redemption, so a creator
+  cannot move a deadline they already gave.
+- [x] **Post takedown (#15, rest) — and the buttons item takedown never got.**
+  `hideItemAction` had shipped with no caller anywhere; takedown was unreachable from the
+  console. Both are now wired into the report queue.
+- [x] **Mobile follow list (#26), CSP enforcement (#34), query measurement (#35),
+  automated a11y (#33).** CSP rejected `'strict-dynamic'` on evidence from a production
+  build. `DEBUG_QUERIES=1` showed the tracked query counts in this repo were both wrong.
+  axe found two missing `main` landmarks.
+
+Tests 26 → 96. `pnpm check:a11y` added.
+
 ## 2026-08-10 (design pass — on `design/polish`, not yet merged)
 
 - [x] **One type/radius/leading/motion scale.** 41 font sizes → 12, 13 radii →

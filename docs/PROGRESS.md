@@ -1,6 +1,6 @@
 ﻿# motoo — Progress Tracker
 
-_Last updated: 2026-08-11_
+_Last updated: 2026-08-18_
 
 **Read this whole file — it is short on purpose.** Everything in it is either open, blocked,
 or a live constraint. Shipped history lives in [`CHANGELOG.md`](./CHANGELOG.md) and does not
@@ -13,15 +13,21 @@ A ten-stage audit ran on 2026-08-06/07 — findings and the plan are in
 is history now, except for its "Open questions" section, which is still live.**
 
 **Pre-launch scope:** [`PRELAUNCH.md`](./PRELAUNCH.md) is the exhaustive list of what is left
-that 사업자등록 would *not* unblock (compiled 2026-08-11 by sweeping the code, 35 items). The
-headline: there is no password reset and no email delivery at all, so a forgotten password is
-a permanent lockout.
+that 사업자등록 would *not* unblock (compiled 2026-08-11 by sweeping the code, 35 items).
+**20 of the 35 are now done and 3 are partial** (2026-08-11 → 08-18). What remains is almost
+entirely things a developer cannot close: console access, counsel, or a vendor choice.
+
+**[`OWNER-ACTIONS.md`](./OWNER-ACTIONS.md) is the file to open first.** Everything waiting on
+Kenneth is collected there — the Vercel env vars, one SQL statement, counsel, three product
+decisions — so it can be done in one sitting. Two of them are load-bearing today:
+`CRON_SECRET` is unset (so the account deletion the UI promises has never run in production),
+and **nobody holds `Role.admin`, so the report, refund and dispute queues are unreachable on
+the live site.**
 
 ## Open items — read this first when resuming
 
-The branch is green after merging `main`'s donation pivot: `pnpm build`, `pnpm test` (26),
-`check:vocab`, `check:emoji` and **`pnpm lint` all pass**. Ordered by what would hurt most if
-ignored.
+`main` is green: `pnpm build`, `pnpm test` (**96**), `check:vocab`, `check:emoji`,
+`check:a11y` and `pnpm lint` all pass. Ordered by what would hurt most if ignored.
 
 **Blocks a real launch**
 - [ ] **Counsel sign-off on `/refund`, and on three questions it doesn't answer.** The page
@@ -52,43 +58,57 @@ ignored.
     personal email. Real, but **explicitly interim**: a personal Gmail as the official contact
     channel (and as the 개인정보 보호책임자 contact in `docs/legal/privacy-draft.md`) is fine
     pre-registration, not something to carry into a launch. Swap the one constant.
-- [ ] **`CRON_SECRET` must be set in Vercel.** `vercel.json` schedules `/api/cron/purge-accounts`
-  daily; the route refuses to run without it, so if it is unset the 30-day deletion grace period
-  never expires and no account is ever actually purged.
+- [ ] **`CRON_SECRET` must be set in Vercel** (OWNER-ACTIONS A1). `vercel.json` schedules
+  `/api/cron/purge-accounts` daily; the route refuses to run without it, so the 30-day deletion
+  grace period never expires and no account is ever actually purged. Once it is set, the route
+  still needs `purgeStaleResetTokens` / `purgeStaleEmailTokens` wired in — both written and
+  tested, neither called.
+- [ ] **Nobody holds `Role.admin` in production** (OWNER-ACTIONS B1), so `/admin` — the report
+  queue, refund queue, escalated disputes, suspension and takedown — 404s for everyone. There is
+  deliberately no UI to grant it; it is one `UPDATE`.
 - [ ] **`/terms` and `/privacy` are still one-line placeholders**, linked from the footer and
   agreed to at onboarding. Blocked on counsel text; the page structure is ready. Lawyer-review
   drafts exist at `docs/legal/terms-draft.md` and `docs/legal/privacy-draft.md` (2026-08-09) —
   not wired into the site; they're for counsel to mark up first.
 - [ ] Real PG (Toss/NICE/PortOne), real 본인인증, Kakao login — all blocked on 사업자등록. Mocks
   stand in behind `PaymentProvider` / `VerificationProvider`.
-  - Note the age gate is now enforced in `donateMochi`, but the **mock verifier always returns
-    an adult** unless `VERIFICATION_MOCK_MINOR=1`. The guardian-consent *collection* flow does
-    not exist, so a real minor is currently blocked outright rather than asked.
+  - The age gate is enforced in `donateMochi`, and the **mock verifier always returns an adult**
+    unless `VERIFICATION_MOCK_MINOR=1`. Guardian-consent *collection* now exists
+    (`/guardian-consent`, 2026-08-18) — it records a declaration, since verifying the guardian
+    needs their own 본인인증.
 
 **Verify on the next deploy**
 - [ ] **Share cards on real URLs.** Metadata, OG tags and the per-creator OG image were verified
   locally, but Kakao/X/Facebook debuggers need a public host.
 - [ ] **Lighthouse** ≥ 90 performance / ≥ 95 SEO on `/` and `/s/[handle]` — not runnable headless
   here.
-- [ ] **CSP is Report-Only.** Watch the violation reports for a week, then enforce. Enforcing
-  needs a per-request nonce (Next injects inline scripts, Tailwind inline styles). The font is
-  no longer part of this — it was self-hosted 2026-08-11 and the jsdelivr exception is gone.
+- [x] ~~CSP is Report-Only~~ — **enforcing since 2026-08-18**, with a per-request nonce from
+  `src/proxy.ts`. `'strict-dynamic'` was tried and rejected on evidence (Next emits one
+  un-nonced chunk per shell page). Rollback is `CSP_MODE=report-only`, no code change. Verified
+  on the live site.
 
 **Known gaps, consciously left**
 - [x] ~~Pretendard loads from a CDN `@import`~~ — **self-hosted 2026-08-11** as a 92-file
   dynamic subset in `public/fonts/pretendard/` (3.1MB in the repo; a page fetches only the
   unicode ranges it renders — `/s/[handle]` pulls 17). CSP dropped its jsdelivr exception in
   `style-src` and `font-src`; what still blocks enforcing is `unsafe-inline`, not the font.
-- [ ] **`/home` and `/s/[handle]` still issue 22 and 19 queries** (down from 44 and 50). Getting
-  materially below that means consolidating reads, not more caching.
-- [ ] **The following list is desktop-only.** The mobile tab bar covers the four primary
-  destinations; surfacing the follow list needs a drawer with its own focus management.
-- [ ] **No screen-reader or Axe pass.** Focus behaviour, landmarks, accessible names and target
-  sizes were verified programmatically; a real AT run has not happened. Heading order unaudited.
-- [ ] **No error tracking and no analytics.** Server actions log to `console`; a failing purchase
-  is invisible in production.
-- [ ] **No pagination anywhere.** Explore is capped at 60, orders at 50, notifications at 30 —
-  bounded, but with no "load more".
+- [ ] **`/home` and `/s/[handle]` issue 18 and 13 queries**, measured 2026-08-18 with
+  `DEBUG_QUERIES=1` rather than remembered — the previous numbers in this file were both wrong.
+  About six of each are the shell, on every signed-in page. Getting materially below that means
+  consolidating reads, not more caching.
+- [x] ~~The following list is desktop-only~~ — **an avatar strip at the top of `/home` below
+  `lg` (2026-08-18)**, which needed no drawer and no focus management.
+- [ ] **No screen-reader pass.** `pnpm check:a11y` (axe over 11 rendered pages) is clean as of
+  2026-08-18 and found two missing `main` landmarks on the way. That covers about a third of
+  real barriers; a human AT run is still owed, and interaction states are outside what it audits.
+- [ ] **No analytics, and no error *backend*.** `reportError`/`reportWarning` exist behind
+  `REPORT_PROVIDER` and are wired into the money path, but the only adapter prints JSON to the
+  console — a log nobody is paged on is not monitoring. Both need a vendor choice
+  (OWNER-ACTIONS F2/F3).
+- [x] ~~No pagination anywhere~~ — **explore, notifications and both `/profile` lists page on
+  their own query keys (2026-08-18)**. The real work was moving explore's sort and supporter-band
+  filter into the database; both ran in JavaScript over a capped fetch, which is wrong the moment
+  there are pages.
 - [x] ~~Expanded rails' dividers end where their content ends~~ — **fixed 2026-08-11** by
   boxing all three shell columns instead of dividing them with lines. The fix everyone
   reached for (force the rails to full height) would have cost their content-sized scroll
