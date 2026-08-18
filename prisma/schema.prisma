@@ -195,11 +195,12 @@ model Backer {
   guardianContact   String?
 
   // Phase 2 relations
-  ownedStreamer Streamer?      @relation("CreatorOwner")
-  mochiHoldings MochiHolding[]
-  orders        Order[]
-  follows       Follow[]
-  notifications Notification[]
+  ownedStreamer     Streamer?          @relation("CreatorOwner")
+  mochiHoldings     MochiHolding[]
+  orders            Order[]
+  follows           Follow[]
+  notifications     Notification[]
+  notificationPrefs NotificationPref[]
 }
 
 enum GuardianRelation {
@@ -387,6 +388,23 @@ enum NotificationType {
   new_item // a creator you hold mochi in or follow added a marketplace item
   price_raised // a creator you hold mochi in raised their mochi price (new tier)
   new_update // a creator you hold mochi in or follow posted an update
+}
+
+// One opt-out. A row exists only when someone has turned a type OFF, so the
+// default is "on" without writing five rows for every account that never
+// touches the setting — and a new NotificationType is on by default rather
+// than silently off for everyone who set preferences before it existed.
+//
+// Only the types in MUTABLE_NOTIFICATIONS (src/lib/notificationPrefs.ts) can
+// appear here. Order outcomes are about the reader's own transaction and stay
+// mandatory; the reasoning is in that file.
+model NotificationPref {
+  backerId   String
+  backer     Backer           @relation(fields: [backerId], references: [id], onDelete: Cascade)
+  type       NotificationType
+  disabledAt DateTime         @default(now())
+
+  @@id([backerId, type])
 }
 
 // A notification queued for one Backer. Created outside the money-invariant

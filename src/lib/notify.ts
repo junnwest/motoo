@@ -10,6 +10,7 @@
 
 import { cache } from "react";
 import { prisma } from "@/lib/db";
+import { filterByPreference } from "@/lib/notificationPrefs";
 import type { NotificationType } from "@prisma/client";
 
 type NotifyInput = {
@@ -23,6 +24,11 @@ type NotifyInput = {
 /** Queue one notification. Never throws — a notification is best-effort. */
 export async function notify(input: NotifyInput) {
   try {
+    // Preferences are enforced here, not at the ~7 call sites, for the same
+    // reason blocks are: one place to be right, and the next notification type
+    // someone adds inherits it without having to know it exists.
+    const [allowed] = await filterByPreference([input.backerId], input.type);
+    if (!allowed) return;
     await prisma.notification.create({ data: input });
   } catch (err) {
     console.error("notify() failed", err);
@@ -34,7 +40,7 @@ export async function notifyMany(
   backerIds: string[],
   rest: Omit<NotifyInput, "backerId">,
 ) {
-  const unique = [...new Set(backerIds)];
+  const unique = await filterByPreference([...new Set(backerIds)], rest.type);
   if (unique.length === 0) return;
   try {
     await prisma.notification.createMany({

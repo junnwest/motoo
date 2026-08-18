@@ -15,6 +15,8 @@ import { EmailForm } from "./EmailForm";
 import { MarketingConsentForm } from "./MarketingConsentForm";
 import { GuardianConsentSection } from "./GuardianConsentSection";
 import { HiddenCreators } from "./HiddenCreators";
+import { NotificationPrefsForm } from "./NotificationPrefsForm";
+import { getNotificationPrefs } from "@/lib/notificationPrefs";
 import { getHiddenCreators } from "@/lib/blocks";
 import { formatKstDate } from "@/lib/format";
 
@@ -39,9 +41,10 @@ export default async function SettingsPage() {
 
   // Stated in the delete confirmation: what happens to unspent mochi is the
   // part of leaving that users actually care about.
-  const [holdings, hiddenCreators] = await Promise.all([
+  const [holdings, hiddenCreators, notificationPrefs] = await Promise.all([
     getHoldingsForBacker(backer.id),
     getHiddenCreators(backer.id),
+    getNotificationPrefs(backer.id),
   ]);
   const unspentMochi = holdings.reduce((sum, h) => sum + h.balance, 0);
 
@@ -79,6 +82,12 @@ export default async function SettingsPage() {
 
           <Section title={t("marketing.sectionTitle")} boxed className="mt-6">
             <MarketingConsentForm initial={backer.marketingConsent} />
+          </Section>
+
+          {/* Next to marketing consent, because to a reader they are the same
+              question asked twice — what may reach me, and how often. */}
+          <Section title={t("notifications.sectionTitle")} boxed className="mt-6">
+            <NotificationPrefsForm initial={notificationPrefs} />
           </Section>
 
           {/* Only for accounts 본인인증 says are minors. An adult has no
