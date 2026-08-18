@@ -1153,6 +1153,13 @@
         "tooMany": "요청이 너무 잦아요. 잠시 후 다시 시도해 주세요.",
         "generic": "처리하지 못했어요. 잠시 후 다시 시도해 주세요."
       }
+    },
+    "marketing": {
+      "sectionTitle": "마케팅 수신",
+      "label": "이벤트·혜택 등 마케팅 정보를 이메일로 받아볼래요. 언제든지 여기서 해제할 수 있어요.",
+      "optedIn": "마케팅 정보 수신에 동의했어요.",
+      "optedOut": "마케팅 정보 수신을 해제했어요.",
+      "error": "변경하지 못했어요. 잠시 후 다시 시도해 주세요."
     }
   },
   "imagePicker": {
@@ -1193,7 +1200,11 @@
     "reportBy": "신고자",
     "markActioned": "조치함",
     "markDismissed": "반려",
-    "creatorsTitle": "크리에이터"
+    "creatorsTitle": "크리에이터",
+    "hideItem": "아이템 내리기",
+    "unhideItem": "다시 노출",
+    "hiddenBadge": "내려짐",
+    "itemsTitle": "신고된 아이템"
   },
   "report": {
     "trigger": "신고",

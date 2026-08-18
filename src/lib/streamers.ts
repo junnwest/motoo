@@ -146,7 +146,7 @@ export const getStreamerProfile = cache(async (handle: string) => {
       // (mochiIssuance) moved to its own page/query — getStreamerMarketplace,
       // used by /s/[handle]/donate — since it's no longer rendered here.
       marketplaceItems: {
-        where: { active: true },
+        where: { active: true, hiddenAt: null },
         orderBy: { sortOrder: "asc" },
       },
     },
@@ -171,7 +171,7 @@ export async function getStreamerMarketplace(handle: string) {
     include: {
       mochiIssuance: true,
       marketplaceItems: {
-        where: { active: true },
+        where: { active: true, hiddenAt: null },
         orderBy: { sortOrder: "asc" },
       },
     },

@@ -264,6 +264,12 @@ model MarketplaceItem {
   stock         Int? // null = unlimited; otherwise remaining stock is stock - redeemedCount
   redeemedCount Int                 @default(0)
   active        Boolean             @default(true)
+  /// Admin takedown, deliberately separate from `active`. `active` is the
+  /// creators own switch; if a takedown reused it the creator could simply
+  /// turn the item back on. Null = not taken down.
+  hiddenAt      DateTime?
+  hiddenBy      String? // admin email
+  hiddenReason  String?
   sortOrder     Int                 @default(0)
   createdAt     DateTime            @default(now())
 

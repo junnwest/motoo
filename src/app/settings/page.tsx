@@ -12,6 +12,7 @@ import { IdentityForm } from "./SettingsForm";
 import { AvatarForm } from "./AvatarForm";
 import { PasswordForm } from "./PasswordForm";
 import { EmailForm } from "./EmailForm";
+import { MarketingConsentForm } from "./MarketingConsentForm";
 
 /** Signed-in surface: one person’s balances and history. Never indexed. */
 export const metadata: Metadata = { robots: NOINDEX };
@@ -60,6 +61,10 @@ export default async function SettingsPage() {
               verified={!!backer.emailVerifiedAt}
               canChange={!!backer.passwordHash}
             />
+          </Section>
+
+          <Section title={t("marketing.sectionTitle")} boxed className="mt-6">
+            <MarketingConsentForm initial={backer.marketingConsent} />
           </Section>
 
           <Section title={t("identityTitle")} boxed className="mt-6">

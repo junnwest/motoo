@@ -81,3 +81,27 @@ export async function changeEmailAction(
   revalidatePath("/settings");
   return { ok: true };
 }
+
+/**
+ * Marketing consent, withdrawable.
+ *
+ * It was captured at onboarding and then unreachable — 개인정보보호법 expects
+ * withdrawal to be as easy as giving it, and "easy" cannot mean emailing
+ * support (docs/PRELAUNCH.md #7). No password gate: this is a preference, not
+ * an account-takeover path, and putting friction on withdrawal is exactly the
+ * pattern the rule exists to prevent.
+ */
+export async function setMarketingConsentAction(
+  consent: boolean,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const backer = await getCurrentBacker();
+  if (!backer) return { ok: false, error: "login" };
+
+  await prisma.backer.update({
+    where: { id: backer.id },
+    data: { marketingConsent: consent },
+  });
+
+  revalidatePath("/settings");
+  return { ok: true };
+}

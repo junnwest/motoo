@@ -93,6 +93,8 @@ export async function getAffordableItems(backerId: string, take = 6) {
   const items = await prisma.marketplaceItem.findMany({
     where: {
       active: true,
+
+      hiddenAt: null,
       OR: holdings.map((h) => ({
         streamerId: h.streamerId,
         priceMochi: { lte: h.balance },
@@ -186,6 +188,7 @@ export async function getOutOfReachItems(backerId: string, take = 3) {
   const items = await prisma.marketplaceItem.findMany({
     where: {
       active: true,
+      hiddenAt: null,
       OR: holdings.map((h) => ({
         streamerId: h.streamerId,
         priceMochi: { gt: h.balance },

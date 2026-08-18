@@ -330,6 +330,61 @@ describe("donateMochi — donor eligibility", () => {
   });
 });
 
+/**
+ * Admin takedown. Two properties: it stops redemption even from a page that
+ * already had the item, and it is *not* the creator's own `active` switch — a
+ * takedown a creator can undo from their Studio is not a takedown.
+ */
+describe("redeemItem — admin takedown", () => {
+  it("refuses a hidden item", async () => {
+    await donateMochi({
+      backerId,
+      streamerId,
+      donationAmountKrw: 10 * PRICE,
+      idempotencyKey: "k",
+    });
+    const item = await newItem(4);
+    await prisma.marketplaceItem.update({
+      where: { id: item.id },
+      data: { hiddenAt: new Date(), hiddenBy: "admin@motoo.test" },
+    });
+
+    await assert.rejects(
+      () => redeemItem({ backerId, itemId: item.id }),
+      /ITEM_UNAVAILABLE/,
+    );
+    assert.equal(
+      (await getHolding(streamerId, backerId))?.balance,
+      10,
+      "nothing spent",
+    );
+  });
+
+  it("stays hidden even when the creator's own switch is on", async () => {
+    const item = await newItem(4);
+    await prisma.marketplaceItem.update({
+      where: { id: item.id },
+      data: { hiddenAt: new Date(), active: true },
+    });
+    const row = await prisma.marketplaceItem.findUniqueOrThrow({
+      where: { id: item.id },
+    });
+    assert.ok(row.active, "creator switch is on");
+    assert.ok(row.hiddenAt, "and the takedown still stands");
+
+    await donateMochi({
+      backerId,
+      streamerId,
+      donationAmountKrw: 10 * PRICE,
+      idempotencyKey: "k",
+    });
+    await assert.rejects(
+      () => redeemItem({ backerId, itemId: item.id }),
+      /ITEM_UNAVAILABLE/,
+    );
+  });
+});
+
 describe("redeemItem", () => {
   it("debits balance, records a pending order, and bumps redeemedCount", async () => {
     await donateMochi({ backerId, streamerId, donationAmountKrw: 10 * PRICE, idempotencyKey: "k" });

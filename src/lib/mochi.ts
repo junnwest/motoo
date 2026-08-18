@@ -286,7 +286,14 @@ export async function redeemItem(
     const item = await tx.marketplaceItem.findUnique({
       where: { id: input.itemId },
     });
-    if (!item || !item.active) throw new Error("ITEM_UNAVAILABLE");
+    // `hiddenAt` is the admin takedown, checked here and not only in the page
+    // queries for the same reason suspension is: hiding an item from listings
+    // does nothing about a page already open on it. Both collapse to the same
+    // user-facing message — from a fan's side "the creator turned it off" and
+    // "we took it down" are equally just "you can't have this".
+    if (!item || !item.active || item.hiddenAt) {
+      throw new Error("ITEM_UNAVAILABLE");
+    }
 
     const mochiSpent = item.priceMochi * quantity;
 
