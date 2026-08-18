@@ -83,6 +83,15 @@ real 본인인증, Kakao login, real refund execution, and creator payouts.
 
 ---
 
+### 36 — the dev seed is in the production database
+
+Found 2026-08-18. 63 of 70 accounts and 10 of 12 creators on the live site are
+fixtures, counted in every supporter total and leaderboard. Credential access is
+closed (0 can log in). Removal is written and dry-run but **not executed** —
+`pnpm seed:audit --prod` and `pnpm seed:remove --prod`. It refuses while a real
+holding is attached to a seeded creator; the one blocker is the owner's own test
+account. Tracked in OWNER-ACTIONS B2.
+
 ## Needs you, not me
 
 Everything requiring the Vercel console, a database statement, counsel, or a

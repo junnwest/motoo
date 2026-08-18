@@ -18,7 +18,9 @@
     "postinstall": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "check:drift": "tsx scripts/check-prod-drift.ts",
-    "check:a11y": "tsx scripts/check-a11y.ts"
+    "check:a11y": "tsx scripts/check-a11y.ts",
+    "seed:audit": "tsx scripts/seed-audit.ts",
+    "seed:remove": "tsx scripts/seed-remove.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",

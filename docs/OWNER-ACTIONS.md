@@ -113,6 +113,47 @@ the queues instead of a 404.
 
 ---
 
+## B2 — the dev seed is in the production database
+
+Found 2026-08-18 while debugging admin access. **63 of 70 accounts and 10 of 12
+creators on the live site are seed fixtures**, and they are counted in every
+supporter total, leaderboard and headline stat a visitor sees.
+
+The credential half is already closed — you nulled their passwords, and
+`pnpm seed:audit --prod` confirms **0** seeded accounts can still log in. What is
+left is that the numbers on the site are mostly fiction.
+
+Removing them is written and dry-run, but **not executed**, because it is
+irreversible against a live database:
+
+```bash
+pnpm seed:audit --prod     # what is there, and what a delete would destroy
+pnpm seed:remove --prod    # dry run; prints what it would delete, changes nothing
+```
+
+The remover refuses to run, and this is the interesting part: one real holding is
+attached to a seeded creator —
+
+```
+p.redee80@gmail.com → @creatorA: balance 20, paid 4000 KRW
+```
+
+That is **your own** test account, and the 4000 KRW went through the mock PG, so no
+money moved. But the script cannot know that, and a cascade would erase it silently,
+so it stops. When you are happy to lose it:
+
+```bash
+pnpm seed:remove --prod --accept-owner-holding --confirm
+```
+
+Also still outstanding: `admin@motoo.dev` is **still an admin**. That demote never ran.
+
+```sql
+UPDATE "Backer" SET role = 'backer' WHERE email = 'admin@motoo.dev';
+```
+
+(Deleting the seed removes that account entirely, so this only matters if you keep it.)
+
 ## C. Legal — counsel's clock, not yours
 
 | | Action | Why it matters |
