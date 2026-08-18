@@ -7,15 +7,16 @@
  * declined one from the outside, and nothing anywhere recorded it
  * (docs/PRELAUNCH.md #16).
  *
- * Deliberately not a vendor SDK yet. The valuable half is calling something
- * consistent at every catch site; which backend receives it is a swap behind
- * `REPORT_PROVIDER`, the same shape as payments, verification and email. The
- * console adapter emits one line of JSON, which is what Vercel's log drain
- * wants anyway.
+ * Which backend receives it is a swap behind `REPORT_PROVIDER`, the same shape
+ * as payments, verification and email. The console adapter emits one line of
+ * JSON, which is what a log drain wants; `REPORT_PROVIDER=sentry` sends it to
+ * Sentry instead (server-side only — see `reporters/sentry.ts` for why).
  *
  * **Never throws.** A reporter that can fail the request it is reporting on is
  * worse than no reporter.
  */
+
+import { SentryReporter } from "@/lib/reporters/sentry";
 
 export type Severity = "error" | "warn";
 
@@ -62,7 +63,25 @@ function getReporter(): Reporter {
     case "console":
       reporter = new ConsoleReporter();
       break;
-    // case "sentry": reporter = new SentryReporter(); break;
+    case "sentry": {
+      // A missing DSN degrades to console rather than to silence. Silence is
+      // the worst outcome available here, because it looks exactly like
+      // "no errors".
+      const sentry = new SentryReporter();
+      if (sentry.usable()) {
+        reporter = sentry;
+      } else {
+        console.warn(
+          JSON.stringify({
+            level: "warn",
+            scope: "report",
+            message: "REPORT_PROVIDER=sentry but SENTRY_DSN is unset; falling back to console.",
+          }),
+        );
+        reporter = new ConsoleReporter();
+      }
+      break;
+    }
     default:
       // Unlike the other providers, this one does NOT throw on an unknown
       // value. Refusing to start because the *error reporter* is misconfigured
