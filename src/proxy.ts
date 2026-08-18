@@ -157,5 +157,9 @@ export default auth((req) => {
 
 export const config = {
   // Run on all pages except API routes, Next internals, and static files.
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  // `_vercel` is excluded alongside Next's own internals: the analytics script
+  // and its beacons are served from this origin, so without it they would go
+  // through the onboarding gate — and a signed-in, not-yet-onboarded visitor
+  // would have their beacon 307'd to /onboarding.
+  matcher: ["/((?!api|_next/static|_next/image|_vercel|favicon.ico).*)"],
 };

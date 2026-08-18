@@ -218,7 +218,7 @@ approved-but-not-refunded rows are exactly the reconciliation worklist.
 | | Question | What hangs on it |
 | --- | --- | --- |
 | F1 | Should email verification be **required** before donating? | Built, surfaced, and deliberately gating nothing (PRELAUNCH #3). Requiring it costs conversion and buys accountability. That trade is a product call, not a technical one. |
-| F2 | Analytics: which vendor, self-hosted or not? | PRELAUNCH #17. It drags #10 (the cookie banner) in with it — the banner isn't required today *precisely because* there are no third-party scripts. Pick a vendor and both land together. |
+| ~~F2~~ | ✅ **Vercel Analytics — chosen and shipped 2026-08-18.** No cookies, no third-party host, so no consent banner is needed and #10 is closed with it. Nothing for you to configure; it is on by default for the project. Not a funnel tool — say so if you later want one and we'll weigh the banner against it. |
 | ~~F3~~ | ✅ **Sentry — chosen and built 2026-08-18.** Two env vars away from live; see A4. |
 
 Answer any of these and I'll build it.

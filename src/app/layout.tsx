@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import { IBM_Plex_Mono } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getTranslations } from "next-intl/server";
@@ -85,6 +86,18 @@ export default async function RootLayout({
             {t("skipToContent")}
           </a>
           {children}
+          {/* Vercel Analytics (docs/PRELAUNCH.md #17). Chosen over a product
+              analytics tool specifically because it needs no consent banner:
+              it sets no cookies and is served from this origin
+              (`/_vercel/insights/*`), so no third party is involved and #10
+              stays unnecessary. It also means the enforced CSP needs no
+              widening — `script-src 'self'` already covers it, which is the
+              payoff for not using 'strict-dynamic'.
+
+              What it does not do is funnels. It answers "is the donate page
+              being visited and are people leaving", not "which step lost
+              them". */}
+          <Analytics />
         </NextIntlClientProvider>
       </body>
     </html>
