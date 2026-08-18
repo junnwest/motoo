@@ -378,6 +378,16 @@ export async function redeemItem(
         note: input.note ?? null,
         status: instant ? "fulfilled" : "pending",
         fulfilledAt: instant ? new Date() : null,
+        // The promised-by date is stamped here from the item's window, not
+        // read back from the item later: a creator lengthening their window
+        // must not silently move a deadline they already gave someone
+        // (docs/PRELAUNCH.md #32). Instant items have nothing to promise.
+        dueAt:
+          !instant && item.fulfillmentDays
+            ? new Date(
+                Date.now() + item.fulfillmentDays * 24 * 60 * 60 * 1000,
+              )
+            : null,
       },
     });
 

@@ -127,6 +127,7 @@ export default async function CreatorDashboardHome() {
     thumbnailKey: item.thumbnailKey,
     coverImage: item.coverImage,
     fulfillment: item.fulfillment,
+    fulfillmentDays: item.fulfillmentDays,
     stock: item.stock,
     redeemedCount: item.redeemedCount,
     active: item.active,
@@ -140,6 +141,7 @@ export default async function CreatorDashboardHome() {
     note: o.note,
     status: o.status,
     createdAt: o.createdAt.toISOString(),
+    dueAt: o.dueAt?.toISOString() ?? null,
     issue: o.issue
       ? {
           id: o.issue.id,

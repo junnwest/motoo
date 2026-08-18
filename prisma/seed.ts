@@ -90,12 +90,14 @@ const ITEM_TEMPLATES: {
   itemType: MarketplaceItemType;
   thumbnailKey: string;
   fulfillment: FulfillmentMode;
+  /** Only set on a couple of request items, so both states are visible in dev. */
+  fulfillmentDays?: number;
   stock: number | null;
 }[] = [
   { title: "실시간 샤라웃", description: "방송 중에 닉네임을 불러드려요.", priceMochi: 3, itemType: "digital", thumbnailKey: "shoutout", fulfillment: "instant", stock: null },
-  { title: "노래 신청", description: "다음 라이브에서 원하는 곡을 불러드려요.", priceMochi: 5, itemType: "digital", thumbnailKey: "vote", fulfillment: "request", stock: null },
+  { title: "노래 신청", description: "다음 라이브에서 원하는 곡을 불러드려요.", priceMochi: 5, itemType: "digital", thumbnailKey: "vote", fulfillment: "request", fulfillmentDays: 3, stock: null },
   { title: "멤버 전용 포스트", description: "비공개 소식과 사진을 받아보세요.", priceMochi: 10, itemType: "access", thumbnailKey: "badge", fulfillment: "request", stock: null },
-  { title: "손편지", description: "정성껏 쓴 손편지를 보내드려요.", priceMochi: 30, itemType: "physical", thumbnailKey: "letter", fulfillment: "request", stock: 20 },
+  { title: "손편지", description: "정성껏 쓴 손편지를 보내드려요.", priceMochi: 30, itemType: "physical", thumbnailKey: "letter", fulfillment: "request", fulfillmentDays: 14, stock: 20 },
   { title: "1:1 통화 5분", description: "짧은 통화로 가깝게 인사해요.", priceMochi: 50, itemType: "session", thumbnailKey: "call", fulfillment: "request", stock: 5 },
 ];
 
@@ -247,6 +249,7 @@ async function main() {
           itemType: tpl.itemType,
           thumbnailKey: tpl.thumbnailKey,
           fulfillment: tpl.fulfillment,
+          fulfillmentDays: tpl.fulfillmentDays ?? null,
           stock: tpl.stock,
           redeemedCount,
           sortOrder: i,

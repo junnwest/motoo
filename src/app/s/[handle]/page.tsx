@@ -126,6 +126,7 @@ export default async function StreamerProfilePage({
     thumbnailKey: i.thumbnailKey,
     coverImage: i.coverImage,
     fulfillment: i.fulfillment,
+    fulfillmentDays: i.fulfillmentDays,
     stock: i.stock,
     redeemedCount: i.redeemedCount,
   }));

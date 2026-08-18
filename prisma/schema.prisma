@@ -302,30 +302,35 @@ model MochiHolding {
 // An item in a creator's marketplace, priced in that creator's mochi. Fulfillment
 // is off-platform in v1 (creator marks orders fulfilled). stock null = unlimited.
 model MarketplaceItem {
-  id            String              @id @default(cuid())
-  streamerId    String
-  streamer      Streamer            @relation(fields: [streamerId], references: [id], onDelete: Cascade)
-  title         String
-  description   String?
-  priceMochi    Int // price in mochi units
-  itemType      MarketplaceItemType
-  thumbnailKey  String? // curated thumbnail slug (see lib/itemThumbnails); null = itemType default
+  id              String              @id @default(cuid())
+  streamerId      String
+  streamer        Streamer            @relation(fields: [streamerId], references: [id], onDelete: Cascade)
+  title           String
+  description     String?
+  priceMochi      Int // price in mochi units
+  itemType        MarketplaceItemType
+  thumbnailKey    String? // curated thumbnail slug (see lib/itemThumbnails); null = itemType default
   // Creator-uploaded 16:9 cover photo, stored as a small JPEG data URL (motoo
   // has no object storage — see src/lib/imageUpload.ts). Null = fall back to the
   // curated thumbnailKey tile. Size is capped on write, not just on the client.
-  coverImage    String?
-  fulfillment   FulfillmentMode     @default(request) // instant = auto-complete; request = creator acts
-  stock         Int? // null = unlimited; otherwise remaining stock is stock - redeemedCount
-  redeemedCount Int                 @default(0)
-  active        Boolean             @default(true)
+  coverImage      String?
+  fulfillment     FulfillmentMode     @default(request) // instant = auto-complete; request = creator acts
+  /// How many days the creator promises to take, for `request` items
+  /// (docs/PRELAUNCH.md #32). Null = no promise made, and that stays the
+  /// default: an invented window is worse than an absent one. Ignored for
+  /// `instant` items, which complete at redemption and have nothing to promise.
+  fulfillmentDays Int?
+  stock           Int? // null = unlimited; otherwise remaining stock is stock - redeemedCount
+  redeemedCount   Int                 @default(0)
+  active          Boolean             @default(true)
   /// Admin takedown, deliberately separate from `active`. `active` is the
   /// creators own switch; if a takedown reused it the creator could simply
   /// turn the item back on. Null = not taken down.
-  hiddenAt      DateTime?
-  hiddenBy      String? // admin email
-  hiddenReason  String?
-  sortOrder     Int                 @default(0)
-  createdAt     DateTime            @default(now())
+  hiddenAt        DateTime?
+  hiddenBy        String? // admin email
+  hiddenReason    String?
+  sortOrder       Int                 @default(0)
+  createdAt       DateTime            @default(now())
 
   orders Order[]
 
@@ -351,6 +356,11 @@ model Order {
   status      OrderStatus     @default(pending)
   createdAt   DateTime        @default(now())
   fulfilledAt DateTime?
+  /// Copied from the item's promise at redemption, never read back from the
+  /// item. A creator changing their window later must not silently rewrite what
+  /// they promised on orders already placed — which is the whole value of the
+  /// promise.
+  dueAt       DateTime?
 
   issue OrderIssue?
 

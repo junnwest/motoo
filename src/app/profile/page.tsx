@@ -292,6 +292,22 @@ export default async function ProfilePage({
                       <div className="truncate text-xs text-muted">
                         {o.streamer.displayName} · {formatKstDate(o.createdAt)}
                       </div>
+                      {/* What the creator promised, and whether it has passed.
+                          Only while pending — after the fact it is nagging, and
+                          the dispute control below is the actual recourse. */}
+                      {o.dueAt && o.status === "pending" && (
+                        <div
+                          className={`truncate text-xs ${
+                            o.dueAt < new Date()
+                              ? "font-semibold text-live"
+                              : "text-muted-2"
+                          }`}
+                        >
+                          {o.dueAt < new Date()
+                            ? tm("overdue")
+                            : tm("due", { date: formatKstDate(o.dueAt) })}
+                        </div>
+                      )}
                     </div>
                     <span className="flex items-center gap-1.5 text-sm font-extrabold text-ink">
                       <Mochi width={15} height={11} />

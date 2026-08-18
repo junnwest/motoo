@@ -763,7 +763,9 @@
             "desc": "단역 캐릭터 이름에 반영해요. (희소)"
           }
         }
-      }
+      },
+      "fulfillmentDays": "처리 기간 (일)",
+      "fulfillmentDaysHint": "후원자에게 '약 N일 이내'로 보여요. 비워 두면 표시하지 않아요."
     },
     "orders": {
       "title": "주문",
@@ -781,7 +783,9 @@
         "cancelled": "취소됨"
       },
       "markFulfilled": "완료로 표시",
-      "cancel": "취소·환불"
+      "cancel": "취소·환불",
+      "due": "{date}까지",
+      "overdue": "기한 지남"
     },
     "updates": {
       "title": "소식",
@@ -926,7 +930,8 @@
     "confirmRemaining": "사용 후 잔액 {count} 모찌",
     "confirmCta": "네, 이용할게요",
     "confirmCancel": "취소",
-    "mochiUnit": "모찌"
+    "mochiUnit": "모찌",
+    "withinDays": "약 {days}일 이내"
   },
   "myMochi": {
     "title": "내 모찌",
@@ -951,7 +956,9 @@
     "cancelConfirmBody": "{item} 주문을 취소하고 {count} 모찌를 돌려받아요. 취소한 주문은 되돌릴 수 없어요.",
     "cancelConfirm": "네, 취소할게요",
     "cancelKeep": "그대로 둘게요",
-    "cancelled": "주문을 취소하고 모찌를 돌려드렸어요."
+    "cancelled": "주문을 취소하고 모찌를 돌려드렸어요.",
+    "due": "{date}까지 처리 예정",
+    "overdue": "예정일이 지났어요"
   },
   "onboarding": {
     "eyebrow": "환영해요",

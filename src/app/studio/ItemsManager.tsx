@@ -27,6 +27,7 @@ type ItemDraft = Pick<
   | "thumbnailKey"
   | "coverImage"
   | "fulfillment"
+  | "fulfillmentDays"
 >;
 
 const EMPTY_DRAFT: ItemDraft = {
@@ -37,6 +38,7 @@ const EMPTY_DRAFT: ItemDraft = {
   thumbnailKey: null,
   coverImage: null,
   fulfillment: FulfillmentMode.request,
+  fulfillmentDays: null,
 };
 
 export type DashboardItem = {
@@ -49,6 +51,7 @@ export type DashboardItem = {
   coverImage: string | null;
   fulfillment: FulfillmentMode;
   stock: number | null;
+  fulfillmentDays: number | null;
   redeemedCount: number;
   active: boolean;
 };
@@ -205,6 +208,10 @@ function SuggestionPanel({
                         // cover is the creator's own to add.
                         coverImage: null,
                         fulfillment: s.fulfillment,
+                        // A suggestion cannot promise a turnaround on the
+                        // creator's behalf — that is theirs to state or leave
+                        // blank.
+                        fulfillmentDays: null,
                       })
                     }
                     className="flex items-center gap-1.5 rounded-full border border-line-3 bg-white px-3.5 py-2 text-sm font-medium text-ink transition-colors hover:border-coral/60 hover:bg-coral-chip"
@@ -482,6 +489,9 @@ function ItemForm({
   const [fulfillment, setFulfillment] = useState<FulfillmentMode>(
     seed.fulfillment ?? FulfillmentMode.request,
   );
+  const [fulfillmentDays, setFulfillmentDays] = useState(
+    item?.fulfillmentDays == null ? "" : String(item.fulfillmentDays),
+  );
   const [stock, setStock] = useState(
     item?.stock === null || item?.stock === undefined
       ? ""
@@ -505,6 +515,10 @@ function ItemForm({
         coverImage,
         fulfillment,
         stock: trimmedStock === "" ? null : Math.trunc(Number(trimmedStock)),
+        fulfillmentDays:
+          fulfillmentDays.trim() === ""
+            ? null
+            : Math.trunc(Number(fulfillmentDays)),
         active,
       });
       if (res.ok) {
@@ -592,6 +606,23 @@ function ItemForm({
             onChange={(e) => setStock(e.target.value)}
           />
         </div>
+
+        {/* Only for request items — an instant one has nothing to promise.
+            Blank stays valid: no promise is honest, and better than a number
+            picked to fill a field. */}
+        {fulfillment === "request" && (
+          <Input
+            label={t("items.fulfillmentDays")}
+            hint={t("items.fulfillmentDaysHint")}
+            type="number"
+            min={1}
+            max={90}
+            step={1}
+            inputMode="numeric"
+            value={fulfillmentDays}
+            onChange={(e) => setFulfillmentDays(e.target.value)}
+          />
+        )}
 
         <label className="flex cursor-pointer items-center gap-3">
           <input

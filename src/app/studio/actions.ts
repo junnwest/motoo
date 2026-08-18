@@ -216,6 +216,10 @@ const itemSchema = z.object({
     .optional()
     .transform((v) => parseImageDataUrl(v, ITEM_COVER_SPEC)),
   fulfillment: z.nativeEnum(FulfillmentMode),
+  // The promised turnaround, in days. Capped at 90 rather than left open: a
+  // promise measured in months is not a promise, and the point of showing it
+  // publicly is that a fan can rely on it.
+  fulfillmentDays: z.number().int().min(1).max(90).nullable(),
   stock: positiveInt.nullable(),
   active: z.boolean(),
 });
@@ -230,6 +234,7 @@ export async function upsertItem(input: {
   thumbnailKey?: string | null;
   coverImage?: string | null;
   fulfillment: FulfillmentMode;
+  fulfillmentDays: number | null;
   stock: number | null;
   active: boolean;
 }): Promise<ActionResult> {
@@ -251,6 +256,11 @@ export async function upsertItem(input: {
       stock,
       active,
     } = parsed.data;
+    // An instant item completes at redemption, so a turnaround promise on one
+    // would be a number with nothing to measure. Dropped rather than stored and
+    // then never shown.
+    const fulfillmentDays =
+      fulfillment === "request" ? parsed.data.fulfillmentDays : null;
 
     if (id) {
       // Verify ownership before mutating.
@@ -271,6 +281,7 @@ export async function upsertItem(input: {
           thumbnailKey,
           coverImage,
           fulfillment,
+          fulfillmentDays,
           stock,
           active,
         },
@@ -290,6 +301,7 @@ export async function upsertItem(input: {
           thumbnailKey,
           coverImage,
           fulfillment,
+          fulfillmentDays,
           stock,
           active,
           sortOrder: count,

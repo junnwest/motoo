@@ -24,6 +24,7 @@ type MarketItem = {
   /** Creator-uploaded 16:9 photo; when set it replaces the curated tile. */
   coverImage: string | null;
   fulfillment: Fulfillment;
+  fulfillmentDays: number | null;
   stock: number | null;
   redeemedCount: number;
 };
@@ -158,6 +159,16 @@ function ItemCard({
             >
               {t(`fulfillment.${item.fulfillment}`)}
             </span>
+            {/* The promised turnaround, next to the badge saying the creator
+                has to act — that badge tells a fan they will wait, and this is
+                the only thing on the card that says how long (PRELAUNCH #32).
+                Absent when no promise was made, rather than filled with a
+                guess. */}
+            {item.fulfillment === "request" && item.fulfillmentDays !== null && (
+              <span className="rounded-full bg-panel px-2.5 py-1 text-2xs font-semibold text-muted-2">
+                {t("withinDays", { days: item.fulfillmentDays })}
+              </span>
+            )}
           </div>
         </div>
       </div>

@@ -18,6 +18,8 @@ export type DashboardOrder = {
   note: string | null;
   status: OrderStatus;
   createdAt: string; // ISO string
+  /** Promised-by date, stamped at redemption. Null when nothing was promised. */
+  dueAt: string | null;
   /** A dispute the buyer raised on this order, if any (PRELAUNCH #30). */
   issue: {
     id: string;
@@ -125,6 +127,22 @@ function OrderRow({ order }: { order: DashboardOrder }) {
       </td>
       <td className="whitespace-nowrap px-3 py-3 text-xs text-muted">
         {formatDate(order.createdAt)}
+        {/* The deadline sits under the order date, and only while it still
+            means something: once fulfilled or cancelled, "late" is a fact about
+            the past that would just nag. */}
+        {order.dueAt && order.status === "pending" && (
+          <div
+            className={`mt-0.5 ${
+              new Date(order.dueAt) < new Date()
+                ? "font-bold text-live"
+                : "text-muted-2"
+            }`}
+          >
+            {new Date(order.dueAt) < new Date()
+              ? t("orders.overdue")
+              : t("orders.due", { date: formatDate(order.dueAt) })}
+          </div>
+        )}
       </td>
       <td className="px-3 py-3">
         {/* A dispute is shown on the row it is about rather than in a separate

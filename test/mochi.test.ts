@@ -830,3 +830,64 @@ describe("creator blocks", () => {
     assert.equal((await getHolding(streamerId, backerId))?.balance, 5);
   });
 });
+
+/**
+ * The fulfillment promise (docs/PRELAUNCH.md #32).
+ *
+ * The point of stamping `dueAt` at redemption rather than reading the item's
+ * window later is that a creator must not be able to move a deadline they have
+ * already given someone. That is the test worth having.
+ */
+describe("fulfillment promise", () => {
+  it("stamps the promised date from the item's window", async () => {
+    await donateMochi({ backerId, streamerId, donationAmountKrw: 10 * PRICE, idempotencyKey: "k" });
+    const item = await prisma.marketplaceItem.create({
+      data: {
+        streamerId, title: "sla-item", priceMochi: 1, itemType: "digital",
+        fulfillment: "request", fulfillmentDays: 3,
+      },
+    });
+    const r = await redeemItem({ backerId, itemId: item.id });
+    const order = await prisma.order.findUniqueOrThrow({ where: { id: r.orderId } });
+    assert.ok(order.dueAt, "a promise was made, so it is recorded");
+    const days = (order.dueAt!.getTime() - order.createdAt.getTime()) / 86_400_000;
+    assert.ok(Math.abs(days - 3) < 0.01, `expected ~3 days, got ${days}`);
+  });
+
+  it("does not move a promise already made when the creator changes the window", async () => {
+    await donateMochi({ backerId, streamerId, donationAmountKrw: 10 * PRICE, idempotencyKey: "k" });
+    const item = await prisma.marketplaceItem.create({
+      data: {
+        streamerId, title: "sla-item", priceMochi: 1, itemType: "digital",
+        fulfillment: "request", fulfillmentDays: 2,
+      },
+    });
+    const r = await redeemItem({ backerId, itemId: item.id });
+    const before = await prisma.order.findUniqueOrThrow({ where: { id: r.orderId } });
+
+    await prisma.marketplaceItem.update({
+      where: { id: item.id },
+      data: { fulfillmentDays: 60 },
+    });
+    const after = await prisma.order.findUniqueOrThrow({ where: { id: r.orderId } });
+    assert.deepEqual(after.dueAt, before.dueAt);
+  });
+
+  it("promises nothing when the creator set no window, and never on an instant item", async () => {
+    await donateMochi({ backerId, streamerId, donationAmountKrw: 10 * PRICE, idempotencyKey: "k" });
+    const silent = await newItem(1);
+    const instant = await prisma.marketplaceItem.create({
+      data: {
+        streamerId, title: "instant-item", priceMochi: 1, itemType: "digital",
+        fulfillment: "instant", fulfillmentDays: 5,
+      },
+    });
+
+    const a = await redeemItem({ backerId, itemId: silent.id });
+    const b = await redeemItem({ backerId, itemId: instant.id });
+    assert.equal((await prisma.order.findUniqueOrThrow({ where: { id: a.orderId } })).dueAt, null);
+    // An instant order is already fulfilled — a deadline on it would be a
+    // promise about something that has happened.
+    assert.equal((await prisma.order.findUniqueOrThrow({ where: { id: b.orderId } })).dueAt, null);
+  });
+});
