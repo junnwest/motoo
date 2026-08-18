@@ -24,20 +24,13 @@ them, go to **Deployments → the top one → ⋯ → Redeploy**. Do it once, at
 
 ### A1 — `CRON_SECRET` (Production) ✅ DONE 2026-08-18
 
-**Why:** `vercel.json` schedules `/api/cron/purge-accounts` daily at 03:00 KST. The
-route refuses to run without this secret (it fails closed on purpose — an
-unconfigured deploy should do nothing, not everything). So the 30-day deletion grace
-period has never expired for anyone, and **`/settings` is currently promising a
-deletion that has never happened in production.**
+**Why it mattered:** `vercel.json` schedules `/api/cron/purge-accounts` daily at
+03:00 KST, and the route fails closed without this secret — an unconfigured deploy
+should do nothing, not everything. Until it was set, the 30-day grace period never
+expired for anyone, so `/settings` was promising a deletion that had never once run
+in production. It runs now.
 
-- Key: `CRON_SECRET`
-- Value: any long random string. Here is one, freshly generated — or make your own:
-  ```
-  HcuLUIiY0lfHAfYut8O2risoX3fQ5ZjOvifkFbF0slQ
-  ```
-- Environment: **Production** only.
-
-**Verify after the redeploy** — you don't have to wait for 03:00:
+**Verify any time** — you don't have to wait for 03:00:
 
 ```bash
 curl -i -H "Authorization: Bearer YOUR_SECRET" \
