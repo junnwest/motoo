@@ -102,8 +102,11 @@ export default async function AdminPage() {
   const reportedItemIds = openReports
     .filter((r) => r.targetType === "item")
     .map((r) => r.targetId);
+  const reportedUpdateIds = openReports
+    .filter((r) => r.targetType === "update")
+    .map((r) => r.targetId);
 
-  const [reportedCreators, reportedItems] = await Promise.all([
+  const [reportedCreators, reportedItems, reportedUpdates] = await Promise.all([
     reportedCreatorIds.length
       ? prisma.streamer.findMany({
           where: { id: { in: reportedCreatorIds } },
@@ -113,7 +116,13 @@ export default async function AdminPage() {
     reportedItemIds.length
       ? prisma.marketplaceItem.findMany({
           where: { id: { in: reportedItemIds } },
-          select: { id: true, title: true },
+          select: { id: true, title: true, hiddenAt: true },
+        })
+      : [],
+    reportedUpdateIds.length
+      ? prisma.update.findMany({
+          where: { id: { in: reportedUpdateIds } },
+          select: { id: true, title: true, hiddenAt: true },
         })
       : [],
   ]);
@@ -123,8 +132,15 @@ export default async function AdminPage() {
       (c) => [`creator:${c.id}`, `${c.displayName} @${c.handle}`] as const,
     ),
     ...reportedItems.map((i) => [`item:${i.id}`, i.title] as const),
+    ...reportedUpdates.map((u) => [`update:${u.id}`, u.title] as const),
   ]);
   const creatorHandles = new Map(reportedCreators.map((c) => [c.id, c.handle]));
+  // So the queue can show "already taken down" instead of offering the same
+  // takedown twice.
+  const hiddenTargets = new Set([
+    ...reportedItems.filter((i) => i.hiddenAt).map((i) => `item:${i.id}`),
+    ...reportedUpdates.filter((u) => u.hiddenAt).map((u) => `update:${u.id}`),
+  ]);
 
   const creators = await prisma.streamer.findMany({
     orderBy: [{ status: "asc" }, { createdAt: "desc" }],
@@ -163,6 +179,7 @@ export default async function AdminPage() {
                 key={r.id}
                 reportId={r.id}
                 targetType={r.targetType}
+                targetId={r.targetId}
                 targetLabel={targetLabels.get(`${r.targetType}:${r.targetId}`) ?? r.targetId}
                 targetHref={
                   r.targetType === "creator"
@@ -174,6 +191,7 @@ export default async function AdminPage() {
                 detail={r.detail}
                 reporter={r.reporter.nickname}
                 createdAt={formatKstDate(r.createdAt)}
+                targetHidden={hiddenTargets.has(`${r.targetType}:${r.targetId}`)}
               />
             ))}
           </div>

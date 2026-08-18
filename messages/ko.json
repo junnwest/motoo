@@ -1290,7 +1290,8 @@
     "reportsEmpty": "처리할 신고가 없어요.",
     "reportTarget": {
       "creator": "크리에이터",
-      "item": "아이템"
+      "item": "아이템",
+      "update": "소식"
     },
     "reportBy": "신고자",
     "markActioned": "조치함",

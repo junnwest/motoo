@@ -207,7 +207,11 @@ export const getStreamerProfile = cache(async (handle: string) => {
   const streamer = await prisma.streamer.findUnique({
     where: { handle },
     include: {
-      updates: { orderBy: { publishedAt: "desc" }, take: 5 },
+      updates: {
+        where: { hiddenAt: null }, // admin takedown (PRELAUNCH #15)
+        orderBy: { publishedAt: "desc" },
+        take: 5,
+      },
       // Phase 2: active marketplace items, so the profile page renders the
       // spend module from this one streamer query (no second fetch). Donate
       // (mochiIssuance) moved to its own page/query — getStreamerMarketplace,

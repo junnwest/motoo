@@ -156,7 +156,11 @@ export async function getUpdatesForBacker(backerId: string, take = 4) {
   if (streamerIds.length === 0) return [];
 
   return prisma.update.findMany({
-    where: { streamerId: { in: streamerIds }, visibility: "public" },
+    where: {
+      streamerId: { in: streamerIds },
+      visibility: "public",
+      hiddenAt: null, // admin takedown (PRELAUNCH #15)
+    },
     orderBy: { publishedAt: "desc" },
     take,
     include: {

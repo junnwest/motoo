@@ -120,6 +120,7 @@ export async function globalSearch(
       // supporter finds them on the creator's page, where the gate is real.
       where: {
         visibility: "public",
+        hiddenAt: null, // admin takedown (PRELAUNCH #15)
         streamer: liveCreator,
         OR: [
           { title: { contains: q, mode: "insensitive" } },

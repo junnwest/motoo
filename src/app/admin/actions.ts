@@ -192,3 +192,81 @@ export async function unhideItemAction(
   revalidatePath(`/s/${item.streamer.handle}`);
   return { ok: true };
 }
+
+const hideUpdateSchema = z.object({
+  updateId: z.string().min(1),
+  reason: z.string().trim().min(3).max(300),
+});
+
+/**
+ * Take down one post (docs/PRELAUNCH.md #15).
+ *
+ * The counterpart to `hideItemAction`, and the same reasoning: the creator's
+ * own controls are theirs, so a takedown writes `hiddenAt` — a field they
+ * cannot reach — rather than touching anything in their Studio. It disappears
+ * from the home feed, the creator's public page and search; the Studio still
+ * lists it, because a creator has to be able to see that something of theirs
+ * was removed and why.
+ */
+export async function hideUpdateAction(
+  input: z.infer<typeof hideUpdateSchema>,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const admin = await getAdmin();
+  if (!admin) return { ok: false, error: "forbidden" };
+
+  const parsed = hideUpdateSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: "reasonRequired" };
+
+  const update = await prisma.update.findUnique({
+    where: { id: parsed.data.updateId },
+    select: { title: true, streamer: { select: { handle: true } } },
+  });
+  if (!update) return { ok: false, error: "notFound" };
+
+  await prisma.update.update({
+    where: { id: parsed.data.updateId },
+    data: {
+      hiddenAt: new Date(),
+      hiddenBy: admin.email,
+      hiddenReason: parsed.data.reason,
+    },
+  });
+
+  reportWarning(new Error("update hidden"), {
+    scope: "admin.hideUpdate",
+    meta: {
+      updateId: parsed.data.updateId,
+      title: update.title,
+      by: admin.email,
+      reason: parsed.data.reason,
+    },
+  });
+
+  revalidatePath("/admin");
+  revalidatePath("/home");
+  revalidatePath(`/s/${update.streamer.handle}`);
+  return { ok: true };
+}
+
+export async function unhideUpdateAction(input: {
+  updateId: string;
+}): Promise<{ ok: true } | { ok: false; error: string }> {
+  const admin = await getAdmin();
+  if (!admin) return { ok: false, error: "forbidden" };
+
+  const update = await prisma.update.findUnique({
+    where: { id: input.updateId },
+    select: { streamer: { select: { handle: true } } },
+  });
+  if (!update) return { ok: false, error: "notFound" };
+
+  await prisma.update.update({
+    where: { id: input.updateId },
+    data: { hiddenAt: null, hiddenBy: null, hiddenReason: null },
+  });
+
+  revalidatePath("/admin");
+  revalidatePath("/home");
+  revalidatePath(`/s/${update.streamer.handle}`);
+  return { ok: true };
+}

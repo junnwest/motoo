@@ -29,7 +29,7 @@ export function ReportButton({
   targetId,
   signedIn,
 }: {
-  targetType: "creator" | "item";
+  targetType: "creator" | "item" | "update";
   targetId: string;
   signedIn: boolean;
 }) {

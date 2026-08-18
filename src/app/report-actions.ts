@@ -18,7 +18,7 @@ import { reportWarning } from "@/lib/report";
  */
 
 const submitSchema = z.object({
-  targetType: z.enum(["creator", "item"]),
+  targetType: z.enum(["creator", "item", "update"]),
   targetId: z.string().min(1),
   reason: z.enum(["impersonation", "scam", "sexual", "harassment", "other"]),
   detail: z.string().max(1000).optional().nullable(),

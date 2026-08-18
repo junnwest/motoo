@@ -252,6 +252,12 @@ model Update {
   publishedAt   DateTime         @default(now())
   viewCount     Int              @default(0)
   reactionCount Int              @default(0)
+  /// Admin takedown (docs/PRELAUNCH.md #15), the same shape as
+  /// MarketplaceItem.hiddenAt: deliberately not a field the creator controls,
+  /// because a takedown they can undo from their own Studio is not one.
+  hiddenAt      DateTime?
+  hiddenBy      String? // admin email
+  hiddenReason  String?
 
   @@index([streamerId])
 }
@@ -556,6 +562,7 @@ model EmailToken {
 enum ReportTargetType {
   creator
   item
+  update
 }
 
 enum ReportReason {

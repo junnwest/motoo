@@ -324,6 +324,18 @@ export default async function StreamerProfilePage({
                         <p className="mt-1 line-clamp-2 text-sm leading-normal text-body">
                           {u.body}
                         </p>
+                        {/* Posts became reportable once they became takeable-
+                            down: a target an admin can act on and nobody can
+                            flag is a lever with no handle. Not offered on a
+                            locked post — reporting something you cannot read
+                            is not a judgement anyone can make. */}
+                        <div className="-mb-1 mt-1 flex justify-end">
+                          <ReportButton
+                            targetType="update"
+                            targetId={u.id}
+                            signedIn={!!backer}
+                          />
+                        </div>
                       </>
                     )}
                   </li>

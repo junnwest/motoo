@@ -203,3 +203,47 @@ describe("report triage", () => {
     await prisma.report.deleteMany({ where: { targetId: item.id } });
   });
 });
+
+/**
+ * Post takedown (docs/PRELAUNCH.md #15's remaining half).
+ *
+ * Same two properties the item takedown has: it uses a field the creator cannot
+ * reach, and it actually removes the thing from what readers see. The second is
+ * the one worth asserting — hiding something from a listing query is the entire
+ * mechanism, so a query that forgets the filter is a silent leak.
+ */
+describe("update takedown", () => {
+  it("writes hiddenAt without touching anything the creator controls", async () => {
+    const update = await prisma.update.create({
+      data: { streamerId, title: "rt post", body: "x", visibility: "public" },
+    });
+    await prisma.update.update({
+      where: { id: update.id },
+      data: {
+        hiddenAt: new Date(),
+        hiddenBy: "admin@motoo.test",
+        hiddenReason: "test",
+      },
+    });
+
+    const after = await prisma.update.findUniqueOrThrow({
+      where: { id: update.id },
+    });
+    assert.ok(after.hiddenAt);
+    assert.equal(after.hiddenBy, "admin@motoo.test");
+    // visibility is the creator's own switch and must be untouched — otherwise
+    // a takedown would look like something they did.
+    assert.equal(after.visibility, "public");
+
+    // …and it is gone from the public read, while the creator's own list keeps
+    // it so they can see what happened.
+    const publicRows = await prisma.update.findMany({
+      where: { streamerId, visibility: "public", hiddenAt: null },
+    });
+    assert.equal(publicRows.length, 0);
+    const studioRows = await prisma.update.findMany({ where: { streamerId } });
+    assert.equal(studioRows.length, 1);
+
+    await prisma.update.deleteMany({ where: { streamerId } });
+  });
+});

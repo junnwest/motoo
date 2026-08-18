@@ -3,6 +3,7 @@ import { NOINDEX } from "@/lib/metadata";
 import { redirect } from "next/navigation";
 import { ConsumerShell } from "@/components/ConsumerShell";
 import { HomeSignedIn } from "@/components/HomeSignedIn";
+import { FollowingStrip } from "@/components/FollowingStrip";
 import { getCurrentBacker, getSession } from "@/lib/session";
 
 /** Signed-in surface: one person’s balances and history. Never indexed. */
@@ -28,8 +29,15 @@ export default async function HomePage() {
   return (
     <>
       <ConsumerShell>
+        {/* Above the fold on phones, where the Sidebar that normally carries
+            this list is hidden — see FollowingStrip. Renders nothing at all on
+            desktop, and nothing when the list is empty. */}
+        <div className="px-6 pt-8 sm:px-8 lg:hidden">
+          <FollowingStrip backerId={backer.id} />
+        </div>
         <HomeSignedIn backerId={backer.id} nickname={backer.nickname} />
-      </ConsumerShell>
+      </ConsumerShell>
+
     </>
   );
 }
