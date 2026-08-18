@@ -17,7 +17,8 @@
     "db:studio": "prisma studio",
     "postinstall": "prisma generate",
     "db:migrate": "prisma migrate dev",
-    "check:drift": "tsx scripts/check-prod-drift.ts"
+    "check:drift": "tsx scripts/check-prod-drift.ts",
+    "check:a11y": "tsx scripts/check-a11y.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",
@@ -31,11 +32,14 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/jsdom": "^30.0.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "axe-core": "^4.13.0",
     "eslint": "^9",
     "eslint-config-next": "16.2.10",
+    "jsdom": "^30.0.1",
     "prisma": "^6.19.3",
     "tailwindcss": "^4",
     "tsx": "^4.23.0",

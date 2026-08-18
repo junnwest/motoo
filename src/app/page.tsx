@@ -54,8 +54,13 @@ export default async function FanLandingPage() {
     <>
       <Nav />
 
+      {/* `id="main"` used to sit on the hero <section>, so the skip link had a
+          target but the page had no `main` landmark — and everything below the
+          hero was outside any landmark at all. Found by `pnpm check:a11y`
+          (axe `region`), not by reading it. */}
+      <main id="main">
       {/* Hero */}
-      <section id="main" className="relative overflow-hidden bg-cream-warm px-6 py-20 text-center sm:px-14 sm:py-24">
+      <section className="relative overflow-hidden bg-cream-warm px-6 py-20 text-center sm:px-14 sm:py-24">
         {/* Soft decorative circles (same shape as the final CTA), not floating mochis */}
         <div className="absolute left-[8%] top-10 h-16 w-16 rounded-[46%_46%_48%_48%/52%_52%_48%_48%] bg-coral-soft/45" />
         <div className="absolute right-[12%] top-28 h-11 w-11 rounded-[46%_46%_48%_48%/52%_52%_48%_48%] bg-white/60" />
@@ -307,6 +312,7 @@ export default async function FanLandingPage() {
           </div>
         </div>
       </section>
+      </main>
 
       <Footer variant="fan" />
     </>
