@@ -58,11 +58,9 @@ the live site.**
     personal email. Real, but **explicitly interim**: a personal Gmail as the official contact
     channel (and as the 개인정보 보호책임자 contact in `docs/legal/privacy-draft.md`) is fine
     pre-registration, not something to carry into a launch. Swap the one constant.
-- [ ] **`CRON_SECRET` must be set in Vercel** (OWNER-ACTIONS A1). `vercel.json` schedules
-  `/api/cron/purge-accounts` daily; the route refuses to run without it, so the 30-day deletion
-  grace period never expires and no account is ever actually purged. Once it is set, the route
-  still needs `purgeStaleResetTokens` / `purgeStaleEmailTokens` wired in — both written and
-  tested, neither called.
+- [x] ~~`CRON_SECRET` must be set in Vercel~~ — **set by the owner 2026-08-18**, so the daily
+  `/api/cron/purge-accounts` run works and the 30-day deletion grace period finally expires.
+  (An earlier note claimed the token purges still needed wiring; they were already wired.)
 - [ ] **Nobody holds `Role.admin` in production** (OWNER-ACTIONS B1), so `/admin` — the report
   queue, refund queue, escalated disputes, suspension and takedown — 404s for everyone. There is
   deliberately no UI to grant it; it is one `UPDATE`.

@@ -4,8 +4,8 @@ _Everything in [PRELAUNCH.md](PRELAUNCH.md) that no amount of coding closes: con
 access, money, a signature, or a decision that isn't a developer's to make. Written as
 steps, not reminders, so it can be done in one sitting._
 
-**Do A and B first — they take about fifteen minutes and both fix something that is
-broken on the live site right now.** C is counsel's clock, not yours. E is three
+**A1 is done (2026-08-18). A2/A3 and B are what remain — about ten minutes, and both
+fix something broken on the live site right now.** C is counsel's clock, not yours. E is three
 questions to answer when you feel like it.
 
 ---
@@ -22,7 +22,7 @@ you fixed it by hand).
 ⚠️ **Environment variables only take effect on a new deploy.** After adding all of
 them, go to **Deployments → the top one → ⋯ → Redeploy**. Do it once, at the end.
 
-### A1 — `CRON_SECRET` (Production)
+### A1 — `CRON_SECRET` (Production) ✅ DONE 2026-08-18
 
 **Why:** `vercel.json` schedules `/api/cron/purge-accounts` daily at 03:00 KST. The
 route refuses to run without this secret (it fails closed on purpose — an
@@ -48,9 +48,11 @@ curl -i -H "Authorization: Bearer YOUR_SECRET" \
 finished. (Safe to run: it only purges accounts whose grace period has already
 expired, and there probably aren't any yet.)
 
-**Then tell me.** The route still needs `purgeStaleResetTokens` and
-`purgeStaleEmailTokens` called from it — both are written and tested, neither is
-wired up, and there was no point wiring a route that couldn't run.
+Nothing further is needed from me here. An earlier version of this file said the
+route still needed the token purges wired in — that was wrong. It already calls all
+four (expired accounts, closed rate-limit windows, spent reset tokens, expired email
+tokens), and I have since verified the whole route locally: 401 with no secret, 401
+with a wrong one, 200 and a real prune with the right one.
 
 ### A2 / A3 — Google and Naver login (Production)
 
