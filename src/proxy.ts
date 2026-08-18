@@ -2,6 +2,7 @@ import NextAuth from "next-auth";
 import { NextResponse } from "next/server";
 import { authConfig, isOnboardingExempt } from "./auth.config";
 import { buildCsp, cspHeaderName } from "./lib/csp";
+import { isStudioPage, splitEnabled } from "./lib/hostRouting";
 
 // Edge middleware — uses the Prisma-free config so it can run at the edge. The
 // session (incl. `user.creator`, the Studio handle) rides in the JWT, so the
@@ -39,35 +40,6 @@ const STUDIO_PREFIX = "studio.";
  */
 const PROD_APEX = "themotoo.com";
 const PROD_CANONICAL_APEX = "www.themotoo.com";
-
-/**
- * Canonical Studio pages served on the subdomain (root-relative). Extend this
- * when new routes are added under src/app/studio. Everything else on the studio
- * host is treated as a consumer page and redirected to the apex.
- */
-function isStudioPage(pathname: string): boolean {
-  return (
-    pathname === "/" ||
-    pathname === "/settings" ||
-    pathname.startsWith("/settings/")
-  );
-}
-
-/**
- * Only apply the split on hosts that actually have a sibling studio/apex host —
- * the production domain and localhost dev. Vercel preview deploys (*.vercel.app)
- * have no studio subdomain, so they keep the single-host behavior (serving
- * /studio inline).
- */
-function splitEnabled(host: string): boolean {
-  const h = host.split(":")[0];
-  return (
-    h === "themotoo.com" ||
-    h.endsWith(".themotoo.com") ||
-    h === "localhost" ||
-    h.endsWith(".localhost")
-  );
-}
 
 const isProd = process.env.NODE_ENV === "production";
 
