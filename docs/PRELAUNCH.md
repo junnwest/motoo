@@ -41,7 +41,7 @@ real 본인인증, Kakao login, real refund execution, and creator payouts.
 | # | Item | Evidence |
 | --- | --- | --- |
 | ~11~ | ◐ **Suspension enforced — 2026-08-16.** Registration still auto-approves (owner's call: keep self-serve, moderate after), but `suspended` is now a real state. `donateMochi` refuses anything but `approved`, so a suspension stops new money even from a page that was already open. **Still open:** nothing prevents impersonation at registration time; the strongest fix is gating on real 본인인증, which needs 사업자등록. | `src/lib/mochi.ts` |
-| 12 | **No report/abuse flow** for a creator, an item, or an update. No 신고 string exists in the copy catalogue. | `grep 신고 messages/ko.json` → none |
+| ~~12~~ | ✅ **Report flow — shipped 2026-08-18.** 신고 on a creator profile (signed-in only), five reasons plus free text, one report per person per target enforced by a unique index so volume stays a usable triage signal. Lands in an `/admin` queue, oldest first, with actioned/dismissed and who reviewed it. Reports outlive their target on purpose — deleting an item must not erase the evidence. 5 tests. | `src/app/report-actions.ts` |
 | 13 | **No block or mute.** | — |
 | ~~14~~ | ✅ **Admin console — shipped 2026-08-16.** `/admin`, gated on `Role.admin` (a manual DB update — there is deliberately no UI to grant it), 404 rather than 403 for everyone else. Lists creators, suspends with a required reason, restores. Suspension is audited on the row (`suspendedAt/Reason/By`) and reported to the log. | `src/app/admin/` |
 | 15 | **No moderation of user content.** Uploaded images are validated for format and byte size only (`parseImageDataUrl`); item titles, updates and order notes are free text with no review. | `src/lib/imageUpload.ts` |
@@ -54,7 +54,7 @@ real 본인인증, Kakao login, real refund execution, and creator payouts.
 | 17 | **No analytics** — no funnel, no idea where signup or donation drops off. | already in PROGRESS |
 | 18 | **No uptime or health monitoring**, no alerting. | — |
 | ~~19~~ | ✅ **CI — shipped 2026-08-15.** `.github/workflows/ci.yml` runs typecheck, lint, `check:vocab`, `check:emoji`, the 51-test suite against a real Postgres service, and the production build — on every push to `main` and every PR. Migrations are applied with `migrate deploy`, the same path production takes, so a broken migration fails in CI rather than at deploy. | `.github/workflows/ci.yml` |
-| 20 | **Thin test coverage.** 51 tests now — money (26), password reset (13), email verification (12) — but still no component tests, no e2e, and nothing covering onboarding, the Studio or the middleware. | `test/` |
+| 20 | **Thin test coverage.** 58 tests — money (28), password reset (13), email verification (12), reports (5) — but still no component tests, no e2e, and nothing covering onboarding, the Studio or the middleware. | `test/` |
 | 21 | **Preview deploys have no database** (env scoped Production-only on 2026-08-10 to stop a preview migrating prod). Correct as a stopgap, but it means no working preview until Preview gets its own Supabase branch. | DEPLOYMENT.md |
 | 22 | **No staging environment.** | — |
 | 23 | **Backups never restore-tested.** Supabase PITR exists; nobody has proven a restore. | DEPLOYMENT.md |

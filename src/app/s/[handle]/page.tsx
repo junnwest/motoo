@@ -10,6 +10,7 @@ import { CreatorFacet } from "@/components/CreatorFacet";
 import { SupporterLeaderboard } from "@/components/SupporterLeaderboard";
 import { MarketplaceSection } from "@/components/MarketplaceSection";
 import { FollowButton } from "@/components/FollowButton";
+import { ReportButton } from "@/components/ReportButton";
 import { getStreamerProfile } from "@/lib/streamers";
 import { getCurrentBacker } from "@/lib/session";
 import { getHolding } from "@/lib/mochi";
@@ -226,6 +227,17 @@ export default async function StreamerProfilePage({
               </div>
             ))}
           </div>
+
+          {/* Quiet, and last. Reporting is rare and sits next to a page whose
+              main action moves money — a prominent control here would collect
+              mis-taps, not reports. */}
+          <div className="lg:text-right">
+            <ReportButton
+              targetType="creator"
+              targetId={streamer.id}
+              signedIn={!!backer}
+            />
+          </div>
         </div>
         </div>
       </section>
@@ -308,7 +320,7 @@ export default async function StreamerProfilePage({
           )}
         </div>
       </div>
-      </ConsumerShell>
+      </ConsumerShell>
     </>
   );
 }

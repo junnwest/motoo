@@ -149,6 +149,7 @@ model Backer {
   tokenVersion    Int                  @default(0)
   passwordResets  PasswordResetToken[]
   emailTokens     EmailToken[]
+  reports         Report[]
   /// Set when the address on the account has been confirmed by clicking a
   /// mailed link. Null means unconfirmed — surfaced, not blocked (see
   /// src/lib/emailVerification.ts).
@@ -416,4 +417,50 @@ model EmailToken {
 
   @@index([backerId])
   @@index([expiresAt])
+}
+
+enum ReportTargetType {
+  creator
+  item
+}
+
+enum ReportReason {
+  impersonation // pretending to be someone else — the risk auto-approval carries
+  scam // took mochi, never delivered
+  sexual
+  harassment
+  other
+}
+
+enum ReportStatus {
+  open
+  actioned // the report led to something (a suspension, an item removed)
+  dismissed // reviewed, no action
+}
+
+// A user-submitted report about a creator or a marketplace item.
+//
+// Signed-in only, and one row per (reporter, target): anonymous reporting would
+// make the queue a spam surface, and letting one person file the same report
+// fifty times would make volume meaningless as a triage signal. Both are
+// enforced by the unique index below rather than by the UI.
+model Report {
+  id         String           @id @default(cuid())
+  reporterId String
+  reporter   Backer           @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+  targetType ReportTargetType
+  /// Streamer.id or MarketplaceItem.id depending on targetType. Not a foreign
+  /// key: the two targets live in different tables, and a report should outlive
+  /// the thing it is about — deleting the item must not erase the evidence.
+  targetId   String
+  reason     ReportReason
+  detail     String?
+  status     ReportStatus     @default(open)
+  createdAt  DateTime         @default(now())
+  reviewedAt DateTime?
+  reviewedBy String? // admin email
+  resolution String?
+
+  @@unique([reporterId, targetType, targetId])
+  @@index([status, createdAt])
 }

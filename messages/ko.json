@@ -1183,6 +1183,38 @@
       "forbidden": "권한이 없어요.",
       "notFound": "크리에이터를 찾을 수 없어요.",
       "reasonRequired": "중지 사유를 3자 이상 입력해 주세요."
+    },
+    "reportsTitle": "신고 대기열",
+    "reportsEmpty": "처리할 신고가 없어요.",
+    "reportTarget": {
+      "creator": "크리에이터",
+      "item": "아이템"
+    },
+    "reportBy": "신고자",
+    "markActioned": "조치함",
+    "markDismissed": "반려",
+    "creatorsTitle": "크리에이터"
+  },
+  "report": {
+    "trigger": "신고",
+    "title": "신고하기",
+    "reasonLegend": "신고 사유",
+    "reasons": {
+      "impersonation": "다른 사람을 사칭하고 있어요",
+      "scam": "모찌를 받고 약속을 지키지 않았어요",
+      "sexual": "선정적이거나 부적절한 내용이에요",
+      "harassment": "괴롭힘이나 혐오 표현이에요",
+      "other": "그 밖의 문제예요"
+    },
+    "detailLabel": "자세한 내용 (선택)",
+    "submit": "신고 보내기",
+    "submitting": "보내는 중…",
+    "thanksTitle": "신고를 접수했어요",
+    "thanksBody": "확인 후 필요한 조치를 취할게요. 같은 대상은 한 번만 신고하면 돼요.",
+    "errors": {
+      "login": "로그인이 필요해요.",
+      "tooMany": "신고가 너무 잦아요. 잠시 후 다시 시도해 주세요.",
+      "generic": "접수하지 못했어요. 잠시 후 다시 시도해 주세요."
     }
   }
 }
