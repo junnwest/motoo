@@ -28,7 +28,12 @@ const STRICT = [
   "수익권",
   "조각투자",
   "배당",
-  "원금",
+  // "원금" is principal — the promise motoo must never make. Guarded with a
+  // lookbehind because it is a substring of 후원금 (donation money), which is
+  // the product's most ordinary noun: without this, the check fires on any copy
+  // that says what a donation is, and the fix would be contorting Korean to
+  // satisfy a regex rather than to satisfy the rule.
+  "(?<!후)원금",
 ];
 
 // Ambiguous in English ("share a report", "profit" in prose). Reported as

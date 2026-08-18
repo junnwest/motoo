@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { getCurrentCreator } from "@/lib/session";
 import { getCreatorDashboard, getUpdatesForCreator } from "@/lib/streamers";
 import { getSupportersForStudio } from "@/lib/blocks";
+import { getSettlementSummary } from "@/lib/settlement";
 import { formatCount } from "@/lib/format";
 import { CreatorFacet } from "@/components/CreatorFacet";
 import { isCreatorType, ALL_CATEGORIES } from "@/lib/creatorTaxonomy";
@@ -12,6 +13,7 @@ import { ItemsManager, type DashboardItem } from "./ItemsManager";
 import { OrdersTable, type DashboardOrder } from "./OrdersTable";
 import { UpdatesManager } from "./UpdatesManager";
 import { SupportersTable } from "./SupportersTable";
+import { SettlementPanel } from "./SettlementPanel";
 import { InfoTooltip } from "./InfoTooltip";
 
 function StatTile({ label, value }: { label: string; value: string }) {
@@ -95,10 +97,11 @@ export default async function CreatorDashboardHome() {
   const creator = await getCurrentCreator();
   if (!creator) return null;
 
-  const [data, updates, supporters] = await Promise.all([
+  const [data, updates, supporters, settlement] = await Promise.all([
     getCreatorDashboard(creator.id),
     getUpdatesForCreator(creator.id),
     getSupportersForStudio(creator.id),
+    getSettlementSummary(creator.id),
   ]);
   if (!data) return null;
 
@@ -287,6 +290,13 @@ export default async function CreatorDashboardHome() {
         }
       >
         <OrdersTable orders={orders} />
+      </StudioSection>
+
+      {/* Above supporters and orders: "what came in" is the question a creator
+          opens the Studio to answer, and it was the one thing the console could
+          not tell them. */}
+      <StudioSection id="settlement" title={t("settlement.title")}>
+        <SettlementPanel summary={settlement} />
       </StudioSection>
 
       {/* Directly under orders, because that is where a creator meets the fan
