@@ -154,6 +154,29 @@ UPDATE "Backer" SET role = 'backer' WHERE email = 'admin@motoo.dev';
 
 (Deleting the seed removes that account entirely, so this only matters if you keep it.)
 
+## A4 — turn Sentry on (2 env vars)
+
+The adapter is written and deployed. It needs a project and a DSN:
+
+1. sentry.io → create a project → platform **Node.js** (not Next.js — this adapter
+   is server-side, see below).
+2. Copy the DSN.
+3. Vercel → Settings → Environment Variables → **Production**:
+   - `REPORT_PROVIDER` = `sentry`
+   - `SENTRY_DSN` = the DSN
+4. Redeploy (or push anything — it redeploys on push).
+
+**Server-side only, on purpose.** The browser half would need Sentry's ingest host
+added to `connect-src` in the now-enforced CSP, and puts a third-party script on
+the page — which is what currently keeps the cookie banner (#10) unnecessary.
+Everything `reportError` is wired into is server-side anyway: the money path,
+including the charged-but-not-credited case. Ask and I'll do the client half as
+its own change.
+
+If `SENTRY_DSN` is missing it logs a warning and falls back to console rather than
+going quiet — silence would look exactly like "no errors", which is the one failure
+mode worth engineering against.
+
 ## C. Legal — counsel's clock, not yours
 
 | | Action | Why it matters |
@@ -196,7 +219,7 @@ approved-but-not-refunded rows are exactly the reconciliation worklist.
 | --- | --- | --- |
 | F1 | Should email verification be **required** before donating? | Built, surfaced, and deliberately gating nothing (PRELAUNCH #3). Requiring it costs conversion and buys accountability. That trade is a product call, not a technical one. |
 | F2 | Analytics: which vendor, self-hosted or not? | PRELAUNCH #17. It drags #10 (the cookie banner) in with it — the banner isn't required today *precisely because* there are no third-party scripts. Pick a vendor and both land together. |
-| F3 | Error backend: Sentry, or a log drain? | PRELAUNCH #16 is half-built behind `REPORT_PROVIDER`; the adapter is about twenty lines once you choose. Right now errors print JSON to a console nobody reads, which is not monitoring. |
+| ~~F3~~ | ✅ **Sentry — chosen and built 2026-08-18.** Two env vars away from live; see A4. |
 
 Answer any of these and I'll build it.
 

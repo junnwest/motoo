@@ -50,7 +50,7 @@ real 본인인증, Kakao login, real refund execution, and creator payouts.
 
 | # | Item | Evidence |
 | --- | --- | --- |
-| ~16~ | ◐ **Error reporting — shipped 2026-08-15, half done.** `reportError` / `reportWarning` behind a `REPORT_PROVIDER` abstraction; the console adapter emits one line of JSON, which is what a log drain wants. Wired into the money-path catch sites, including the charged-but-not-credited case that was previously invisible. **Still open:** a real backend (the Sentry adapter is a commented stub) and alerting — a log nobody is paged on is not monitoring. | `src/lib/report.ts` |
+| ~16~ | ◐ **Sentry adapter shipped — 2026-08-18.** `REPORT_PROVIDER=sentry` + `SENTRY_DSN` sends the money-path catch sites to Sentry, tagged by scope so the list reads as a worklist rather than a feed. Falls back to console (loudly) without a DSN, because silence is indistinguishable from no errors. Server-side only — the browser half needs Sentry's host in `connect-src` plus a third-party script, which would drag #10 in with it. **Still open:** the owner must create the project and set two env vars (OWNER-ACTIONS A4), and nothing pages anyone yet. | `src/lib/reporters/sentry.ts` |
 | 17 | **No analytics** — no funnel, no idea where signup or donation drops off. | already in PROGRESS |
 | 18 | **No uptime or health monitoring**, no alerting. | — |
 | ~~19~~ | ✅ **CI — shipped 2026-08-15.** `.github/workflows/ci.yml` runs typecheck, lint, `check:vocab`, `check:emoji`, the 51-test suite against a real Postgres service, and the production build — on every push to `main` and every PR. Migrations are applied with `migrate deploy`, the same path production takes, so a broken migration fails in CI rather than at deploy. | `.github/workflows/ci.yml` |
