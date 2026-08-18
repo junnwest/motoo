@@ -13,6 +13,8 @@ import { AvatarForm } from "./AvatarForm";
 import { PasswordForm } from "./PasswordForm";
 import { EmailForm } from "./EmailForm";
 import { MarketingConsentForm } from "./MarketingConsentForm";
+import { GuardianConsentSection } from "./GuardianConsentSection";
+import { formatKstDate } from "@/lib/format";
 
 /** Signed-in surface: one person’s balances and history. Never indexed. */
 export const metadata: Metadata = { robots: NOINDEX };
@@ -28,6 +30,7 @@ export default async function SettingsPage() {
   if (!session?.user) redirect("/");
 
   const t = await getTranslations("settings");
+  const tg = await getTranslations("guardian");
   const backer = await getCurrentBacker();
   if (!backer) redirect("/api/session-reset");
 
@@ -35,6 +38,11 @@ export default async function SettingsPage() {
   // part of leaving that users actually care about.
   const holdings = await getHoldingsForBacker(backer.id);
   const unspentMochi = holdings.reduce((sum, h) => sum + h.balance, 0);
+
+  // Comes from 본인인증, never self-reported — `ageVerified` is only false once
+  // a provider has actually said so, which is why an unverified account (both
+  // flags absent) is not treated as a minor here.
+  const isMinor = !!backer.verifiedAt && !backer.ageVerified;
 
   return (
     <>
@@ -66,6 +74,29 @@ export default async function SettingsPage() {
           <Section title={t("marketing.sectionTitle")} boxed className="mt-6">
             <MarketingConsentForm initial={backer.marketingConsent} />
           </Section>
+
+          {/* Only for accounts 본인인증 says are minors. An adult has no
+              guardian to record and shouldn't be shown a section implying they
+              might, so this is absent rather than empty for most people. */}
+          {isMinor && (
+            <Section title={tg("settingsTitle")} boxed className="mt-6">
+              <GuardianConsentSection
+                recorded={
+                  backer.guardianConsent === true && backer.guardianName
+                    ? {
+                        name: backer.guardianName,
+                        relation: tg(
+                          `relations.${backer.guardianRelation ?? "other"}` as never,
+                        ),
+                        date: formatKstDate(
+                          backer.guardianConsentAt ?? new Date(),
+                        ),
+                      }
+                    : null
+                }
+              />
+            </Section>
+          )}
 
           <Section title={t("identityTitle")} boxed className="mt-6">
             <IdentityForm

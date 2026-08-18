@@ -176,12 +176,21 @@ model Backer {
 
   // Identity verification (본인인증) — populated by a VerificationProvider (mock in
   // dev; NICE/PASS in prod). Real age gate for payments; not self-reported.
-  verifiedAt      DateTime?
-  verifiedName    String?
-  birthYear       Int?
-  gender          Gender?
-  ageVerified     Boolean   @default(false)
-  guardianConsent Boolean? // true once a minor's guardian consent is recorded
+  verifiedAt        DateTime?
+  verifiedName      String?
+  birthYear         Int?
+  gender            Gender?
+  ageVerified       Boolean           @default(false)
+  guardianConsent   Boolean? // true once a minor's guardian consent is recorded
+  // Proof of that consent. Required to keep, because a consent nobody can
+  // evidence is the same as no consent if it is ever questioned. Collected by
+  // /guardian-consent; the guardian's own 본인인증 needs 사업자등록, so today
+  // this is a recorded declaration, and the page says so rather than implying
+  // it was verified.
+  guardianConsentAt DateTime?
+  guardianName      String?
+  guardianRelation  GuardianRelation?
+  guardianContact   String?
 
   // Phase 2 relations
   ownedStreamer Streamer?      @relation("CreatorOwner")
@@ -189,6 +198,13 @@ model Backer {
   orders        Order[]
   follows       Follow[]
   notifications Notification[]
+}
+
+enum GuardianRelation {
+  parent
+  grandparent
+  sibling
+  other
 }
 
 model Update {

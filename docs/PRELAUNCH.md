@@ -24,7 +24,7 @@ real 본인인증, Kakao login, real refund execution, and creator payouts.
 | ~~2~~ | ✅ **Email delivery — shipped 2026-08-11.** `EmailProvider` behind the same abstraction as payments/verification, mock default that prints the message. Swapping in Resend or SES is one adapter + `EMAIL_PROVIDER`. | `src/lib/email/` |
 | ~~3~~ | ✅ **Email verification — shipped 2026-08-13.** Sent on signup (best-effort, never fails the signup), resend from `/settings`, `emailVerifiedAt` on `Backer`. Surfaced, deliberately **not** enforced — gating money on an email click is a product call nobody has made. | `src/lib/emailVerification.ts` |
 | ~~4~~ | ✅ **Change email — shipped 2026-08-13.** Password-gated, confirmation to the new address, security notice to the old, and the account does not move until the new owner clicks. 12 tests including the claimed-in-between race. | `src/app/settings/EmailForm.tsx` |
-| 5 | **`CRON_SECRET` unset in Vercel**, so `/api/cron/purge-accounts` refuses to run. The UI promises deletion after a 30-day grace period; in production that purge has never executed. Config-only fix. **Now also sweeps the two token tables** (`purgeStaleResetTokens`, `purgeStaleEmailTokens`) — wire those into the route when the secret lands. | `vercel env ls` — five vars, no `CRON_SECRET` |
+| 5 | **`CRON_SECRET` unset in Vercel** (OWNER-ACTIONS A1), so `/api/cron/purge-accounts` refuses to run. The UI promises deletion after a 30-day grace period; in production that purge has never executed. Config-only fix. **Now also sweeps the two token tables** (`purgeStaleResetTokens`, `purgeStaleEmailTokens`) — wire those into the route when the secret lands. | `vercel env ls` — five vars, no `CRON_SECRET` |
 
 ## Tier 2 — legal / compliance surface you are already asserting
 
@@ -33,7 +33,7 @@ real 본인인증, Kakao login, real refund execution, and creator payouts.
 | 6 | **`/terms` and `/privacy` are one-line placeholders**, and onboarding makes users tick a box agreeing to them. Blocked on counsel, not registration. Drafts exist in `docs/legal/`. | `legal.placeholder` in `ko.json` |
 | ~~7~~ | ✅ **Withdrawable — 2026-08-18.** A checkbox in `/settings` that saves on change, no password gate and no save button: withdrawal has to be at least as easy as the single tick that granted it, so friction here would be the thing 개인정보보호법 prohibits. Optimistic, reverting if the write fails. | `src/app/settings/MarketingConsentForm.tsx` |
 | ~~8~~ | ✅ **Shipped — 2026-08-18.** Bigger than it read: donations were never recorded, only summed, so the policy's "within 7 days, if not one mochi from that donation has been spent" was not *computable* and fans had no history or receipt. A `Donation` ledger now writes inside `donateMochi`'s transaction; a request form sits on each row in `/profile`; the admin queue triages them. Ineligible requests are accepted, not blocked — the 법령 carve-out overrides the window. Money leg still needs the PG. | `src/lib/refunds.ts`, `src/app/refund/request-actions.ts` |
-| 9 | **No 청소년보호정책.** Commonly expected of KR platforms that admit minors at all — and this one has a minor/guardian-consent code path. | no such page |
+| ~~9~~ | ✅ **Shipped — 2026-08-18.** `/youth`, linked from the footer and the sitemap. Written from what the code does rather than from a template: §2 describes the money-path block on unconsented minors, §3 admits there is no upload-time review and that moderation is report-then-act. Naming a 청소년보호책임자 needs an entity — tracked as OWNER-ACTIONS C3. | `src/app/youth/page.tsx` |
 | 10 | **Consent/cookie banner** — not required today (no analytics, no third-party scripts), but becomes required the moment item #14 lands. Noting it so it is not forgotten *with* analytics. | — |
 
 ## Tier 3 — trust & safety, currently absent entirely
@@ -54,7 +54,7 @@ real 본인인증, Kakao login, real refund execution, and creator payouts.
 | 17 | **No analytics** — no funnel, no idea where signup or donation drops off. | already in PROGRESS |
 | 18 | **No uptime or health monitoring**, no alerting. | — |
 | ~~19~~ | ✅ **CI — shipped 2026-08-15.** `.github/workflows/ci.yml` runs typecheck, lint, `check:vocab`, `check:emoji`, the 51-test suite against a real Postgres service, and the production build — on every push to `main` and every PR. Migrations are applied with `migrate deploy`, the same path production takes, so a broken migration fails in CI rather than at deploy. | `.github/workflows/ci.yml` |
-| 20 | **Thin test coverage.** 60 tests — money (30), password reset (13), email verification (12), reports (5) — but still no component tests, no e2e, and nothing covering onboarding, the Studio or the middleware. | `test/` |
+| 20 | **Thin test coverage.** 73 tests — money and refunds (43), password reset (13), email verification (12), reports (5) — but still no component tests, no e2e, and nothing covering onboarding, the Studio or the middleware. | `test/` |
 | 21 | **Preview deploys have no database** (env scoped Production-only on 2026-08-10 to stop a preview migrating prod). Correct as a stopgap, but it means no working preview until Preview gets its own Supabase branch. | DEPLOYMENT.md |
 | 22 | **No staging environment.** | — |
 | 23 | **Backups never restore-tested.** Supabase PITR exists; nobody has proven a restore. | DEPLOYMENT.md |
@@ -70,7 +70,7 @@ real 본인인증, Kakao login, real refund execution, and creator payouts.
 | 28 | **No notification preferences.** Every event type is on, with no per-type mute and no channel choice. | no preference model |
 | 29 | **No creator payout/settlement view.** Real numbers need the PG, but the surface — what is owed, what settled, when — does not exist at all. | no `정산`/`payout` in `src/app/studio` |
 | 30 | **No fan↔creator messaging or dispute path.** An order that goes wrong has no in-product recourse; the order note is one-way at redemption. | — |
-| 31 | **Guardian-consent capture UI.** The money path already blocks a minor without recorded consent, and `guardianConsent` exists in the schema — the *collection* flow is what is missing. Real verification needs 본인인증, but the consent UI does not. | `assertCanPurchase` in `mochi.ts` |
+| ~~31~~ | ✅ **Shipped — 2026-08-18.** `/guardian-consent` records the guardian's name, relation and a contact, gated on what 본인인증 says — never on the form, which would make it a way to self-declare an age. Withdrawable from `/settings`, re-blocking donating at once. The blocked donate error links there instead of dead-ending. Recorded, **not verified**: the guardian's own 본인인증 needs 사업자등록, and the page says so rather than implying otherwise. | `src/app/guardian-consent/` |
 | 32 | **No fulfillment SLA** — creator-set promised-by window, shown publicly. PROGRESS's own growth idea, and the cheapest trust primitive available. | PROGRESS |
 
 ## Tier 6 — quality bar
@@ -82,6 +82,13 @@ real 본인인증, Kakao login, real refund execution, and creator payouts.
 | 35 | **Query counts.** `/home` now issues 7 parallel queries after the 2026-08-11 sections; `/s/[handle]` ~19. Parallel and narrow, but the number moved. | PROGRESS tracks this |
 
 ---
+
+## Needs you, not me
+
+Everything requiring the Vercel console, a database statement, counsel, or a
+product decision is collected in **[OWNER-ACTIONS.md](OWNER-ACTIONS.md)** so it
+can be done in one sitting: #5 and the missing OAuth vars, the admin role grant,
+#6, and the calls behind #3, #16 and #17.
 
 ## Suggested order
 

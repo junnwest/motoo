@@ -302,6 +302,19 @@ export function DonateMochi({
           {error && (
             <InlineMessage tone="error" className="mt-3">
               {t(`errors.${error}`)}
+              {/* The one refusal a fan can actually do something about. The
+                  gate has been enforced since the eligibility work; until
+                  /guardian-consent existed there was nowhere to send them, so
+                  this said no and stopped there. `next` brings them back to
+                  the creator they were trying to support. */}
+              {error === "guardianRequired" && (
+                <Link
+                  href={`/guardian-consent?next=${encodeURIComponent(`/s/${handle}/donate`)}`}
+                  className="mt-1.5 block font-bold underline"
+                >
+                  {t("guardianCta")}
+                </Link>
+              )}
             </InlineMessage>
           )}
 

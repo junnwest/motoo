@@ -730,3 +730,44 @@ describe("refund completion", () => {
     assert.deepEqual(await checkRefundEligibility(second.id), { eligible: true });
   });
 });
+
+/**
+ * The guardian-consent gate, from both sides of the transition.
+ *
+ * The refusal has been tested since the eligibility work, but until
+ * /guardian-consent existed nothing could ever record consent — so the *allowed*
+ * side was only ever exercised by a fixture that started out consented. These
+ * cover the change itself, which is what the new page performs.
+ */
+describe("guardian consent unblocks a minor", () => {
+  it("goes from refused to allowed when consent is recorded, and back", async () => {
+    await assert.rejects(
+      () => donateMochi({ backerId: minorId, streamerId, donationAmountKrw: PRICE, idempotencyKey: "g1" }),
+      /GUARDIAN_CONSENT_REQUIRED/,
+    );
+
+    await prisma.backer.update({
+      where: { id: minorId },
+      data: {
+        guardianConsent: true,
+        guardianConsentAt: new Date(),
+        guardianName: "MT Guardian",
+        guardianRelation: "parent",
+        guardianContact: "010-0000-0000",
+      },
+    });
+    const r = await donateMochi({ backerId: minorId, streamerId, donationAmountKrw: PRICE, idempotencyKey: "g2" });
+    assert.equal(r.balance, 1);
+
+    // Withdrawal has to re-block immediately — a consent you can take back but
+    // that keeps working isn't withdrawable.
+    await prisma.backer.update({
+      where: { id: minorId },
+      data: { guardianConsent: false, guardianConsentAt: null, guardianName: null, guardianRelation: null, guardianContact: null },
+    });
+    await assert.rejects(
+      () => donateMochi({ backerId: minorId, streamerId, donationAmountKrw: PRICE, idempotencyKey: "g3" }),
+      /GUARDIAN_CONSENT_REQUIRED/,
+    );
+  });
+});

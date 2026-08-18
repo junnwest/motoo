@@ -174,6 +174,7 @@ export function Footer({
                 { label: t("terms.tos"), href: "/terms" },
                 { label: t("terms.privacy"), href: "/privacy" },
                 { label: t("terms.refund"), href: "/refund", underline: true },
+                { label: t("terms.youth"), href: "/youth" },
               ]}
             />
           </div>
