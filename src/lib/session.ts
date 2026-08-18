@@ -40,6 +40,20 @@ export const getCurrentBacker = cache(async () => {
  * size limit. Returns null for the monogram fallback.
  */
 export const getAvatarUrl = cache(async (backerId: string): Promise<string | null> => {
+  // Reuses `getCurrentBacker`'s cached row instead of issuing its own read.
+  //
+  // Measured with DEBUG_QUERIES=1 (docs/PRELAUNCH.md #35): every signed-in
+  // consumer page was doing three Backer.findUnique — the auth callback's
+  // tokenVersion check, the page's own getCurrentBacker, and this. The
+  // one-column select was there to avoid loading the whole row, but the row's
+  // bulk *is* avatarUrl (a data URL), so it was saving nothing and costing a
+  // round trip on every page.
+  //
+  // Falls back to its own read when the id is not the signed-in account, which
+  // is the case this signature still has to support.
+  const me = await getCurrentBacker();
+  if (me?.id === backerId) return me.avatarUrl ?? null;
+
   const row = await prisma.backer.findUnique({
     where: { id: backerId },
     select: { avatarUrl: true },

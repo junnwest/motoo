@@ -79,7 +79,7 @@ real 본인인증, Kakao login, real refund execution, and creator payouts.
 | --- | --- | --- |
 | 33 | **No screen-reader or Axe pass.** Focus, landmarks and names were verified programmatically; no real AT run, heading order unaudited. | already in PROGRESS |
 | ~~34~~ | ✅ **Enforced — 2026-08-18.** Per-request nonce generated in `src/proxy.ts` and threaded onto the request, so Next stamps its inline scripts; `'unsafe-inline'` is gone from `script-src`. `'strict-dynamic'` was tried and **rejected on evidence**: against a real production build Next emits one un-nonced async chunk per shell page, which it would have blocked on every signed-in page. `style-src` keeps `'unsafe-inline'` because a nonce cannot cover `style=""` attributes and Safari lacks `style-src-attr`. Rollback is `CSP_MODE=report-only`, no code change. | `src/lib/csp.ts` |
-| 35 | **Query counts.** `/home` now issues 7 parallel queries after the 2026-08-11 sections; `/s/[handle]` ~19. Parallel and narrow, but the number moved. | PROGRESS tracks this |
+| ~~35~~ | ✅ **Measurable — 2026-08-18.** `DEBUG_QUERIES=1` logs one line per Prisma call; count a page by loading exactly one. The doc's numbers were both wrong (it said /home 7, /s/[handle] ~19). Measured: **/home 18, /s/[handle] 13, /profile 15, /settings 8, /explore 7**, of which ~6 are the shell on every signed-in page. A per-request *total* is deliberately not offered — two attempts at one silently reported zero, and the reasons are written up in `src/lib/db.ts` because both are traps worth not re-entering. Also removed a redundant `Backer.findUnique` on every signed-in page, found this way. | `src/lib/db.ts` |
 
 ---
 
