@@ -1,6 +1,7 @@
 import { createHash, randomBytes } from "node:crypto";
 import { prisma } from "@/lib/db";
 import { getEmailProvider } from "@/lib/email";
+import { reportWarning } from "@/lib/report";
 
 /**
  * Email confirmation, for two purposes that are the same mechanism:
@@ -72,7 +73,7 @@ export async function sendVerificationEmail(
   if (!backer || backer.emailVerifiedAt) return { ok: true };
 
   const token = await issue(backerId, "verify");
-  await getEmailProvider().send({
+  const result = await getEmailProvider().send({
     to: backer.email,
     subject: "[motoo] 이메일 주소 확인",
     text: [
@@ -85,6 +86,14 @@ export async function sendVerificationEmail(
       "확인하지 않아도 motoo는 그대로 이용할 수 있어요. 다만 비밀번호를 잊었을 때 이 주소로만 재설정 링크를 보낼 수 있어요.",
     ].join("\n"),
   });
+  // This is the mail `assertCanPurchase` gates donating on — a silently
+  // failed send here means the gate is unpassable and nothing says why.
+  if (!result.ok) {
+    reportWarning(new Error(result.error), {
+      scope: "sendVerificationEmail.sendFailed",
+      meta: { backerId },
+    });
+  }
   return { ok: true };
 }
 
@@ -123,7 +132,7 @@ export async function requestEmailChange(
 
   const token = await issue(backerId, "change", normalized);
 
-  await getEmailProvider().send({
+  const confirmResult = await getEmailProvider().send({
     to: normalized,
     subject: "[motoo] 새 이메일 주소 확인",
     text: [
@@ -136,10 +145,16 @@ export async function requestEmailChange(
       "본인이 요청한 것이 아니라면 이 메일은 무시해 주세요. 링크를 열기 전까지는 아무것도 바뀌지 않아요.",
     ].join("\n"),
   });
+  if (!confirmResult.ok) {
+    reportWarning(new Error(confirmResult.error), {
+      scope: "requestEmailChange.confirmSendFailed",
+      meta: { backerId },
+    });
+  }
 
   // The security notice. Sent to the address being moved away from, and
   // deliberately carries no link — its only job is to be noticed.
-  await getEmailProvider().send({
+  const noticeResult = await getEmailProvider().send({
     to: backer.email,
     subject: "[motoo] 이메일 주소 변경 요청",
     text: [
@@ -151,6 +166,12 @@ export async function requestEmailChange(
       "본인이 요청한 것이 아니라면 지금 비밀번호를 변경해 주세요.",
     ].join("\n"),
   });
+  if (!noticeResult.ok) {
+    reportWarning(new Error(noticeResult.error), {
+      scope: "requestEmailChange.noticeSendFailed",
+      meta: { backerId },
+    });
+  }
 
   return { ok: true };
 }

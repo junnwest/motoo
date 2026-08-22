@@ -2,6 +2,7 @@ import { createHash, randomBytes } from "node:crypto";
 import { prisma } from "@/lib/db";
 import { hashPassword } from "@/lib/password";
 import { getEmailProvider, EMAIL_FROM } from "@/lib/email";
+import { reportWarning } from "@/lib/report";
 
 /**
  * Password reset.
@@ -73,7 +74,7 @@ export async function requestPasswordReset(
   });
 
   const url = `${origin}/reset/${token}`;
-  await getEmailProvider().send({
+  const result = await getEmailProvider().send({
     to: normalized,
     subject: "[motoo] 비밀번호 재설정",
     text: [
@@ -88,6 +89,17 @@ export async function requestPasswordReset(
       `보낸 사람: ${EMAIL_FROM}`,
     ].join("\n"),
   });
+
+  // The caller always sees `{ ok: true }` regardless (enumeration, see above) —
+  // this is the only place a failed send is recorded at all. Without it, a
+  // misconfigured provider (bad key, unverified domain) fails every reset
+  // silently forever, indistinguishable from success on every layer above.
+  if (!result.ok) {
+    reportWarning(new Error(result.error), {
+      scope: "requestPasswordReset.sendFailed",
+      meta: { backerId: backer.id },
+    });
+  }
 
   return { ok: true };
 }
