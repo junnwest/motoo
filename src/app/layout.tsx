@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Analytics } from "@vercel/analytics/next";
-import { IBM_Plex_Mono } from "next/font/google";
+import { Baloo_2, Fredoka, IBM_Plex_Mono } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { defaultLocale } from "@/i18n/config";
@@ -12,6 +12,25 @@ const ibmPlexMono = IBM_Plex_Mono({
   variable: "--font-ibm-plex-mono",
   subsets: ["latin"],
   weight: ["400", "500", "600"],
+  display: "swap",
+});
+
+// The "motoo" wordmark, replacing Pretendard for just that lockup — rounder
+// and friendlier than the UI's default face, on purpose (2026-08-20).
+const fredoka = Fredoka({
+  variable: "--font-fredoka",
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  display: "swap",
+});
+
+// The "studio" suffix on the Studio host's wordmark only — a distinct, lighter
+// rounded face so it still reads as a suffix, not a second word competing with
+// "motoo".
+const baloo2 = Baloo_2({
+  variable: "--font-baloo-2",
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
   display: "swap",
 });
 
@@ -62,7 +81,7 @@ export async function generateMetadata(): Promise<Metadata> {
  * unusable for low-vision users.
  */
 export const viewport: Viewport = {
-  themeColor: "#fbf6ef",
+  themeColor: "#f15a29",
   viewportFit: "cover",
 };
 
@@ -72,7 +91,10 @@ export default async function RootLayout({
   const t = await getTranslations("a11y");
 
   return (
-    <html lang={defaultLocale} className={`${ibmPlexMono.variable} h-full antialiased`}>
+    <html
+      lang={defaultLocale}
+      className={`${ibmPlexMono.variable} ${fredoka.variable} ${baloo2.variable} h-full antialiased`}
+    >
       <body className="min-h-full flex flex-col bg-cream text-ink">
         <NextIntlClientProvider>
           {/* Skip link (WCAG 2.4.1). Every page starts with the same nav, and

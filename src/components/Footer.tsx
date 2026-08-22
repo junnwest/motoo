@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { Mochi } from "./Mochi";
+import { BrandMark } from "./BrandMark";
 import { supportMailto } from "@/lib/support";
 
 type FooterLink = {
@@ -105,9 +105,9 @@ export function Footer({
         <div className="flex flex-wrap justify-between gap-10">
           <div className="max-w-[300px]">
             <div className="mb-[14px] flex items-center gap-[9px]">
-              <Mochi width={24} height={19} />
+              <BrandMark width={21} height={24} />
               <span
-                className={`text-xl font-extrabold tracking-[-0.04em] ${c.brand}`}
+                className={`font-wordmark text-xl font-bold tracking-[-0.01em] ${c.brand}`}
               >
                 motoo
               </span>

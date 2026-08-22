@@ -22,7 +22,7 @@ export default async function SignupPage() {
       <Nav />
       <main id="main" className="mx-auto grid w-full max-w-[1080px] flex-1 grid-cols-1 items-center gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[1.05fr_1fr] lg:gap-12 lg:py-14">
         {/* Left: warm value-prop hero */}
-        <div className="relative overflow-hidden rounded-2xl bg-[linear-gradient(155deg,#f7eadd_0%,#f2b5a0_100%)] px-8 py-12 sm:px-12 sm:py-16">
+        <div className="relative overflow-hidden rounded-2xl bg-[linear-gradient(155deg,#f7eadd_0%,#f9b59f_100%)] px-8 py-12 sm:px-12 sm:py-16">
           {/* decorative floating mochi */}
           <Mochi
             width={130}

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Mochi } from "./Mochi";
+import { BrandMark } from "./BrandMark";
 
 /**
  * The brand mark. On the Studio host it reads **motoo studio** — the console is
@@ -19,16 +19,16 @@ export function BrandLogo({
 }) {
   return (
     <Link href={href} className="flex items-center gap-[10px]">
-      <Mochi width={26} height={21} />
+      <BrandMark width={23} height={26} />
       <span
-        className={`text-2xl font-extrabold tracking-[-0.04em] ${
+        className={`font-wordmark text-2xl font-bold tracking-[-0.01em] ${
           onDark ? "text-cream" : "text-ink"
         }`}
       >
         motoo
         {studio ? (
           <span
-            className={`ml-1.5 font-bold ${
+            className={`font-wordmark-studio ml-1.5 font-semibold ${
               onDark ? "text-dark-text-3" : "text-muted"
             }`}
           >

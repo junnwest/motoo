@@ -58,11 +58,11 @@ export const contentType = "image/png";
 
 // Brand tokens, copied from the @theme block in globals.css. Satori can't read
 // CSS variables, so these are literals and must be updated with the tokens.
-const CREAM = "#fbf6ef";
+const CREAM = "#fde9e2";
 const INK = "#211c18";
 const BODY = "#74695f";
-const CORAL = "#e08a6f";
-const CORAL_DEEP = "#c9694c";
+const CORAL = "#f15a29";
+const CORAL_DEEP = "#d43e0e";
 const LINE = "#ece1d2";
 
 export default async function Image({

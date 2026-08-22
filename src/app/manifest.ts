@@ -5,11 +5,6 @@ import { getTranslations } from "next-intl/server";
  * Web app manifest. Mostly this is what lets a Korean mobile user "add to home
  * screen" and get the brand name and color rather than a URL and a screenshot —
  * relevant given how much of this product's traffic is expected on phones.
- *
- * No `icons` yet: the repo has only a favicon.ico, and a manifest that points
- * at icon sizes which don't exist is worse than one that omits them (browsers
- * fall back to the favicon either way, but a broken reference shows up in
- * every audit). Add them here when real PNG icons land.
  */
 export default async function manifest(): Promise<MetadataRoute.Manifest> {
   const t = await getTranslations("meta");
@@ -19,8 +14,12 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
     description: t("description"),
     start_url: "/",
     display: "standalone",
-    background_color: "#fbf6ef",
-    theme_color: "#fbf6ef",
+    background_color: "#fde9e2",
+    theme_color: "#f15a29",
     lang: "ko",
+    icons: [
+      { src: "/brand/icon-192.png", sizes: "192x192", type: "image/png" },
+      { src: "/brand/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
   };
 }
