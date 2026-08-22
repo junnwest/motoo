@@ -32,7 +32,7 @@ export function RightRailPanel({
 
   if (collapsed) {
     return (
-      <aside className="hidden h-full w-12 flex-none rounded-xl border border-line-2 bg-panel py-6 xl:block">
+      <aside className="hidden h-full w-12 flex-none rounded-xl border border-line-2 bg-card py-6 xl:block">
         <button
           type="button"
           onClick={() => toggle(false)}
@@ -46,7 +46,7 @@ export function RightRailPanel({
   }
 
   return (
-    <aside className="group hidden h-full w-[272px] flex-none overflow-y-auto rounded-xl border border-line-2 bg-panel px-4 py-6 xl:block">
+    <aside className="group hidden h-full w-[272px] flex-none overflow-y-auto rounded-xl border border-line-2 bg-card px-4 py-6 xl:block">
       <div className="mb-4 flex items-center gap-1">
         <button
           type="button"

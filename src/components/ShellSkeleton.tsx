@@ -23,7 +23,7 @@ export function ShellSkeleton({ children }: { children?: React.ReactNode }) {
       <Nav />
       <div className="flex h-[calc(100dvh-64px)] w-full items-stretch gap-3 overflow-hidden px-3 py-4 sm:gap-4 sm:px-4">
         <aside
-          className="hidden h-full w-[224px] flex-none rounded-xl border border-line-2 bg-panel px-3 py-6 lg:block"
+          className="hidden h-full w-[224px] flex-none rounded-xl border border-line-2 bg-card px-3 py-6 lg:block"
           aria-hidden
         >
           <SkeletonList rows={7} />
@@ -34,7 +34,7 @@ export function ShellSkeleton({ children }: { children?: React.ReactNode }) {
         <main
           id="main"
           aria-busy="true"
-          className="min-w-0 flex-1 overflow-hidden rounded-xl border border-line-2 bg-panel pb-[72px] lg:pb-0"
+          className="min-w-0 flex-1 overflow-hidden rounded-xl border border-line-2 bg-card pb-[72px] lg:pb-0"
         >
           <div className="w-full px-6 py-10 sm:px-8 sm:py-12">
             {children ?? <DefaultBody />}
@@ -42,7 +42,7 @@ export function ShellSkeleton({ children }: { children?: React.ReactNode }) {
         </main>
 
         <aside
-          className="hidden h-full w-[272px] flex-none rounded-xl border border-line-2 bg-panel px-4 py-6 xl:block"
+          className="hidden h-full w-[272px] flex-none rounded-xl border border-line-2 bg-card px-4 py-6 xl:block"
           aria-hidden
         >
           <SkeletonList rows={5} />

@@ -47,7 +47,7 @@ export function SidebarPanel({
 
   if (collapsed) {
     return (
-      <aside className="hidden h-full w-12 flex-none rounded-xl border border-line-2 bg-panel py-6 lg:block">
+      <aside className="hidden h-full w-12 flex-none rounded-xl border border-line-2 bg-card py-6 lg:block">
         <button
           type="button"
           onClick={() => toggle(false)}
@@ -61,7 +61,7 @@ export function SidebarPanel({
   }
 
   return (
-    <aside className="group hidden h-full w-[224px] flex-none overflow-y-auto rounded-xl border border-line-2 bg-panel px-3 py-6 lg:block">
+    <aside className="group hidden h-full w-[224px] flex-none overflow-y-auto rounded-xl border border-line-2 bg-card px-3 py-6 lg:block">
       <nav className="flex flex-col gap-0.5">
         <SidebarLink
           href="/home"
@@ -156,9 +156,7 @@ function SidebarLink({
       href={href}
       aria-current={active ? "page" : undefined}
       className={`flex items-center gap-3 rounded-md px-3 py-2.5 text-base font-bold transition-colors ${
-        active
-          ? "bg-cream-warm text-coral-deep"
-          : "text-ink hover:bg-cream-warm"
+        active ? "bg-cream text-coral-deep" : "text-ink hover:bg-cream"
       }`}
     >
       {icon}

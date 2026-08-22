@@ -84,17 +84,26 @@ export async function ConsumerShell({
             pb below `lg` clears the fixed MobileTabBar, which would otherwise
             sit on top of the last ~56px of every page; zero from `lg` up,
             where the bar is hidden and the Sidebar takes over. */}
-        {/* The middle box is `bg-panel`, not `bg-card`. Panel is the same tone
-            as the page, so the box reads as an outlined region rather than a
-            white slab — which matters because /s/[handle] and /home box their
-            own sections inside it. White-on-white would have made every inner
-            card look like a box in a box; on panel they read as cards sitting
-            in a container, which is what they are. */}
+        {/* All three shell boxes are `bg-card` (white) against the light-orange
+            page background (2026-08-20) — was `bg-panel`, deliberately the
+            same tone as the page, so inner cards read as "sitting in a
+            container" rather than a box-in-a-box. That relationship no longer
+            holds now that the page itself is colored: keeping panel's old
+            neutral tone here would have left the shell a dull beige floating
+            on the new orange, which is the opposite of what a white shell is
+            for. */}
         <main
           id="main"
-          className="min-w-0 flex-1 overflow-y-auto rounded-xl border border-line-2 bg-panel pb-[72px] lg:pb-0"
+          className="min-w-0 flex-1 overflow-y-auto rounded-xl border border-line-2 bg-card pb-[72px] lg:pb-0"
         >
-          {children}
+          {/* Floored to the box's own height so a short page (an empty
+              /notifications, a fresh account's /home) can't push the footer
+              up into view on load. Without this, `main`'s content — footer
+              included — is only as tall as `children`, so a couple of empty-
+              state lines put the footer a few hundred px down instead of a
+              full scroll away, and it read as a stray element mid-page
+              rather than a footer. */}
+          <div className="min-h-[calc(100dvh-64px)]">{children}</div>
           {/* The footer lives *inside* the scrolling column rather than under
               the shell. Outside it, a non-scrolling page could never reach it,
               and it spanned the full window width — cutting straight across the
