@@ -88,9 +88,20 @@ export async function Nav() {
             over one creator's own data, and a box that searched the public
             catalogue from inside it would be answering a different question
             than the one the page is about. Hidden below `sm`, where the mobile
-            tab bar carries the entry instead. */}
+            tab bar carries the entry instead.
+
+            Widened 2026-08-20 to line up with the shell's main box below it
+            rather than sitting in a fixed 360px well. The Sidebar reserves
+            224px+gap at `lg`, but this box already sits after the brand
+            logo (~96px) in nav's own flow, so `lg:ml-32` (224 − 96) is what
+            actually lands its left edge on main's — measured against a real
+            render, not assumed from the shell's own numbers. `xl:mr-[272px]`
+            mirrors the RightRail at `xl`; there's no equivalent logo-width
+            correction on the right because the actions cluster's width
+            varies by auth state, so that edge is close but not exact. No
+            `max-w` any more — `flex-1` fills whatever's left. */}
         {showConsumerChrome && (
-          <div className="mx-4 hidden max-w-[360px] flex-1 sm:block">
+          <div className="mx-4 hidden flex-1 sm:block lg:ml-32 xl:mr-[272px]">
             <SearchBox compact />
           </div>
         )}

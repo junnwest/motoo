@@ -1,5 +1,8 @@
 import { prisma } from "@/lib/db";
 import { getHiddenStreamerIds } from "@/lib/blocks";
+import { SEARCH_LIMIT, SUGGEST_LIMIT, MIN_QUERY_LENGTH } from "@/lib/searchConfig";
+
+export { SEARCH_LIMIT, SUGGEST_LIMIT, MIN_QUERY_LENGTH };
 
 /**
  * Global search (docs/PRELAUNCH.md #27).
@@ -19,10 +22,6 @@ import { getHiddenStreamerIds } from "@/lib/blocks";
  * mis-tokenised tsvector returns confidently wrong results where a substring
  * match just returns fewer. Worth revisiting with real query logs.
  */
-
-export const SEARCH_LIMIT = 12;
-/** Below this a query matches most of the catalogue; treated as no query. */
-export const MIN_QUERY_LENGTH = 2;
 
 export type SearchResults = {
   creators: {
@@ -53,6 +52,7 @@ export type SearchResults = {
 export async function globalSearch(
   rawQuery: string,
   viewerId?: string | null,
+  limit: number = SEARCH_LIMIT,
 ): Promise<SearchResults> {
   const q = rawQuery.trim();
   if (q.length < MIN_QUERY_LENGTH) {
@@ -79,7 +79,7 @@ export async function globalSearch(
         ],
       },
       orderBy: { mochiHoldings: { _count: "desc" } },
-      take: SEARCH_LIMIT,
+      take: limit,
       select: {
         id: true,
         handle: true,
@@ -103,7 +103,7 @@ export async function globalSearch(
         ],
       },
       orderBy: { redeemedCount: "desc" },
-      take: SEARCH_LIMIT,
+      take: limit,
       select: {
         id: true,
         title: true,
@@ -128,7 +128,7 @@ export async function globalSearch(
         ],
       },
       orderBy: { publishedAt: "desc" },
-      take: SEARCH_LIMIT,
+      take: limit,
       select: {
         id: true,
         title: true,

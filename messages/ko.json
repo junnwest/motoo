@@ -1480,8 +1480,10 @@
     "updates": "소식",
     "supporters": "후원자 {count, number}명",
     "price": "{count, number}모찌",
+    "viewAll": "‘{q}’ 검색 결과 모두 보기",
+    "noSuggestions": "‘{q}’에 대한 결과가 없어요",
     "empty": {
-      "title": "'{q}'에 대한 결과가 없어요",
+      "title": "‘{q}’에 대한 결과가 없어요",
       "body": "철자를 확인하거나 다른 말로 찾아보세요.",
       "cta": "둘러보기"
     }
@@ -1489,7 +1491,7 @@
   "orderIssue": {
     "cta": "문제 신고",
     "title": "주문에 문제가 있나요?",
-    "subtitle": "'{item}' 주문에 대해 크리에이터에게 확인을 요청할게요.",
+    "subtitle": "‘{item}’ 주문에 대해 크리에이터에게 확인을 요청할게요.",
     "reasonLabel": "어떤 문제인가요?",
     "reasons": {
       "not_delivered": "완료 처리됐는데 받지 못했어요",
