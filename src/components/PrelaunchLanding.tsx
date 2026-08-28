@@ -51,17 +51,31 @@ export async function PrelaunchLanding({
             <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-line-3 bg-card px-3.5 py-1.5">
               <span className="h-1.5 w-1.5 rounded-full bg-coral" />
               <span className="text-xs font-semibold uppercase tracking-[0.08em] text-coral-deep">
-                {signedIn ? t("doneEyebrow") : t("eyebrow")}
+                {signedIn
+                  ? signedIn.creatorHandle
+                    ? t("doneEyebrow")
+                    : signedIn.founding
+                      ? t("resumeEyebrow")
+                      : t("doneEyebrow")
+                  : t("eyebrow")}
               </span>
             </div>
 
             {signedIn ? (
               <>
                 <h1 className="break-keep text-4xl font-extrabold leading-tight tracking-[-0.04em] sm:text-6xl">
-                  {signedIn.creatorHandle ? t("doneTitle") : t("waitTitle")}
+                  {signedIn.creatorHandle
+                    ? t("doneTitle")
+                    : signedIn.founding
+                      ? t("resumeTitle")
+                      : t("waitTitle")}
                 </h1>
                 <p className="mx-auto mt-6 max-w-[540px] break-keep text-lg leading-relaxed text-body">
-                  {signedIn.creatorHandle ? t("doneBody") : t("waitBody")}
+                  {signedIn.creatorHandle
+                    ? t("doneBody")
+                    : signedIn.founding
+                      ? t("resumeBody")
+                      : t("waitBody")}
                 </p>
 
                 {signedIn.creatorHandle ? (
@@ -76,9 +90,12 @@ export async function PrelaunchLanding({
                       <FoundingBadge label={t("foundingBadge")} />
                     ) : null}
                   </div>
-                ) : (
-                  /* Signed in, invite redeemed, Studio not set up yet — the one
-                     thing they are still allowed to do. */
+                ) : signedIn.founding ? (
+                  /* Invited, account made, Studio not set up yet — the one
+                     thing they are still allowed to do. Distinct from the plain
+                     "wait for launch" state below: telling someone with unfinished
+                     setup to sit tight, directly above a button asking them to
+                     finish it, is a contradiction they have to resolve themselves. */
                   <div className="mt-8">
                     <ButtonLink
                       href="/creator/onboarding"
@@ -88,7 +105,7 @@ export async function PrelaunchLanding({
                       {t("doneSetupCta")}
                     </ButtonLink>
                   </div>
-                )}
+                ) : null}
 
                 <p className="mt-8 text-sm text-muted">
                   <Link
