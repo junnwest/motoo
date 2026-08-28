@@ -47,9 +47,9 @@ export default async function VerifyEmailPage({
         id="main"
         className="mx-auto flex w-full max-w-[420px] flex-1 flex-col justify-center px-6 py-20"
       >
-        <div className="rounded-xl border border-line-2 bg-card p-8 text-center shadow-[0_10px_40px_rgba(0,0,0,.04)]">
+        <div className="rounded-xl border border-line-2 bg-card p-8 text-center shadow-soft">
           <div className="flex flex-col items-center">
-            <Mochi width={40} height={33} float />
+            <Mochi width={40} height={33} float className="text-coral-soft" />
             <h1 className="mt-4 text-2xl font-extrabold tracking-[-0.02em] break-keep">
               {title}
             </h1>

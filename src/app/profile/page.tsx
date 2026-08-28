@@ -112,8 +112,8 @@ export default async function ProfilePage({
             {holdings.length === 0 ? (
               <div className="flex flex-col items-center rounded-lg border border-dashed border-line-3 bg-card/60 px-6 py-16 text-center">
                 <div className="mb-3 flex items-end justify-center gap-1.5">
-                  <Mochi width={38} height={31} float />
-                  <Mochi width={50} height={41} float floatDelay={0.5} />
+                  <Mochi width={38} height={31} float className="text-coral-soft" />
+                  <Mochi width={50} height={41} float floatDelay={0.5} className="text-coral-soft" />
                 </div>
                 <p className="max-w-[360px] text-base text-body">
                   {tm("empty")}
@@ -160,7 +160,7 @@ export default async function ProfilePage({
                         creator" belongs, next to what you hold. */}
                     <div className="mt-4 flex flex-wrap items-center justify-between gap-2 rounded-md bg-panel px-4 py-3">
                       <span className="flex items-center gap-1.5 text-base font-extrabold text-ink">
-                        <Mochi width={16} height={12} />
+                        <Mochi width={16} height={12} className="text-coral-deep" />
                         {tm("balance", { count: h.balance })}
                       </span>
                       {rankByStreamer.get(h.streamerId) && (
@@ -226,7 +226,7 @@ export default async function ProfilePage({
                       {t("donatedAmount", { amount: d.amountKrw })}
                     </span>
                     <span className="flex items-center gap-1.5 text-sm font-bold text-coral-deep">
-                      <Mochi width={15} height={11} />
+                      <Mochi width={15} height={11} className="text-coral-deep" />
                       {t("donationBonus", { count: d.mochiGranted })}
                     </span>
                     {/* One request per donation, so once asked the row states
@@ -310,7 +310,7 @@ export default async function ProfilePage({
                       )}
                     </div>
                     <span className="flex items-center gap-1.5 text-sm font-extrabold text-ink">
-                      <Mochi width={15} height={11} />
+                      <Mochi width={15} height={11} className="text-coral-deep" />
                       {tm("spent", { count: o.mochiSpent })}
                     </span>
                     <span

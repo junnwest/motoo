@@ -1,12 +1,15 @@
 import Link from "next/link";
-import { BrandMark } from "./BrandMark";
+import { BrandWordmark } from "./BrandWordmark";
 
 /**
- * The brand mark. On the Studio host it reads **motoo studio** — the console is
- * a different product surface from the consumer app, and both hosts share one
- * `Nav`, so the wordmark is what tells you which one you're on at a glance.
- * "studio" is set in the lighter muted weight so "motoo" still reads as the
- * brand rather than the two words competing.
+ * The brand lockup. Wordmark only — the symbol was retired 2026-08-28, so this
+ * is now just the Bauhaus 93 outlines at nav scale.
+ *
+ * On the Studio host it reads **motoo studio** — the console is a different
+ * product surface from the consumer app, and both hosts share one `Nav`, so the
+ * wordmark is what tells you which one you're on at a glance. "studio" carries
+ * a muted fill inside the SVG (it shares a baseline with "motoo" rather than
+ * being a separate element) so it still reads as a suffix, not a second word.
  */
 export function BrandLogo({
   href = "/",
@@ -18,24 +21,13 @@ export function BrandLogo({
   studio?: boolean;
 }) {
   return (
-    <Link href={href} className="flex items-center gap-[10px]">
-      <BrandMark width={23} height={26} />
-      <span
-        className={`font-wordmark text-2xl font-bold tracking-[-0.01em] ${
-          onDark ? "text-cream" : "text-ink"
-        }`}
-      >
-        motoo
-        {studio ? (
-          <span
-            className={`font-wordmark-studio ml-1.5 font-semibold ${
-              onDark ? "text-dark-text-3" : "text-muted"
-            }`}
-          >
-            studio
-          </span>
-        ) : null}
-      </span>
+    <Link href={href} className="flex items-center">
+      <BrandWordmark
+        height={20}
+        studio={studio}
+        onDark={onDark}
+        className={onDark ? "text-cream" : "text-ink"}
+      />
     </Link>
   );
 }

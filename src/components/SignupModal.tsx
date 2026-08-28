@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Modal } from "@/components/ui/Modal";
 import { Mochi } from "./Mochi";
+import { IconHeart } from "@/components/ui/Icons";
 
 /**
  * Sign-up role chooser. A single 회원가입 entry opens this instead of forking the
@@ -57,12 +58,16 @@ export function SignupModal({
           <Link
             href="/api/fan-signup"
             onClick={onClose}
-            className="group flex flex-col items-center rounded-xl border border-line-2 bg-panel px-4 py-6 text-center transition hover:border-coral hover:bg-card hover:shadow-[0_8px_24px_rgba(33,28,24,0.08)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-deep"
+            className="group flex flex-col items-center rounded-xl border border-line-2 bg-panel px-4 py-6 text-center transition hover:border-coral hover:bg-card hover:shadow-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-deep"
           >
-            <span className="flex h-12 w-12 items-center justify-center rounded-lg bg-coral-chip text-coral-deep transition group-hover:bg-coral group-hover:text-white">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path d="M12 21s-7.5-4.6-10-9.3C.4 8.4 1.9 5 5.1 5c2 0 3.3 1.2 3.9 2.2C9.6 6.2 10.9 5 12.9 5 16.1 5 17.6 8.4 16 11.7 13.5 16.4 12 21 12 21z" />
-              </svg>
+            <span className="flex h-12 w-12 items-center justify-center rounded-lg border border-line-2 bg-card text-coral-deep transition group-hover:border-coral group-hover:shadow-soft">
+              {/* Was a hand-rolled filled heart inline here. It was the only
+                  glyph in the app not coming from `Icons.tsx`, and it had
+                  drifted accordingly: solid where everything else is a 2px
+                  stroke, and geometrically lopsided — its lobes spanned
+                  x≈1.5–17 while the bottom point sat at x=12, so it rendered
+                  visibly left of centre in this tile. */}
+              <IconHeart className="h-6 w-6" />
             </span>
             <span className="mt-4 text-xs text-muted">
               {t("roleFanTagline")}
@@ -76,10 +81,10 @@ export function SignupModal({
           <Link
             href="/api/become-creator"
             onClick={onClose}
-            className="group flex flex-col items-center rounded-xl border border-line-2 bg-panel px-4 py-6 text-center transition hover:border-coral hover:bg-card hover:shadow-[0_8px_24px_rgba(33,28,24,0.08)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-deep"
+            className="group flex flex-col items-center rounded-xl border border-line-2 bg-panel px-4 py-6 text-center transition hover:border-coral hover:bg-card hover:shadow-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-deep"
           >
-            <span className="flex h-12 w-12 items-center justify-center rounded-lg bg-sage-bg transition group-hover:bg-sage/20">
-              <Mochi width={26} height={21} />
+            <span className="flex h-12 w-12 items-center justify-center rounded-lg border border-line-2 bg-card transition group-hover:border-coral group-hover:shadow-soft">
+              <Mochi width={26} height={21} className="text-coral-deep" />
             </span>
             <span className="mt-4 text-xs text-muted">
               {t("roleCreatorTagline")}

@@ -67,7 +67,7 @@ export async function SupporterLeaderboard({
                   {e.nickname}
                 </span>
                 <span className="flex flex-none items-center gap-1 text-xs font-bold text-ink">
-                  <Mochi width={12} height={9.5} />
+                  <Mochi width={12} height={9.5} className="text-coral-deep" />
                   {formatCount(e.mochiEarnedTotal)}
                 </span>
               </li>

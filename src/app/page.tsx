@@ -11,14 +11,72 @@ import {
   IconGift,
   IconAward,
   IconDashboard,
+  IconChevronRight,
+  IconLock,
+  IconRefund,
+  IconWallet,
 } from "@/components/ui/Icons";
 import { Mochi } from "@/components/Mochi";
 import { StreamerCard } from "@/components/StreamerCard";
-import { CreatorCover } from "@/components/CreatorCover";
-import { getExploreStreamers, type StreamerCard as CardData } from "@/lib/streamers";
+import {
+  getExploreStreamers,
+  getLandingStats,
+  type StreamerCard as CardData,
+  type LandingStats,
+} from "@/lib/streamers";
 import { getSession } from "@/lib/session";
-import { getSupporterLeaderboard } from "@/lib/ranking";
+import { PRELAUNCH } from "@/lib/prelaunch";
+import { PrelaunchLanding } from "@/components/PrelaunchLanding";
 import { formatCount } from "@/lib/format";
+
+/**
+ * The fine grid behind the hero. Pure CSS — no image and no third party, so it
+ * costs no request and cannot trip the CSP. Masked to a radial fade so it reads
+ * as a surface the page is drawn on rather than as graph paper.
+ */
+function HeroGrid() {
+  const fade =
+    "radial-gradient(ellipse 75% 60% at 50% 0%, #000 35%, transparent 100%)";
+  return (
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-0"
+      style={{
+        backgroundImage:
+          "linear-gradient(to right, var(--color-line) 1px, transparent 1px)," +
+          "linear-gradient(to bottom, var(--color-line) 1px, transparent 1px)",
+        backgroundSize: "72px 72px",
+        maskImage: fade,
+        WebkitMaskImage: fade,
+      }}
+    />
+  );
+}
+
+/** One figure in the hero stat rail. Tabular so the three do not jitter. */
+function Stat({ value, label }: { value: string; label: string }) {
+  return (
+    <div className="flex-1 px-5 py-4 text-center sm:px-7 sm:py-5">
+      <div className="text-3xl font-extrabold tabular-nums tracking-[-0.03em] text-ink sm:text-4xl">
+        {value}
+      </div>
+      <div className="mt-1.5 break-keep text-xs tracking-[0.03em] text-muted">
+        {label}
+      </div>
+    </div>
+  );
+}
+
+/** Founding status for the pre-launch confirmation. One column, one page. */
+async function hasFoundingMark(backerId: string | undefined): Promise<boolean> {
+  if (!backerId) return false;
+  const { prisma } = await import("@/lib/db");
+  const row = await prisma.backer.findUnique({
+    where: { id: backerId },
+    select: { foundingAt: true },
+  });
+  return Boolean(row?.foundingAt);
+}
 
 export default async function FanLandingPage() {
   // "/" is the public marketing landing for logged-OUT visitors only. Everyone
@@ -32,6 +90,27 @@ export default async function FanLandingPage() {
   // nav's motoo pill goes straight back to /home, which stays fully reachable.
   // (Non-onboarded users are caught by the onboarding middleware before this.)
   const session = await getSession();
+
+  // Pre-launch: the product is unlaunched for everyone but admins, so `/` is
+  // where a signed-in creator lands too — the Studio and /home are gated. They
+  // get a confirmation (handle reserved, founding badge) rather than the
+  // "only invited creators can sign up" pitch, which would read as a failure to
+  // someone who has just been invited and signed up.
+  //
+  // The marketing landing below is untouched: flipping PRELAUNCH off brings it
+  // straight back, which is the point of gating on an env var.
+  if (PRELAUNCH && session?.user?.role !== "admin") {
+    if (!session?.user) return <PrelaunchLanding />;
+    return (
+      <PrelaunchLanding
+        signedIn={{
+          creatorHandle: session.user.creator ?? null,
+          founding: await hasFoundingMark(session.user.id),
+        }}
+      />
+    );
+  }
+
   if (session?.user) redirect(session.user.creator ? "/studio" : "/home");
 
   const t = await getTranslations("fanLanding");
@@ -40,15 +119,67 @@ export default async function FanLandingPage() {
 
   let trending: CardData[] = [];
   try {
-    trending = (await getExploreStreamers({ sort: "backers", pageSize: 4 })).cards;
+    trending = (await getExploreStreamers({ sort: "backers", pageSize: 4 }))
+      .cards;
   } catch {
     trending = [];
   }
-  const spotlight = trending[0];
-  // The spotlight's real lifetime mochi, not a multiple of its supporter count.
-  const spotlightMochi = spotlight
-    ? (await getSupporterLeaderboard(spotlight.id, 1)).totalMochiEarned
-    : 0;
+
+  // Stats are stated as fact on the page, so a failed query renders nothing
+  // rather than a zero — "0 크리에이터" is a worse lie than an absent rail.
+  let stats: LandingStats | null = null;
+  try {
+    stats = await getLandingStats();
+  } catch {
+    stats = null;
+  }
+
+  const benefits = [
+    {
+      Icon: IconSend,
+      title: t("benefits.messageTitle"),
+      body: t("benefits.messageBody"),
+    },
+    {
+      Icon: IconGift,
+      title: t("benefits.perksTitle"),
+      body: t("benefits.perksBody"),
+    },
+    {
+      Icon: IconAward,
+      title: t("benefits.badgeTitle"),
+      body: t("benefits.badgeBody"),
+    },
+    {
+      Icon: IconDashboard,
+      title: t("benefits.dashboardTitle"),
+      body: t("benefits.dashboardBody"),
+    },
+  ];
+
+  const steps = [
+    { n: "01", title: t("how.step1Title"), body: t("how.step1Body") },
+    { n: "02", title: t("how.step2Title"), body: t("how.step2Body") },
+    { n: "03", title: t("how.step3Title"), body: t("how.step3Body") },
+  ];
+
+  const guarantees = [
+    {
+      Icon: IconRefund,
+      title: t("mochiPoint1Title"),
+      body: t("mochiPoint1Body"),
+    },
+    {
+      Icon: IconWallet,
+      title: t("mochiPoint2Title"),
+      body: t("mochiPoint2Body"),
+    },
+    {
+      Icon: IconLock,
+      title: t("mochiPoint3Title"),
+      body: t("mochiPoint3Body"),
+    },
+  ];
 
   return (
     <>
@@ -59,262 +190,266 @@ export default async function FanLandingPage() {
           hero was outside any landmark at all. Found by `pnpm check:a11y`
           (axe `region`), not by reading it. */}
       <main id="main">
-      {/* Hero */}
-      <section className="relative overflow-hidden bg-cream-warm px-6 py-20 text-center sm:px-14 sm:py-24">
-        {/* Soft decorative circles (same shape as the final CTA), not floating mochis */}
-        <div className="absolute left-[8%] top-10 h-16 w-16 rounded-[46%_46%_48%_48%/52%_52%_48%_48%] bg-coral-soft/45" />
-        <div className="absolute right-[12%] top-28 h-11 w-11 rounded-[46%_46%_48%_48%/52%_52%_48%_48%] bg-white/60" />
-        <div className="absolute bottom-8 left-[16%] hidden h-9 w-9 rounded-[46%_46%_48%_48%/52%_52%_48%_48%] bg-coral-soft/35 sm:block" />
-        <div className="relative mx-auto max-w-[720px]">
-          <Eyebrow className="mb-[22px]">{t("eyebrow")}</Eyebrow>
-          <h1 className="text-5xl font-extrabold leading-tight tracking-[-0.035em] sm:text-7xl">
-            {t("heroTitle")}
-            <br />
-            <span className="text-coral-deep">{t("heroTitleAccent")}</span>
-            {t("heroTitleTail")}
-          </h1>
-          <p className="mx-auto mt-6 max-w-[520px] text-lg leading-relaxed text-body sm:text-xl">
-            {t("heroSubtitle")}
-          </p>
-
-          {/* Role CTAs — the choice at first glance (fan vs creator) */}
-          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            {/* Both role CTAs go through their route handler so picking one
-                clears the other's remembered intent (see /api/fan-signup). */}
-            <ButtonLink href="/api/fan-signup" variant="primary" size="lg">
-              {ta("startAsFan")}
-            </ButtonLink>
-            <ButtonLink href="/api/become-creator" variant="dark" size="lg">
-              {ta("startAsCreator")}
-            </ButtonLink>
-          </div>
-          <p className="mt-4 text-sm text-muted">
-            {ta("alreadyMember")}{" "}
-            <Link
-              href="/login"
-              className="font-semibold text-coral-deep hover:underline"
-            >
-              {tc("login")}
-            </Link>
-          </p>
-        </div>
-      </section>
-
-      {/* Trending creators */}
-      <section className="mx-auto max-w-[1200px] px-6 py-20 sm:px-14 sm:py-24">
-        <div className="mb-8">
-          <Eyebrow className="mb-3">{t("trendingEyebrow")}</Eyebrow>
-          <h2 className="text-3xl font-extrabold tracking-[-0.03em] sm:text-5xl">
-            {t("trendingTitle")}
-          </h2>
-        </div>
-        {trending.length > 0 ? (
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {trending.map((s) => (
-              <StreamerCard key={s.handle} streamer={s} />
-            ))}
-          </div>
-        ) : (
-          <p className="text-body">{tc("loading")}</p>
-        )}
-      </section>
-
-      {/* How mochi works (dark) */}
-      <section className="bg-ink px-6 py-20 text-dark-text sm:px-14 sm:py-24">
-        <div className="mx-auto max-w-[1200px]">
-          <div className="mb-[50px] text-center">
-            <Eyebrow tone="onDark" className="mb-4">
-              {t("howEyebrow")}
-            </Eyebrow>
-            <h2 className="text-3xl font-extrabold tracking-[-0.03em] text-cream sm:text-5xl">
-              {t("howTitle")}
-            </h2>
-          </div>
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-            {[1, 2, 3].map((n) => (
-              <div
-                key={n}
-                className="rounded-2xl border border-dark-line bg-ink-2 p-8"
-              >
-                <div className="mb-[18px] font-mono text-sm font-semibold text-coral-tint">
-                  0{n}
-                </div>
-                <h3 className="mb-[10px] text-xl font-extrabold text-cream">
-                  {t(`how.step${n}Title` as never)}
-                </h3>
-                <p className="text-base leading-relaxed text-dark-text-3">
-                  {t(`how.step${n}Body` as never)}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Benefits. Left-aligned, matching Trending: the rule on this page is
-          that sections sitting *on* the page align left, and full-bleed colour
-          bands (hero, the dark how-it-works, the final CTA) centre. Before,
-          Trending was left and Benefits was centred with nothing distinguishing
-          them, which is the kind of near-miss that reads as unconsidered. */}
-      <section className="mx-auto max-w-[1200px] px-6 py-20 sm:px-14 sm:py-24">
-        <h2 className="mb-10 text-3xl font-extrabold tracking-[-0.03em] sm:text-5xl">
-          {t("benefitsTitle")}
-        </h2>
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-          {[
-            {
-              key: "message",
-              Icon: IconSend,
-              tile: "bg-coral-chip text-coral-deep",
-            },
-            {
-              key: "perks",
-              Icon: IconGift,
-              tile: "bg-sage-bg text-sage-text",
-            },
-            {
-              key: "badge",
-              Icon: IconAward,
-              tile: "bg-coral-chip text-coral-deep",
-            },
-            {
-              key: "dashboard",
-              Icon: IconDashboard,
-              tile: "bg-sage-bg text-sage-text",
-            },
-          ].map((b) => (
-            <div
-              key={b.key}
-              className="flex items-start gap-5 rounded-xl border border-line-2 bg-card p-8"
-            >
-              <div
-                className={`flex h-12 w-12 flex-none items-center justify-center rounded-lg ${b.tile}`}
-              >
-                <b.Icon />
-              </div>
-              <div>
-                <h3 className="mb-[7px] text-xl font-extrabold">
-                  {t(`benefits.${b.key}Title` as never)}
-                </h3>
-                <p className="text-base leading-relaxed text-body">
-                  {t(`benefits.${b.key}Body` as never)}
-                </p>
-              </div>
+        {/* Hero.
+            No colour band. The hero shares the page's white so there is no seam
+            under the nav — the old `bg-cream-warm` block was designed against a
+            pink page and read as a stray beige rectangle once the page went
+            white. Separation now comes from the grid fade and the stat rail. */}
+        <section className="relative overflow-hidden px-6 pb-16 pt-16 sm:px-14 sm:pb-20 sm:pt-24">
+          <HeroGrid />
+          <div className="relative mx-auto max-w-[860px] text-center">
+            <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-line-3 bg-card px-3.5 py-1.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-coral" />
+              <span className="text-xs font-semibold uppercase tracking-[0.08em] text-coral-deep">
+                {t("eyebrow")}
+              </span>
             </div>
-          ))}
-        </div>
-      </section>
 
-      {/* Spotlight creator */}
-      {spotlight && (
-        <section className="mx-auto max-w-[1200px] px-6 pb-[92px] sm:px-14">
-          <div className="grid grid-cols-1 overflow-hidden rounded-2xl border border-line-2 bg-card shadow-card md:grid-cols-2">
-            <CreatorCover
-              handle={spotlight.handle}
-              displayName={spotlight.displayName}
-              className="min-h-[240px] md:min-h-[340px]"
-              markClass="text-[104px] sm:text-[132px]"
-            />
-            <div className="p-10 sm:p-11">
-              <Eyebrow className="mb-4">{t("spotlightEyebrow")}</Eyebrow>
-              <h2 className="text-3xl font-extrabold tracking-[-0.03em] sm:text-4xl">
-                {spotlight.displayName}
-              </h2>
-              <div className="mb-7 mt-6 flex gap-7">
-                <div>
-                  <div className="text-2xl font-extrabold">
-                    {spotlight.backerCount}
-                  </div>
-                  <div className="text-xs text-muted">
-                    {t("spotlightBackers")}
-                  </div>
-                </div>
-                <div>
-                  {/* Was `backerCount * 10` — an invented number presented as
-                      this creator's real mochi total, on the homepage of a
-                      product whose whole premise is trustworthy support data.
-                      The true figure was one query away. */}
-                  <div className="flex items-center gap-[6px] text-2xl font-extrabold">
-                    <Mochi width={18} height={14} />
-                    {formatCount(spotlightMochi)}
-                  </div>
-                  <div className="text-xs text-muted">
-                    {t("spotlightMochi")}
-                  </div>
-                </div>
-              </div>
-              <ButtonLink href={`/s/${spotlight.handle}/donate`} size="lg">
-                <Mochi width={18} height={14} /> {tc("donate")}
+            <h1 className="break-keep text-5xl font-extrabold leading-tight tracking-[-0.04em] sm:text-7xl">
+              {t("heroTitle")}
+              <br />
+              <span className="text-coral">{t("heroTitleAccent")}</span>
+              {t("heroTitleTail")}
+            </h1>
+
+            <p className="mx-auto mt-6 max-w-[540px] break-keep text-lg leading-relaxed text-body sm:text-xl">
+              {t("heroSubtitle")}
+            </p>
+
+            {/* Both role CTAs go through their route handler so picking one
+                clears the other's remembered intent (see /api/fan-signup).
+                The creator CTA is `secondary`, not `dark` — filled black, it
+                read as equal weight to the fan CTA, which is the one this page
+                exists to push. */}
+            <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <ButtonLink href="/api/fan-signup" variant="primary" size="lg">
+                {ta("startAsFan")}
               </ButtonLink>
+              <ButtonLink
+                href="/api/become-creator"
+                variant="secondary"
+                size="lg"
+              >
+                {ta("startAsCreator")}
+              </ButtonLink>
+            </div>
+
+            <p className="mt-5 break-keep text-sm text-muted">{t("heroNote")}</p>
+            <p className="mt-2 text-sm text-muted">
+              {ta("alreadyMember")}{" "}
+              <Link
+                href="/login"
+                className="font-semibold text-coral-deep hover:underline"
+              >
+                {tc("login")}
+              </Link>
+            </p>
+          </div>
+
+          {/* Stat rail — real rows from the same tables the product reads. */}
+          {stats ? (
+            <div className="relative mx-auto mt-14 max-w-[820px] sm:mt-16">
+              <div className="flex divide-x divide-line rounded-2xl border border-line-2 bg-card shadow-soft">
+                <Stat
+                  value={formatCount(stats.creators)}
+                  label={t("statsCreators")}
+                />
+                <Stat
+                  value={formatCount(stats.supporters)}
+                  label={t("statsSupporters")}
+                />
+                <Stat
+                  value={formatCount(stats.mochiDelivered)}
+                  label={t("statsMochi")}
+                />
+              </div>
+              <p className="mt-3 text-center text-2xs tracking-[0.04em] text-muted">
+                {t("statsNote")}
+              </p>
+            </div>
+          ) : null}
+        </section>
+
+        {/* Trending creators */}
+        <section className="mx-auto max-w-[1200px] px-6 py-20 sm:px-14 sm:py-24">
+          <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <Eyebrow className="mb-3">{t("trendingEyebrow")}</Eyebrow>
+              <h2 className="break-keep text-3xl font-extrabold tracking-[-0.03em] sm:text-5xl">
+                {t("trendingTitle")}
+              </h2>
+            </div>
+            <Link
+              href="/explore"
+              className="inline-flex items-center gap-1 text-sm font-semibold text-coral-deep hover:underline"
+            >
+              {t("trendingAll")}
+              <IconChevronRight className="h-4 w-4" />
+            </Link>
+          </div>
+
+          {trending.length > 0 ? (
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              {trending.map((s, i) => (
+                <div key={s.handle} className="relative">
+                  {/* Rank marker. Landing-only: it belongs to "지금 뜨는", not to
+                      StreamerCard, which is shared with /explore and /search. */}
+                  <span className="absolute -top-2.5 left-3 z-10 rounded-md border border-line-2 bg-card px-1.5 py-0.5 text-2xs font-semibold tabular-nums tracking-[0.06em] text-muted">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <StreamerCard streamer={s} />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-body">{tc("loading")}</p>
+          )}
+        </section>
+
+        {/* How it works — the page's single dark block. It used to have two
+            plus a dark footer, with a full-bleed orange section wedged between
+            them. */}
+        <section className="bg-ink px-6 py-20 text-dark-text sm:px-14 sm:py-24">
+          <div className="mx-auto max-w-[1200px]">
+            <div className="mb-12 text-center">
+              <Eyebrow tone="onDark" className="mb-3">
+                {t("howEyebrow")}
+              </Eyebrow>
+              <h2 className="break-keep text-3xl font-extrabold tracking-[-0.03em] text-dark-text sm:text-5xl">
+                {t("howTitle")}
+              </h2>
+            </div>
+
+            <ol className="grid grid-cols-1 gap-px overflow-hidden rounded-2xl bg-dark-line md:grid-cols-3">
+              {steps.map((s) => (
+                <li key={s.n} className="bg-ink-2 p-8 sm:p-9">
+                  <div className="text-sm font-semibold tabular-nums tracking-[0.06em] text-coral-tint">
+                    {s.n}
+                  </div>
+                  <h3 className="mt-5 break-keep text-xl font-bold text-dark-text">
+                    {s.title}
+                  </h3>
+                  <p className="mt-2.5 break-keep text-base leading-relaxed text-dark-text-2">
+                    {s.body}
+                  </p>
+                </li>
+              ))}
+            </ol>
+
+            <p className="mt-8 break-keep text-center text-sm text-dark-text-3">
+              {t("howNote")}
+            </p>
+          </div>
+        </section>
+
+        {/* Benefits */}
+        <section className="mx-auto max-w-[1200px] px-6 py-20 sm:px-14 sm:py-24">
+          <h2 className="mb-10 break-keep text-3xl font-extrabold tracking-[-0.03em] sm:text-5xl">
+            {t("benefitsTitle")}
+          </h2>
+          <div className="grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-line-2 bg-line sm:grid-cols-2 lg:grid-cols-4">
+            {benefits.map(({ Icon, title, body }) => (
+              <div key={title} className="bg-card p-7">
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-coral-chip text-coral-deep">
+                  <Icon className="h-5 w-5" />
+                </span>
+                <h3 className="mt-5 break-keep text-lg font-bold">{title}</h3>
+                <p className="mt-2 break-keep text-base leading-relaxed text-body">
+                  {body}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* What mochi is not.
+            Legally load-bearing (spec §2 — motoo is not a financial product),
+            so it is a precise bordered statement rather than a soft pastel
+            band. Every claim here has to agree with /refund, which is the
+            single source of truth; the link is not decoration. */}
+        <section className="mx-auto max-w-[1200px] px-6 pb-20 sm:px-14 sm:pb-24">
+          <div className="overflow-hidden rounded-2xl border border-line-3 bg-card">
+            <div className="flex flex-wrap items-center gap-3 border-b border-line-2 bg-panel px-8 py-5">
+              {/* `Mochi` writes width/height as inline styles from its props, so a
+                  Tailwind `h-4 w-4` on it is silently ignored — this was the one
+                  call site of 49 passing className instead of props, and it was
+                  rendering at the 26x21 default inside a 28px circle. The tile is
+                  also `coral-chip` now: the flattened mochi body is coral-tint,
+                  which was invisible against the solid `coral` this used to be. */}
+              <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-coral-chip">
+                <Mochi width={18} height={14} className="text-coral-deep" />
+              </span>
+              <span className="text-xs font-semibold uppercase tracking-[0.08em] text-coral-deep">
+                {t("mochiExplainerLabel")}
+              </span>
+            </div>
+
+            <div className="px-8 py-9 sm:px-10">
+              <h2 className="max-w-[720px] break-keep text-2xl font-extrabold tracking-[-0.02em] sm:text-4xl">
+                {t.rich("mochiExplainerTitle", {
+                  accent: (c) => <span className="text-coral">{c}</span>,
+                })}
+              </h2>
+
+              <div className="mt-9 grid grid-cols-1 gap-8 sm:grid-cols-3">
+                {guarantees.map(({ Icon, title, body }) => (
+                  <div key={title}>
+                    <div className="flex items-center gap-2 text-ink">
+                      <Icon className="h-4 w-4 text-coral-deep" />
+                      <h3 className="break-keep text-base font-bold">{title}</h3>
+                    </div>
+                    <p className="mt-2 break-keep text-sm leading-relaxed text-body">
+                      {body}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              <Link
+                href="/refund"
+                className="mt-9 inline-flex items-center gap-1 text-sm font-semibold text-coral-deep hover:underline"
+              >
+                {t("mochiExplainerLink")}
+                <IconChevronRight className="h-4 w-4" />
+              </Link>
             </div>
           </div>
         </section>
-      )}
 
-      {/* Mochi explainer — full-bleed, not a boxed card (DECISIONS 2026-08-10: matches
-          the Final CTA band below, the one section on this page that already avoided
-          the repeated-card look). */}
-      <section
-        id="what-is-mochi"
-        className="bg-cream-warm px-6 py-20 text-center sm:px-14 sm:py-24"
-      >
-        <div className="mx-auto max-w-[680px]">
-          <div className="mb-[18px] flex justify-center gap-[10px]">
-            <Mochi width={44} height={36} />
-            <Mochi width={56} height={46} />
-            <Mochi width={40} height={33} />
-          </div>
-          <h3 className="text-2xl font-extrabold tracking-[-0.02em] sm:text-3xl">
-            {t.rich("mochiExplainerTitle", {
-              accent: (c) => <span className="text-coral-deep">{c}</span>,
-            })}
-          </h3>
-          <p className="mx-auto mt-3 max-w-[620px] text-base leading-relaxed text-muted-3">
-            {t("mochiExplainerBody")}
-          </p>
-        </div>
-      </section>
+        <SafetyStrip />
 
-      {/* Are you a creator? — full-bleed dark band, same non-boxed treatment. */}
-      <section className="bg-ink px-6 py-20 sm:px-14 sm:py-24">
-        <div className="mx-auto flex max-w-[1200px] flex-col items-center justify-between gap-6 text-center sm:flex-row sm:text-left">
-          <div>
-            <h3 className="text-2xl font-extrabold text-cream sm:text-3xl">
-              {t("creatorPromptTitle")}
-            </h3>
-            <p className="mt-2 text-base text-dark-text-2">
+        {/* Closing CTA.
+            Was a full-bleed #ff5722 block sitting between two dark sections —
+            the harshest transition on the page, twice over. The orange is the
+            button now, which is where it has a job. */}
+        <section className="mx-auto max-w-[1200px] px-6 py-20 sm:px-14 sm:py-24">
+          <div className="relative overflow-hidden rounded-2xl border border-line-2 bg-card px-8 py-14 text-center shadow-card sm:px-14">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-x-0 top-0 h-px bg-coral"
+            />
+            <h2 className="mx-auto max-w-[640px] break-keep text-3xl font-extrabold tracking-[-0.03em] sm:text-5xl">
+              {t("finalCtaTitle")}
+            </h2>
+            <p className="mx-auto mt-4 max-w-[520px] break-keep text-lg leading-relaxed text-body">
+              {t("finalCtaBody")}
+            </p>
+            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <ButtonLink href="/explore" variant="primary" size="lg">
+                {t("finalCtaPrimary")}
+              </ButtonLink>
+              <ButtonLink href="/creators" variant="secondary" size="lg">
+                {t("creatorPromptCta")}
+              </ButtonLink>
+            </div>
+            <p className="mt-6 break-keep text-sm text-muted">
               {t("creatorPromptBody")}
             </p>
           </div>
-          <ButtonLink href="/creators" variant="primary" size="lg">
-            {t("creatorPromptCta")}
-          </ButtonLink>
-        </div>
-      </section>
-
-      <SafetyStrip />
-
-      {/* Final CTA */}
-      <section className="relative overflow-hidden bg-coral px-6 py-20 text-center text-white sm:px-14 sm:py-24">
-        <div className="absolute left-[10%] top-8 h-[50px] w-[50px] rounded-[46%_46%_48%_48%/52%_52%_48%_48%] bg-white/20" />
-        <div className="absolute bottom-10 right-[14%] h-[64px] w-[64px] rounded-[46%_46%_48%_48%/52%_52%_48%_48%] bg-black/10" />
-        <div className="relative">
-          <h2 className="text-4xl font-extrabold leading-tight tracking-[-0.03em] sm:text-6xl">
-            {t("finalCtaTitle")}
-          </h2>
-          <p className="mb-8 mt-[18px] text-lg text-white/85">
-            {t("finalCtaBody")}
-          </p>
-          <div className="flex justify-center">
-            <ButtonLink href="/api/fan-signup" variant="dark" size="lg">
-              {tc("signup")}
-            </ButtonLink>
-          </div>
-        </div>
-      </section>
+        </section>
       </main>
 
-      <Footer variant="fan" />
+      <Footer />
     </>
   );
 }

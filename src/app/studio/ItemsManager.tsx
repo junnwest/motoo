@@ -221,7 +221,7 @@ function SuggestionPanel({
                     </span>
                     {title}
                     <span className="flex items-center gap-0.5 text-2xs text-muted-2">
-                      <Mochi width={13} height={10} />
+                      <Mochi width={13} height={10} className="text-coral-deep" />
                       {formatCount(s.priceMochi)}
                     </span>
                   </button>
@@ -304,7 +304,7 @@ function ItemCard({
       </div>
       <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted">
         <span className="flex items-center gap-1.5 font-semibold text-body">
-          <Mochi width={16} height={12} />
+          <Mochi width={16} height={12} className="text-coral-deep" />
           {formatCount(item.priceMochi)}
         </span>
         <span>{t("items.redeemed", { count: item.redeemedCount })}</span>

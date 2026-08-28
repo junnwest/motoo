@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { getTranslations } from "next-intl/server";
 import { BrandLogo } from "./BrandLogo";
 import { SignupButton } from "./SignupButton";
+import { PRELAUNCH } from "@/lib/prelaunch";
 import { UserMenu, type MenuItem } from "./UserMenu";
 import { NotificationBell } from "./NotificationBell";
 import { StudioPill } from "./StudioPill";
@@ -50,7 +51,12 @@ export async function Nav() {
   const host = (await headers()).get("host") ?? "";
   const onStudioHost = host.startsWith("studio.");
 
-  const showConsumerChrome = authed && !onStudioHost;
+  // Pre-launch, a signed-in non-admin can reach only onboarding and the legal
+  // pages — so search, the bell and the Studio pill would all be controls that
+  // bounce the user back to `/`. Chrome that leads nowhere is worse than no
+  // chrome: it reads as a broken product rather than an unlaunched one.
+  const prelaunchLocked = PRELAUNCH && session?.user?.role !== "admin";
+  const showConsumerChrome = authed && !onStudioHost && !prelaunchLocked;
   // Both are per-account reads the JWT can't carry: the unread count changes
   // constantly, and the avatar is a data URL far past the cookie size limit.
   const [unreadCount, avatarUrl] = await Promise.all([
@@ -61,7 +67,9 @@ export async function Nav() {
   // Studio-host dropdown stays as it was; the consumer dropdown is now
   // identity-only (Profile/Settings/My channel) — everything else moved out
   // to the Sidebar or the Studio pill.
-  const items: MenuItem[] = onStudioHost
+  const items: MenuItem[] = prelaunchLocked
+    ? [] // every consumer destination is gated; the dropdown keeps only logout
+    : onStudioHost
     ? [
         { label: tcd("settings.title"), href: "/settings" },
         ...(handle ? [{ label: tcd("viewPublic"), href: `/s/${handle}` }] : []),
@@ -149,7 +157,7 @@ export async function Nav() {
                 href="/home"
                 className="flex items-center gap-2 rounded-full border border-line-3 bg-white px-4 py-2.5 text-sm font-bold text-ink transition-colors hover:border-coral hover:text-coral-deep"
               >
-                <Mochi width={16} height={13} />
+                <Mochi width={16} height={13} className="text-coral-deep" />
                 {t("backToMotoo")}
               </Link>
             )}
@@ -171,7 +179,13 @@ export async function Nav() {
             >
               {tc("login")}
             </Link>
-            <SignupButton label={tc("signup")} variant="primary" size="md" />
+            {/* No signup door while invite-only: the fan route redirects home
+                and the creator route is refused without an invite, so the
+                button would open a role chooser leading nowhere. Signup is
+                reached only by opening /join/<token>. */}
+            {PRELAUNCH ? null : (
+              <SignupButton label={tc("signup")} variant="primary" size="md" />
+            )}
           </div>
         )}
       </nav>

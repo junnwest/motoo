@@ -38,7 +38,6 @@ export default async function CreatorLandingPage() {
 
       {/* Hero */}
       <section id="main" className="relative overflow-hidden px-6 py-16 sm:px-14 sm:py-[74px]">
-        <div className="pointer-events-none absolute -right-20 -top-28 h-[620px] w-[620px] rounded-full bg-[radial-gradient(circle_at_40%_40%,rgba(240,163,140,.30),rgba(240,163,140,0)_62%)]" />
         <div className="relative mx-auto grid max-w-[1200px] items-center gap-12 lg:grid-cols-[1.05fr_.95fr]">
           <div>
             <Eyebrow className="mb-[22px]">{t("eyebrow")}</Eyebrow>
@@ -65,7 +64,7 @@ export default async function CreatorLandingPage() {
                 {t("ctaSample")}
               </ButtonLink>
             </div>
-            <div className="mt-[30px] flex flex-wrap items-center gap-[18px] font-mono text-xs tracking-[0.02em] text-muted">
+            <div className="mt-[30px] flex flex-wrap items-center gap-[18px] text-xs tracking-[0.02em] text-muted">
               <span className="flex items-center gap-[6px]">
                 <span className="h-[7px] w-[7px] rounded-full bg-sage" />
                 {t("trustDirect")}
@@ -83,12 +82,12 @@ export default async function CreatorLandingPage() {
                   <Avatar name="크리에이터A" size={46} />
                   <div className="flex-1">
                     <div className="text-lg font-extrabold">@크리에이터A</div>
-                    <div className="font-mono text-2xs text-muted">
+                    <div className="text-2xs text-muted">
                       나의 마켓
                     </div>
                   </div>
                   <div className="flex items-center gap-1.5 rounded-full bg-coral-chip px-3 py-1.5 text-xs font-bold text-coral-deep">
-                    <Mochi width={14} height={11} /> 200원
+                    <Mochi width={14} height={11} className="text-coral-deep" /> 200원
                   </div>
                 </div>
                 <div className="flex flex-col gap-2.5">
@@ -105,7 +104,7 @@ export default async function CreatorLandingPage() {
                         {item.title}
                       </span>
                       <span className="flex items-center gap-1 text-xs font-bold text-coral-deep">
-                        <Mochi width={13} height={10} /> {item.price}
+                        <Mochi width={13} height={10} className="text-coral-deep" /> {item.price}
                       </span>
                     </div>
                   ))}
@@ -113,7 +112,7 @@ export default async function CreatorLandingPage() {
               </div>
             </div>
             <div className="absolute right-0 top-0 flex animate-[floaty_5s_ease-in-out_infinite] items-center gap-2 rounded-full bg-ink px-[15px] py-[10px] text-sm font-bold text-cream shadow-float">
-              <Mochi width={18} height={14} /> +312 응원
+              <Mochi width={18} height={14} className="text-coral-deep" /> +312 응원
             </div>
             <div className="absolute bottom-4 left-0 flex items-center gap-2 rounded-full bg-sage px-[15px] py-[10px] text-sm font-bold text-white shadow-float">
               ✓ 직접 정산
@@ -124,7 +123,7 @@ export default async function CreatorLandingPage() {
 
       {/* Proof strip */}
       <div className="flex items-center justify-between gap-6 border-y border-line bg-cream-warm-2 px-6 py-[26px] sm:px-14">
-        <span className="whitespace-nowrap font-mono text-2xs tracking-[0.04em] text-muted">
+        <span className="whitespace-nowrap text-2xs tracking-[0.04em] text-muted">
           {t("proofStrip")}
         </span>
         <div className="flex flex-1 items-center justify-around gap-10 opacity-55">
@@ -184,7 +183,7 @@ export default async function CreatorLandingPage() {
         </div>
         <div className="grid gap-6 md:grid-cols-3">
           {[
-            { n: 1, right: <span className="flex gap-[6px]"><Mochi width={30} height={24} /><Mochi width={30} height={24} /></span> },
+            { n: 1, right: <span className="flex gap-[6px]"><Mochi width={30} height={24} className="text-coral-deep" /><Mochi width={30} height={24} className="text-coral-deep" /></span> },
             { n: 2, right: <span className="flex h-9 w-9 items-center justify-center rounded-md bg-coral-chip text-coral-deep"><IconAward width={19} height={19} /></span> },
             { n: 3, right: <span className="flex h-9 w-9 items-center justify-center rounded-md bg-sage-bg text-sage-text"><IconGift width={18} height={18} /></span> },
           ].map((s) => (
@@ -193,7 +192,7 @@ export default async function CreatorLandingPage() {
               className="rounded-2xl border border-line-2 bg-card p-8 shadow-soft"
             >
               <div className="mb-[22px] flex items-center justify-between">
-                <span className="font-mono text-sm font-semibold text-coral-deep">
+                <span className="text-sm font-semibold tabular-nums tracking-[0.06em] text-coral-deep">
                   0{s.n}
                 </span>
                 {s.right}
@@ -213,8 +212,8 @@ export default async function CreatorLandingPage() {
       <section className="px-6 py-[72px] sm:px-14">
         <div className="mx-auto flex max-w-[1200px] flex-col items-center gap-9 rounded-2xl border border-line-2 bg-card p-11 shadow-soft sm:flex-row">
           <div className="flex flex-none gap-2">
-            <Mochi width={58} height={46} />
-            <Mochi width={46} height={38} className="self-end" />
+            <Mochi width={58} height={46} className="text-coral-deep" />
+            <Mochi width={46} height={38} className="text-coral-deep self-end" />
           </div>
           <div>
             <h3 className="text-2xl font-extrabold tracking-[-0.02em] sm:text-3xl">

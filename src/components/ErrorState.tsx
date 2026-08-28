@@ -47,8 +47,8 @@ export function ErrorState({
   return (
     <main id="main" className="mx-auto flex min-h-[70vh] w-full max-w-[560px] flex-col items-center justify-center px-6 py-24 text-center">
       <div className="mb-5 flex items-end gap-2">
-        <Mochi width={38} height={31} float />
-        <Mochi width={50} height={41} float floatDelay={0.5} />
+        <Mochi width={38} height={31} float className="text-coral-soft" />
+        <Mochi width={50} height={41} float floatDelay={0.5} className="text-coral-soft" />
       </div>
       <h1 className="text-2xl font-extrabold tracking-[-0.02em] text-ink break-keep sm:text-3xl">
         {title}
@@ -61,7 +61,7 @@ export function ErrorState({
         <button
           type="button"
           onClick={onRetry}
-          className="rounded-lg bg-coral px-6 py-3 text-base font-bold text-white shadow-[0_10px_24px_rgba(224,138,111,.34)] transition-transform duration-150 hover:brightness-[1.03] active:scale-[.98]"
+          className="rounded-lg bg-coral px-6 py-3 text-base font-bold text-white shadow-soft transition-transform duration-150 hover:brightness-[1.03] active:scale-[.98]"
         >
           {retryLabel}
         </button>
@@ -74,7 +74,7 @@ export function ErrorState({
       </div>
 
       {digest && (
-        <p className="mt-8 font-mono text-2xs tracking-[0.04em] text-muted">
+        <p className="mt-8 text-2xs tabular-nums tracking-[0.04em] text-muted">
           {referenceLabel} · {digest}
         </p>
       )}

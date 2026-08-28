@@ -220,6 +220,11 @@ export const getStreamerProfile = cache(async (handle: string) => {
         where: { active: true, hiddenAt: null },
         orderBy: { sortOrder: "asc" },
       },
+      // Founding status is read through the owner rather than mirrored onto
+      // Streamer: the account is created (and the invite spent) before the
+      // Studio exists, so a copy on Streamer would be a second source of truth
+      // that could drift. One extra column on a join we already do.
+      owner: { select: { foundingAt: true } },
     },
   });
   if (!streamer || streamer.status !== "approved") return null;
@@ -306,3 +311,42 @@ export async function getUpdatesForCreator(streamerId: string, take = 30) {
     take,
   });
 }
+
+export type LandingStats = {
+  creators: number;
+  supporters: number;
+  mochiDelivered: number;
+};
+
+/**
+ * Aggregate counts for the public landing page. Real rows, not claims — the
+ * landing states them as fact, so they have to come from the same tables the
+ * rest of the product reads.
+ *
+ * `supporters` counts distinct fans holding at least one creator's mochi rather
+ * than `MochiHolding` rows, so one fan supporting four creators is one person,
+ * not four. `mochiDelivered` sums lifetime earned rather than current `balance`
+ * — spending mochi in a marketplace must not make the number go down, because
+ * the mochi was still delivered.
+ *
+ * Cached for a minute: this runs on every logged-out visit and the numbers are
+ * a scale signal, not a live counter.
+ */
+export const getLandingStats = unstable_cache(
+  async (): Promise<LandingStats> => {
+    const [creators, supporters, earned] = await Promise.all([
+      prisma.streamer.count({ where: { status: "approved" } }),
+      prisma.mochiHolding
+        .findMany({ distinct: ["backerId"], select: { backerId: true } })
+        .then((rows) => rows.length),
+      prisma.mochiHolding.aggregate({ _sum: { mochiEarnedTotal: true } }),
+    ]);
+    return {
+      creators,
+      supporters,
+      mochiDelivered: earned._sum.mochiEarnedTotal ?? 0,
+    };
+  },
+  ["landing-stats"],
+  { revalidate: 60 },
+);

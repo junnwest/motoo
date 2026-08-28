@@ -270,3 +270,60 @@ export async function unhideUpdateAction(input: {
   revalidatePath(`/s/${update.streamer.handle}`);
   return { ok: true };
 }
+
+/**
+ * Pre-launch invites.
+ *
+ * Minting is admin-only and audited on the row (`createdBy`), because an invite
+ * is the only way into the product while `PRELAUNCH=1` — it is a credential,
+ * and one that we hand to a named creator. Revoking never deletes: the outreach
+ * record (who we approached, who never came back) is the reason this is a table
+ * of rows rather than one shared code.
+ */
+
+const createInviteSchema = z.object({
+  // Who this is for. Required — an unlabelled invite is an anonymous credential
+  // and defeats the point of per-invite rows.
+  label: z.string().min(1).max(120),
+  email: z.string().email().optional().or(z.literal("")),
+  note: z.string().max(500).optional().or(z.literal("")),
+});
+
+export async function createInviteAction(
+  input: z.infer<typeof createInviteSchema>,
+): Promise<{ ok: true; token: string } | { ok: false; error: string }> {
+  const admin = await getAdmin();
+  if (!admin) return { ok: false, error: "forbidden" };
+
+  const parsed = createInviteSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: "labelRequired" };
+
+  const { createInvite } = await import("@/lib/invites");
+  const invite = await createInvite({
+    label: parsed.data.label,
+    email: parsed.data.email || null,
+    note: parsed.data.note || null,
+    createdBy: admin.email,
+  });
+
+  revalidatePath("/admin");
+  return { ok: true, token: invite.token };
+}
+
+export async function revokeInviteAction(input: {
+  id: string;
+}): Promise<{ ok: true } | { ok: false; error: string }> {
+  const admin = await getAdmin();
+  if (!admin) return { ok: false, error: "forbidden" };
+  if (!input?.id) return { ok: false, error: "notFound" };
+
+  const { revokeInvite } = await import("@/lib/invites");
+  const res = await revokeInvite(input.id);
+  // 0 rows means it was already spent or already revoked — a redeemed invite is
+  // deliberately not revocable: the account exists, and pulling the invite would
+  // leave that creator's founding badge unexplainable.
+  if (res.count === 0) return { ok: false, error: "inviteNotRevocable" };
+
+  revalidatePath("/admin");
+  return { ok: true };
+}

@@ -95,7 +95,7 @@ export async function HomeSignedIn({
             label={t("summaryMochi")}
             value={
               <span className="flex items-center gap-1.5">
-                <Mochi width={18} height={14} />
+                <Mochi width={18} height={14} className="text-coral-deep" />
                 {formatCount(totalMochi)}
               </span>
             }
@@ -141,7 +141,7 @@ export async function HomeSignedIn({
                         {/* The number is the point of the card, so it reads at
                             heading scale rather than as another 14px line. */}
                         <span className="mt-0.5 flex items-baseline gap-1.5 text-xl font-extrabold tracking-[-0.02em] text-ink">
-                          <Mochi width={17} height={13} />
+                          <Mochi width={17} height={13} className="text-coral-deep" />
                           {t("balance", { count: h.balance })}
                         </span>
                         {r && (
@@ -185,7 +185,7 @@ export async function HomeSignedIn({
                           {streamer.displayName}
                         </span>
                         <span className="mt-2 flex items-center gap-1.5 text-sm font-extrabold text-coral-deep">
-                          <Mochi width={14} height={11} />
+                          <Mochi width={14} height={11} className="text-coral-deep" />
                           {t("itemPrice", { count: item.priceMochi })}
                           <span className="font-medium text-muted">
                             {t("ofBalance", { count: balance })}
@@ -224,7 +224,7 @@ export async function HomeSignedIn({
                           {streamer.displayName}
                         </span>
                         <span className="mt-2 flex items-center gap-1.5 text-sm font-extrabold text-coral-deep">
-                          <Mochi width={14} height={11} />
+                          <Mochi width={14} height={11} className="text-coral-deep" />
                           {t("reachShort", { count: shortfall })}
                         </span>
                       </span>
@@ -257,7 +257,7 @@ export async function HomeSignedIn({
                         </div>
                       </div>
                       <span className="flex items-center gap-1.5 text-sm font-extrabold text-ink">
-                        <Mochi width={15} height={11} />
+                        <Mochi width={15} height={11} className="text-coral-deep" />
                         {t("spent", { count: o.mochiSpent })}
                       </span>
                       <span className="rounded-full bg-coral-chip px-2.5 py-1 text-2xs font-semibold text-coral-deep">
@@ -292,7 +292,7 @@ export async function HomeSignedIn({
                         </div>
                       </div>
                       <span className="flex items-center gap-1.5 text-sm font-extrabold text-ink">
-                        <Mochi width={15} height={11} />
+                        <Mochi width={15} height={11} className="text-coral-deep" />
                         {t("spent", { count: o.mochiSpent })}
                       </span>
                       <span className="rounded-full bg-sage-bg px-2.5 py-1 text-2xs font-semibold text-sage">

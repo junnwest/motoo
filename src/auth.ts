@@ -1,4 +1,8 @@
 import NextAuth from "next-auth";
+import { cookies } from "next/headers";
+import { PRELAUNCH } from "@/lib/prelaunch";
+import { INVITE_COOKIE } from "@/lib/inviteCookie";
+import { checkInvite, redeemInvite } from "@/lib/invites";
 import Credentials from "next-auth/providers/credentials";
 import Naver from "next-auth/providers/naver";
 import Kakao from "next-auth/providers/kakao";
@@ -85,6 +89,39 @@ export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
   ],
   callbacks: {
     ...authConfig.callbacks,
+    /**
+     * Pre-launch invite gate for **OAuth**.
+     *
+     * `signupUser` gates the credentials path, but OAuth users are provisioned
+     * lazily in the `jwt` callback below — they never touch that action, so
+     * without this a stranger could open the public `/login`, click "Google로
+     * 계속하기" and have an account while the product is supposed to be
+     * invite-only. `/login` has to stay public (invited creators need to sign
+     * back in), so the check belongs here rather than in the middleware.
+     *
+     * Only **new** accounts are gated. An existing account signing in again is
+     * always allowed: they already redeemed an invite, and locking out the
+     * creators we recruited would be worse than the hole.
+     */
+    async signIn({ user, account }) {
+      if (!PRELAUNCH) return true;
+      const isOAuth = account?.type === "oauth" || account?.type === "oidc";
+      if (!isOAuth) return true; // credentials → signupUser already gated it
+
+      const email = user?.email?.toLowerCase();
+      if (!email) return false;
+
+      const existing = await prisma.backer.findUnique({
+        where: { email },
+        select: { id: true },
+      });
+      if (existing) return true;
+
+      const token = (await cookies()).get(INVITE_COOKIE)?.value;
+      if (!token) return false;
+      const state = await checkInvite(token);
+      return state.ok;
+    },
     async jwt({ token, user, trigger, account }) {
       // ── Revocation gate ────────────────────────────────────────────────
       // Sessions are stateless JWTs, so signing out can only ask the browser to
@@ -132,16 +169,33 @@ export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
         // `update` only ever sets it, never clears it, so a credentials user
         // who later links the same address does not lose their verification.
         const viaOAuth = account?.type === "oauth" || account?.type === "oidc";
-        const backer = await prisma.backer.upsert({
-          where: { email },
-          update: {},
-          create: {
-            email,
-            nickname: user.name ?? email.split("@")[0],
-            avatarUrl: user.image ?? null,
-            ...(viaOAuth ? { emailVerifiedAt: new Date() } : {}),
-          },
-        });
+        // Find-then-create rather than upsert: during pre-launch we have to
+        // know whether this sign-in *created* the account, because that is the
+        // moment the invite is spent and the founding mark is set. An upsert
+        // cannot tell us which branch it took.
+        // Full row, not a narrow select: everything below (tokenVersion, role,
+        // nickname, onboardedAt, pendingDeletionAt) reads off it.
+        const before = await prisma.backer.findUnique({ where: { email } });
+        const backer =
+          before ??
+          (await prisma.backer.create({
+            data: {
+              email,
+              nickname: user.name ?? email.split("@")[0],
+              avatarUrl: user.image ?? null,
+              ...(viaOAuth ? { emailVerifiedAt: new Date() } : {}),
+            },
+          }));
+
+        // New OAuth account during pre-launch: spend the invite that the
+        // signIn callback above already validated. Same single-use guard as
+        // the credentials path (src/lib/invites.ts).
+        if (PRELAUNCH && !before) {
+          const inviteToken = (await cookies()).get(INVITE_COOKIE)?.value;
+          if (inviteToken) {
+            await redeemInvite(inviteToken, backer.id).catch(() => false);
+          }
+        }
         // Guarded on `null` so signing in again does not keep rewriting the
         // timestamp — "verified at" should mean when it was first proven, not
         // when they last logged in.

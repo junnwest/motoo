@@ -5,6 +5,94 @@ For current status and open work see [`PROGRESS.md`](./PROGRESS.md); for *why* a
 the way it is see [`DECISIONS.md`](./DECISIONS.md).
 
 
+## 2026-08-28 — pre-launch: the site goes invite-only
+
+Creator collection starts before launch, so the product is private and only
+creators we contact directly can sign up. `PRELAUNCH=1` turns it on; unsetting
+the variable and redeploying is the launch. Rationale in DECISIONS 2026-08-28.
+
+- **`Invite` model + `Backer.foundingAt`** (migration `prelaunch_invites`). One
+  row per creator approached, so the table doubles as the outreach record. Single
+  use is a conditional update inside the redemption transaction — tested under
+  concurrency: exactly one winner, loser's founding mark rolled back.
+- **The gate** lives in `src/proxy.ts` for pages and — the one that matters — in
+  `signupUser` for account creation, since a server action can be called directly.
+  The invite token rides in an httpOnly cookie, never a form field. Nothing on the
+  studio host is public, including `/`.
+- **Public surface**: the welcome page, login, `/join`, and the legal pages
+  (`/terms`, `/privacy`, `/refund`, `/youth`) — the last four deliberately, since
+  `/refund` is an obligation and the terms are agreed at onboarding.
+- **`/join/<token>`** is a Route Handler (cookies cannot be set from a Server
+  Component); `/join` renders which of invalid / revoked / already-used happened.
+- **Admin invite management** — mint, copy link, revoke. Revoking never deletes,
+  and a redeemed invite is not revocable.
+- **Founding badge** on the creator profile, read through `Streamer.owner` rather
+  than mirrored onto `Streamer`, so there is one source of truth.
+- **Dead ends closed**: the nav's 회원가입 button and the footer's explore column
+  both pointed at things the gate makes unreachable, and are hidden while
+  invite-only.
+
+## 2026-08-28 — the brand overhaul
+
+A single session, owner-driven, working outward from the logo. Rationale for each
+piece is in [`DECISIONS.md`](./DECISIONS.md) (six entries dated 2026-08-28).
+Everything below passes `pnpm lint`, `check:vocab`, `check:emoji`, `check:a11y`
+(11/11) and `next build` (34/34).
+
+- **The logo is the wordmark.** `BrandMark` deleted; `BrandLogo` and the footer are
+  wordmark-only. New `BrandWordmark` renders **Bauhaus 93 as SVG outlines**, not a
+  webfont — its licence permits creating artwork but not redistributing the font or
+  serving it, so outlines are the only compliant route (and they render identically
+  for everyone who has never had the font installed). Favicon, apple-icon and both
+  PWA icons regenerated as a lowercase `m` monogram from the same outlines.
+- **Brand orange → `#ff5722`.** The other four coral roles and the warm surfaces
+  were re-derived in OKLCh rather than hand-picked: each keeps its own lightness,
+  with chroma scaled and hue shifted by the base's deltas.
+- **The page background is white.** `--color-cream` `#fee9e1` → `#ffffff`; the warm
+  tints deliberately stayed put so they now read as deliberate bands. Side effect:
+  `coral-deep` on the page went 4.02:1 → **4.70:1**, clearing AA for link text for
+  the first time.
+- **Mono removed.** IBM Plex Mono ships `latin` only, so the ten Korean `font-mono`
+  call sites had been falling back to an OS font — the hero eyebrow rendered two
+  typefaces in one line. `tabular-nums` replaces it for the numerals that actually
+  wanted fixed-width digits. With Fredoka and Baloo 2 also gone, the project now has
+  **zero `next/font` imports** and makes no third-party font request.
+- **The Bauhaus pass, applied through tokens** so all 34 routes moved together.
+  Two-state geometry (rectangles square-cornered, `rounded-full` untouched); the
+  five shadow tokens redefined as hard `0 0 0 1px` outlines instead of blur; the
+  mochi flattened (gradient *and* its two inset lighting shadows — then redone
+  properly, below). `src/` now has
+  **zero hardcoded radii and zero hardcoded shadows** — the audit that found this
+  also turned up `#e08a6f` still living in `ErrorState.tsx`, a terracotta retired
+  on 2026-08-20.
+- **All 41 icons rebuilt** on a stated construction spec (20×20 live area, optical
+  rather than metric sizing, 16px legibility). `Studio` and `Camera` had been the
+  same drawing; `Scroll` read as nothing; `Dice` drew its pips as zero-length paths
+  that vanished small. Exact export parity, so no consumer changed. Drawn in the
+  Feather idiom rather than copied, so no upstream licence obligation.
+- **The logged-out landing rebuilt, twice.** Structure first (eight background bands
+  → three, the full-bleed orange block gone, a real stat rail from
+  `getLandingStats`), then the copy: it now leads with `후원금은 크리에이터에게
+  그대로. / 모투 수수료 0%.` rather than a line any tipping product could run. Found
+  and fixed a factual error carried since the donation pivot — step 2 read `모찌
+  보내기`, but fans don't send mochi, they donate and receive it.
+- **The mochi is now an SVG that inherits `currentColor`.** The first flatten made it
+  worse: a hard-stop ellipse replaced the gradient's soft falloff, so on white, `panel`,
+  `coral-chip` and `sand` the lower half merged into the background and the mochi read as
+  a crescent, while on solid `coral` the body vanished instead. Fixed fills were always
+  going to collide across six surfaces — one flat silhouette coloured by context cannot.
+  `text-coral-deep` where the mochi is the subject, `text-coral-soft` for the decorative
+  floaters.
+- **Fixes found along the way.** The signup modal's 후원자 icon was a hand-rolled
+  inline SVG bypassing `Icons.tsx` — filled where everything else is stroked, and
+  geometrically lopsided; it is `IconHeart` now, and both role tiles are white with
+  the hairline border that keeps them visible when the card turns white on hover.
+  `Mochi` now **requires** `width`/`height` (the defaults were dead across all 49
+  call sites) and warns in dev if a sizing class is passed, because inline styles
+  silently beat Tailwind — which is exactly how the explainer shipped a 26×21 blob
+  crammed into a 28px circle.
+
+
 ## 2026-08-18 — the pre-launch sweep (25 of 36)
 
 Worked straight down [`PRELAUNCH.md`](./PRELAUNCH.md). Everything below is on `main`

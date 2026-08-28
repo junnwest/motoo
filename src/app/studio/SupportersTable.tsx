@@ -83,7 +83,7 @@ export function SupportersTable({
               )}
             </div>
             <span className="flex items-center gap-1.5 text-xs text-muted">
-              <Mochi width={13} height={10} />
+              <Mochi width={13} height={10} className="text-coral-deep" />
               {t("earned", { count: s.mochiEarnedTotal })}
             </span>
             <span className="text-xs text-muted">

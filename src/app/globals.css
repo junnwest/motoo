@@ -12,17 +12,30 @@
 */
 @theme {
   /*
-    surfaces. `cream`/`panel` re-tinted 2026-08-20 to a light orange derived
-    from the logomark's hue (was a neutral #fbf6ef) — chosen light enough to
-    keep --color-body's contrast on it at AA (4.56:1). `cream-warm` and
-    `cream-warm-2` are untouched for now; they were already warmer than the
-    old cream and still read as a deliberate step up from it.
+    surfaces. `cream` is the page background and is plain white as of
+    2026-08-28. It has moved twice: a neutral #fbf6ef until 2026-08-20, then a
+    light orange tint derived from the logomark (#fde9e2, then #fee9e1 when the
+    brand orange changed), now white.
+
+    The warm tints did not leave with it. `panel`, `cream-warm`, `cream-warm-2`
+    and `sand` keep their orange-derived values, and against a white page they
+    now read as deliberate bands and insets rather than as a slightly different
+    shade of the same background — the landing's section rhythm depends on that
+    contrast, so don't neutralise them to "match" the white.
+
+    Those four were each derived from the brand orange by keeping their own
+    OKLCh lightness and shifting only chroma (x1.089) and hue (-0.8deg) — the
+    same transform the coral family takes.
+
+    One trap: `card` is #ffffff too, so a card no longer separates from the page
+    by fill alone. Every `bg-card` in the app pairs with `border-line-2` and
+    that border is now the only thing delineating it. Don't drop it.
   */
-  --color-cream: #fde9e2; /* page background */
-  --color-cream-warm: #f6e8dc; /* warm section band */
-  --color-cream-warm-2: #f6ecdf; /* proof strip */
-  --color-sand: #f1e4d4; /* chips / image-slot bg */
-  --color-panel: #fde9e2; /* inset panels on cards */
+  --color-cream: #ffffff; /* page background */
+  --color-cream-warm: #f7e8db; /* warm section band */
+  --color-cream-warm-2: #f7ecde; /* proof strip */
+  --color-sand: #f2e4d2; /* chips / image-slot bg */
+  --color-panel: #fee9e1; /* inset panels on cards */
   --color-card: #ffffff;
 
   /* ink / text */
@@ -34,16 +47,28 @@
   --color-muted-3: #6f6356;
 
   /*
-    coral (primary brand). Re-derived 2026-08-20 from the logomark's orange
-    (#f15a29) rather than the earlier dustier terracotta (#e08a6f) — same
-    five roles, same tint/shade relationships, new base hue so UI accents
-    match the mark instead of sitting a shade duller than it.
+    coral (primary brand). The base is the owner's brand orange, set 2026-08-28
+    (was #f15a29, the retired logomark's orange; before that a dustier
+    terracotta #e08a6f). The other four roles are not hand-picked: each was
+    converted to OKLCh, kept at its own lightness, and had its chroma scaled by
+    the base's chroma ratio (0.1954 -> 0.2128) and its hue shifted by the base's
+    hue delta (-0.8deg). That preserves the five roles' existing relationships
+    instead of re-inventing them around a new base.
+
+    Contrast: white on `coral` is 3.16:1 (was 3.37:1) — fine for the large-text
+    and UI-component threshold of 3:1 that the primary button actually needs.
+    `coral-deep` on the page background is 4.70:1 and **clears AA 4.5:1 for
+    body-size link text**, which the old palette never did (3.99:1 on the pink
+    cream, 4.02:1 after the orange changed). What fixed it was `cream` going
+    white on 2026-08-28, not the hue — so if the page background is ever
+    re-tinted, re-check this number before shipping it. #cd1f00 is the tested
+    darker fallback (4.74:1 even on the old pink cream).
   */
-  --color-coral: #f15a29; /* primary button / accent — the mark's orange */
-  --color-coral-deep: #d43e0e; /* eyebrows, links, emphasis */
-  --color-coral-soft: #f9b59f; /* underlines, highlights */
-  --color-coral-tint: #f58b69; /* on dark */
-  --color-coral-chip: #fcece7; /* soft chip background */
+  --color-coral: #ff5722; /* primary button / accent — the brand orange */
+  --color-coral-deep: #db3200; /* eyebrows, links, emphasis */
+  --color-coral-soft: #fdb39c; /* underlines, highlights */
+  --color-coral-tint: #fb8763; /* on dark */
+  --color-coral-chip: #fdece6; /* soft chip background */
 
   /* sage (trust / success) */
   --color-sage: #7e9b82;
@@ -68,21 +93,33 @@
   --color-live: #e0584c;
 
   /* typography */
+  /*
+    One text face, deliberately. Pretendard covers Hangul and Latin at matched
+    metrics and is self-hosted (see the import at the top of this file).
+
+    There is no `--font-mono` any more (removed 2026-08-28). IBM Plex Mono had
+    no Hangul, so the ten Korean `font-mono` call sites — eyebrows, footer
+    column titles, the legal paragraph — never rendered in it: they fell through
+    to whatever mono the OS supplied, which meant Malgun Gothic on Windows,
+    Apple SD Gothic on macOS, something else again on Android. The hero eyebrow
+    showed both faces in one line ("팬을 위한" in the fallback, "MOTOO" in Plex
+    Mono). That is the same per-platform drift this project bans emoji for.
+
+    Only the 01/02/03 step numerals were genuinely getting mono, and what mono
+    bought them was fixed-width digits — `tabular-nums` gets that from
+    Pretendard's own tnum feature, with no second family.
+  */
   --font-sans: "Pretendard", "Pretendard Variable", -apple-system, system-ui,
     sans-serif;
-  --font-mono: var(--font-ibm-plex-mono), "IBM Plex Mono", ui-monospace,
-    monospace;
 
   /*
-    The "motoo" wordmark only — every other letterform on the site still
-    reads Pretendard. Chosen 2026-08-20 for a rounder, friendlier lockup than
-    the UI face gives at logo scale. `wordmark-studio` is the "studio" suffix
-    on the Studio host specifically, a distinct (lighter) rounded face so it
-    keeps reading as a suffix rather than a second word.
+    There is no wordmark font token any more. The wordmark was Fredoka with a
+    Baloo 2 "studio" suffix (2026-08-20); on 2026-08-28 the brand moved to
+    Bauhaus 93, which cannot be served as a webfont under its licence, so the
+    wordmark is shipped as outlines in `BrandWordmark.tsx` instead. Both Google
+    fonts existed solely for the logo and were dropped with it — every
+    letterform the site now renders as text is Pretendard.
   */
-  --font-wordmark: var(--font-fredoka), "Fredoka", ui-rounded, sans-serif;
-  --font-wordmark-studio: var(--font-baloo-2), "Baloo 2", ui-rounded,
-    sans-serif;
 
   /*
     Type scale. Before this existed the app used **41 distinct font sizes**
@@ -126,16 +163,28 @@
     Radii. Was thirteen values (6, 8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 28)
     against three declared tokens. Five steps, each with a job.
   */
-  --radius-sm: 8px; /* chips, small badges */
-  --radius-md: 12px; /* buttons, inputs */
-  --radius-lg: 16px; /* inset panels, list rows */
-  --radius-xl: 20px; /* cards */
-  --radius-2xl: 24px; /* full-bleed sections, modals */
+  /*
+    Two-state geometry (2026-08-28, the Bauhaus pass). A shape is either a
+    rectangle or a circle — there is no soft middle. Rectangles are square
+    cornered; only the largest surfaces keep a 2px break so a full-bleed card
+    does not look like a printing error against the viewport edge. Round things
+    (`rounded-full`: avatars, dots, status pills) stay fully circular, which is
+    the other half of the rule, not an exception to it.
+
+    This replaces a 5-step soft ramp (8/12/16/20/24). Every radius in the app
+    goes through these tokens — there is not one hardcoded `rounded-[…]` in
+    src/ — so changing them here is what makes all 34 routes move together.
+  */
+  --radius-sm: 0px; /* chips, small badges */
+  --radius-md: 0px; /* buttons, inputs */
+  --radius-lg: 0px; /* inset panels, list rows */
+  --radius-xl: 2px; /* cards */
+  --radius-2xl: 2px; /* full-bleed sections, modals */
 
   /* Kept: the original handoff names, now aliases of the scale above. */
-  --radius-btn: 12px;
-  --radius-card: 20px;
-  --radius-card-lg: 24px;
+  --radius-btn: 0px;
+  --radius-card: 2px;
+  --radius-card-lg: 2px;
 
   /*
     Motion. There was no motion system — 29 scattered `transition` classes,
@@ -149,11 +198,22 @@
   --duration-settle: 320ms;
 
   /* shadows */
-  --shadow-soft: 0 2px 4px rgba(33, 28, 24, 0.04);
-  --shadow-card: 0 8px 24px rgba(33, 28, 24, 0.06);
-  --shadow-float: 0 30px 80px rgba(33, 28, 24, 0.14);
-  --shadow-coral: 0 6px 16px rgba(241, 90, 41, 0.3);
-  --shadow-coral-lg: 0 10px 24px rgba(241, 90, 41, 0.34);
+  /*
+    Bauhaus is flat: no blur, no simulated light source. These are kept as
+    tokens rather than deleted so the 23 `shadow-*` call sites keep working,
+    but every one is now a hard 1px outline — a drawn edge, not a cast shadow.
+    `0 0 0 1px` also guarantees the definition the blur used to provide, so
+    nothing loses its boundary on a white page.
+
+    The two coral glows are simply gone. A 24px orange halo under a button is
+    the single most un-Bauhaus thing the app had, and it was already flagged in
+    Button.tsx as reading like a toy.
+  */
+  --shadow-soft: 0 0 0 1px rgba(33, 28, 24, 0.08);
+  --shadow-card: 0 0 0 1px rgba(33, 28, 24, 0.1);
+  --shadow-float: 0 0 0 1px rgba(33, 28, 24, 0.14);
+  --shadow-coral: none;
+  --shadow-coral-lg: none;
 }
 
 html {

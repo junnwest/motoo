@@ -70,7 +70,7 @@ export default async function ExplorePage({
 
         {/* no top-earners leaderboard — ranked by real support, never money raised */}
         <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
-          <span className="font-mono text-2xs tracking-[0.03em] text-muted">
+          <span className="text-2xs tracking-[0.03em] text-muted">
             {t("rankingNote")}
           </span>
           <span className="text-xs text-muted">
@@ -91,8 +91,8 @@ export default async function ExplorePage({
         ) : (
           <div className="mt-16 flex flex-col items-center rounded-2xl border border-dashed border-line-3 bg-cream-warm/50 px-6 py-20 text-center">
             <div className="mb-3 flex items-end justify-center gap-1.5">
-              <Mochi width={38} height={31} float />
-              <Mochi width={50} height={41} float floatDelay={0.5} />
+              <Mochi width={38} height={31} float className="text-coral-soft" />
+              <Mochi width={50} height={41} float floatDelay={0.5} className="text-coral-soft" />
             </div>
             <h2 className="text-xl font-extrabold">{t("empty.title")}</h2>
             <p className="mt-2 max-w-[360px] text-base text-body">

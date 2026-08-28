@@ -7,6 +7,13 @@ import { isStudioPage, splitEnabled } from "./lib/hostRouting";
 // Edge middleware — uses the Prisma-free config so it can run at the edge. The
 // session (incl. `user.creator`, the Studio handle) rides in the JWT, so the
 // two-domain split below needs no database access.
+import {
+  PRELAUNCH,
+  isPublicDuringPrelaunch,
+  isSignedInAllowedDuringPrelaunch,
+  isStudioHostAllowedDuringPrelaunch,
+} from "@/lib/prelaunch";
+
 const { auth } = NextAuth(authConfig);
 
 /**
@@ -77,6 +84,55 @@ export default auth((req) => {
   const path = url.pathname;
   const host = req.headers.get("host") ?? url.host;
   const user = req.auth?.user;
+
+  // Pre-launch gate. While PRELAUNCH=1 the product is invite-only: we are
+  // approaching creators directly and only they can hold an account. A signed-
+  // OUT visitor sees the welcome page, the legal pages, and the invite/login
+  // doors; everything else is private. Signed-in users are unaffected — holding
+  // a session *is* the proof of invitation, since the only way to get one is to
+  // redeem an invite (see src/lib/invites.ts).
+  //
+  // Deliberately before the studio split, so the studio host is covered too
+  // rather than only the apex.
+  //
+  // Nothing on the studio host is public: `/` there is the creator console, not
+  // the welcome page, so it must not inherit the apex allowlist. Production
+  // would also be caught by the creator gate below, but a gate whose whole job
+  // is privacy should not depend on a second one being correct.
+  //
+  // The product is unlaunched for everyone except admins — including invited
+  // creators, who get signup and Studio setup and nothing else. Admins bypass
+  // the whole gate: somebody has to be able to look at the running product.
+  const onStudioHostEarly = host.startsWith(STUDIO_PREFIX);
+  const prelaunchBlocked =
+    PRELAUNCH &&
+    user?.role !== "admin" &&
+    (onStudioHostEarly
+      ? // The console is closed, but creator *settings* are served here and a
+        // founding creator must be able to fix the handle they reserved.
+        //
+        // The signed-in requirement is `isProd`-only for the same reason the
+        // creator gate below is: `AUTH_COOKIE_DOMAIN` is production-only, so in
+        // dev the session cookie is host-only on the apex and never reaches
+        // `studio.localhost`. Requiring a user here unconditionally would make
+        // the studio host unreachable in dev for everyone, which is exactly the
+        // trap the existing gate documents.
+        (isProd && !user) || !isStudioHostAllowedDuringPrelaunch(path)
+      : user
+        ? !isSignedInAllowedDuringPrelaunch(path)
+        : !isPublicDuringPrelaunch(path));
+  if (prelaunchBlocked) {
+    const apexForRedirect = onStudioHostEarly
+      ? host.replace(/^studio\./, "")
+      : host;
+    return new NextResponse(null, {
+      status: 307,
+      headers: { location: `${
+        req.headers.get("x-forwarded-proto") ??
+        (url.protocol === "https:" ? "https" : "http")
+      }://${apexForRedirect}/` },
+    });
+  }
 
   const canSplit = splitEnabled(host);
   const onStudioHost = host.startsWith(STUDIO_PREFIX);

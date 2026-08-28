@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { PRELAUNCH } from "@/lib/prelaunch";
 
 /**
  * Single entry for the 후원자 (fan) sign-up CTAs — the mirror of
@@ -14,6 +15,11 @@ import { NextResponse } from "next/server";
  * part of the fan signup flow.
  */
 export function GET(req: Request) {
+  // Pre-launch is creators-only, so the fan door is closed rather than leading
+  // to a signup that `signupUser` would refuse for want of an invite. Home,
+  // where the welcome page explains why.
+  if (PRELAUNCH) return NextResponse.redirect(new URL("/", req.url));
+
   const res = NextResponse.redirect(new URL("/signup", req.url));
   res.cookies.delete("creatorIntent");
   return res;

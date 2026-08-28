@@ -22,8 +22,8 @@ export default async function NotFound() {
       <Nav />
       <main id="main" className="mx-auto flex min-h-[60vh] w-full max-w-[560px] flex-col items-center justify-center px-6 py-24 text-center">
         <div className="mb-5 flex items-end gap-2">
-          <Mochi width={38} height={31} float />
-          <Mochi width={50} height={41} float floatDelay={0.5} />
+          <Mochi width={38} height={31} float className="text-coral-soft" />
+          <Mochi width={50} height={41} float floatDelay={0.5} className="text-coral-soft" />
         </div>
         <h1 className="text-2xl font-extrabold tracking-[-0.02em] text-ink break-keep sm:text-3xl">
           {t("notFoundTitle")}

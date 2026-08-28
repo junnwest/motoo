@@ -58,8 +58,8 @@ export default async function SearchPage({
           {q.trim().length >= MIN_QUERY_LENGTH && results.empty && (
             <div className="mt-12 flex flex-col items-center rounded-2xl border border-dashed border-line-3 bg-cream-warm/50 px-6 py-16 text-center">
               <div className="mb-3 flex items-end justify-center gap-1.5">
-                <Mochi width={38} height={31} float />
-                <Mochi width={50} height={41} float floatDelay={0.5} />
+                <Mochi width={38} height={31} float className="text-coral-soft" />
+                <Mochi width={50} height={41} float floatDelay={0.5} className="text-coral-soft" />
               </div>
               <h2 className="text-xl font-extrabold break-keep">
                 {t("empty.title", { q: q.trim() })}
@@ -127,7 +127,7 @@ export default async function SearchPage({
                         </div>
                       </div>
                       <span className="flex flex-none items-center gap-1.5 text-sm font-extrabold text-ink">
-                        <Mochi width={15} height={11} />
+                        <Mochi width={15} height={11} className="text-coral-deep" />
                         {t("price", { count: i.priceMochi })}
                       </span>
                     </Link>

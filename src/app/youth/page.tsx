@@ -50,7 +50,7 @@ export default async function YouthPage() {
         <h1 className="break-keep text-3xl font-extrabold tracking-[-0.02em] text-ink">
           {t("title")}
         </h1>
-        <p className="mt-2 font-mono text-2xs tracking-[0.04em] text-muted">
+        <p className="mt-2 text-2xs tabular-nums tracking-[0.04em] text-muted">
           {t("updated")}
         </p>
         <p className="mt-6 break-keep text-base leading-relaxed text-body">

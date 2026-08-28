@@ -1,6 +1,6 @@
 ﻿# motoo — Progress Tracker
 
-_Last updated: 2026-08-18_
+_Last updated: 2026-08-28_
 
 **Read this whole file — it is short on purpose.** Everything in it is either open, blocked,
 or a live constraint. Shipped history lives in [`CHANGELOG.md`](./CHANGELOG.md) and does not
@@ -53,6 +53,11 @@ Resend adapter is written and needs an account, a verified domain and two env va
     credit is the single most challengeable position in the product under 선불전자지급수단
     rules, and it means a user with under 60% spent now does *worse* by deleting their account
     than by requesting a refund. See DECISIONS 2026-08-07.
+  - [ ] **Font licensing for the wordmark (2026-08-28).** Bauhaus 93 (URW) ships as
+    outlines, so no font software is redistributed — that part is settled. Open before
+    any trademark filing: a logo licence may still be required by URW/Monotype, and the
+    "only the font *software* is protected" principle is a US framing (Korean law treats
+    font files as computer program works). Cheap now, expensive after filing.
   - [ ] **Creator/service termination** — what happens to balances if a creator stops trading
     or motoo closes. Deliberately omitted from `/refund`; still the clause hardest to defend
     leaving out, and more exposed since the 60% path went: past the 7-day window there is now
@@ -80,6 +85,13 @@ Resend adapter is written and needs an account, a verified domain and two env va
   `DEBUG_QUERIES=1` rather than remembered — the previous numbers in this file were both wrong.
   About six of each are the shell, on every signed-in page. Getting materially below that means
   consolidating reads, not more caching.
+- [ ] **Brand pass leftovers (2026-08-28)** — all seen and consciously left, none blocking.
+  Footer tagline (`…가장 따뜻한 방법`) is still the soft register the landing moved away
+  from, but it's in the `footer` namespace so it shows on every page — cross-app call.
+  `StreamerCard`/`CreatorCover` still read as placeholders (owner raised it; shared with
+  `/explore`, `/search`, `/home`). `Note`/`Document`/`Scroll` are three near-identical
+  page-with-lines icons at 16px. `muted` `#9b8d7c` is 3.23:1, still under AA (was 2.76:1).
+  `IconLink` and `IconDocument` have zero references — safe to delete.
 - [ ] **No screen-reader pass.** `pnpm check:a11y` (axe over 11 rendered pages) is clean as of
   2026-08-18 and found two missing `main` landmarks on the way. That covers about a third of
   real barriers; a human AT run is still owed, and interaction states are outside what it audits.
@@ -87,19 +99,57 @@ Resend adapter is written and needs an account, a verified domain and two env va
   token can still satisfy the *routing* gate for one request. Every page-level `auth()` does the
   real check. **No action recommended.**
 
+**Pre-launch (2026-08-28) — live obligations, not just a feature**
+- **`PRELAUNCH=1` is what makes the site private.** It is a deploy-critical env
+  var, not a feature flag: unsetting it *is* the launch. Documented in DEPLOYMENT.
+  New routes that must stay publicly reachable go in `PUBLIC_PREFIXES`
+  (`src/lib/prelaunch.ts`) or they disappear.
+- [ ] **Two of the four founding-creator promises are unbuilt.** The badge and the
+  reserved `@handle` are already true. **Discovery placement at launch** and a
+  **direct line / roadmap input** are stated on the public welcome page, which
+  makes them as binding as anything on `/refund`. Neither exists yet: nothing
+  orders `/explore` by founding status, and there is no contact route beyond
+  고객센터. Do these before the first invite goes out, or change the copy.
+- [ ] **Email is still the one genuinely missing piece.** `EMAIL_PROVIDER` and
+  `RESEND_API_KEY` are absent from Vercel production (confirmed 2026-08-28), so the
+  provider falls back to `mock` and verification mail is only printed to a log. The
+  Resend adapter itself is written and posts to the real API — this is two env vars
+  and a verified domain, not code. Mitigated but not solved for outreach: a creator
+  who signs up **with Google is verified on the spot** (OAuth counts as proof, see
+  DECISIONS 2026-08-18), so only credentials signups are affected. Still worth
+  closing before outreach — we cannot email the creators we just recruited.
+
+**Live design constraints (2026-08-28) — quiet breakage if ignored.** Why: DECISIONS.
+- **Page and `--color-card` are both `#ffffff`**, so cards separate by border, not fill.
+  Every `bg-card` must keep its `border-line-2`.
+- **Two-state geometry**: rectangles square-cornered, `rounded-full` round, nothing
+  between; shadows are `0 0 0 1px` outlines, not blur. Token-level — `src/` has zero
+  hardcoded radii and zero hardcoded shadows.
+- **`Mochi` requires `width`/`height` props**; a sizing `className` is silently ignored
+  (dev warns). It is an SVG filled with `currentColor` — **never give it a hard-coded
+  fill**; that is what made it collide with the orange and cream surfaces. Set a text
+  colour at the call site instead.
+- **No `--font-mono`, zero `next/font` imports.** Pretendard only. Check Hangul coverage
+  before adding a family — IBM Plex Mono had none and ten Korean call sites fell back.
+- **Never claim "100% passthrough"** — the landing says `모투 수수료 0%`, matching the
+  donate page's `PG 결제 수수료는 제외`.
+- **Never webfont Bauhaus 93**; the wordmark is outlines in `BrandWordmark.tsx`.
+
 **Maintenance**
   - **Do this in the dashboard, never `vercel env rm NAME preview`** — that CLI command
     deletes the *whole* variable rather than one target, and re-adding by piping a value
     to `vercel env add` silently stored something P1013-invalid, which failed the first
     deploy. Sensitive variables also can't be read back (`vercel env pull` returns empty
     strings for them), so the only way to verify a value is to build.
-- [ ] **`CRON_SECRET` is still unset in Vercel**, so `/api/cron/purge-accounts` refuses to
-  run and no account is ever actually purged after its 30-day grace period.
-- [ ] **The four OAuth vars are missing from Vercel** — `AUTH_GOOGLE_ID`/`SECRET`,
-  `AUTH_NAVER_ID`/`SECRET`. `src/auth.ts` only registers a provider when its credentials
-  are present, so **Google and Naver login silently don't exist on production**; the
-  buttons are gated by the same check, so nothing errors, they just aren't there. They work
-  in dev because the credentials are in the local `.env`.
+- [x] ~~`CRON_SECRET` is still unset in Vercel~~ — **set** (verified 2026-08-28 via
+  `vercel env ls production`).
+- [x] ~~The four OAuth vars are missing from Vercel~~ — **all four are set** and Google,
+  Naver and Kakao buttons render on the live `/login` (verified 2026-08-28 against
+  `vercel env ls production` and `themotoo.com`). This entry was stale for ten days and
+  actively misleading: it is what led to a pre-launch OAuth signup hole shipping (see the
+  pre-launch note above). **`.env.production.local` is not production** — it holds 2-char
+  placeholders; Vercel env vars are the only source of truth, and `vercel env ls
+  production` prints names without exposing values.
 - [ ] Carried refactors: route-group layouts (`(marketing)`/`(app)`/`(auth)`) to stop repeating
   `<Nav/>`+`<Footer/>` across 20 pages; `EmptyState` + `PageHeader` primitives (6 and 9 real call
   sites); hardcoded Korean still in `creators/page.tsx`; `Backer` → `User` rename (high churn,

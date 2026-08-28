@@ -11,6 +11,14 @@ To pull a single entry, grep its heading with trailing context, e.g.
 
 | Date | Decision |
 | --- | --- |
+| 2026-08-28 | Pre-launch is invite-only, one row per creator we approach |
+| 2026-08-28 | The mochi becomes an SVG that inherits `currentColor` |
+| 2026-08-28 | The landing is rebuilt, and leads with 수수료 0% |
+| 2026-08-28 | The icon set gets a stated construction spec |
+| 2026-08-28 | Flat and two-state: the Bauhaus geometry pass |
+| 2026-08-28 | Mono is dropped: IBM Plex Mono had no Hangul and nobody noticed |
+| 2026-08-28 | Brand orange is #ff5722, and the page background goes white |
+| 2026-08-28 | The logo is the wordmark; Bauhaus 93 ships as outlines, not a webfont |
 | 2026-08-18 | A confirmed email is required to donate, and OAuth counts as confirmation |
 | 2026-08-18 | Blocking is asymmetric: it stops money in, never mochi already held |
 | 2026-08-18 | Refund eligibility is a rule about totals, not about identity of units |
@@ -88,6 +96,319 @@ To pull a single entry, grep its heading with trailing context, e.g.
 | 2026-07-08 | `FoundingMembership` table for the founding-number invariant |
 | 2026-07-08 | Prisma pinned to v6 (not v7) |
 | 2026-07-08 | Korean-first, i18n-ready; integer KRW; mock PG |
+
+## 2026-08-28 — Pre-launch is invite-only, one row per creator we approach
+
+We are collecting creators before launch by reaching out directly, so the
+product goes private and only the people we contacted can create an account.
+`PRELAUNCH=1` turns it on; unsetting it is the launch.
+
+**What stays public.** The welcome page, the login/invite doors, and the legal
+pages — `/terms`, `/privacy`, `/refund`, `/youth`. The legal ones are on that
+list deliberately and must stay: `/refund` is a live obligation, and the terms
+are agreed to at onboarding. Hiding the terms someone is being asked to accept
+is not a thing to do for marketing tidiness.
+
+**One `Invite` row per creator, not one shared code.** A shared code is an
+hour's work and answers none of the questions the outreach actually raises: who
+was approached, who signed up, who never came back. It also fails badly — one
+leak opens signup to everyone until it is rotated, and rotating locks out
+everyone still holding the old one. Rows give per-creator revocation and double
+as the outreach record. The admin console mints and revokes them.
+
+**Single use is enforced in the database, not in a read-then-write.**
+`redeemInvite` is a conditional update with `redeemedAt: null` in the
+where-clause, so two people opening the same link at the same moment cannot both
+get in. Tested under concurrency: exactly one winner, and the loser's
+`foundingAt` is rolled back so a founding mark can never exist without an invite
+actually being spent.
+
+**The gate that matters is in `signupUser`, not the middleware.** Middleware
+gates *pages*; a server action can be invoked directly. Checking in the action is
+the difference between a closed signup and a hidden one. The token rides in an
+httpOnly cookie set by `/join/<token>` rather than a form field, so it cannot be
+supplied or edited by the caller.
+
+**`/join/<token>` is a Route Handler, not a page** — setting a cookie is only
+permitted in a Route Handler or Server Action, and the server component this
+started as threw at runtime. Failures redirect to `/join`, which *is* a page and
+can say which of "invalid", "revoked" or "already used" happened; the last of
+those has an obvious next step (log in) that the others do not.
+
+**Nothing on the studio host is public**, even `/`. Production would also be
+caught by the existing creator gate, but a gate whose whole job is privacy should
+not depend on a second one being correct.
+
+**Four things were promised to founding creators, and two are obligations.**
+The founding badge and the reserved `@handle` are already true the moment they
+sign up. **Discovery placement at launch and a direct line are promises we have
+to keep** — they are stated on the public welcome page, which makes them as
+binding as anything on `/refund`.
+
+Benefits are deliberately non-financial. Promising early signups future economic
+advantage would read as a return for getting in early, which is the framing the
+donation pivot exists to avoid (DECISIONS 2026-08-09) and which `check:vocab`
+polices. Note the obvious lever was never available anyway: motoo already takes
+0%, so there is no fee to discount.
+
+**Constraint it creates.** `PRELAUNCH` is the public/private switch — treat it
+as a deploy-critical variable, not a feature flag. Anything new that must stay
+reachable while invite-only goes in `PUBLIC_PREFIXES` in `src/lib/prelaunch.ts`.
+
+---
+
+## 2026-08-28 — The mochi becomes an SVG that inherits `currentColor`
+
+Owner: the mochi "looks weird", and its colours are "often indistinguishable with
+the background orange and cream". Both true, and the first half was self-inflicted.
+
+**What broke.** The Bauhaus flatten (entry above) replaced the mochi's radial
+gradient with a **hard-stop** ellipse. A gradient's soft falloff had let the
+highlight blend into the body; a hard stop turned it into a hard-edged shape that
+ate the bottom of the blob. Rendered against every surface it actually appears on,
+the failure was obvious: on `card`, `panel`, `coral-chip` and `sand` the cream
+highlight matched the background closely enough that the lower half vanished and
+what remained read as a **crescent**; on solid `coral` the inverse happened — the
+coral-tint body disappeared and only the highlight showed.
+
+**The real problem was older than the flatten.** The mochi renders on white, three
+warm tints, solid coral and near-black. Any fixed fill collides with at least one
+of them; the gradient had merely been busy enough to disguise it.
+
+**Decision: one flat filled silhouette, coloured by context.** `currentColor`
+cannot collide, because the surrounding text colour was already chosen to be
+legible on that surface. Rejected: a filled shape with an interior fold (invisible
+below ~22px, and most of the 49 call sites render at 11–18px), and a stroked
+outline matching `Icons.tsx` (too light at 11px to work as a currency mark — a
+currency wants to read as a token, not a ring).
+
+Callers set the colour like any other glyph: `text-coral-deep` where the mochi
+*is* the subject (balances, prices — 34 sites), `text-coral-soft` for the
+decorative floaters on empty states (15 sites).
+
+**Constraint it creates.** Never give the mochi a hard-coded fill again — that is
+the bug, not the shading. If a new surface needs one, set a text colour at the
+call site.
+
+---
+
+## 2026-08-28 — The logo is the wordmark; Bauhaus 93 ships as outlines, not a webfont
+
+Owner retired the logomark: "only use the typeface as the logo", with Bauhaus 93
+as the face. `BrandMark` is deleted, `BrandLogo` and the footer are wordmark-only,
+and the square surfaces (favicon, apple-icon, PWA 192/512) are a lowercase `m`
+monogram from the same outlines — a five-letter wordmark is illegible at 16px and
+those surfaces have to be square.
+
+**Why outlines.** This is a licensing constraint, not a performance choice.
+Bauhaus 93 is **URW's**, bundled with Windows/Office; Microsoft's terms permit
+creating artwork with it — including logos — but **not** redistributing the font
+file or serving it as a webfont. Outlines carry no font software, so nothing is
+redistributed. The side effect is that the mark renders identically for the
+overwhelming majority of users, who have never had Bauhaus 93 installed and would
+otherwise have seen a fallback face. Generated with fontTools from
+`C:\Windows\Fonts\BAUHS93.TTF` at 2048 upem; the font has no `kern` table, so
+advances are raw `hmtx` widths and the lockup's word space is the font's own
+space glyph (512 units).
+
+Two open questions were flagged to the owner and are **not** answered here:
+registering 모투/motoo as a trademark in these letterforms may need a separate
+logo licence from URW/Monotype, and the "typeface designs aren't copyrightable,
+only the font *software* is" principle that makes outlining safe is a US framing —
+Korean law treats font files as protected computer program works and wants local
+confirmation.
+
+**Constraint it creates.** Never add `Bauhaus 93` to a `font-family`, never
+self-host `BAUHS93.TTF`, and never ship it in a webfont pipeline. The wordmark is
+regenerated by re-running the fontTools extraction, not by editing paths by hand.
+
+**Consequence.** Fredoka and Baloo 2 existed solely for the old text wordmark and
+were dropped with it. Combined with the mono removal the same day, the project now
+has **zero `next/font` imports** — no Google Fonts request on any page, and the
+type system cannot be broken by a CDN or a CSP change.
+
+---
+
+## 2026-08-28 — Brand orange is #ff5722, and the page background goes white
+
+Owner set the brand colour to `#ff5722` (was `#f15a29`, the retired logomark's
+orange; before that the dustier terracotta `#e08a6f`), then asked for the page
+background to be white.
+
+**The other four coral roles were not hand-picked.** Each was converted to OKLCh,
+held at its own lightness, and had chroma scaled by the base's chroma ratio
+(0.1954 → 0.2128) and hue shifted by the base's hue delta (−0.8°). That preserves
+the five roles' existing relationships instead of re-inventing them around a new
+base. `cream-warm`, `cream-warm-2` and `sand` took the same transform.
+
+**White was the bigger change.** `--color-cream` went `#fee9e1` → `#ffffff`. The
+warm tints deliberately did **not** follow: `panel`, `cream-warm`, `cream-warm-2`
+and `sand` keep their orange-derived values, so against a white page they read as
+deliberate bands and insets rather than as a slightly different shade of the same
+background. The landing's section rhythm depends on that contrast — don't
+neutralise them to "match" the white.
+
+**It fixed a contrast bug we had been carrying.** Every text role improved, and
+`coral-deep` on the page background went 4.02:1 → **4.70:1**, clearing AA 4.5:1
+for body-size link text, which the palette had never done (3.99:1 on the old pink
+cream). What fixed it was the white background, not the hue — so if the page is
+ever re-tinted, re-check that number before shipping. `#cd1f00` is the tested
+darker fallback. `muted` (`#9b8d7c`) is still 3.23:1 and remains under AA; it was
+2.76:1 before, so this improved it, and it is used for captions rather than body.
+
+**Constraint it creates.** `--color-card` is `#ffffff` too, so a card no longer
+separates from the page by fill. Every `bg-card` in the app pairs with
+`border-line-2`, and that border is now the only thing delineating it — dropping
+it makes cards vanish. This is also why the signup modal's role tiles carry a
+border: their cards go `bg-panel → bg-card` on hover, and a plain white tile would
+disappear into the card at exactly the moment the user points at it.
+
+---
+
+## 2026-08-28 — Mono is dropped: IBM Plex Mono had no Hangul and nobody noticed
+
+`font-mono` was applied to twelve call sites — eyebrows, footer column titles, the
+legal paragraph, dates, captions — of which **ten were Korean**. IBM Plex Mono
+ships `latin` only, so every one of those fell through the stack to whatever mono
+the OS supplied: Malgun Gothic on Windows, Apple SD Gothic on macOS, something
+else again on Android. The hero eyebrow rendered **two typefaces in one line** —
+`팬을 위한` in the fallback, `MOTOO` in Plex Mono.
+
+Measured, not assumed: canvas at 12px gave Hangul 80.64 in the Plex Mono stack vs
+72.24 in Pretendard and 79.44 in generic monospace — the Latin width proved Plex
+Mono was loading, and the Hangul width proved it was not being used for Hangul.
+
+This is the same per-platform drift the project already bans emoji for
+(DECISIONS 2026-07-29), and `check:emoji` does not catch it.
+
+**Only the `01/02/03` step numerals were genuinely getting mono**, and what mono
+bought them was fixed-width digits — `tabular-nums` gets that from Pretendard's
+own `tnum` feature with no second family. Owner chose to drop mono entirely rather
+than restrict it or swap in a Hangul-capable mono (D2Coding, Nanum Gothic Coding
+are code-editor faces with weaker Latin).
+
+Tracking that had been tuned for Latin mono was dialled back where it gapped
+Hangul: eyebrows `0.2em → 0.08em` (this was what produced the visible `팬 을  위 한`),
+footer titles `0.1em → 0.05em`.
+
+**Constraint it creates.** There is no `--font-mono`. Pretendard is the only text
+face; the wordmark is outlines. Before reaching for a second family, check it
+actually covers Hangul.
+
+---
+
+## 2026-08-28 — Flat and two-state: the Bauhaus geometry pass
+
+Owner: since the wordmark is Bauhaus 93, move the UI to match — "every single page
+should match the theme". Flagged first that **Bauhaus 93 is not Bauhaus design** —
+it is a 1990s URW digitisation after Bayer's 1925 Universal, and reads 70s/90s
+retro. Owner chose Bauhaus *principles* (flat, geometric) while **keeping the
+orange** rather than adopting primary red/yellow/blue, so the Bauhaus read comes
+from form, not palette.
+
+**This was a token change, not a 34-page edit**, and only because the app was
+already fully tokenised: zero hardcoded `rounded-[…]` in `src/`, 232 radius uses
+across 6 tokens. Changing the tokens moved every route together.
+
+- **Two-state geometry.** A shape is either a rectangle or a circle, with no soft
+  middle. `sm`/`md`/`lg` → `0`; `xl`/`2xl` → `2px` (so a full-bleed card doesn't
+  look like a printing error at the viewport edge); `rounded-full` kept as-is.
+  Round things staying fully round is the *other half* of the rule, not an
+  exception — avatars, status dots and the Studio pill are supposed to be round.
+- **Shadows are outlines, not blur.** The five tokens are kept so the 23 call
+  sites keep working, but each is now `0 0 0 1px` — a drawn edge, not a cast
+  shadow, which also guarantees the definition the blur used to provide on a white
+  page. The two coral glows are `none`; `Button.tsx` had already flagged the 24px
+  orange halo as reading like a toy.
+- **The mochi is flat.** Its radial + linear gradient *and* two inset shadows
+  faking a top light and a bottom shade are gone. **The first attempt at this was
+  wrong and is superseded — see the mochi entry below.**
+
+**Two pieces of rot surfaced.** `ErrorState.tsx` still carried
+`rgba(224,138,111)` — `#e08a6f`, the terracotta retired 2026-08-20 and dead twice
+over — and all nine hardcoded `shadow-[…]` classes were bypassing the scale, which
+is exactly how that survived unnoticed. There are now **zero hardcoded shadows and
+zero hardcoded radii in `src/`**.
+
+**Constraint it creates.** Don't reintroduce a soft radius or a blurred shadow;
+both are token-level decisions now. New rounded surfaces pick a side: square, or
+`rounded-full`.
+
+---
+
+## 2026-08-28 — The icon set gets a stated construction spec
+
+Owner: "renovate all the icons so that they are consistent and good looking". The
+set was structurally sound already (shared wrapper, 24 grid, 2px stroke,
+`currentColor`) — the problems were in the drawings, and the spec was implied
+rather than written down, so it had drifted.
+
+- **`Camera` and `Studio` were the same drawing** — a rect plus a lens triangle —
+  and indistinguishable in a row. `Studio` is now a mixer console, which shares
+  nothing with the video icons it used to collide with; `Camera` is a stills
+  camera.
+- **Live area varied 16–20px** across the set (`Note` 16, `Dice` 18, `Tape` 20),
+  which is what made a row read as mixed sizes rather than one set. Now a 20×20
+  live area inside the 24 grid, with **optical** sizing rather than metric: circles
+  r=9, square containers 18 wide, full-bleed 19. They measure differently and look
+  the same, which is the point.
+- **Detail that collapsed at 16px** was cut. `Dice` drew its pips as `h.01`
+  zero-length paths relying on the round cap, which vanished small — they are real
+  circles now. `Film` lost its sprocket holes. `Scroll` was a curl that read as
+  nothing and is redrawn.
+
+Drawn for this project in the Feather idiom rather than copied from Feather (MIT)
+or Lucide (ISC), so the set carries **no upstream licence obligation** — worth
+stating alongside the Bauhaus 93 licensing above.
+
+**Constraint it creates.** The spec is in the `Icons.tsx` header and is the
+contract for new icons. And per CLAUDE.md every user-visible glyph comes from that
+file: the signup modal had a hand-rolled inline heart that bypassed it, and had
+drifted accordingly — filled where everything else is stroked, and geometrically
+lopsided (lobes spanning x≈1.5–17 while the bottom point sat at x=12, so it
+rendered visibly left of centre). `check:emoji` does not catch a hand-rolled SVG.
+
+---
+
+## 2026-08-28 — The landing is rebuilt, and leads with 수수료 0%
+
+Owner rejected the logged-out landing twice: first the layout ("modern, technical,
+and fancy"), then the copy. Read "technical" as **precise and engineered** —
+strict grid, real numbers, high-craft detail — explicitly *not* the dark,
+data-dense, monospace register, which is the prediction-market/trading-venue look
+this product spent the donation pivot moving away from.
+
+**Structure.** Eight background bands became three. The full-bleed `#ff5722`
+block is gone — it sat between two dark sections, which was the harshest
+transition on the page and happened twice; orange is the buttons and a 1px hairline
+now. The hero dropped its `bg-cream-warm` band entirely: that band was designed
+against a pink page and read as a stray beige rectangle with a hard seam under the
+nav once the page went white. A **real stat rail** (`getLandingStats`) replaced
+claims with rows from the same tables the product reads — distinct backers rather
+than holding rows, lifetime earned rather than current balance so spending mochi
+can't make the number drop, and it renders nothing on failure because `0 크리에이터`
+is a worse lie than an absent number.
+
+**Copy.** The hero never said what motoo was — `좋아하는 크리에이터를, 모찌로
+응원하세요` could be any tipping product — and the register (`마음을 전하고`,
+`가장 따뜻한 방법`) contradicted the precise layout. It now leads with the
+mechanism: `후원금은 크리에이터에게 그대로. / 모투 수수료 0%.`
+
+**The claim is `모투 수수료 0%`, never "100% passthrough."** The donate page
+discloses `모투 수수료 0%, PG 결제 수수료는 제외`, and landing copy contradicting
+the money-flow disclosure was a real bug in this repo before (see CLAUDE.md).
+
+**A factual error was found in the old copy while rewriting.** Step 2 read
+`모찌 보내기` — but under the donation model (DECISIONS 2026-08-09) a fan does not
+send mochi; they donate and receive mochi back as a bonus. The copy still described
+the pre-pivot mechanic. Now `후원하기` → `모찌 쓰기`.
+
+The `모찌는 응원이에요 — 투자가 아니에요` block and its three guarantees were kept
+**verbatim**: it is legally load-bearing under spec §2, is the only place `투자` is
+allowlisted in `check:vocab`, and has to agree with `/refund`. A tone pass does not
+belong there.
+
+---
 
 ## 2026-08-18 — A confirmed email is required to donate, and OAuth counts as confirmation
 

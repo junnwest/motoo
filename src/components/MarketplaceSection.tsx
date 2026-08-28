@@ -187,7 +187,7 @@ function ItemCard({
           here — it used to be a 15px line under a 48px coral button, which
           inverted the hierarchy and turned every card into a wall of CTA. */}
       <div className="mt-3 flex items-baseline gap-1.5">
-        <Mochi width={18} height={14} />
+        <Mochi width={18} height={14} className="text-coral-deep" />
         <span className="text-xl font-extrabold tracking-[-0.02em] text-ink">
           {formatCount(item.priceMochi)}
         </span>
