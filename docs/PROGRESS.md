@@ -110,11 +110,14 @@ Resend adapter is written and needs an account, a verified domain and two env va
   makes them as binding as anything on `/refund`. Neither exists yet: nothing
   orders `/explore` by founding status, and there is no contact route beyond
   고객센터. Do these before the first invite goes out, or change the copy.
-- [ ] **Invited creators will sign up with unverified emails.** A5 (no email
-  provider in production) means the verification mail is still only printed to a
-  log. It does not block *them* — donating is what requires a confirmed address,
-  and nobody can donate pre-launch — but it means we cannot reach the very
-  creators we recruited. Worth closing before outreach, not after.
+- [ ] **Email is still the one genuinely missing piece.** `EMAIL_PROVIDER` and
+  `RESEND_API_KEY` are absent from Vercel production (confirmed 2026-08-28), so the
+  provider falls back to `mock` and verification mail is only printed to a log. The
+  Resend adapter itself is written and posts to the real API — this is two env vars
+  and a verified domain, not code. Mitigated but not solved for outreach: a creator
+  who signs up **with Google is verified on the spot** (OAuth counts as proof, see
+  DECISIONS 2026-08-18), so only credentials signups are affected. Still worth
+  closing before outreach — we cannot email the creators we just recruited.
 
 **Live design constraints (2026-08-28) — quiet breakage if ignored.** Why: DECISIONS.
 - **Page and `--color-card` are both `#ffffff`**, so cards separate by border, not fill.
@@ -138,13 +141,15 @@ Resend adapter is written and needs an account, a verified domain and two env va
     to `vercel env add` silently stored something P1013-invalid, which failed the first
     deploy. Sensitive variables also can't be read back (`vercel env pull` returns empty
     strings for them), so the only way to verify a value is to build.
-- [ ] **`CRON_SECRET` is still unset in Vercel**, so `/api/cron/purge-accounts` refuses to
-  run and no account is ever actually purged after its 30-day grace period.
-- [ ] **The four OAuth vars are missing from Vercel** — `AUTH_GOOGLE_ID`/`SECRET`,
-  `AUTH_NAVER_ID`/`SECRET`. `src/auth.ts` only registers a provider when its credentials
-  are present, so **Google and Naver login silently don't exist on production**; the
-  buttons are gated by the same check, so nothing errors, they just aren't there. They work
-  in dev because the credentials are in the local `.env`.
+- [x] ~~`CRON_SECRET` is still unset in Vercel~~ — **set** (verified 2026-08-28 via
+  `vercel env ls production`).
+- [x] ~~The four OAuth vars are missing from Vercel~~ — **all four are set** and Google,
+  Naver and Kakao buttons render on the live `/login` (verified 2026-08-28 against
+  `vercel env ls production` and `themotoo.com`). This entry was stale for ten days and
+  actively misleading: it is what led to a pre-launch OAuth signup hole shipping (see the
+  pre-launch note above). **`.env.production.local` is not production** — it holds 2-char
+  placeholders; Vercel env vars are the only source of truth, and `vercel env ls
+  production` prints names without exposing values.
 - [ ] Carried refactors: route-group layouts (`(marketing)`/`(app)`/`(auth)`) to stop repeating
   `<Nav/>`+`<Footer/>` across 20 pages; `EmptyState` + `PageHeader` primitives (6 and 9 real call
   sites); hardcoded Korean still in `creators/page.tsx`; `Backer` → `User` rename (high churn,
