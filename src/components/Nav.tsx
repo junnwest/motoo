@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { getTranslations } from "next-intl/server";
 import { BrandLogo } from "./BrandLogo";
 import { SignupButton } from "./SignupButton";
+import { PRELAUNCH } from "@/lib/prelaunch";
 import { UserMenu, type MenuItem } from "./UserMenu";
 import { NotificationBell } from "./NotificationBell";
 import { StudioPill } from "./StudioPill";
@@ -171,7 +172,13 @@ export async function Nav() {
             >
               {tc("login")}
             </Link>
-            <SignupButton label={tc("signup")} variant="primary" size="md" />
+            {/* No signup door while invite-only: the fan route redirects home
+                and the creator route is refused without an invite, so the
+                button would open a role chooser leading nowhere. Signup is
+                reached only by opening /join/<token>. */}
+            {PRELAUNCH ? null : (
+              <SignupButton label={tc("signup")} variant="primary" size="md" />
+            )}
           </div>
         )}
       </nav>

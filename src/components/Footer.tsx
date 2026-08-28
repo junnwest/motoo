@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PRELAUNCH } from "@/lib/prelaunch";
 import { useTranslations } from "next-intl";
 import { BrandWordmark } from "./BrandWordmark";
 import { supportMailto } from "@/lib/support";
@@ -130,7 +131,12 @@ export function Footer({
                   { label: tNav("forFans"), href: "/" },
                 ]}
               />
-            ) : (
+            ) : PRELAUNCH ? null : (
+              /* Every link in this column points at a page the pre-launch gate
+                 makes private, so while invite-only it is four links that bounce
+                 the reader straight back to where they came from. Support and
+                 legal below stay — those are reachable, and the legal ones have
+                 to be. */
               <FooterCol
                 tone={tone}
                 title={t("colExplore")}

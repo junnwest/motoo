@@ -493,7 +493,9 @@
         "used": "이미 사용한 링크예요.",
         "taken": "이미 다른 계정이 사용 중인 이메일이에요."
       }
-    }
+    },
+    "inviteRequired": "초대받은 크리에이터만 가입할 수 있어요. 받으신 초대 링크로 다시 시작해 주세요.",
+    "inviteInvalid": "초대 링크가 만료되었거나 이미 사용되었어요."
   },
   "creatorOnboarding": {
     "title": "크리에이터 시작하기",
@@ -1338,7 +1340,23 @@
       "noReply": "크리에이터 답변 없음",
       "close": "처리 완료로 표시",
       "notePlaceholder": "처리 내용을 적어 주세요."
-    }
+    },
+    "invitesTitle": "프리런치 초대",
+    "inviteLabelField": "누구에게 (크리에이터 이름·핸들)",
+    "inviteEmailField": "이메일 (선택)",
+    "inviteCreate": "초대 링크 만들기",
+    "inviteCreated": "초대 링크를 만들었어요",
+    "inviteColWho": "누구에게",
+    "inviteColLink": "링크",
+    "inviteColState": "상태",
+    "inviteColCreated": "생성일",
+    "inviteEmpty": "아직 만든 초대가 없어요.",
+    "inviteStateRedeemed": "가입 완료",
+    "inviteStateRevoked": "사용 중지됨",
+    "inviteStatePending": "대기 중",
+    "inviteRevoke": "사용 중지",
+    "labelRequired": "누구에게 보낼 초대인지 입력해 주세요.",
+    "inviteNotRevocable": "이미 사용되었거나 중지된 초대예요."
   },
   "report": {
     "trigger": "신고",
@@ -1539,6 +1557,39 @@
       "alreadyOpen": "이미 접수된 문의가 있어요.",
       "forbidden": "권한이 없어요.",
       "generic": "처리하지 못했어요. 잠시 후 다시 시도해 주세요."
+    }
+  },
+  "prelaunch": {
+    "eyebrow": "정식 출시 준비 중",
+    "title": "크리에이터를 먼저 모시고 있어요.",
+    "body": "motoo는 아직 정식 출시 전이에요. 지금은 저희가 직접 연락드린 크리에이터만 초대 링크로 가입할 수 있어요.",
+    "what": "motoo는 이런 서비스예요",
+    "whatBody": "팬이 크리에이터를 직접 후원하고, 후원 보너스로 받은 모찌를 그 크리에이터의 마켓에서 쓰는 곳이에요. 모투 중개 수수료는 0%예요.",
+    "perksTitle": "먼저 함께하는 크리에이터에게",
+    "perk1Title": "파운딩 배지",
+    "perk1Body": "프로필에 정식 출시 전부터 함께한 크리에이터라는 배지가 표시돼요.",
+    "perk2Title": "핸들 선점",
+    "perk2Body": "원하는 @핸들을 공개 가입이 열리기 전에 먼저 확보할 수 있어요.",
+    "perk3Title": "출시일 노출 우선",
+    "perk3Body": "정식 출시일 둘러보기에서 먼저 소개해 드려요.",
+    "perk4Title": "직접 소통",
+    "perk4Body": "담당자와 바로 연결되고, 무엇을 먼저 만들지 함께 정해요.",
+    "haveInvite": "초대 링크를 받으셨나요? 링크로 접속하면 가입이 시작돼요.",
+    "loginPrompt": "이미 가입하셨나요?",
+    "loginCta": "로그인",
+    "contactTitle": "초대를 받고 싶으신가요?",
+    "contactBody": "크리에이터로 활동하고 계신다면 아래로 연락 주세요.",
+    "backHome": "홈으로",
+    "foundingBadge": "파운딩 크리에이터",
+    "foundingBadgeTitle": "정식 출시 전부터 함께한 크리에이터예요.",
+    "joinError": {
+      "unknownTitle": "유효하지 않은 초대 링크예요.",
+      "unknownBody": "링크가 잘못되었거나 더 이상 사용할 수 없어요. 받으신 링크를 다시 확인해 주세요.",
+      "revokedTitle": "사용이 중지된 초대 링크예요.",
+      "revokedBody": "이 초대는 더 이상 사용할 수 없어요. 연락 주신 담당자에게 문의해 주세요.",
+      "spentTitle": "이미 사용된 초대 링크예요.",
+      "spentBody": "이 초대로 이미 가입이 완료되었어요. 가입하신 계정으로 로그인해 주세요.",
+      "spentLogin": "로그인하러 가기"
     }
   }
 }

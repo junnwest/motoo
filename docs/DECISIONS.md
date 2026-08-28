@@ -11,6 +11,7 @@ To pull a single entry, grep its heading with trailing context, e.g.
 
 | Date | Decision |
 | --- | --- |
+| 2026-08-28 | Pre-launch is invite-only, one row per creator we approach |
 | 2026-08-28 | The mochi becomes an SVG that inherits `currentColor` |
 | 2026-08-28 | The landing is rebuilt, and leads with 수수료 0% |
 | 2026-08-28 | The icon set gets a stated construction spec |
@@ -95,6 +96,66 @@ To pull a single entry, grep its heading with trailing context, e.g.
 | 2026-07-08 | `FoundingMembership` table for the founding-number invariant |
 | 2026-07-08 | Prisma pinned to v6 (not v7) |
 | 2026-07-08 | Korean-first, i18n-ready; integer KRW; mock PG |
+
+## 2026-08-28 — Pre-launch is invite-only, one row per creator we approach
+
+We are collecting creators before launch by reaching out directly, so the
+product goes private and only the people we contacted can create an account.
+`PRELAUNCH=1` turns it on; unsetting it is the launch.
+
+**What stays public.** The welcome page, the login/invite doors, and the legal
+pages — `/terms`, `/privacy`, `/refund`, `/youth`. The legal ones are on that
+list deliberately and must stay: `/refund` is a live obligation, and the terms
+are agreed to at onboarding. Hiding the terms someone is being asked to accept
+is not a thing to do for marketing tidiness.
+
+**One `Invite` row per creator, not one shared code.** A shared code is an
+hour's work and answers none of the questions the outreach actually raises: who
+was approached, who signed up, who never came back. It also fails badly — one
+leak opens signup to everyone until it is rotated, and rotating locks out
+everyone still holding the old one. Rows give per-creator revocation and double
+as the outreach record. The admin console mints and revokes them.
+
+**Single use is enforced in the database, not in a read-then-write.**
+`redeemInvite` is a conditional update with `redeemedAt: null` in the
+where-clause, so two people opening the same link at the same moment cannot both
+get in. Tested under concurrency: exactly one winner, and the loser's
+`foundingAt` is rolled back so a founding mark can never exist without an invite
+actually being spent.
+
+**The gate that matters is in `signupUser`, not the middleware.** Middleware
+gates *pages*; a server action can be invoked directly. Checking in the action is
+the difference between a closed signup and a hidden one. The token rides in an
+httpOnly cookie set by `/join/<token>` rather than a form field, so it cannot be
+supplied or edited by the caller.
+
+**`/join/<token>` is a Route Handler, not a page** — setting a cookie is only
+permitted in a Route Handler or Server Action, and the server component this
+started as threw at runtime. Failures redirect to `/join`, which *is* a page and
+can say which of "invalid", "revoked" or "already used" happened; the last of
+those has an obvious next step (log in) that the others do not.
+
+**Nothing on the studio host is public**, even `/`. Production would also be
+caught by the existing creator gate, but a gate whose whole job is privacy should
+not depend on a second one being correct.
+
+**Four things were promised to founding creators, and two are obligations.**
+The founding badge and the reserved `@handle` are already true the moment they
+sign up. **Discovery placement at launch and a direct line are promises we have
+to keep** — they are stated on the public welcome page, which makes them as
+binding as anything on `/refund`.
+
+Benefits are deliberately non-financial. Promising early signups future economic
+advantage would read as a return for getting in early, which is the framing the
+donation pivot exists to avoid (DECISIONS 2026-08-09) and which `check:vocab`
+polices. Note the obvious lever was never available anyway: motoo already takes
+0%, so there is no fee to discount.
+
+**Constraint it creates.** `PRELAUNCH` is the public/private switch — treat it
+as a deploy-critical variable, not a feature flag. Anything new that must stay
+reachable while invite-only goes in `PUBLIC_PREFIXES` in `src/lib/prelaunch.ts`.
+
+---
 
 ## 2026-08-28 — The mochi becomes an SVG that inherits `currentColor`
 

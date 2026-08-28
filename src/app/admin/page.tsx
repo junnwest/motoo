@@ -10,6 +10,10 @@ import { CreatorRow } from "./CreatorRow";
 import { ReportRow } from "./ReportRow";
 import { RefundRow } from "./RefundRow";
 import { IssueRow } from "./IssueRow";
+import { InvitesPanel } from "./InvitesPanel";
+import { listInvites } from "@/lib/invites";
+import { PRELAUNCH } from "@/lib/prelaunch";
+import { headers } from "next/headers";
 
 export const metadata: Metadata = { robots: NOINDEX };
 
@@ -30,6 +34,12 @@ export const dynamic = "force-dynamic";
 export default async function AdminPage() {
   await requireAdmin(); // 404s for everyone else
   const t = await getTranslations("admin");
+  const invites = PRELAUNCH ? await listInvites() : [];
+  const h = await headers();
+  // Absolute origin so a minted link can be copied straight into a DM.
+  const origin = `${h.get("x-forwarded-proto") ?? "http"}://${
+    h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000"
+  }`;
 
   const openReports = await prisma.report.findMany({
     where: { status: "open" },
@@ -250,6 +260,45 @@ export default async function AdminPage() {
             ))}
           </div>
         )}
+
+        {/* Pre-launch invites. Hidden once PRELAUNCH is off — after launch the
+            table is history, and a key-cutter on the admin console with nothing
+            to unlock is an attractive nuisance. */}
+        {PRELAUNCH ? (
+          <>
+            <h2 className="mt-10 text-xl font-extrabold text-ink">
+              {t("invitesTitle")}
+            </h2>
+            <InvitesPanel
+              origin={origin}
+              rows={invites.map((i) => ({
+                id: i.id,
+                token: i.token,
+                label: i.label,
+                email: i.email,
+                createdAt: formatKstDate(i.createdAt),
+                redeemedAt: i.redeemedAt ? formatKstDate(i.redeemedAt) : null,
+                revokedAt: i.revokedAt ? formatKstDate(i.revokedAt) : null,
+                redeemedByNickname: i.redeemedBy?.nickname ?? null,
+              }))}
+              t={{
+                labelField: t("inviteLabelField"),
+                emailField: t("inviteEmailField"),
+                create: t("inviteCreate"),
+                created: t("inviteCreated"),
+                colWho: t("inviteColWho"),
+                colLink: t("inviteColLink"),
+                colState: t("inviteColState"),
+                colCreated: t("inviteColCreated"),
+                empty: t("inviteEmpty"),
+                redeemed: t("inviteStateRedeemed"),
+                revoked: t("inviteStateRevoked"),
+                pending: t("inviteStatePending"),
+                revoke: t("inviteRevoke"),
+              }}
+            />
+          </>
+        ) : null}
 
         <h2 className="mt-10 text-xl font-extrabold text-ink">
           {t("creatorsTitle")}

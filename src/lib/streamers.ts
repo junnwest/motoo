@@ -220,6 +220,11 @@ export const getStreamerProfile = cache(async (handle: string) => {
         where: { active: true, hiddenAt: null },
         orderBy: { sortOrder: "asc" },
       },
+      // Founding status is read through the owner rather than mirrored onto
+      // Streamer: the account is created (and the invite spent) before the
+      // Studio exists, so a copy on Streamer would be a second source of truth
+      // that could drift. One extra column on a join we already do.
+      owner: { select: { foundingAt: true } },
     },
   });
   if (!streamer || streamer.status !== "approved") return null;

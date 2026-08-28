@@ -99,6 +99,23 @@ Resend adapter is written and needs an account, a verified domain and two env va
   token can still satisfy the *routing* gate for one request. Every page-level `auth()` does the
   real check. **No action recommended.**
 
+**Pre-launch (2026-08-28) — live obligations, not just a feature**
+- **`PRELAUNCH=1` is what makes the site private.** It is a deploy-critical env
+  var, not a feature flag: unsetting it *is* the launch. Documented in DEPLOYMENT.
+  New routes that must stay publicly reachable go in `PUBLIC_PREFIXES`
+  (`src/lib/prelaunch.ts`) or they disappear.
+- [ ] **Two of the four founding-creator promises are unbuilt.** The badge and the
+  reserved `@handle` are already true. **Discovery placement at launch** and a
+  **direct line / roadmap input** are stated on the public welcome page, which
+  makes them as binding as anything on `/refund`. Neither exists yet: nothing
+  orders `/explore` by founding status, and there is no contact route beyond
+  고객센터. Do these before the first invite goes out, or change the copy.
+- [ ] **Invited creators will sign up with unverified emails.** A5 (no email
+  provider in production) means the verification mail is still only printed to a
+  log. It does not block *them* — donating is what requires a confirmed address,
+  and nobody can donate pre-launch — but it means we cannot reach the very
+  creators we recruited. Worth closing before outreach, not after.
+
 **Live design constraints (2026-08-28) — quiet breakage if ignored.** Why: DECISIONS.
 - **Page and `--color-card` are both `#ffffff`**, so cards separate by border, not fill.
   Every `bg-card` must keep its `border-line-2`.

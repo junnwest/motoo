@@ -5,6 +5,33 @@ For current status and open work see [`PROGRESS.md`](./PROGRESS.md); for *why* a
 the way it is see [`DECISIONS.md`](./DECISIONS.md).
 
 
+## 2026-08-28 — pre-launch: the site goes invite-only
+
+Creator collection starts before launch, so the product is private and only
+creators we contact directly can sign up. `PRELAUNCH=1` turns it on; unsetting
+the variable and redeploying is the launch. Rationale in DECISIONS 2026-08-28.
+
+- **`Invite` model + `Backer.foundingAt`** (migration `prelaunch_invites`). One
+  row per creator approached, so the table doubles as the outreach record. Single
+  use is a conditional update inside the redemption transaction — tested under
+  concurrency: exactly one winner, loser's founding mark rolled back.
+- **The gate** lives in `src/proxy.ts` for pages and — the one that matters — in
+  `signupUser` for account creation, since a server action can be called directly.
+  The invite token rides in an httpOnly cookie, never a form field. Nothing on the
+  studio host is public, including `/`.
+- **Public surface**: the welcome page, login, `/join`, and the legal pages
+  (`/terms`, `/privacy`, `/refund`, `/youth`) — the last four deliberately, since
+  `/refund` is an obligation and the terms are agreed at onboarding.
+- **`/join/<token>`** is a Route Handler (cookies cannot be set from a Server
+  Component); `/join` renders which of invalid / revoked / already-used happened.
+- **Admin invite management** — mint, copy link, revoke. Revoking never deletes,
+  and a redeemed invite is not revocable.
+- **Founding badge** on the creator profile, read through `Streamer.owner` rather
+  than mirrored onto `Streamer`, so there is one source of truth.
+- **Dead ends closed**: the nav's 회원가입 button and the footer's explore column
+  both pointed at things the gate makes unreachable, and are hidden while
+  invite-only.
+
 ## 2026-08-28 — the brand overhaul
 
 A single session, owner-driven, working outward from the logo. Rationale for each

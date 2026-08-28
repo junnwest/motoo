@@ -7,6 +7,7 @@ import { Mochi } from "@/components/Mochi";
 import { Avatar } from "@/components/ui/Placeholder";
 import { IconLock } from "@/components/ui/Icons";
 import { CreatorFacet } from "@/components/CreatorFacet";
+import { FoundingBadge } from "@/components/FoundingBadge";
 import { SupporterLeaderboard } from "@/components/SupporterLeaderboard";
 import { MarketplaceSection } from "@/components/MarketplaceSection";
 import { FollowButton } from "@/components/FollowButton";
@@ -87,6 +88,7 @@ export default async function StreamerProfilePage({
   const t = await getTranslations("profile");
   const tc = await getTranslations("common");
   const tax = await getTranslations("creatorTaxonomy");
+  const tPre = await getTranslations("prelaunch");
   // Independent reads run concurrently (the viewer's account doesn't depend on
   // the profile). Issuance + items are folded into the profile query itself.
   const [data, backer] = await Promise.all([
@@ -169,6 +171,12 @@ export default async function StreamerProfilePage({
                 {streamer.displayName}
               </h1>
               <span className="text-sm text-muted">@{streamer.handle}</span>
+              {streamer.owner?.foundingAt ? (
+                <FoundingBadge
+                  label={tPre("foundingBadge")}
+                  title={tPre("foundingBadgeTitle")}
+                />
+              ) : null}
             </div>
             <CreatorFacet
               variant="chips"

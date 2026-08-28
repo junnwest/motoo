@@ -63,6 +63,7 @@ preview deploys per PR.
 | `AUTH_SECRET` | `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"` |
 | `AUTH_TRUST_HOST` | `true` |
 | `AUTH_COOKIE_DOMAIN` | `.themotoo.com` (**Production only**, leading dot) — shares the session cookie across `themotoo.com` ↔ `studio.themotoo.com`. **Leave unset** in dev/preview so cookies stay host-only. |
+| `PRELAUNCH` | `1` while invite-only. **This is the switch that makes the site public.** With it set, everything except the welcome page, the legal pages and the login/invite doors is private, and an account can only be created by redeeming an `Invite` (`/join/<token>`). Unset or any other value = launched. Launch is this variable plus a redeploy — no code change. |
 | `PAYMENT_PROVIDER` | `mock` (real Toss/NICE/PortOne needs a merchant contract) |
 | `VERIFICATION_PROVIDER` | `mock` (real 본인인증 needs a 본인확인기관 contract) |
 | `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` | Google Cloud OAuth client — **set locally, live in dev** |

@@ -25,6 +25,8 @@ import {
   type LandingStats,
 } from "@/lib/streamers";
 import { getSession } from "@/lib/session";
+import { PRELAUNCH } from "@/lib/prelaunch";
+import { PrelaunchLanding } from "@/components/PrelaunchLanding";
 import { formatCount } from "@/lib/format";
 
 /**
@@ -78,6 +80,12 @@ export default async function FanLandingPage() {
   // (Non-onboarded users are caught by the onboarding middleware before this.)
   const session = await getSession();
   if (session?.user) redirect(session.user.creator ? "/studio" : "/home");
+
+  // Pre-launch: signed-out visitors get the welcome page instead of the
+  // marketing landing. The landing below is untouched — flipping PRELAUNCH off
+  // brings it straight back, which is the point of gating on an env var rather
+  // than deleting it.
+  if (PRELAUNCH) return <PrelaunchLanding />;
 
   const t = await getTranslations("fanLanding");
   const tc = await getTranslations("common");

@@ -166,6 +166,14 @@ model Backer {
   // purge job once this timestamp is in the past. See src/lib/accountDeletion.ts.
   pendingDeletionAt DateTime?
 
+  /// Set when this account was created by redeeming a pre-launch `Invite`.
+  /// Source of truth for the founding badge — the creator profile reads it
+  /// through `Streamer.owner` rather than duplicating it, so the two can never
+  /// disagree. Null for everyone who signs up after launch.
+  foundingAt      DateTime?
+  /// The invite this account redeemed, if any. One invite, one account.
+  invite          Invite?
+
   // Onboarding — every new user completes this once (creators use /creator/onboarding).
   // Middleware redirects a signed-in, non-onboarded fan to /onboarding.
   onboardedAt      DateTime?
@@ -495,6 +503,46 @@ model Notification {
  * pruned nightly by the same cron that purges deleted accounts.
  * See src/lib/rateLimit.ts.
  */
+/// A pre-launch invitation to one creator we contacted directly.
+///
+/// Pre-launch signup is invite-only (PRELAUNCH=1): we reach out to specific
+/// creators, and only they can create an account. A row per invite rather than
+/// one shared secret code, because the point is to know *who* — which creators
+/// were approached, which redeemed, and which never did. A shared code answers
+/// none of that, and one leak opens signup to everyone until it is rotated,
+/// which also locks out everyone still holding the old one.
+///
+/// Single-use: redemption is a conditional update inside the signup transaction
+/// (`redeemedAt: null` in the where-clause), so two people opening the same link
+/// at once cannot both get in.
+model Invite {
+  id        String @id @default(cuid())
+  /// The random half of the /join/<token> URL. Unique and unguessable.
+  token     String @unique
+  /// Who this was minted for — a creator name or handle. For our own records;
+  /// never shown to the invitee.
+  label     String
+  /// Optional address we sent it to, so a redemption can be sanity-checked
+  /// against who we actually contacted.
+  email     String?
+  note      String?
+  createdAt DateTime @default(now())
+  /// Admin email from the ADMIN_EMAILS allowlist.
+  createdBy String
+
+  /// Set the moment it is spent. Also the single-use guard — see above.
+  redeemedAt         DateTime?
+  redeemedByBackerId String?   @unique
+  redeemedBy         Backer?   @relation(fields: [redeemedByBackerId], references: [id], onDelete: SetNull)
+
+  /// Revoked invites stop working without being deleted, so the outreach record
+  /// survives. A redeemed invite is never revoked — the account already exists.
+  revokedAt DateTime?
+
+  @@index([createdAt])
+  @@index([redeemedAt])
+}
+
 model RateLimit {
   id          String   @id @default(cuid())
   /// "<kind>:<subject>", e.g. "buy:<backerId>" or "login:<email>"
