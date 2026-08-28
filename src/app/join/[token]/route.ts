@@ -26,9 +26,11 @@ export async function GET(
     return NextResponse.redirect(new URL(`/join?e=${state.reason}`, req.url));
   }
 
-  // Straight into creator signup — an invite is only ever for a creator, so
-  // this also sets the creator intent rather than making them pick a role.
-  const res = NextResponse.redirect(new URL("/api/become-creator", req.url));
+  // On to the invitation at /join — not straight into signup. Being handed a
+  // form is what a public product does; an invitation should be read first and
+  // accepted second. That page's CTA is what continues to /api/become-creator,
+  // which sets the creator intent (an invite is only ever for a creator).
+  const res = NextResponse.redirect(new URL("/join", req.url));
   res.cookies.set(INVITE_COOKIE, token, {
     httpOnly: true,
     path: "/",

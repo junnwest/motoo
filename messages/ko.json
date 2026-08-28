@@ -1604,6 +1604,17 @@
     "inviteTitle": "먼저 모시고 싶은 크리에이터께",
     "inviteBody": "motoo는 아직 정식 출시 전이에요. 지금은 저희가 직접 연락드린 분들만 가입할 수 있어요.",
     "inviteSingleUse": "이 초대 링크는 한 번만 사용할 수 있어요.",
-    "invitePerksLead": "먼저 함께하시면"
+    "invitePerksLead": "먼저 함께하시면",
+    "letterEyebrow": "초대장",
+    "letterTitle": "motoo에 초대합니다",
+    "letterLead": "정식 출시 전, 저희가 먼저 모시고 싶은 크리에이터께만 보내드리는 초대예요.",
+    "letterWhatTitle": "motoo는",
+    "letterWhatBody": "팬이 크리에이터를 직접 후원하고, 후원 보너스로 받은 모찌를 그 크리에이터의 마켓에서 쓰는 곳이에요. 모투 중개 수수료는 0%예요.",
+    "letterPerksTitle": "먼저 함께하시면",
+    "letterCta": "초대 수락하고 시작하기",
+    "letterSingleUse": "이 초대 링크는 한 번만 사용할 수 있어요.",
+    "letterAlready": "이미 가입하셨나요?",
+    "noInviteTitle": "초대 링크가 필요해요.",
+    "noInviteBody": "motoo는 아직 정식 출시 전이에요. 받으신 초대 링크로 접속해 주세요."
   }
 }
