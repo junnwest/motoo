@@ -1,38 +1,21 @@
 import type { Metadata, Viewport } from "next";
 import { Analytics } from "@vercel/analytics/next";
-import { Baloo_2, Fredoka, IBM_Plex_Mono } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { defaultLocale } from "@/i18n/config";
 import { SITE_URL } from "@/lib/metadata";
 import "./globals.css";
 
-// Pretendard is loaded via CDN in globals.css (not on Google Fonts).
-const ibmPlexMono = IBM_Plex_Mono({
-  variable: "--font-ibm-plex-mono",
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  display: "swap",
-});
+// Pretendard is loaded from globals.css (self-hosted, not on Google Fonts) and
+// is now the only text face. IBM Plex Mono went with the mono role on
+// 2026-08-28 — it shipped `latin` only, so every Korean label that asked for it
+// silently fell back to an OS font. See the type comment in globals.css.
 
-// The "motoo" wordmark, replacing Pretendard for just that lockup — rounder
-// and friendlier than the UI's default face, on purpose (2026-08-20).
-const fredoka = Fredoka({
-  variable: "--font-fredoka",
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
-  display: "swap",
-});
-
-// The "studio" suffix on the Studio host's wordmark only — a distinct, lighter
-// rounded face so it still reads as a suffix, not a second word competing with
-// "motoo".
-const baloo2 = Baloo_2({
-  variable: "--font-baloo-2",
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
-  display: "swap",
-});
+// Fredoka (wordmark) and Baloo 2 ("studio" suffix) were removed 2026-08-28.
+// The wordmark is Bauhaus 93 now, shipped as outlines in `BrandWordmark.tsx`
+// because its licence does not permit webfont use — so both families existed
+// only for a lockup that no longer renders as text, and were two font
+// downloads on every page for five glyphs.
 
 /**
  * Site-wide metadata. Was a single hardcoded title/description still selling
@@ -81,7 +64,7 @@ export async function generateMetadata(): Promise<Metadata> {
  * unusable for low-vision users.
  */
 export const viewport: Viewport = {
-  themeColor: "#f15a29",
+  themeColor: "#ff5722",
   viewportFit: "cover",
 };
 
@@ -93,7 +76,7 @@ export default async function RootLayout({
   return (
     <html
       lang={defaultLocale}
-      className={`${ibmPlexMono.variable} ${fredoka.variable} ${baloo2.variable} h-full antialiased`}
+      className="h-full antialiased"
     >
       <body className="min-h-full flex flex-col bg-cream text-ink">
         <NextIntlClientProvider>

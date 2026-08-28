@@ -1,6 +1,6 @@
 ﻿# motoo — Progress Tracker
 
-_Last updated: 2026-08-18_
+_Last updated: 2026-08-28_
 
 **Read this whole file — it is short on purpose.** Everything in it is either open, blocked,
 or a live constraint. Shipped history lives in [`CHANGELOG.md`](./CHANGELOG.md) and does not
@@ -53,6 +53,11 @@ Resend adapter is written and needs an account, a verified domain and two env va
     credit is the single most challengeable position in the product under 선불전자지급수단
     rules, and it means a user with under 60% spent now does *worse* by deleting their account
     than by requesting a refund. See DECISIONS 2026-08-07.
+  - [ ] **Font licensing for the wordmark (2026-08-28).** Bauhaus 93 (URW) ships as
+    outlines, so no font software is redistributed — that part is settled. Open before
+    any trademark filing: a logo licence may still be required by URW/Monotype, and the
+    "only the font *software* is protected" principle is a US framing (Korean law treats
+    font files as computer program works). Cheap now, expensive after filing.
   - [ ] **Creator/service termination** — what happens to balances if a creator stops trading
     or motoo closes. Deliberately omitted from `/refund`; still the clause hardest to defend
     leaving out, and more exposed since the 60% path went: past the 7-day window there is now
@@ -80,12 +85,33 @@ Resend adapter is written and needs an account, a verified domain and two env va
   `DEBUG_QUERIES=1` rather than remembered — the previous numbers in this file were both wrong.
   About six of each are the shell, on every signed-in page. Getting materially below that means
   consolidating reads, not more caching.
+- [ ] **Brand pass leftovers (2026-08-28)** — all seen and consciously left, none blocking.
+  Footer tagline (`…가장 따뜻한 방법`) is still the soft register the landing moved away
+  from, but it's in the `footer` namespace so it shows on every page — cross-app call.
+  `StreamerCard`/`CreatorCover` still read as placeholders (owner raised it; shared with
+  `/explore`, `/search`, `/home`). `Note`/`Document`/`Scroll` are three near-identical
+  page-with-lines icons at 16px. `muted` `#9b8d7c` is 3.23:1, still under AA (was 2.76:1).
+  `IconLink` and `IconDocument` have zero references — safe to delete.
 - [ ] **No screen-reader pass.** `pnpm check:a11y` (axe over 11 rendered pages) is clean as of
   2026-08-18 and found two missing `main` landmarks on the way. That covers about a third of
   real barriers; a human AT run is still owed, and interaction states are outside what it audits.
 - [ ] The edge middleware doesn't check `tokenVersion` — Prisma-free by design, so a revoked
   token can still satisfy the *routing* gate for one request. Every page-level `auth()` does the
   real check. **No action recommended.**
+
+**Live design constraints (2026-08-28) — quiet breakage if ignored.** Why: DECISIONS.
+- **Page and `--color-card` are both `#ffffff`**, so cards separate by border, not fill.
+  Every `bg-card` must keep its `border-line-2`.
+- **Two-state geometry**: rectangles square-cornered, `rounded-full` round, nothing
+  between; shadows are `0 0 0 1px` outlines, not blur. Token-level — `src/` has zero
+  hardcoded radii and zero hardcoded shadows.
+- **`Mochi` requires `width`/`height` props**; a sizing `className` is silently ignored
+  (dev warns).
+- **No `--font-mono`, zero `next/font` imports.** Pretendard only. Check Hangul coverage
+  before adding a family — IBM Plex Mono had none and ten Korean call sites fell back.
+- **Never claim "100% passthrough"** — the landing says `모투 수수료 0%`, matching the
+  donate page's `PG 결제 수수료는 제외`.
+- **Never webfont Bauhaus 93**; the wordmark is outlines in `BrandWordmark.tsx`.
 
 **Maintenance**
   - **Do this in the dashboard, never `vercel env rm NAME preview`** — that CLI command

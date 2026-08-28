@@ -140,7 +140,7 @@ export function Modal({
           <motion.div
             ref={cardRef}
             tabIndex={-1}
-            className={`relative w-full max-w-[420px] rounded-2xl border border-line-2 bg-card p-7 shadow-[0_24px_70px_rgba(33,28,24,0.28)] outline-none sm:p-8 ${className}`}
+            className={`relative w-full max-w-[420px] rounded-2xl border border-line-2 bg-card p-7 shadow-float outline-none sm:p-8 ${className}`}
             // Rises 8px into place. Small on purpose: a dialog that flies in
             // from off-screen is the kind of motion that reads as decoration.
             initial={

@@ -38,7 +38,6 @@ export default async function CreatorLandingPage() {
 
       {/* Hero */}
       <section id="main" className="relative overflow-hidden px-6 py-16 sm:px-14 sm:py-[74px]">
-        <div className="pointer-events-none absolute -right-20 -top-28 h-[620px] w-[620px] rounded-full bg-[radial-gradient(circle_at_40%_40%,rgba(240,163,140,.30),rgba(240,163,140,0)_62%)]" />
         <div className="relative mx-auto grid max-w-[1200px] items-center gap-12 lg:grid-cols-[1.05fr_.95fr]">
           <div>
             <Eyebrow className="mb-[22px]">{t("eyebrow")}</Eyebrow>
@@ -65,7 +64,7 @@ export default async function CreatorLandingPage() {
                 {t("ctaSample")}
               </ButtonLink>
             </div>
-            <div className="mt-[30px] flex flex-wrap items-center gap-[18px] font-mono text-xs tracking-[0.02em] text-muted">
+            <div className="mt-[30px] flex flex-wrap items-center gap-[18px] text-xs tracking-[0.02em] text-muted">
               <span className="flex items-center gap-[6px]">
                 <span className="h-[7px] w-[7px] rounded-full bg-sage" />
                 {t("trustDirect")}
@@ -83,7 +82,7 @@ export default async function CreatorLandingPage() {
                   <Avatar name="크리에이터A" size={46} />
                   <div className="flex-1">
                     <div className="text-lg font-extrabold">@크리에이터A</div>
-                    <div className="font-mono text-2xs text-muted">
+                    <div className="text-2xs text-muted">
                       나의 마켓
                     </div>
                   </div>
@@ -124,7 +123,7 @@ export default async function CreatorLandingPage() {
 
       {/* Proof strip */}
       <div className="flex items-center justify-between gap-6 border-y border-line bg-cream-warm-2 px-6 py-[26px] sm:px-14">
-        <span className="whitespace-nowrap font-mono text-2xs tracking-[0.04em] text-muted">
+        <span className="whitespace-nowrap text-2xs tracking-[0.04em] text-muted">
           {t("proofStrip")}
         </span>
         <div className="flex flex-1 items-center justify-around gap-10 opacity-55">
@@ -193,7 +192,7 @@ export default async function CreatorLandingPage() {
               className="rounded-2xl border border-line-2 bg-card p-8 shadow-soft"
             >
               <div className="mb-[22px] flex items-center justify-between">
-                <span className="font-mono text-sm font-semibold text-coral-deep">
+                <span className="text-sm font-semibold tabular-nums tracking-[0.06em] text-coral-deep">
                   0{s.n}
                 </span>
                 {s.right}

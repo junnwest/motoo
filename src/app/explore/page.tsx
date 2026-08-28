@@ -70,7 +70,7 @@ export default async function ExplorePage({
 
         {/* no top-earners leaderboard — ranked by real support, never money raised */}
         <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
-          <span className="font-mono text-2xs tracking-[0.03em] text-muted">
+          <span className="text-2xs tracking-[0.03em] text-muted">
             {t("rankingNote")}
           </span>
           <span className="text-xs text-muted">

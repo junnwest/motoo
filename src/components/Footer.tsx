@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { BrandMark } from "./BrandMark";
+import { BrandWordmark } from "./BrandWordmark";
 import { supportMailto } from "@/lib/support";
 
 type FooterLink = {
@@ -66,7 +66,7 @@ function FooterCol({
   return (
     <div>
       <div
-        className={`mb-[14px] font-mono text-2xs tracking-[0.1em] ${c.colTitle}`}
+        className={`mb-[14px] text-2xs font-semibold tracking-[0.05em] ${c.colTitle}`}
       >
         {title}
       </div>
@@ -104,13 +104,8 @@ export function Footer({
       <div className="mx-auto max-w-[1200px]">
         <div className="flex flex-wrap justify-between gap-10">
           <div className="max-w-[300px]">
-            <div className="mb-[14px] flex items-center gap-[9px]">
-              <BrandMark width={21} height={24} />
-              <span
-                className={`font-wordmark text-xl font-bold tracking-[-0.01em] ${c.brand}`}
-              >
-                motoo
-              </span>
+            <div className="mb-[14px] flex items-center">
+              <BrandWordmark height={18} className={c.brand} />
             </div>
             <p className={`text-sm leading-relaxed ${c.tagline}`}>
               {variant === "creator" ? t("creatorTagline") : t("fanTagline")}
@@ -181,7 +176,7 @@ export function Footer({
         </div>
 
         <div
-          className={`mt-10 border-t pt-[18px] font-mono text-2xs leading-relaxed ${c.rule} ${c.legal}`}
+          className={`mt-10 border-t pt-[18px] text-2xs leading-relaxed ${c.rule} ${c.legal}`}
         >
           {t("businessInfo")}
           {variant === "fan" && (

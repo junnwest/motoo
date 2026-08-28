@@ -58,11 +58,14 @@ export const contentType = "image/png";
 
 // Brand tokens, copied from the @theme block in globals.css. Satori can't read
 // CSS variables, so these are literals and must be updated with the tokens.
-const CREAM = "#fde9e2";
+// Deliberately still the warm tint, not the page background: `cream` went
+// white 2026-08-28, but a white OG card disappears into the white chrome of
+// Twitter/KakaoTalk previews. This is a standalone image, not a page.
+const WARM = "#fee9e1";
 const INK = "#211c18";
 const BODY = "#74695f";
-const CORAL = "#f15a29";
-const CORAL_DEEP = "#d43e0e";
+const CORAL = "#ff5722";
+const CORAL_DEEP = "#db3200";
 const LINE = "#ece1d2";
 
 export default async function Image({
@@ -89,7 +92,7 @@ export default async function Image({
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            background: CREAM,
+            background: WARM,
             color: INK,
             fontSize: 96,
             fontWeight: 700,
@@ -132,7 +135,7 @@ export default async function Image({
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
-          background: CREAM,
+          background: WARM,
           padding: 72,
           fontFamily: "Noto Sans KR",
         }}
@@ -148,7 +151,7 @@ export default async function Image({
               width: 132,
               height: 132,
               borderRadius: 999,
-              background: "#f1e4d4",
+              background: "#f2e4d2",
               color: CORAL_DEEP,
               fontSize: 64,
               fontWeight: 700,

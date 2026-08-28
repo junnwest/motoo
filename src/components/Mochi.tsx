@@ -6,22 +6,41 @@ import { CSSProperties } from "react";
  * Gradient + shape ported verbatim from the design handoff `.mochi` class.
  */
 export function Mochi({
-  width = 26,
-  height = 21,
+  width,
+  height,
   float = false,
   floatDuration = 5,
   floatDelay = 0,
   className = "",
   style,
 }: {
-  width?: number;
-  height?: number;
+  /**
+   * Size in px. **Required, and the only way to size a mochi** — see the note
+   * on className below. Deliberately not defaulted: the defaults used to be
+   * 26x21, so forgetting them rendered a plausible-looking mochi at the wrong
+   * size instead of failing, which is exactly how the landing page shipped a
+   * 26x21 blob crammed into a 28px circle.
+   */
+  width: number;
+  height: number;
   float?: boolean;
   floatDuration?: number;
   floatDelay?: number;
+  /**
+   * Positioning and layout only (`absolute`, `self-end`, …). **Sizing utilities
+   * here do nothing** — width/height are written as inline styles below and
+   * inline styles beat Tailwind classes. Dev builds warn if you try.
+   */
   className?: string;
   style?: CSSProperties;
 }) {
+  if (process.env.NODE_ENV !== "production" && /(^|\s)(w-|h-|size-)/.test(className)) {
+    console.warn(
+      `[Mochi] A sizing class in className is ignored — width/height are inline ` +
+        `styles and win. Pass the width/height props instead. Got: "${className}"`,
+    );
+  }
+
   return (
     <span
       aria-hidden="true"
@@ -36,11 +55,14 @@ export function Mochi({
         width,
         height,
         flex: "none",
+        // Flat, two-tone (2026-08-28, the Bauhaus pass). Was a radial + linear
+        // gradient from the design handoff, plus two inset shadows faking a top
+        // light and a bottom shade — a soft 3D blob, which is the opposite of a
+        // flat system and went muddy at the 16-24px it actually renders at.
+        // Same silhouette, all shading gone: one solid body, one hard highlight.
         background:
-          "radial-gradient(ellipse 50% 42% at 50% 80%, #FFFDF8 0%, #F5E4D2 58%, rgba(245,228,210,0) 62%), linear-gradient(158deg,#F3B49B,#E2855F)",
+          "radial-gradient(ellipse 46% 38% at 50% 78%, var(--color-cream-warm) 0 100%, transparent 100%), var(--color-coral-tint)",
         borderRadius: "47% 47% 49% 49%/57% 57% 43% 43%",
-        boxShadow:
-          "inset 0 4px 6px rgba(255,255,255,.5), inset 0 -5px 9px rgba(168,90,64,.32)",
         animation: float
           ? `floaty ${floatDuration}s ease-in-out ${floatDelay}s infinite`
           : undefined,

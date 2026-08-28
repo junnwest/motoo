@@ -61,7 +61,7 @@ export function ErrorState({
         <button
           type="button"
           onClick={onRetry}
-          className="rounded-lg bg-coral px-6 py-3 text-base font-bold text-white shadow-[0_10px_24px_rgba(224,138,111,.34)] transition-transform duration-150 hover:brightness-[1.03] active:scale-[.98]"
+          className="rounded-lg bg-coral px-6 py-3 text-base font-bold text-white shadow-soft transition-transform duration-150 hover:brightness-[1.03] active:scale-[.98]"
         >
           {retryLabel}
         </button>
@@ -74,7 +74,7 @@ export function ErrorState({
       </div>
 
       {digest && (
-        <p className="mt-8 font-mono text-2xs tracking-[0.04em] text-muted">
+        <p className="mt-8 text-2xs tabular-nums tracking-[0.04em] text-muted">
           {referenceLabel} · {digest}
         </p>
       )}
