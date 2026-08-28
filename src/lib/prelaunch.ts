@@ -10,7 +10,21 @@
  * redeploy, and so a staging host can run in the opposite mode. Off by default:
  * a missing variable must not silently lock the product.
  */
-export const PRELAUNCH = process.env.PRELAUNCH === "1";
+const RAW_PRELAUNCH = (process.env.PRELAUNCH ?? "").trim().toLowerCase();
+
+/**
+ * Trimmed and case-insensitive, accepting `1` / `true` / `on`, because the
+ * value is typed into a dashboard or piped to `vercel env add` — and a trailing
+ * newline silently storing `"1
+"` would fail a strict `=== "1"` and leave the
+ * site wide open. DEPLOYMENT records exactly that failure with a different
+ * variable. A privacy switch must not hinge on invisible whitespace.
+ *
+ * Still deliberately opt-**in**: anything unrecognised means launched, so a
+ * missing variable can never silently lock the product.
+ */
+export const PRELAUNCH =
+  RAW_PRELAUNCH === "1" || RAW_PRELAUNCH === "true" || RAW_PRELAUNCH === "on";
 
 /**
  * Paths that stay reachable while signed out during pre-launch.
