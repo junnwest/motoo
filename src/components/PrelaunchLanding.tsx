@@ -3,6 +3,8 @@ import { getTranslations } from "next-intl/server";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 import { IconAward, IconTag, IconTrend, IconSend } from "@/components/ui/Icons";
+import { ButtonLink } from "@/components/ui/Button";
+import { FoundingBadge } from "@/components/FoundingBadge";
 
 /**
  * The public face of motoo while `PRELAUNCH=1`.
@@ -20,7 +22,17 @@ import { IconAward, IconTag, IconTrend, IconSend } from "@/components/ui/Icons";
  * The launch landing is untouched in `page.tsx`; flipping the env var brings it
  * back.
  */
-export async function PrelaunchLanding() {
+export async function PrelaunchLanding({
+  signedIn,
+}: {
+  /**
+   * Present when someone is signed in. During pre-launch a signed-in non-admin
+   * cannot reach the app at all, so `/` is where they land — and landing on a
+   * page that says "only invited creators can sign up" after being invited and
+   * signing up would read as a failure. They get a confirmation instead.
+   */
+  signedIn?: { creatorHandle: string | null; founding: boolean } | null;
+} = {}) {
   const t = await getTranslations("prelaunch");
 
   const perks = [
@@ -39,29 +51,77 @@ export async function PrelaunchLanding() {
             <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-line-3 bg-card px-3.5 py-1.5">
               <span className="h-1.5 w-1.5 rounded-full bg-coral" />
               <span className="text-xs font-semibold uppercase tracking-[0.08em] text-coral-deep">
-                {t("eyebrow")}
+                {signedIn ? t("doneEyebrow") : t("eyebrow")}
               </span>
             </div>
 
-            <h1 className="break-keep text-4xl font-extrabold leading-tight tracking-[-0.04em] sm:text-6xl">
-              {t("title")}
-            </h1>
-            <p className="mx-auto mt-6 max-w-[540px] break-keep text-lg leading-relaxed text-body">
-              {t("body")}
-            </p>
+            {signedIn ? (
+              <>
+                <h1 className="break-keep text-4xl font-extrabold leading-tight tracking-[-0.04em] sm:text-6xl">
+                  {signedIn.creatorHandle ? t("doneTitle") : t("waitTitle")}
+                </h1>
+                <p className="mx-auto mt-6 max-w-[540px] break-keep text-lg leading-relaxed text-body">
+                  {signedIn.creatorHandle ? t("doneBody") : t("waitBody")}
+                </p>
 
-            <p className="mt-8 break-keep text-sm text-muted">
-              {t("haveInvite")}
-            </p>
-            <p className="mt-2 text-sm text-muted">
-              {t("loginPrompt")}{" "}
-              <Link
-                href="/login"
-                className="font-semibold text-coral-deep hover:underline"
-              >
-                {t("loginCta")}
-              </Link>
-            </p>
+                {signedIn.creatorHandle ? (
+                  <div className="mx-auto mt-8 inline-flex flex-col items-center gap-3 border border-line-2 bg-card px-8 py-6">
+                    <span className="text-2xs font-semibold uppercase tracking-[0.08em] text-muted">
+                      {t("doneHandle")}
+                    </span>
+                    <span className="text-2xl font-extrabold tracking-[-0.02em]">
+                      @{signedIn.creatorHandle}
+                    </span>
+                    {signedIn.founding ? (
+                      <FoundingBadge label={t("foundingBadge")} />
+                    ) : null}
+                  </div>
+                ) : (
+                  /* Signed in, invite redeemed, Studio not set up yet — the one
+                     thing they are still allowed to do. */
+                  <div className="mt-8">
+                    <ButtonLink
+                      href="/creator/onboarding"
+                      variant="primary"
+                      size="lg"
+                    >
+                      {t("doneSetupCta")}
+                    </ButtonLink>
+                  </div>
+                )}
+
+                <p className="mt-8 text-sm text-muted">
+                  <Link
+                    href="/api/logout"
+                    className="font-semibold text-coral-deep hover:underline"
+                  >
+                    {t("logout")}
+                  </Link>
+                </p>
+              </>
+            ) : (
+              <>
+                <h1 className="break-keep text-4xl font-extrabold leading-tight tracking-[-0.04em] sm:text-6xl">
+                  {t("title")}
+                </h1>
+                <p className="mx-auto mt-6 max-w-[540px] break-keep text-lg leading-relaxed text-body">
+                  {t("body")}
+                </p>
+
+                <p className="mt-8 break-keep text-sm text-muted">
+                  {t("haveInvite")}
+                </p>
+                <p className="mt-2 text-sm text-muted">
+                  {t("loginPrompt")}{" "}
+                  <Link
+                    href="/login"
+                    className="font-semibold text-coral-deep hover:underline"
+                  >
+                    {t("loginCta")}
+                  </Link>
+                </p>
+              </>
+            )}
           </div>
         </section>
 

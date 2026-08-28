@@ -7,7 +7,11 @@ import { isStudioPage, splitEnabled } from "./lib/hostRouting";
 // Edge middleware — uses the Prisma-free config so it can run at the edge. The
 // session (incl. `user.creator`, the Studio handle) rides in the JWT, so the
 // two-domain split below needs no database access.
-import { PRELAUNCH, isPublicDuringPrelaunch } from "@/lib/prelaunch";
+import {
+  PRELAUNCH,
+  isPublicDuringPrelaunch,
+  isSignedInAllowedDuringPrelaunch,
+} from "@/lib/prelaunch";
 
 const { auth } = NextAuth(authConfig);
 
@@ -94,12 +98,19 @@ export default auth((req) => {
   // the welcome page, so it must not inherit the apex allowlist. Production
   // would also be caught by the creator gate below, but a gate whose whole job
   // is privacy should not depend on a second one being correct.
+  //
+  // The product is unlaunched for everyone except admins — including invited
+  // creators, who get signup and Studio setup and nothing else. Admins bypass
+  // the whole gate: somebody has to be able to look at the running product.
   const onStudioHostEarly = host.startsWith(STUDIO_PREFIX);
-  if (
+  const prelaunchBlocked =
     PRELAUNCH &&
-    !user &&
-    (onStudioHostEarly || !isPublicDuringPrelaunch(path))
-  ) {
+    user?.role !== "admin" &&
+    (onStudioHostEarly ||
+      (user
+        ? !isSignedInAllowedDuringPrelaunch(path)
+        : !isPublicDuringPrelaunch(path)));
+  if (prelaunchBlocked) {
     const apexForRedirect = onStudioHostEarly
       ? host.replace(/^studio\./, "")
       : host;

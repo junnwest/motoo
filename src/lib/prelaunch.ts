@@ -37,3 +37,23 @@ export function isPublicDuringPrelaunch(path: string): boolean {
   if (path === "/") return true; // the welcome page
   return PUBLIC_PREFIXES.some((p) => path === p || path.startsWith(p + "/"));
 }
+
+/**
+ * What a signed-in **non-admin** may reach while invite-only.
+ *
+ * The product is genuinely unlaunched, not merely hidden: an invited creator can
+ * complete signup and set their Studio up, and that is all. They cannot browse,
+ * donate, or open the Studio itself — none of which would do anything useful
+ * before launch anyway (payments are mocked, there are no fans, and the
+ * discovery surfaces would be empty).
+ *
+ * So the reward for redeeming an invite is a finished account and a reserved
+ * handle, which is exactly what was promised. Admins bypass this entirely —
+ * somebody has to be able to look at the running product.
+ */
+const SIGNED_IN_PREFIXES = ["/onboarding", "/creator/onboarding"];
+
+export function isSignedInAllowedDuringPrelaunch(path: string): boolean {
+  if (isPublicDuringPrelaunch(path)) return true;
+  return SIGNED_IN_PREFIXES.some((p) => path === p || path.startsWith(p + "/"));
+}

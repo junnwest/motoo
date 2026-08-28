@@ -1590,6 +1590,15 @@
       "spentTitle": "이미 사용된 초대 링크예요.",
       "spentBody": "이 초대로 이미 가입이 완료되었어요. 가입하신 계정으로 로그인해 주세요.",
       "spentLogin": "로그인하러 가기"
-    }
+    },
+    "doneEyebrow": "설정 완료",
+    "doneTitle": "준비가 끝났어요.",
+    "doneBody": "정식 출시되면 바로 알려드릴게요. 그때부터 마켓을 열고 후원을 받을 수 있어요.",
+    "doneHandle": "선점한 핸들",
+    "doneFounding": "파운딩 크리에이터로 등록되었어요.",
+    "doneSetupCta": "크리에이터 설정 이어서 하기",
+    "waitTitle": "아직 준비 중이에요.",
+    "waitBody": "motoo는 정식 출시 전이에요. 출시되면 알려드릴게요.",
+    "logout": "로그아웃"
   }
 }

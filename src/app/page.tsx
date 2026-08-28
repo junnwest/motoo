@@ -67,6 +67,17 @@ function Stat({ value, label }: { value: string; label: string }) {
   );
 }
 
+/** Founding status for the pre-launch confirmation. One column, one page. */
+async function hasFoundingMark(backerId: string | undefined): Promise<boolean> {
+  if (!backerId) return false;
+  const { prisma } = await import("@/lib/db");
+  const row = await prisma.backer.findUnique({
+    where: { id: backerId },
+    select: { foundingAt: true },
+  });
+  return Boolean(row?.foundingAt);
+}
+
 export default async function FanLandingPage() {
   // "/" is the public marketing landing for logged-OUT visitors only. Everyone
   // signed in is routed to their own landing surface — NOT /explore, which is a
@@ -79,13 +90,28 @@ export default async function FanLandingPage() {
   // nav's motoo pill goes straight back to /home, which stays fully reachable.
   // (Non-onboarded users are caught by the onboarding middleware before this.)
   const session = await getSession();
-  if (session?.user) redirect(session.user.creator ? "/studio" : "/home");
 
-  // Pre-launch: signed-out visitors get the welcome page instead of the
-  // marketing landing. The landing below is untouched — flipping PRELAUNCH off
-  // brings it straight back, which is the point of gating on an env var rather
-  // than deleting it.
-  if (PRELAUNCH) return <PrelaunchLanding />;
+  // Pre-launch: the product is unlaunched for everyone but admins, so `/` is
+  // where a signed-in creator lands too — the Studio and /home are gated. They
+  // get a confirmation (handle reserved, founding badge) rather than the
+  // "only invited creators can sign up" pitch, which would read as a failure to
+  // someone who has just been invited and signed up.
+  //
+  // The marketing landing below is untouched: flipping PRELAUNCH off brings it
+  // straight back, which is the point of gating on an env var.
+  if (PRELAUNCH && session?.user?.role !== "admin") {
+    if (!session?.user) return <PrelaunchLanding />;
+    return (
+      <PrelaunchLanding
+        signedIn={{
+          creatorHandle: session.user.creator ?? null,
+          founding: await hasFoundingMark(session.user.id),
+        }}
+      />
+    );
+  }
+
+  if (session?.user) redirect(session.user.creator ? "/studio" : "/home");
 
   const t = await getTranslations("fanLanding");
   const tc = await getTranslations("common");
