@@ -509,7 +509,7 @@
     "displayName": "활동명",
     "displayNamePlaceholder": "채널·활동에서 쓰는 이름",
     "handle": "프로필 주소",
-    "handleHint": "motoo.app/s/여기",
+    "handleHint": "themotoo.com/s/여기",
     "handlePlaceholder": "myhandle",
     "category": "카테고리",
     "creatorType": "크리에이터 유형",
@@ -1599,6 +1599,11 @@
     "doneSetupCta": "크리에이터 설정 이어서 하기",
     "waitTitle": "아직 준비 중이에요.",
     "waitBody": "motoo는 정식 출시 전이에요. 출시되면 알려드릴게요.",
-    "logout": "로그아웃"
+    "logout": "로그아웃",
+    "inviteEyebrow": "초대장",
+    "inviteTitle": "먼저 모시고 싶은 크리에이터께",
+    "inviteBody": "motoo는 아직 정식 출시 전이에요. 지금은 저희가 직접 연락드린 분들만 가입할 수 있어요.",
+    "inviteSingleUse": "이 초대 링크는 한 번만 사용할 수 있어요.",
+    "invitePerksLead": "먼저 함께하시면"
   }
 }

@@ -51,7 +51,12 @@ export async function Nav() {
   const host = (await headers()).get("host") ?? "";
   const onStudioHost = host.startsWith("studio.");
 
-  const showConsumerChrome = authed && !onStudioHost;
+  // Pre-launch, a signed-in non-admin can reach only onboarding and the legal
+  // pages — so search, the bell and the Studio pill would all be controls that
+  // bounce the user back to `/`. Chrome that leads nowhere is worse than no
+  // chrome: it reads as a broken product rather than an unlaunched one.
+  const prelaunchLocked = PRELAUNCH && session?.user?.role !== "admin";
+  const showConsumerChrome = authed && !onStudioHost && !prelaunchLocked;
   // Both are per-account reads the JWT can't carry: the unread count changes
   // constantly, and the avatar is a data URL far past the cookie size limit.
   const [unreadCount, avatarUrl] = await Promise.all([
@@ -62,7 +67,9 @@ export async function Nav() {
   // Studio-host dropdown stays as it was; the consumer dropdown is now
   // identity-only (Profile/Settings/My channel) — everything else moved out
   // to the Sidebar or the Studio pill.
-  const items: MenuItem[] = onStudioHost
+  const items: MenuItem[] = prelaunchLocked
+    ? [] // every consumer destination is gated; the dropdown keeps only logout
+    : onStudioHost
     ? [
         { label: tcd("settings.title"), href: "/settings" },
         ...(handle ? [{ label: tcd("viewPublic"), href: `/s/${handle}` }] : []),
