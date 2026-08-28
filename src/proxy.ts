@@ -11,6 +11,7 @@ import {
   PRELAUNCH,
   isPublicDuringPrelaunch,
   isSignedInAllowedDuringPrelaunch,
+  isStudioHostAllowedDuringPrelaunch,
 } from "@/lib/prelaunch";
 
 const { auth } = NextAuth(authConfig);
@@ -106,10 +107,20 @@ export default auth((req) => {
   const prelaunchBlocked =
     PRELAUNCH &&
     user?.role !== "admin" &&
-    (onStudioHostEarly ||
-      (user
+    (onStudioHostEarly
+      ? // The console is closed, but creator *settings* are served here and a
+        // founding creator must be able to fix the handle they reserved.
+        //
+        // The signed-in requirement is `isProd`-only for the same reason the
+        // creator gate below is: `AUTH_COOKIE_DOMAIN` is production-only, so in
+        // dev the session cookie is host-only on the apex and never reaches
+        // `studio.localhost`. Requiring a user here unconditionally would make
+        // the studio host unreachable in dev for everyone, which is exactly the
+        // trap the existing gate documents.
+        (isProd && !user) || !isStudioHostAllowedDuringPrelaunch(path)
+      : user
         ? !isSignedInAllowedDuringPrelaunch(path)
-        : !isPublicDuringPrelaunch(path)));
+        : !isPublicDuringPrelaunch(path));
   if (prelaunchBlocked) {
     const apexForRedirect = onStudioHostEarly
       ? host.replace(/^studio\./, "")

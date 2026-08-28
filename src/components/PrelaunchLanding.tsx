@@ -79,7 +79,7 @@ export async function PrelaunchLanding({
                 </p>
 
                 {signedIn.creatorHandle ? (
-                  <div className="mx-auto mt-8 inline-flex flex-col items-center gap-3 border border-line-2 bg-card px-8 py-6">
+                  <div className="mx-auto mt-8 flex max-w-[420px] flex-col items-center gap-3 border border-line-2 bg-card px-8 py-6">
                     <span className="text-2xs font-semibold uppercase tracking-[0.08em] text-muted">
                       {t("doneHandle")}
                     </span>
@@ -89,6 +89,39 @@ export async function PrelaunchLanding({
                     {signedIn.founding ? (
                       <FoundingBadge label={t("foundingBadge")} />
                     ) : null}
+
+                    {/* The reserved handle is one of the four things we
+                        promised, so it cannot be a value you are shown and
+                        cannot change — a typo in it would otherwise be
+                        permanent until launch. Both settings surfaces are
+                        reachable during pre-launch for exactly this reason
+                        (src/lib/prelaunch.ts): the handle and creator profile
+                        live in the Studio's settings, the account fields in
+                        /settings. */}
+                    <div className="mt-5 grid w-full grid-cols-1 gap-px overflow-hidden border border-line-2 bg-line sm:grid-cols-2">
+                      <Link
+                        href="/studio/settings"
+                        className="group bg-card px-4 py-3 text-left transition hover:bg-coral-chip"
+                      >
+                        <span className="block text-sm font-bold text-ink group-hover:text-coral-deep">
+                          {t("editStudio")}
+                        </span>
+                        <span className="mt-0.5 block break-keep text-2xs text-muted">
+                          {t("editStudioHint")}
+                        </span>
+                      </Link>
+                      <Link
+                        href="/settings"
+                        className="group bg-card px-4 py-3 text-left transition hover:bg-coral-chip"
+                      >
+                        <span className="block text-sm font-bold text-ink group-hover:text-coral-deep">
+                          {t("editAccount")}
+                        </span>
+                        <span className="mt-0.5 block break-keep text-2xs text-muted">
+                          {t("editAccountHint")}
+                        </span>
+                      </Link>
+                    </div>
                   </div>
                 ) : signedIn.founding ? (
                   /* Invited, account made, Studio not set up yet — the one

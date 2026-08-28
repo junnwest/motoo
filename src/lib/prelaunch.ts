@@ -51,7 +51,26 @@ export function isPublicDuringPrelaunch(path: string): boolean {
  * handle, which is exactly what was promised. Admins bypass this entirely —
  * somebody has to be able to look at the running product.
  */
-const SIGNED_IN_PREFIXES = ["/onboarding", "/creator/onboarding"];
+const SIGNED_IN_PREFIXES = [
+  "/onboarding",
+  "/creator/onboarding",
+  // Settings, both halves. A creator who has reserved a handle has to be able
+  // to change it — the reserved handle is one of the four things we promised,
+  // and a promise you cannot correct a typo in is a trap. `/settings` is the
+  // account (nickname, avatar, password); `/studio/settings` is the creator
+  // profile, which is where the *reserved handle* actually lives.
+  "/settings",
+  "/studio/settings",
+];
+
+/**
+ * The studio host has no public surface during pre-launch, with one exception:
+ * the creator settings page, which is served there as `/settings`. Everything
+ * else on that host is the console itself, which is not open yet.
+ */
+export function isStudioHostAllowedDuringPrelaunch(path: string): boolean {
+  return path === "/settings" || path.startsWith("/settings/");
+}
 
 export function isSignedInAllowedDuringPrelaunch(path: string): boolean {
   if (isPublicDuringPrelaunch(path)) return true;
