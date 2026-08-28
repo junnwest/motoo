@@ -34,7 +34,7 @@ export default async function ResetPasswordPage({
       >
         <div className="rounded-xl border border-line-2 bg-card p-8 shadow-soft">
           <div className="mb-6 flex flex-col items-center text-center">
-            <Mochi width={40} height={33} float />
+            <Mochi width={40} height={33} float className="text-coral-soft" />
             <h1 className="mt-4 text-2xl font-extrabold tracking-[-0.02em] break-keep">
               {state.valid ? t("newTitle") : t("invalidTitle")}
             </h1>

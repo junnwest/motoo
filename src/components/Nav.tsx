@@ -149,7 +149,7 @@ export async function Nav() {
                 href="/home"
                 className="flex items-center gap-2 rounded-full border border-line-3 bg-white px-4 py-2.5 text-sm font-bold text-ink transition-colors hover:border-coral hover:text-coral-deep"
               >
-                <Mochi width={16} height={13} />
+                <Mochi width={16} height={13} className="text-coral-deep" />
                 {t("backToMotoo")}
               </Link>
             )}

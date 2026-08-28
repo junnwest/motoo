@@ -11,6 +11,7 @@ To pull a single entry, grep its heading with trailing context, e.g.
 
 | Date | Decision |
 | --- | --- |
+| 2026-08-28 | The mochi becomes an SVG that inherits `currentColor` |
 | 2026-08-28 | The landing is rebuilt, and leads with 수수료 0% |
 | 2026-08-28 | The icon set gets a stated construction spec |
 | 2026-08-28 | Flat and two-state: the Bauhaus geometry pass |
@@ -94,6 +95,41 @@ To pull a single entry, grep its heading with trailing context, e.g.
 | 2026-07-08 | `FoundingMembership` table for the founding-number invariant |
 | 2026-07-08 | Prisma pinned to v6 (not v7) |
 | 2026-07-08 | Korean-first, i18n-ready; integer KRW; mock PG |
+
+## 2026-08-28 — The mochi becomes an SVG that inherits `currentColor`
+
+Owner: the mochi "looks weird", and its colours are "often indistinguishable with
+the background orange and cream". Both true, and the first half was self-inflicted.
+
+**What broke.** The Bauhaus flatten (entry above) replaced the mochi's radial
+gradient with a **hard-stop** ellipse. A gradient's soft falloff had let the
+highlight blend into the body; a hard stop turned it into a hard-edged shape that
+ate the bottom of the blob. Rendered against every surface it actually appears on,
+the failure was obvious: on `card`, `panel`, `coral-chip` and `sand` the cream
+highlight matched the background closely enough that the lower half vanished and
+what remained read as a **crescent**; on solid `coral` the inverse happened — the
+coral-tint body disappeared and only the highlight showed.
+
+**The real problem was older than the flatten.** The mochi renders on white, three
+warm tints, solid coral and near-black. Any fixed fill collides with at least one
+of them; the gradient had merely been busy enough to disguise it.
+
+**Decision: one flat filled silhouette, coloured by context.** `currentColor`
+cannot collide, because the surrounding text colour was already chosen to be
+legible on that surface. Rejected: a filled shape with an interior fold (invisible
+below ~22px, and most of the 49 call sites render at 11–18px), and a stroked
+outline matching `Icons.tsx` (too light at 11px to work as a currency mark — a
+currency wants to read as a token, not a ring).
+
+Callers set the colour like any other glyph: `text-coral-deep` where the mochi
+*is* the subject (balances, prices — 34 sites), `text-coral-soft` for the
+decorative floaters on empty states (15 sites).
+
+**Constraint it creates.** Never give the mochi a hard-coded fill again — that is
+the bug, not the shading. If a new surface needs one, set a text colour at the
+call site.
+
+---
 
 ## 2026-08-28 — The logo is the wordmark; Bauhaus 93 ships as outlines, not a webfont
 
@@ -224,9 +260,8 @@ across 6 tokens. Changing the tokens moved every route together.
   page. The two coral glows are `none`; `Button.tsx` had already flagged the 24px
   orange halo as reading like a toy.
 - **The mochi is flat.** Its radial + linear gradient *and* two inset shadows
-  faking a top light and a bottom shade are gone: one solid body, one hard
-  highlight, same silhouette. It is also crisper at the 16–24px it actually
-  renders at.
+  faking a top light and a bottom shade are gone. **The first attempt at this was
+  wrong and is superseded — see the mochi entry below.**
 
 **Two pieces of rot surfaced.** `ErrorState.tsx` still carried
 `rgba(224,138,111)` — `#e08a6f`, the terracotta retired 2026-08-20 and dead twice

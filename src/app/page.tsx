@@ -343,7 +343,7 @@ export default async function FanLandingPage() {
                   also `coral-chip` now: the flattened mochi body is coral-tint,
                   which was invisible against the solid `coral` this used to be. */}
               <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-coral-chip">
-                <Mochi width={18} height={14} />
+                <Mochi width={18} height={14} className="text-coral-deep" />
               </span>
               <span className="text-xs font-semibold uppercase tracking-[0.08em] text-coral-deep">
                 {t("mochiExplainerLabel")}

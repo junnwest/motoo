@@ -216,7 +216,7 @@ export function SearchBox({
                         </span>
                       </span>
                       <span className="flex flex-none items-center gap-1 text-xs font-extrabold text-ink">
-                        <Mochi width={11} height={9} />
+                        <Mochi width={11} height={9} className="text-coral-deep" />
                         {t("price", { count: row.priceMochi })}
                       </span>
                     </>

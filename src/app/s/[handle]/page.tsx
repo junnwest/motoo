@@ -214,7 +214,7 @@ export default async function StreamerProfilePage({
               signedIn={!!backer}
             />
             <ButtonLink href={`/s/${streamer.handle}/donate`} size="lg">
-              <Mochi width={18} height={14} /> {tc("donate")}
+              <Mochi width={18} height={14} className="text-coral-deep" /> {tc("donate")}
             </ButtonLink>
           </div>
 

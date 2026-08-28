@@ -28,18 +28,18 @@ export default async function SignupPage() {
             width={130}
             height={106}
             float
-            className="pointer-events-none absolute -right-6 -top-8 opacity-60"
+            className="text-coral-soft pointer-events-none absolute -right-6 -top-8 opacity-60"
           />
           <Mochi
             width={70}
             height={57}
             float
             floatDelay={1.6}
-            className="pointer-events-none absolute -bottom-4 right-20 opacity-45"
+            className="text-coral-soft pointer-events-none absolute -bottom-4 right-20 opacity-45"
           />
           <div className="relative">
             <span className="inline-flex">
-              <Mochi width={46} height={38} float />
+              <Mochi width={46} height={38} float className="text-coral-soft" />
             </span>
             <h2 className="mt-6 max-w-[400px] text-3xl font-extrabold leading-snug tracking-[-0.02em] text-ink sm:text-4xl">
               {t("signupHeroTitle")}
@@ -68,7 +68,7 @@ export default async function SignupPage() {
           <div className="w-full max-w-[400px]">
             {creatorMode && (
               <div className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-coral-chip px-3 py-1 text-xs font-semibold text-coral-deep">
-                <Mochi width={14} height={11} /> {t("creatorSignupBadge")}
+                <Mochi width={14} height={11} className="text-coral-deep" /> {t("creatorSignupBadge")}
               </div>
             )}
             <div className="mb-6">

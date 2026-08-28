@@ -93,7 +93,7 @@ export async function SettlementPanel({
                   {formatKstDate(d.createdAt)}
                 </span>
                 <span className="flex items-center gap-1.5 text-xs text-muted">
-                  <Mochi width={13} height={10} />
+                  <Mochi width={13} height={10} className="text-coral-deep" />
                   {t("granted", { count: d.mochiGranted })}
                 </span>
                 <span className="font-bold text-ink">

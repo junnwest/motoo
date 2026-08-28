@@ -33,7 +33,8 @@ Everything below passes `pnpm lint`, `check:vocab`, `check:emoji`, `check:a11y`
 - **The Bauhaus pass, applied through tokens** so all 34 routes moved together.
   Two-state geometry (rectangles square-cornered, `rounded-full` untouched); the
   five shadow tokens redefined as hard `0 0 0 1px` outlines instead of blur; the
-  mochi flattened (gradient *and* its two inset lighting shadows). `src/` now has
+  mochi flattened (gradient *and* its two inset lighting shadows — then redone
+  properly, below). `src/` now has
   **zero hardcoded radii and zero hardcoded shadows** — the audit that found this
   also turned up `#e08a6f` still living in `ErrorState.tsx`, a terracotta retired
   on 2026-08-20.
@@ -48,6 +49,13 @@ Everything below passes `pnpm lint`, `check:vocab`, `check:emoji`, `check:a11y`
   그대로. / 모투 수수료 0%.` rather than a line any tipping product could run. Found
   and fixed a factual error carried since the donation pivot — step 2 read `모찌
   보내기`, but fans don't send mochi, they donate and receive it.
+- **The mochi is now an SVG that inherits `currentColor`.** The first flatten made it
+  worse: a hard-stop ellipse replaced the gradient's soft falloff, so on white, `panel`,
+  `coral-chip` and `sand` the lower half merged into the background and the mochi read as
+  a crescent, while on solid `coral` the body vanished instead. Fixed fills were always
+  going to collide across six surfaces — one flat silhouette coloured by context cannot.
+  `text-coral-deep` where the mochi is the subject, `text-coral-soft` for the decorative
+  floaters.
 - **Fixes found along the way.** The signup modal's 후원자 icon was a hand-rolled
   inline SVG bypassing `Icons.tsx` — filled where everything else is stroked, and
   geometrically lopsided; it is `IconHeart` now, and both role tiles are white with

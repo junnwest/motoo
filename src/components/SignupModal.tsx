@@ -84,7 +84,7 @@ export function SignupModal({
             className="group flex flex-col items-center rounded-xl border border-line-2 bg-panel px-4 py-6 text-center transition hover:border-coral hover:bg-card hover:shadow-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-deep"
           >
             <span className="flex h-12 w-12 items-center justify-center rounded-lg border border-line-2 bg-card transition group-hover:border-coral group-hover:shadow-soft">
-              <Mochi width={26} height={21} />
+              <Mochi width={26} height={21} className="text-coral-deep" />
             </span>
             <span className="mt-4 text-xs text-muted">
               {t("roleCreatorTagline")}

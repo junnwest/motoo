@@ -106,7 +106,9 @@ Resend adapter is written and needs an account, a verified domain and two env va
   between; shadows are `0 0 0 1px` outlines, not blur. Token-level — `src/` has zero
   hardcoded radii and zero hardcoded shadows.
 - **`Mochi` requires `width`/`height` props**; a sizing `className` is silently ignored
-  (dev warns).
+  (dev warns). It is an SVG filled with `currentColor` — **never give it a hard-coded
+  fill**; that is what made it collide with the orange and cream surfaces. Set a text
+  colour at the call site instead.
 - **No `--font-mono`, zero `next/font` imports.** Pretendard only. Check Hangul coverage
   before adding a family — IBM Plex Mono had none and ten Korean call sites fell back.
 - **Never claim "100% passthrough"** — the landing says `모투 수수료 0%`, matching the

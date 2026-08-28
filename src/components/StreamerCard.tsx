@@ -48,7 +48,7 @@ export function StreamerCard({ streamer }: { streamer: StreamerCardData }) {
         </p>
 
         <div className="mt-auto flex items-center justify-center gap-[7px] rounded-md bg-coral-chip py-[11px] text-base font-bold text-coral-deep transition-colors group-hover:bg-coral group-hover:text-white">
-          <Mochi width={17} height={14} /> {tc("backThisStreamer")}
+          <Mochi width={17} height={14} className="text-coral-deep" /> {tc("backThisStreamer")}
         </div>
       </div>
     </Link>

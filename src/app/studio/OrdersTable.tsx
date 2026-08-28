@@ -111,7 +111,7 @@ function OrderRow({ order }: { order: DashboardOrder }) {
       <td className="px-3 py-3 text-sm text-body break-keep">{order.fan}</td>
       <td className="px-3 py-3 text-sm text-body">
         <span className="flex items-center gap-1.5">
-          <Mochi width={16} height={12} />
+          <Mochi width={16} height={12} className="text-coral-deep" />
           {formatCount(order.mochiSpent)}
         </span>
       </td>

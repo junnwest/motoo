@@ -136,7 +136,7 @@ export function DonateMochi({
               {t("myBalance")}
             </span>
             <span className="flex items-center gap-1.5 text-base font-extrabold text-ink">
-              <Mochi width={16} height={12} />
+              <Mochi width={16} height={12} className="text-coral-deep" />
               {formatCount(balance)}
             </span>
           </div>
