@@ -1,6 +1,6 @@
 ﻿# motoo — Progress Tracker
 
-_Last updated: 2026-08-28_
+_Last updated: 2026-08-29_
 
 **Read this whole file — it is short on purpose.** Everything in it is either open, blocked,
 or a live constraint. Shipped history lives in [`CHANGELOG.md`](./CHANGELOG.md) and does not
@@ -99,11 +99,26 @@ Resend adapter is written and needs an account, a verified domain and two env va
   token can still satisfy the *routing* gate for one request. Every page-level `auth()` does the
   real check. **No action recommended.**
 
-**Pre-launch (2026-08-28) — live obligations, not just a feature**
-- **`PRELAUNCH=1` is what makes the site private.** It is a deploy-critical env
-  var, not a feature flag: unsetting it *is* the launch. Documented in DEPLOYMENT.
-  New routes that must stay publicly reachable go in `PUBLIC_PREFIXES`
-  (`src/lib/prelaunch.ts`) or they disappear.
+**Pre-launch — LIVE on themotoo.com since 2026-08-29. Obligations, not just a feature**
+- **The site is private right now.** Strangers get the welcome page, the legal
+  pages and the login/invite doors; everything else redirects. Admins bypass the
+  gate entirely, so **a normal browser window shows you the full product — that is
+  correct, not a broken gate.** Use a private window to see what a stranger sees.
+- **`PRELAUNCH` changes need a REBUILD, not just a redeploy.** It is read in
+  `src/proxy.ts`, which is edge middleware, and Next inlines env vars into the edge
+  bundle at build time. Setting it in the same minute as a push is a race — the
+  first production deploy shipped publicly open for several minutes for exactly
+  this reason. Set it, confirm it, *then* trigger a build. Its value cannot be read
+  back (`vercel env pull` returns empty for every user-defined variable), so the
+  only real check is the deployed site: `/explore` must not answer 200 signed out.
+- Unsetting the variable *is* the launch. New routes that must stay publicly
+  reachable go in `PUBLIC_PREFIXES` (`src/lib/prelaunch.ts`) or they disappear;
+  routes a signed-in creator needs go in `SIGNED_IN_PREFIXES`.
+- [ ] **Production has zero invites.** Nothing has been minted yet, so nobody can
+  sign up. Mint from `/admin` — it builds links against the request host, so they
+  come out as `https://www.themotoo.com/join/…` automatically. Prefer one invite
+  per creator, labelled with their name: anonymous bulk invites throw away the
+  who-redeemed / who-ghosted tracking that per-invite rows exist for.
 - [ ] **Two of the four founding-creator promises are unbuilt.** The badge and the
   reserved `@handle` are already true. **Discovery placement at launch** and a
   **direct line / roadmap input** are stated on the public welcome page, which
@@ -141,15 +156,11 @@ Resend adapter is written and needs an account, a verified domain and two env va
     to `vercel env add` silently stored something P1013-invalid, which failed the first
     deploy. Sensitive variables also can't be read back (`vercel env pull` returns empty
     strings for them), so the only way to verify a value is to build.
-- [x] ~~`CRON_SECRET` is still unset in Vercel~~ — **set** (verified 2026-08-28 via
-  `vercel env ls production`).
-- [x] ~~The four OAuth vars are missing from Vercel~~ — **all four are set** and Google,
-  Naver and Kakao buttons render on the live `/login` (verified 2026-08-28 against
-  `vercel env ls production` and `themotoo.com`). This entry was stale for ten days and
-  actively misleading: it is what led to a pre-launch OAuth signup hole shipping (see the
-  pre-launch note above). **`.env.production.local` is not production** — it holds 2-char
-  placeholders; Vercel env vars are the only source of truth, and `vercel env ls
-  production` prints names without exposing values.
+- **`vercel env ls production` is the only source of truth for what production has.**
+  `.env.production.local` holds 2-char placeholders and is not production. Both the
+  `CRON_SECRET` and OAuth entries here sat stale for ten days claiming they were unset
+  when they were live — and that staleness is what let a pre-launch OAuth signup hole
+  ship. Check before repeating what this file says about env state.
 - [ ] Carried refactors: route-group layouts (`(marketing)`/`(app)`/`(auth)`) to stop repeating
   `<Nav/>`+`<Footer/>` across 20 pages; `EmptyState` + `PageHeader` primitives (6 and 9 real call
   sites); hardcoded Korean still in `creators/page.tsx`; `Backer` → `User` rename (high churn,

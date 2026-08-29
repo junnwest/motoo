@@ -11,6 +11,9 @@ To pull a single entry, grep its heading with trailing context, e.g.
 
 | Date | Decision |
 | --- | --- |
+| 2026-08-29 | `PRELAUNCH` is read at build time, not request time |
+| 2026-08-29 | The invite link opens an invitation, not a form |
+| 2026-08-29 | Pre-launch means unlaunched, not merely hidden |
 | 2026-08-28 | Pre-launch is invite-only, one row per creator we approach |
 | 2026-08-28 | The mochi becomes an SVG that inherits `currentColor` |
 | 2026-08-28 | The landing is rebuilt, and leads with 수수료 0% |
@@ -96,6 +99,100 @@ To pull a single entry, grep its heading with trailing context, e.g.
 | 2026-07-08 | `FoundingMembership` table for the founding-number invariant |
 | 2026-07-08 | Prisma pinned to v6 (not v7) |
 | 2026-07-08 | Korean-first, i18n-ready; integer KRW; mock PG |
+
+## 2026-08-29 — Pre-launch means unlaunched, not merely hidden
+
+The first gate was `PRELAUNCH && !user`: signed-out visitors blocked, anyone with
+a session waved through, on the reasoning that holding a session proves you were
+invited. That only holds for accounts created *after* the flag is switched on.
+Every account that already existed passed freely — 64 seeded ones locally, and in
+production everyone who had already signed up, roaming a site meant to be private.
+
+Owner's call, and stricter than any option offered: **admins only** get the
+product. An invited creator gets signup and onboarding and nothing else.
+
+- signed out → welcome page, legal pages, `/login`, `/join`
+- signed in  → `/onboarding`, `/creator/onboarding`, and both settings surfaces
+- admin      → everything
+
+Nothing an invited creator is blocked from would work pre-launch anyway: payments
+are mocked, there are no fans, and the discovery surfaces are empty. So the reward
+for redeeming an invite is a finished account and a reserved handle, which is
+exactly what was promised — not a tour of an empty product.
+
+The admin check reads `user.role` from the JWT, so it stays edge-safe.
+
+**Settings are deliberately inside the allowlist.** The reserved handle is one of
+the four things promised to founding creators; showing it as a value that cannot
+be corrected would make a typo permanent until launch. `/studio/settings` carries
+the *Studio* handle (the public creator URL) and `/settings` the account fields —
+two different columns, two different pages, both reachable.
+
+**Constraint it creates.** The signed-in requirement on the studio host is
+`isProd`-only, matching the creator gate directly below it: `AUTH_COOKIE_DOMAIN`
+is production-only, so in dev the session cookie is host-only on the apex and
+never reaches `studio.localhost`. Requiring a user there unconditionally made that
+host unreachable in dev for everyone.
+
+---
+
+## 2026-08-29 — The invite link opens an invitation, not a form
+
+The link dropped the creator onto the ordinary signup page — and worse, its hero
+was a *fan* pitch ("좋아하는 크리에이터를 응원하는 가장 따뜻한 방법"), shown to a
+creator we had approached directly, in the register the landing copy had already
+moved away from.
+
+`/join/<token>` now validates, parks the token, and lands on `/join`, which is the
+invitation: a dark letter with an 초대장 seal, what motoo is, the four founding
+benefits, and one accept CTA onward to signup. Being handed a form is what a
+public product does; an invitation is read first and accepted second, so the page
+carries exactly one way forward. The signup page keeps a matching dark panel so
+the exclusivity does not evaporate the moment they accept.
+
+`/join` renders three states from one place: a valid invite in the cookie shows
+the invitation, an `?e=` from the token handler explains why a link failed, and
+neither means someone found `/join` on their own. The cookie is re-checked on the
+page rather than trusted from the redirect — an invite can be spent or revoked
+between arriving and reading.
+
+**A related state was contradictory and is now separate.** A creator who signed up
+but stopped before Studio setup was told "아직 준비 중이에요 / 출시되면
+알려드릴게요" directly above a button reading "크리에이터 설정 이어서 하기". Three
+distinct situations now render distinctly: has a Studio, founding but unfinished,
+and neither.
+
+---
+
+## 2026-08-29 — `PRELAUNCH` is read at build time, not request time
+
+The first production deploy shipped **publicly open**: `/explore` answered 200 to
+an unauthenticated request for several minutes after the merge, on a site whose
+whole point was to be private.
+
+The flag is read in `src/proxy.ts`, which runs as **edge middleware**, and Next
+inlines `process.env` into the edge bundle at build time. The variable was set on
+Vercel while that build was already running, so the bundle baked in the old value.
+An empty commit forcing a rebuild fixed it within fifteen seconds.
+
+**Constraint it creates.** Changing `PRELAUNCH` requires a **rebuild**, not merely
+a redeploy, and setting it in the same minute as a push is a race. Set it, confirm
+it, *then* trigger a build.
+
+Two follow-ons from the same incident:
+
+- The flag is no longer a strict `=== "1"`. It is trimmed and case-insensitive
+  (`1` / `true` / `on`), because the value is typed into a dashboard or piped to
+  `vercel env add`, and a trailing newline storing `"1
+"` would fail a strict
+  match and leave the site open while the dashboard showed it set. DEPLOYMENT
+  already records that exact CLI failure with a different variable. It stays
+  opt-**in** so a missing variable can never silently lock the product.
+- **The value cannot be read back.** `vercel env pull` returns empty strings for
+  every user-defined variable — `DATABASE_URL` and `AUTH_SECRET` come back empty
+  too, and both plainly work. The only real check is the deployed site.
+
+---
 
 ## 2026-08-28 — Pre-launch is invite-only, one row per creator we approach
 

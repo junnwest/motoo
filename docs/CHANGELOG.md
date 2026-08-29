@@ -5,6 +5,44 @@ For current status and open work see [`PROGRESS.md`](./PROGRESS.md); for *why* a
 the way it is see [`DECISIONS.md`](./DECISIONS.md).
 
 
+## 2026-08-29 — pre-launch goes live on themotoo.com
+
+The gate from 2026-08-28 shipped to production, plus the refinements that came out
+of walking the invited creator's path end to end. Rationale in DECISIONS
+2026-08-29.
+
+- **Pre-launch now means unlaunched, not hidden.** The gate was
+  `PRELAUNCH && !user`, which waved through every account that existed before the
+  flag was switched on — 64 locally, and in production everyone who had already
+  signed up. Three tiers now: signed out gets the welcome and legal pages, signed
+  in gets onboarding and settings, **admins get the product**.
+- **The invite link opens an invitation.** `/join/<token>` validates, parks the
+  token and lands on `/join` — a dark letter with an 초대장 seal, the four founding
+  benefits and one accept CTA. It used to drop the creator on the ordinary signup
+  page, whose hero was a *fan* pitch. `/join` also carries the "link didn't work"
+  and "you need a link" states.
+- **Settings reachable during pre-launch.** A founding creator can edit the handle
+  they reserved — `/studio/settings` for the creator profile, `/settings` for the
+  account. Showing a promised handle that cannot be corrected makes a typo
+  permanent until launch.
+- **"Setup unfinished" is no longer "wait for launch".** A creator who signed up
+  but stopped before Studio setup was told to sit tight directly above a button
+  asking them to finish.
+- **OAuth signup is invite-gated too.** OAuth users are provisioned lazily in the
+  `jwt` callback and never touch `signupUser`, so `/login` — public by necessity —
+  was a way to get an account without an invite. A `signIn` callback now denies new
+  OAuth accounts without one; existing accounts always pass.
+
+**Deployed and verified on themotoo.com**: `/` serves the pre-launch page,
+`/explore`, `/home`, `/s/[handle]` and the studio host all redirect, and `/refund`,
+`/terms` and `/login` stay reachable.
+
+**The first deploy shipped publicly open for several minutes.** `PRELAUNCH` is read
+in edge middleware, and Next inlines env vars into the edge bundle at build time —
+the variable was set while that build was already running. A rebuild fixed it in
+fifteen seconds. The flag now tolerates whitespace and case, and DEPLOYMENT records
+that changing it needs a rebuild, not just a redeploy.
+
 ## 2026-08-28 — pre-launch: the site goes invite-only
 
 Creator collection starts before launch, so the product is private and only
