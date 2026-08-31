@@ -158,14 +158,22 @@ export async function PrelaunchLanding({
                   />
                 ) : null}
 
-                <p className="mt-8 text-sm text-muted">
-                  <Link
-                    href="/api/logout"
-                    className="font-semibold text-coral-deep hover:underline"
+                {/* A native form POST, not a Link. `/api/logout` exports POST
+                    only — a GET never matches it, so the page re-renders with
+                    the session intact, which is exactly what "logout does
+                    nothing" looks like. The POST is also what bumps
+                    `Backer.tokenVersion`; clearing the cookie alone is undone by
+                    any in-flight request still carrying the old one, since
+                    Auth.js re-issues it on every authenticated request. See
+                    DECISIONS 2026-08-02 and UserMenu, which does the same. */}
+                <form action="/api/logout" method="post" className="mt-8">
+                  <button
+                    type="submit"
+                    className="text-sm font-semibold text-coral-deep hover:underline"
                   >
                     {t("logout")}
-                  </Link>
-                </p>
+                  </button>
+                </form>
               </>
             ) : (
               <>

@@ -7,6 +7,15 @@ the way it is see [`DECISIONS.md`](./DECISIONS.md).
 
 ## 2026-08-31 — creator avatar at setup, and a one-time marketing re-ask
 
+- **Fixed: logout did nothing on the pre-launch confirmation page.** It was a
+  `<Link href="/api/logout">` — a GET. That route exports **POST only**, so the
+  request never matched it, the page re-rendered, and the session survived. Now a
+  native form POST, matching `UserMenu`. The POST is also what bumps
+  `Backer.tokenVersion`, which is the actual revocation gate: clearing the cookie
+  alone is undone by any in-flight request still carrying the old one, since
+  Auth.js re-issues it on every authenticated request. Exactly the trap DECISIONS
+  2026-08-02 documents, reintroduced by a new page that did not follow it.
+
 - **Profile picture in creator setup.** `/creator/onboarding` now takes an avatar
   through the existing `ImagePicker`, above 활동명 — that page is where the public
   creator profile is built and where an avatar actually shows. Optional and
