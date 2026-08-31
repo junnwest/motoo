@@ -1014,7 +1014,9 @@
       "verifyRequired": "본인인증을 완료해주세요.",
       "termsRequired": "필수 약관에 동의해주세요.",
       "generic": "완료하지 못했어요. 잠시 후 다시 시도해주세요."
-    }
+    },
+    "agreeAll": "모두 동의합니다",
+    "agreeAllHint": "선택 항목을 포함한 전체 동의예요. 아래에서 따로 선택할 수도 있어요."
   },
   "legal": {
     "termsTitle": "이용약관",

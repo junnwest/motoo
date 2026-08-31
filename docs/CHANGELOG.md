@@ -7,6 +7,15 @@ the way it is see [`DECISIONS.md`](./DECISIONS.md).
 
 ## 2026-08-31 — creator avatar at setup, and a one-time marketing re-ask
 
+- **모두 동의합니다 on `/onboarding`.** One checkbox that ticks both agreements.
+  It holds no state of its own — it is derived from the two below it, so a master
+  saying "all agreed" while one is unticked is impossible. The individual boxes
+  stay visible and independently toggleable, which is not a style choice:
+  개인정보보호법 requires 선택 to be separable from 필수, so a bundle that hid or
+  locked them would not be a valid consent. It saves two clicks and never removes
+  the choice. Onboarding is the only screen with more than one agreement;
+  `/guardian-consent` has a single one and is unchanged.
+
 - **Fixed: logout did not end the session on production.** Two session cookies of
   the same name existed — `.themotoo.com` from the Node instance and a host-only
   `www.themotoo.com` written by the edge middleware, which builds its own Auth.js

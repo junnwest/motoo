@@ -176,6 +176,34 @@ export function OnboardingForm({
       {/* Terms */}
       <section className="flex flex-col gap-3">
         <Eyebrow>{t("sectionTerms")}</Eyebrow>
+
+        {/* 전체 동의. Derived from the individual boxes rather than holding its
+            own state, so the two can never disagree — a master checkbox that
+            says "all agreed" while one below it is unticked is worse than no
+            master at all.
+
+            The individual boxes stay visible and independently toggleable on
+            purpose: 개인정보보호법 requires 선택 to be separable from 필수, so a
+            bundle that hides or locks them would not be a valid consent. This
+            only saves two clicks; it never removes the choice. */}
+        <label className="mb-1 flex cursor-pointer items-start gap-2.5 border border-line-3 bg-panel p-3.5 text-sm font-bold text-ink">
+          <input
+            type="checkbox"
+            checked={agreedTerms && marketing}
+            onChange={(e) => {
+              setAgreedTerms(e.target.checked);
+              setMarketing(e.target.checked);
+            }}
+            className="mt-0.5 h-5 w-5 shrink-0 rounded-sm border border-line-3 accent-coral"
+          />
+          <span>
+            {t("agreeAll")}
+            <span className="mt-0.5 block text-2xs font-medium text-muted">
+              {t("agreeAllHint")}
+            </span>
+          </span>
+        </label>
+
         <label className="flex cursor-pointer items-start gap-2.5 text-sm text-ink">
           <input
             type="checkbox"
