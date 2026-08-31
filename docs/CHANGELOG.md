@@ -5,6 +5,29 @@ For current status and open work see [`PROGRESS.md`](./PROGRESS.md); for *why* a
 the way it is see [`DECISIONS.md`](./DECISIONS.md).
 
 
+## 2026-08-31 — creator avatar at setup, and a one-time marketing re-ask
+
+- **Profile picture in creator setup.** `/creator/onboarding` now takes an avatar
+  through the existing `ImagePicker`, above 활동명 — that page is where the public
+  creator profile is built and where an avatar actually shows. Optional and
+  skippable. The data URL goes through `parseImageDataUrl`/`AVATAR_SPEC` on the
+  server like every other upload, and a malformed crop becomes null rather than an
+  error: a bad image must not cost someone their Studio at the last step of setup.
+- **One-time marketing re-ask.** Owner's call: we need a way to reach pre-launch
+  creators at launch, so a declined 마케팅 수신 동의 is asked once more after
+  onboarding, on the confirmation page. New `Backer.marketingPromptedAt` is set
+  **whichever way they answer**, which is the safeguard — 마케팅 수신 동의 is 선택
+  by law, cannot be a condition of using the product, and repeatedly re-asking a
+  declined consent is the pattern Korean guidance is least comfortable with. One
+  follow-up is defensible; a nag is not. Declining is an equally-weighted button,
+  and a "no" leaves the original consent untouched rather than rewriting it.
+
+Recommended instead, and not taken: a purpose-limited "출시 알림" consent rather
+than re-asking for generic marketing. It reads as a service notification for the
+thing these creators signed up for, and a single "no" would not then block the
+launch notice as well. Recorded here because the choice is the owner's, and
+because it stays available later.
+
 ## 2026-08-29 — pre-launch goes live on themotoo.com
 
 The gate from 2026-08-28 shipped to production, plus the refinements that came out

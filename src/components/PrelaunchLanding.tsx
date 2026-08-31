@@ -5,6 +5,7 @@ import { Footer } from "@/components/Footer";
 import { IconAward, IconTag, IconTrend, IconSend } from "@/components/ui/Icons";
 import { ButtonLink } from "@/components/ui/Button";
 import { FoundingBadge } from "@/components/FoundingBadge";
+import { MarketingNudge } from "@/components/MarketingNudge";
 
 /**
  * The public face of motoo while `PRELAUNCH=1`.
@@ -31,7 +32,11 @@ export async function PrelaunchLanding({
    * page that says "only invited creators can sign up" after being invited and
    * signing up would read as a failure. They get a confirmation instead.
    */
-  signedIn?: { creatorHandle: string | null; founding: boolean } | null;
+  signedIn?: {
+    creatorHandle: string | null;
+    founding: boolean;
+    owedMarketingNudge?: boolean;
+  } | null;
 } = {}) {
   const t = await getTranslations("prelaunch");
 
@@ -138,6 +143,19 @@ export async function PrelaunchLanding({
                       {t("doneSetupCta")}
                     </ButtonLink>
                   </div>
+                ) : null}
+
+                {signedIn.owedMarketingNudge ? (
+                  <MarketingNudge
+                    t={{
+                      title: t("nudgeTitle"),
+                      body: t("nudgeBody"),
+                      note: t("nudgeNote"),
+                      accept: t("nudgeAccept"),
+                      decline: t("nudgeDecline"),
+                      thanks: t("nudgeThanks"),
+                    }}
+                  />
                 ) : null}
 
                 <p className="mt-8 text-sm text-muted">

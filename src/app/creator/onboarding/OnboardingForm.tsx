@@ -3,6 +3,8 @@
 import { useCallback, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { Eyebrow } from "@/components/ui/Eyebrow";
+import { ImagePicker } from "@/components/ui/ImagePicker";
+import { AVATAR_SPEC } from "@/lib/imageUpload";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import {
   MochiIssuancePicker,
@@ -44,6 +46,7 @@ export function CreatorSetupForm({
   const [creatorType, setCreatorType] = useState<CreatorType | "">("");
   const [category, setCategory] = useState("");
   const [bio, setBio] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
   // Mochi issuance is owned by the shared picker; it reports the resolved
   // (price, count) + validity here. Starts invalid until the picker mounts.
@@ -84,6 +87,7 @@ export function CreatorSetupForm({
         category,
         creatorType,
         bio,
+        avatarUrl,
         mochiPriceKrw: String(mochi.price),
         mochiGoal: String(mochi.count),
       });
@@ -97,6 +101,16 @@ export function CreatorSetupForm({
       <section className="rounded-xl border border-line-2 bg-card p-6 sm:p-7">
         <Eyebrow className="mb-4">{t("sectionProfile")}</Eyebrow>
         <div className="flex flex-col gap-4">
+          <div className="mb-5">
+            <ImagePicker
+              value={avatarUrl}
+              onChange={setAvatarUrl}
+              spec={AVATAR_SPEC}
+              shape="circle"
+              label={t("avatar")}
+              disabled={pending}
+            />
+          </div>
           <Input
             label={t("displayName")}
             type="text"

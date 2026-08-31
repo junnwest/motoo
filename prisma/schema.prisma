@@ -179,6 +179,14 @@ model Backer {
   onboardedAt      DateTime?
   termsAgreedAt    DateTime? // 필수 약관(이용약관·개인정보) 동의 시각
   marketingConsent Boolean   @default(false) // 선택 마케팅 수신 동의
+  /// When we re-asked for marketing consent after onboarding, having been
+  /// declined during it. Set whichever way they answer — **the point of this
+  /// column is that the question is asked once**. 마케팅 수신 동의 is 선택 by
+  /// law and repeatedly re-asking a declined consent is the pattern Korean
+  /// guidance is least comfortable with; one follow-up is defensible, a nag is
+  /// not. Null means never asked again, which is also true of anyone who
+  /// consented the first time.
+  marketingPromptedAt DateTime?
   // "become a creator" intent, captured durably at signup so it survives OAuth
   // round-trips and long gaps between signup and finishing onboarding. Consumed
   // once by completeOnboarding to route the user to /creator/onboarding.

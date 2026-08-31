@@ -1,6 +1,6 @@
 ﻿# motoo — Progress Tracker
 
-_Last updated: 2026-08-29_
+_Last updated: 2026-08-31_
 
 **Read this whole file — it is short on purpose.** Everything in it is either open, blocked,
 or a live constraint. Shipped history lives in [`CHANGELOG.md`](./CHANGELOG.md) and does not
@@ -114,6 +114,13 @@ Resend adapter is written and needs an account, a verified domain and two env va
 - Unsetting the variable *is* the launch. New routes that must stay publicly
   reachable go in `PUBLIC_PREFIXES` (`src/lib/prelaunch.ts`) or they disappear;
   routes a signed-in creator needs go in `SIGNED_IN_PREFIXES`.
+- [ ] **Marketing re-ask is a legal position, not just a feature.** A declined
+  마케팅 수신 동의 is re-asked once after onboarding (`Backer.marketingPromptedAt`
+  guarantees once). 마케팅 수신 동의 is 선택 by law and cannot be a condition of
+  service; the safer alternative — a purpose-limited "출시 알림" consent, which
+  reads as a service notification rather than an ad — was offered and not taken.
+  Worth raising with counsel alongside the `/refund` questions, and worth
+  revisiting if the launch mail is ever the thing blocked by a "no".
 - [ ] **Production has zero invites.** Nothing has been minted yet, so nobody can
   sign up. Mint from `/admin` — it builds links against the request host, so they
   come out as `https://www.themotoo.com/join/…` automatically. Prefer one invite

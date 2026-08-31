@@ -8,6 +8,7 @@ import { getCurrentBacker } from "@/lib/session";
 import { unstable_update } from "@/auth";
 import { CREATOR_TYPES, isCategoryForType } from "@/lib/creatorTaxonomy";
 import { validateIssuance } from "@/lib/issuance";
+import { parseImageDataUrl, AVATAR_SPEC } from "@/lib/imageUpload";
 
 /**
  * Create a Studio (Streamer) for the CURRENT signed-in user. Becoming a creator
@@ -26,6 +27,10 @@ const setupSchema = z.object({
   creatorType: z.enum(CREATOR_TYPES),
   category: z.string().trim().min(1),
   bio: z.string().max(500).optional().default(""),
+  // A cropped data URL from ImagePicker, or null. Validated server-side by
+  // parseImageDataUrl below — never trusted from the client, which is the whole
+  // point of that gate (jpeg/png/webp only, never svg, hard byte cap).
+  avatarUrl: z.string().nullable().optional(),
   mochiPriceKrw: z.coerce.number().int(),
   mochiGoal: z.coerce.number().int(),
 });
@@ -59,12 +64,20 @@ export async function createStudio(
   });
   if (existing) redirect("/studio");
 
+  // Server-side image gate: anything malformed becomes null rather than an
+  // error, the same treatment `thumbnailKey` gets. A bad crop must not cost
+  // someone their Studio at the last step of setup.
+  const avatarUrl = data.avatarUrl
+    ? parseImageDataUrl(data.avatarUrl, AVATAR_SPEC)
+    : null;
+
   try {
     await prisma.$transaction(async (tx) => {
       const streamer = await tx.streamer.create({
         data: {
           handle,
           displayName: data.displayName,
+          avatarUrl,
           bio: data.bio,
           category: data.category,
           creatorType: data.creatorType,

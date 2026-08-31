@@ -554,7 +554,8 @@
     "presetSub": "모찌 {count}개 · 개당 {price}원",
     "customPrice": "모찌 1개 가격 (원)",
     "customCount": "발행 수량 (개)",
-    "mochiFloorHint": "개당 100원 이상 · 10개 이상 · 총 5만원 이상 발행할 수 있어요."
+    "mochiFloorHint": "개당 100원 이상 · 10개 이상 · 총 5만원 이상 발행할 수 있어요.",
+    "avatar": "프로필 사진"
   },
   "creatorDashboard": {
     "navHome": "홈",
@@ -1622,6 +1623,12 @@
     "editStudio": "크리에이터 정보 수정",
     "editStudioHint": "핸들·활동명·소개·카테고리",
     "editAccount": "계정 설정",
-    "editAccountHint": "닉네임·프로필 사진·비밀번호"
+    "editAccountHint": "닉네임·프로필 사진·비밀번호",
+    "nudgeTitle": "출시 소식을 받아보시겠어요?",
+    "nudgeBody": "정식 출시와 크리에이터 소식을 이메일로 알려드릴 수 있어요. 가입할 때는 받지 않겠다고 하셔서 한 번만 다시 여쭤봐요.",
+    "nudgeNote": "선택 사항이에요. 받지 않으셔도 서비스 이용에는 아무 영향이 없어요.",
+    "nudgeAccept": "네, 받을게요",
+    "nudgeDecline": "괜찮아요",
+    "nudgeThanks": "알림 설정을 저장했어요."
   }
 }

@@ -68,14 +68,28 @@ function Stat({ value, label }: { value: string; label: string }) {
 }
 
 /** Founding status for the pre-launch confirmation. One column, one page. */
-async function hasFoundingMark(backerId: string | undefined): Promise<boolean> {
-  if (!backerId) return false;
+async function readSignedInState(backerId: string | undefined) {
+  if (!backerId) return { founding: false, owedMarketingNudge: false };
   const { prisma } = await import("@/lib/db");
   const row = await prisma.backer.findUnique({
     where: { id: backerId },
-    select: { foundingAt: true },
+    select: {
+      foundingAt: true,
+      onboardedAt: true,
+      marketingConsent: true,
+      marketingPromptedAt: true,
+    },
   });
-  return Boolean(row?.foundingAt);
+  return {
+    founding: Boolean(row?.foundingAt),
+    // Only after onboarding has actually finished, only if they declined, and
+    // only if we have not already asked. Any one of those being false means the
+    // nudge never renders — see MarketingNudge for why "once" is the point.
+    owedMarketingNudge:
+      Boolean(row?.onboardedAt) &&
+      row?.marketingConsent === false &&
+      row?.marketingPromptedAt == null,
+  };
 }
 
 export default async function FanLandingPage() {
@@ -101,11 +115,13 @@ export default async function FanLandingPage() {
   // straight back, which is the point of gating on an env var.
   if (PRELAUNCH && session?.user?.role !== "admin") {
     if (!session?.user) return <PrelaunchLanding />;
+    const state = await readSignedInState(session.user.id);
     return (
       <PrelaunchLanding
         signedIn={{
           creatorHandle: session.user.creator ?? null,
-          founding: await hasFoundingMark(session.user.id),
+          founding: state.founding,
+          owedMarketingNudge: state.owedMarketingNudge,
         }}
       />
     );
