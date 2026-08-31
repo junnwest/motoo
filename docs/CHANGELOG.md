@@ -7,6 +7,12 @@ the way it is see [`DECISIONS.md`](./DECISIONS.md).
 
 ## 2026-08-31 — creator avatar at setup, and a one-time marketing re-ask
 
+- **Fixed: logout did not end the session on production.** Two session cookies of
+  the same name existed — `.themotoo.com` from the Node instance and a host-only
+  `www.themotoo.com` written by the edge middleware, which builds its own Auth.js
+  instance from `auth.config.ts` and never had the domain. Logout cleared the one
+  it knew about; the duplicate survived. Cookie config now lives in the shared
+  config. See DECISIONS 2026-08-31.
 - **Fixed: logout did nothing on the pre-launch confirmation page.** It was a
   `<Link href="/api/logout">` — a GET. That route exports **POST only**, so the
   request never matched it, the page re-rendered, and the session survived. Now a

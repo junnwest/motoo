@@ -11,6 +11,7 @@ To pull a single entry, grep its heading with trailing context, e.g.
 
 | Date | Decision |
 | --- | --- |
+| 2026-08-31 | The session-cookie domain belongs to the shared config |
 | 2026-08-29 | `PRELAUNCH` is read at build time, not request time |
 | 2026-08-29 | The invite link opens an invitation, not a form |
 | 2026-08-29 | Pre-launch means unlaunched, not merely hidden |
@@ -161,6 +162,44 @@ but stopped before Studio setup was told "아직 준비 중이에요 / 출시되
 알려드릴게요" directly above a button reading "크리에이터 설정 이어서 하기". Three
 distinct situations now render distinctly: has a Studio, founding but unfinished,
 and neither.
+
+---
+
+## 2026-08-31 — The session-cookie domain belongs to the shared config
+
+Logout did nothing on production. The page reloaded and the user was still
+signed in — from the avatar dropdown, which has used the correct native form
+POST since 2026-08-02.
+
+The cause was two session cookies with the same name:
+
+    __Secure-authjs.session-token   domain=.themotoo.com
+    __Secure-authjs.session-token   domain=www.themotoo.com
+
+`AUTH_COOKIE_DOMAIN` was applied in `src/auth.ts` only. The edge middleware
+builds its **own** Auth.js instance from `src/auth.config.ts`
+(`NextAuth(authConfig)` in `src/proxy.ts`), and Auth.js re-issues the session
+cookie on *every* authenticated request — so the edge re-issue wrote a second,
+host-only cookie with no `Domain`. Logout cleared the `.themotoo.com` one it was
+configured for; the host-only duplicate survived, browsers prefer the more
+specific domain, and the session came straight back.
+
+Production only, because the domain is only set there. Confirmed on the live
+site: after logout the `.themotoo.com` cookie was gone and the
+`www.themotoo.com` one remained. `tokenVersion` **was** bumped to 1, so the
+route ran correctly — the revocation gate did its job and the cookie still
+outlived it, because the edge middleware is deliberately Prisma-free and does
+not check `tokenVersion` (a known gap in PROGRESS). Both halves failing together
+is what made it look like logout did nothing at all.
+
+**Decision: cookie configuration lives in `auth.config.ts`**, the file both
+runtimes import, and must stay there. Anything configured only in `auth.ts`
+applies to the Node instance alone, and the edge will happily disagree with it.
+
+**Constraint it creates.** Never configure cookies in `src/auth.ts`. More
+generally: when the two Auth.js instances disagree about how a cookie is
+written, the disagreement is invisible in dev — `AUTH_COOKIE_DOMAIN` is unset
+there, so both write host-only cookies and agree by accident.
 
 ---
 

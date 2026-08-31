@@ -38,6 +38,38 @@ export function isOnboardingExempt(pathname: string): boolean {
 
 export const authConfig = {
   session: { strategy: "jwt" },
+  /**
+   * Session-cookie domain, shared across themotoo.com ↔ studio.themotoo.com.
+   *
+   * **This lives here, in the config both runtimes import, and must stay here.**
+   * It used to sit only in `src/auth.ts` (Node). The edge middleware builds its
+   * own instance from this file — `NextAuth(authConfig)` in src/proxy.ts — and
+   * Auth.js re-issues the session cookie on *every* authenticated request. With
+   * the domain missing at the edge, that re-issue wrote a second, **host-only**
+   * cookie of the same name on www.themotoo.com.
+   *
+   * Two cookies, one name. Logout cleared the `.themotoo.com` one it knew about;
+   * the host-only duplicate survived, browsers prefer the more specific domain,
+   * and the user stayed signed in — on production only, since the domain is only
+   * set there. Verified on the live site before the fix.
+   *
+   * Unset in dev/preview, where cookies stay host-only and there is no split.
+   */
+  ...(process.env.AUTH_COOKIE_DOMAIN
+    ? {
+        cookies: {
+          sessionToken: {
+            options: {
+              domain: process.env.AUTH_COOKIE_DOMAIN,
+              path: "/",
+              httpOnly: true,
+              sameSite: "lax" as const,
+              secure: true,
+            },
+          },
+        },
+      }
+    : {}),
   trustHost: true,
   providers: [], // real providers are added in src/auth.ts (Node runtime)
   callbacks: {
