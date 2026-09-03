@@ -33,6 +33,13 @@ export async function loginAction(
   if (!(await checkRateLimit("login", email.trim().toLowerCase()))) {
     return { ok: false, error: "tooMany" };
   }
+  // Read before `signIn` so a *stale* session-token cookie already sitting in
+  // the browser (an old session, a previous attempt) can't be mistaken for
+  // proof this attempt worked — see the note below.
+  const jarBefore = await cookies();
+  const cookieBefore = jarBefore
+    .getAll()
+    .find((c) => c.name.endsWith("session-token"))?.value;
   try {
     await signIn("credentials", {
       email: email.toLowerCase(),
@@ -50,15 +57,22 @@ export async function loginAction(
   // reads as success — the client navigates to "/" with no session cookie
   // ever set, landing back on the logged-out page with no error shown.
   //
-  // Checked via the cookie jar, not `auth()`: `auth()` resolves from the
-  // *incoming* request's cookies, which cannot yet contain a cookie `signIn`
-  // only just queued onto this same response — it reads back null even on a
-  // real success. `cookies()` sees the pending write because `signIn` sets it
-  // through the same request-scoped jar. Matched by suffix because the cookie
-  // is `__Secure-`-prefixed in production (AUTH_COOKIE_DOMAIN/https) and
-  // bare in dev.
-  const jar = await cookies();
-  const sessionCookie = jar.getAll().find((c) => c.name.endsWith("session-token"));
-  if (!sessionCookie?.value) return { ok: false, error: "sessionFailed" };
+  // Checked via the cookie jar's *value*, not `auth()` and not just presence:
+  // `auth()` resolves from the incoming request's cookies, which cannot yet
+  // contain one `signIn` only just queued onto this same response — it reads
+  // back null even on a real success. `cookies()` sees the pending write
+  // because `signIn` sets it through the same request-scoped jar, but
+  // `cookies()` also still carries whatever the browser already had, so mere
+  // presence proves nothing when a stale cookie is already there — it has to
+  // have actually changed. Matched by suffix because the cookie is
+  // `__Secure-`-prefixed in production (AUTH_COOKIE_DOMAIN/https) and bare in
+  // dev.
+  const jarAfter = await cookies();
+  const cookieAfter = jarAfter
+    .getAll()
+    .find((c) => c.name.endsWith("session-token"))?.value;
+  if (!cookieAfter || cookieAfter === cookieBefore) {
+    return { ok: false, error: "sessionFailed" };
+  }
   return { ok: true };
 }

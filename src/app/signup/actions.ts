@@ -112,6 +112,13 @@ export async function signupUser(
     // swallowed on purpose — see above
   }
 
+  // Read before `signIn` so a *stale* session-token cookie already sitting in
+  // the browser can't be mistaken for proof this attempt worked — see
+  // loginAction for the full reasoning.
+  const jarBefore = await cookies();
+  const cookieBefore = jarBefore
+    .getAll()
+    .find((c) => c.name.endsWith("session-token"))?.value;
   try {
     await signIn("credentials", { email, password, redirect: false });
   } catch (e) {
@@ -122,10 +129,13 @@ export async function signupUser(
   // failure from the jwt() callback into a redirect URL instead of throwing,
   // so the catch above can miss it. Confirm a session actually landed before
   // reporting success — the account row above was already created either way.
-  // Checked via the cookie jar, not `auth()` — see loginAction for why.
-  const jar = await cookies();
-  const sessionCookie = jar.getAll().find((c) => c.name.endsWith("session-token"));
-  if (!sessionCookie?.value) return { ok: false, error: "sessionFailed" };
+  const jarAfter = await cookies();
+  const cookieAfter = jarAfter
+    .getAll()
+    .find((c) => c.name.endsWith("session-token"))?.value;
+  if (!cookieAfter || cookieAfter === cookieBefore) {
+    return { ok: false, error: "sessionFailed" };
+  }
 
   // The client sends them to "/", where the middleware catches a non-onboarded
   // account and routes it to /onboarding.
