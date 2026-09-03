@@ -64,7 +64,7 @@ export function LoginForm({ providers }: { providers: EnabledProviders }) {
           {t("forgotLink")}
         </Link>
 
-        {error && <InlineMessage tone="error">{t("invalid")}</InlineMessage>}
+        {error && <InlineMessage tone="error">{t(error)}</InlineMessage>}
 
       <Button
         type="submit"

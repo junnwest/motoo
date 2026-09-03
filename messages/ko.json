@@ -449,6 +449,7 @@
     "signupBenefit2": "마켓에서 원하는 아이템을 이용해요",
     "signupBenefit3": "응원한 크리에이터를 한곳에서 관리해요",
     "tooMany": "시도가 너무 잦아요. 잠시 후 다시 시도해 주세요.",
+    "sessionFailed": "로그인하지 못했어요. 잠시 후 다시 시도해 주세요.",
     "forgotLink": "비밀번호를 잊으셨나요?",
     "reset": {
       "requestTitle": "비밀번호 재설정",

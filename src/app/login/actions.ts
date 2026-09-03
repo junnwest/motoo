@@ -1,6 +1,6 @@
 "use server";
 
-import { signIn } from "@/auth";
+import { signIn, auth } from "@/auth";
 import { AuthError } from "next-auth";
 import { checkRateLimit } from "@/lib/rateLimit";
 
@@ -42,5 +42,13 @@ export async function loginAction(
     if (e instanceof AuthError) return { ok: false, error: "invalid" };
     throw e;
   }
+  // `signIn` with `redirect: false` doesn't throw for every failure: a
+  // non-AuthError exception raised inside the jwt() callback (e.g. a Prisma
+  // error) is swallowed by @auth/core into a redirect URL instead of a throw,
+  // so the catch above never runs. Without this check that left-over failure
+  // reads as success — the client navigates to "/" with no session cookie
+  // ever set, landing back on the logged-out page with no error shown.
+  const session = await auth();
+  if (!session?.user) return { ok: false, error: "sessionFailed" };
   return { ok: true };
 }
