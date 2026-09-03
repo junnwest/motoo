@@ -10,7 +10,7 @@ import { INVITE_COOKIE } from "@/lib/inviteCookie";
 import { checkInvite, redeemInvite } from "@/lib/invites";
 import { sendVerificationEmail } from "@/lib/emailVerification";
 import { hashPassword, PASSWORD_RE } from "@/lib/password";
-import { signIn, auth } from "@/auth";
+import { signIn } from "@/auth";
 import { AuthError } from "next-auth";
 import { checkRateLimit } from "@/lib/rateLimit";
 
@@ -122,8 +122,10 @@ export async function signupUser(
   // failure from the jwt() callback into a redirect URL instead of throwing,
   // so the catch above can miss it. Confirm a session actually landed before
   // reporting success — the account row above was already created either way.
-  const session = await auth();
-  if (!session?.user) return { ok: false, error: "sessionFailed" };
+  // Checked via the cookie jar, not `auth()` — see loginAction for why.
+  const jar = await cookies();
+  const sessionCookie = jar.getAll().find((c) => c.name.endsWith("session-token"));
+  if (!sessionCookie?.value) return { ok: false, error: "sessionFailed" };
 
   // The client sends them to "/", where the middleware catches a non-onboarded
   // account and routes it to /onboarding.

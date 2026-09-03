@@ -1,6 +1,7 @@
 "use server";
 
-import { signIn, auth } from "@/auth";
+import { cookies } from "next/headers";
+import { signIn } from "@/auth";
 import { AuthError } from "next-auth";
 import { checkRateLimit } from "@/lib/rateLimit";
 
@@ -48,7 +49,16 @@ export async function loginAction(
   // so the catch above never runs. Without this check that left-over failure
   // reads as success — the client navigates to "/" with no session cookie
   // ever set, landing back on the logged-out page with no error shown.
-  const session = await auth();
-  if (!session?.user) return { ok: false, error: "sessionFailed" };
+  //
+  // Checked via the cookie jar, not `auth()`: `auth()` resolves from the
+  // *incoming* request's cookies, which cannot yet contain a cookie `signIn`
+  // only just queued onto this same response — it reads back null even on a
+  // real success. `cookies()` sees the pending write because `signIn` sets it
+  // through the same request-scoped jar. Matched by suffix because the cookie
+  // is `__Secure-`-prefixed in production (AUTH_COOKIE_DOMAIN/https) and
+  // bare in dev.
+  const jar = await cookies();
+  const sessionCookie = jar.getAll().find((c) => c.name.endsWith("session-token"));
+  if (!sessionCookie?.value) return { ok: false, error: "sessionFailed" };
   return { ok: true };
 }
