@@ -1206,6 +1206,36 @@
     "passwordHint": "8자 이상, 영문과 숫자를 함께 써주세요.",
     "changePassword": "비밀번호 변경",
     "oauthOnly": "소셜 로그인 계정은 비밀번호가 없어요.",
+    "connectedAccounts": {
+      "sectionTitle": "연결된 계정",
+      "linkedAt": "{date}에 연결됨",
+      "linkCta": "연결하기",
+      "unlinkCta": "연결 해제",
+      "comingSoonBadge": "준비 중",
+      "lastMethod": "마지막 로그인 수단이라 해제할 수 없어요.",
+      "unlinkConfirmTitle": "연결을 해제할까요?",
+      "unlinkConfirmBody": "{provider} 계정으로 더 이상 로그인할 수 없어요. 언제든지 다시 연결할 수 있어요.",
+      "unlinkConfirmCta": "네, 해제할게요",
+      "cancel": "취소",
+      "linkedFlash": "{provider} 계정을 연결했어요.",
+      "providerNames": {
+        "google": "Google",
+        "kakao": "카카오",
+        "naver": "네이버"
+      },
+      "errors": {
+        "login": "로그인이 필요해요.",
+        "tooMany": "요청이 너무 잦아요. 잠시 후 다시 시도해 주세요.",
+        "lockout": "마지막 로그인 수단은 해제할 수 없어요.",
+        "linkedElsewhere": "이미 다른 계정에 연결된 소셜 계정이에요.",
+        "emailTaken": "이미 다른 계정에서 사용 중인 이메일이에요.",
+        "unavailable": "지금은 사용할 수 없는 로그인 방식이에요.",
+        "expired": "연결 요청이 만료됐어요. 다시 시도해 주세요.",
+        "denied": "연결을 취소했어요.",
+        "sessionChanged": "로그인 상태가 바뀌었어요. 다시 시도해 주세요.",
+        "generic": "처리하지 못했어요. 잠시 후 다시 시도해 주세요."
+      }
+    },
     "errors": {
       "generic": "문제가 생겼어요. 다시 시도해 주세요.",
       "handleTaken": "이미 사용 중인 핸들이에요.",

@@ -7,6 +7,8 @@ import Credentials from "next-auth/providers/credentials";
 import Naver from "next-auth/providers/naver";
 import Kakao from "next-auth/providers/kakao";
 import Google from "next-auth/providers/google";
+import { Prisma } from "@prisma/client";
+import type { LinkedAccountProvider } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { verifyPassword } from "@/lib/password";
 import { authConfig } from "./auth.config";
@@ -187,6 +189,32 @@ export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
             where: { id: backer.id, emailVerifiedAt: null },
             data: { emailVerifiedAt: new Date() },
           });
+        }
+        // Self-heal: record which provider identity authenticated this
+        // sign-in, even for a Backer created long before LinkedAccount
+        // existed. Bookkeeping only — this never decides who `backer` is
+        // (that's still the email-match resolution above) and must never
+        // fail the sign-in, so a conflict (P2002 — already recorded, or this
+        // Backer already has a different identity of this provider linked)
+        // is swallowed rather than surfaced. See DECISIONS: connected accounts.
+        if (viaOAuth && account?.provider && account?.providerAccountId) {
+          const provider = account.provider as LinkedAccountProvider; // only google/kakao/naver are ever pushed into providers[]
+          await prisma.linkedAccount
+            .create({
+              data: {
+                backerId: backer.id,
+                provider,
+                providerAccountId: account.providerAccountId,
+                email,
+              },
+            })
+            .catch((e) => {
+              if (
+                !(e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002")
+              ) {
+                console.error("linkedAccount self-heal failed", provider, e);
+              }
+            });
         }
         // Signing back in *is* the cancellation gesture for a scheduled
         // deletion — the user shouldn't have to find a setting to undo it, and

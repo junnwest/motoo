@@ -217,6 +217,7 @@ model Backer {
   follows           Follow[]
   notifications     Notification[]
   notificationPrefs NotificationPref[]
+  linkedAccounts    LinkedAccount[]
 }
 
 enum GuardianRelation {
@@ -549,6 +550,35 @@ model Invite {
 
   @@index([createdAt])
   @@index([redeemedAt])
+}
+
+enum LinkedAccountProvider {
+  google
+  kakao
+  naver
+}
+
+/// One row per OAuth identity a Backer has explicitly linked from /settings.
+/// This is bookkeeping and display state only — it does NOT participate in
+/// ordinary sign-in identity resolution, which stays exclusively email-based
+/// in auth.ts's jwt() callback. Self-heals: jwt() also writes a row here on
+/// every OAuth sign-in (any provider), so an account that authenticated via a
+/// provider before this table existed picks up its row on next sign-in
+/// without a data migration.
+model LinkedAccount {
+  id                String                @id @default(cuid())
+  backerId          String
+  backer            Backer                @relation(fields: [backerId], references: [id], onDelete: Cascade)
+  provider          LinkedAccountProvider
+  providerAccountId String
+  /// Email the provider reported at link time. Informational only — never
+  /// re-synced, never used to resolve identity (see the module note above).
+  email             String?
+  linkedAt          DateTime              @default(now())
+
+  @@unique([provider, providerAccountId])
+  @@unique([backerId, provider])
+  @@index([backerId])
 }
 
 model RateLimit {

@@ -43,6 +43,9 @@ export const RATE_LIMITS = {
   follow: { limit: 60, windowSec: 60 },
   /** Deleting an account, and the export that dumps everything about one. */
   account: { limit: 5, windowSec: 3600 },
+  /** Starting a link redirect, and removing a linked provider. */
+  linkAccount: { limit: 10, windowSec: 3600 },
+  unlinkAccount: { limit: 10, windowSec: 3600 },
 } as const satisfies Record<string, RateLimitRule>;
 
 export type RateLimitKind = keyof typeof RATE_LIMITS;

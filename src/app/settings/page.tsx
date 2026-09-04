@@ -16,8 +16,11 @@ import { MarketingConsentForm } from "./MarketingConsentForm";
 import { GuardianConsentSection } from "./GuardianConsentSection";
 import { HiddenCreators } from "./HiddenCreators";
 import { NotificationPrefsForm } from "./NotificationPrefsForm";
+import { ConnectedAccountsSection } from "./ConnectedAccountsSection";
 import { getNotificationPrefs } from "@/lib/notificationPrefs";
 import { getHiddenCreators } from "@/lib/blocks";
+import { getEnabledOAuthProviders } from "@/lib/auth-providers";
+import { prisma } from "@/lib/db";
 import { formatKstDate } from "@/lib/format";
 
 /** Signed-in surface: one person’s balances and history. Never indexed. */
@@ -29,7 +32,11 @@ export const metadata: Metadata = { robots: NOINDEX };
  * are on different hosts, and `src/proxy.ts`'s studio rewrite only fires when
  * the request host starts with `studio.` (see isStudioPage).
  */
-export default async function SettingsPage() {
+export default async function SettingsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ linked?: string; linkError?: string }>;
+}) {
   const session = await getSession();
   if (!session?.user) redirect("/");
 
@@ -39,13 +46,20 @@ export default async function SettingsPage() {
   const backer = await getCurrentBacker();
   if (!backer) redirect("/api/session-reset");
 
+  const { linked, linkError } = await searchParams;
+
   // Stated in the delete confirmation: what happens to unspent mochi is the
   // part of leaving that users actually care about.
-  const [holdings, hiddenCreators, notificationPrefs] = await Promise.all([
-    getHoldingsForBacker(backer.id),
-    getHiddenCreators(backer.id),
-    getNotificationPrefs(backer.id),
-  ]);
+  const [holdings, hiddenCreators, notificationPrefs, linkedAccounts] =
+    await Promise.all([
+      getHoldingsForBacker(backer.id),
+      getHiddenCreators(backer.id),
+      getNotificationPrefs(backer.id),
+      prisma.linkedAccount.findMany({
+        where: { backerId: backer.id },
+        orderBy: { linkedAt: "asc" },
+      }),
+    ]);
   const unspentMochi = holdings.reduce((sum, h) => sum + h.balance, 0);
 
   // Comes from 본인인증, never self-reported — `ageVerified` is only false once
@@ -133,6 +147,19 @@ export default async function SettingsPage() {
             ) : (
               <p className="text-sm text-muted">{t("oauthOnly")}</p>
             )}
+          </Section>
+
+          <Section title={t("connectedAccounts.sectionTitle")} boxed className="mt-6">
+            <ConnectedAccountsSection
+              providers={getEnabledOAuthProviders()}
+              linkedAccounts={linkedAccounts.map((r) => ({
+                id: r.id,
+                provider: r.provider,
+                linkedAt: r.linkedAt.toISOString(),
+              }))}
+              hasPassword={!!backer.passwordHash}
+              initialFlash={{ linked, linkError }}
+            />
           </Section>
 
           {/* PIPA rights of access and erasure — neither existed before. */}
