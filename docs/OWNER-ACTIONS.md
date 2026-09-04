@@ -4,9 +4,10 @@ _Everything in [PRELAUNCH.md](PRELAUNCH.md) that no amount of coding closes: con
 access, money, a signature, or a decision that isn't a developer's to make. Written as
 steps, not reminders, so it can be done in one sitting._
 
-**A1 is done (2026-08-18). A2/A3 and B are what remain — about ten minutes, and both
-fix something broken on the live site right now.** C is counsel's clock, not yours. E is three
-questions to answer when you feel like it.
+**A1, A2/A3, and B are all done** (A1: 2026-08-18; A2/A3 and B confirmed live via real
+production sign-ins and a working `/admin` on 2026-09-03/04 — Kakao is live too, not
+listed below since it was never one of these three). C is counsel's clock, not yours.
+E is three questions to answer when you feel like it.
 
 ---
 
@@ -47,7 +48,7 @@ four (expired accounts, closed rate-limit windows, spent reset tokens, expired e
 tokens), and I have since verified the whole route locally: 401 with no secret, 401
 with a wrong one, 200 and a real prune with the right one.
 
-### A2 / A3 — Google and Naver login (Production)
+### A2 / A3 — Google and Naver login (Production) ✅ DONE, confirmed 2026-09-03
 
 **Why:** both are live in dev and **silently absent** on themotoo.com. The code only
 registers a provider when its credentials are present, so the buttons simply don't
@@ -80,10 +81,22 @@ The canonical host is **`www.themotoo.com`** (`PROD_CANONICAL_APEX` in
   https://www.themotoo.com/api/auth/callback/naver
   ```
 
-**Verify:** open https://www.themotoo.com/login in a private window. The Google and
-Naver buttons should be there. Click one and complete a sign-in.
+**Verified 2026-09-03:** real production sign-ins completed for both, via a test
+invite (pre-launch is invite-only) — accounts created, email confirmed, Studio set
+up. `/login` shows all three social buttons.
 
-Kakao stays off — it needs 사업자등록 before Kakao will approve the app.
+**Kakao is also live** (2026-09-03/04) — turned out not to need 사업자등록 after
+all. The assumption below (Section E) that Kakao was blocked on business
+registration was wrong; the 카카오계정(이메일) consent item was approved for this
+app as configured, without it. Console setup: 동의항목 → 닉네임 (선택), 프로필
+사진 (선택), 카카오계정(이메일) (필수) — email is required because
+`auth.ts`'s account-provisioning only runs `if (user?.email)`. `AUTH_KAKAO_ID`/
+`AUTH_KAKAO_SECRET` are set in Production the same way as the Google/Naver pair
+above. Confirmed via a real production signup with `emailVerifiedAt` set.
+
+Users can also now see and manage which of the three are linked to their account
+from `/settings` (2026-09-04) — no action needed from you, it just works once the
+provider credentials above are set.
 
 ---
 
@@ -238,8 +251,9 @@ rather than degrade it, so it gets its own row.
 ## E. Blocked on 사업자등록 — for completeness, not action
 
 The real PG (`PAYMENT_PROVIDER` leaving `mock`), real 본인인증
-(`VERIFICATION_PROVIDER`), Kakao login, paying refunds out as money rather than
-records, and creator payouts.
+(`VERIFICATION_PROVIDER`), paying refunds out as money rather than records, and
+creator payouts. **Kakao login turned out not to belong on this list** (2026-09-04)
+— see A2/A3 above; it's live.
 
 The refund **queue** does not wait on this: requests, eligibility decisions and the
 audit trail all work now, and "승인" is deliberately separate from "환불 완료" so the

@@ -79,7 +79,7 @@ relative `Location` and loops. Dev: `studio.localhost:PORT`. See DECISIONS 2026-
   "the donation pivot") — it's now a bonus on a direct donation, not a purchase; see below
   and DECISIONS.
 - **Money logic is tested.** Run `pnpm test` (node:test via tsx, needs `pnpm db:up`) after
-  touching `src/lib/mochi.ts` — **108 tests** covering the donate/redeem/cancel invariants, the
+  touching `src/lib/mochi.ts` — **125 tests** covering the donate/redeem/cancel invariants, the
   per-donation ceilings, the concurrency guards (no oversell, no negative balance, no double
   refund when a buyer and creator cancel at once), refund eligibility, blocking, and the
   fulfilment promise.
@@ -147,8 +147,12 @@ creator (`getCurrentCreator`) when nobody's signed in. New signups are forced th
 fake accounts and 10 fake creators in the live database — including `admin@motoo.dev`, whose
 password is in this public repo. Cleaned up 2026-08-18 with `pnpm seed:audit` /
 `pnpm seed:remove`; those two exist so it can be checked rather than assumed.
-Google/Naver OAuth are live in dev (`.env`, gitignored); Kakao + real 본인인증 + real PG all
-need a business registration (`사업자등록`) — mocks stand in until then.
+Google/Naver/Kakao OAuth are all live, in dev and in production (2026-09-04 — Kakao no longer
+needs a 사업자등록/Biz-App wait; the 카카오계정(이메일) consent item was approved for this app as
+configured, confirmed via a real production signup). Real 본인인증 + real PG still need one —
+mocks stand in until then. Users can see and manage which of the three are linked to their
+account from `/settings` — `LinkedAccount` (2026-09-04), separate from and never consulted by
+ordinary sign-in, which still resolves identity by email match alone, unchanged.
 
 **`VERIFICATION_MOCK_MINOR=1`** makes the mock 본인확인기관 return a minor instead of an adult.
 The money path blocks minors without recorded guardian consent, and the mock used to hardcode
@@ -163,7 +167,7 @@ the env-var list and the runbook.
 
 ## Stack
 Next.js 16 (App Router) · TypeScript · Tailwind v4 · Prisma 6 + Postgres · next-intl ·
-Auth.js v5 (credentials + Google/Naver live, Kakao scaffold; edge `auth.config.ts` +
+Auth.js v5 (credentials + Google/Naver/Kakao live; edge `auth.config.ts` +
 Node `auth.ts` split, `src/proxy.ts` middleware) · `PaymentProvider`, `VerificationProvider`,
 `EmailProvider` (mock | **resend**) and `Reporter` (console | **sentry**) abstractions — swap
 via `PAYMENT_PROVIDER` / `VERIFICATION_PROVIDER` / `EMAIL_PROVIDER` / `REPORT_PROVIDER` ·

@@ -5,6 +5,73 @@ For current status and open work see [`PROGRESS.md`](./PROGRESS.md); for *why* a
 the way it is see [`DECISIONS.md`](./DECISIONS.md).
 
 
+## 2026-09-04 — connected accounts: see, link, and unlink Google/Kakao/Naver from /settings
+
+- **New `LinkedAccount` table + a "연결된 계정" section in `/settings`.** Linking was
+  previously invisible: any OAuth sign-in whose email matched an existing account
+  silently attached to it, with no record of which provider was ever used and no way
+  to add or remove one. Linking any email is allowed, not just a matching one, so it
+  runs through a dedicated OAuth client (`src/lib/oauthLinking.ts`, PKCE + `state`)
+  rather than reusing Auth.js's `signIn()`/callback machinery — isolates it fully from
+  the PRELAUNCH-gated primary sign-in path. See DECISIONS 2026-09-04.
+- Rejects linking an identity already linked to a *different* account, and an email
+  already claimed by a *different* account's own `Backer.email` — otherwise this table
+  and the unchanged, still-email-based ordinary login could disagree about who an
+  OAuth identity belongs to. Ordinary `/login` sign-in is **not** touched by this —
+  still resolves purely by email match, exactly as before.
+- Unlinking refuses to strand an account with no password and no other linked
+  provider. The lockout check and the delete run inside one transaction with the
+  `Backer` row locked (`FOR UPDATE`) — found via an independent review pass, not
+  written correctly the first time: two concurrent unlinks on a passwordless
+  account's last two providers could otherwise both read "one other remains" before
+  either committed, both pass the check, and both delete. Proven with a regression
+  test that fails against the un-locked version and passes against the fixed one.
+- The same review pass also caught a linked-but-later-disabled provider becoming
+  permanently un-removable through self-service (the UI checked "is this provider
+  enabled" before "is it linked," so a row for a provider whose env credentials were
+  since pulled had no way to reach its own unlink button). Fixed by checking `linked`
+  first.
+- Every OAuth sign-in — including on an account that authenticated before this table
+  existed — now writes a `LinkedAccount` row via `auth.ts`'s `jwt()` callback, so
+  existing accounts self-heal on their next ordinary sign-in rather than needing a
+  data migration.
+- 17 new tests (`test/linkedAccounts.test.ts`): every collision case, the unlink
+  lockout, the concurrent-unlink race, and pure profile-extraction fixtures for all
+  three providers' actual response shapes.
+
+## 2026-09-03 — Kakao OAuth wired up, and three rounds of a login regression
+
+- **Kakao login is live**, in dev and production. Console setup (동의항목: 닉네임/프로필
+  선택, 카카오계정 이메일 필수; Client Secret generated and activated) confirmed working via
+  a real production signup — the 카카오계정(이메일) consent item did not require
+  Biz-App/사업자등록 for this app as configured, contradicting the standing assumption
+  that Kakao was blocked on it. Google and Naver were already live; both re-verified
+  today with real production signups too.
+- **Fixed: login/signup could report success while landing back on a page that looks
+  logged out, with no error shown.** `signIn("credentials", { redirect: false })`
+  doesn't throw for every failure — a non-`AuthError` exception inside the `jwt()`
+  callback (e.g. a Prisma error) is swallowed by `@auth/core` into a redirect URL
+  instead of a throw, so `loginAction`/`signupUser`'s `catch` never saw it and fell
+  through to `{ ok: true }` with no session cookie ever set.
+- That fix's own first version was itself broken and shipped broken for about ten
+  minutes: it checked session state via `auth()` right after `signIn()`, in the same
+  request — `auth()` resolves from the *incoming* request's cookies, which cannot yet
+  contain one `signIn` only just queued onto the same response, so it read back null
+  even on a genuine success and started failing every login. Confirmed live: an admin
+  account got "로그인하지 못했어요" on a correct password.
+- The fix after that was *also* incomplete: checking the cookie jar's mere presence
+  (rather than `auth()`) is correct in principle, but `cookies()` also still carries
+  whatever the browser already had — a stale `session-token` cookie left over from an
+  earlier attempt reads as proof of success even when this attempt's `signIn()`
+  produced nothing new. Final version compares the cookie's *value* before and after;
+  only an actual change (a fresh `iat`/`jti`, even for the same account) counts.
+  See DECISIONS 2026-09-03.
+- Root cause of the original symptom, separately: the local dev checkout had silently
+  fallen 17 commits behind `origin/main` (a stale remote-tracking ref made `git status`
+  report "up to date" when it wasn't) and was missing the whole invite-only pre-launch
+  gate and Bauhaus rebrand already live in production — hours were initially spent
+  debugging against week-old code before this surfaced.
+
 ## 2026-08-31 — creator avatar at setup, and a one-time marketing re-ask
 
 - **모두 동의합니다 on `/onboarding`.** One checkbox that ticks both agreements.

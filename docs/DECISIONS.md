@@ -11,6 +11,9 @@ To pull a single entry, grep its heading with trailing context, e.g.
 
 | Date | Decision |
 | --- | --- |
+| 2026-09-04 | Linking a provider gets its own OAuth client, not Auth.js's `signIn()` |
+| 2026-09-04 | Linking any email is allowed, except one already claimed elsewhere |
+| 2026-09-03 | A fresh session cookie is proven by its value changing, not its presence |
 | 2026-08-31 | The session-cookie domain belongs to the shared config |
 | 2026-08-29 | `PRELAUNCH` is read at build time, not request time |
 | 2026-08-29 | The invite link opens an invitation, not a form |
@@ -162,6 +165,115 @@ but stopped before Studio setup was told "아직 준비 중이에요 / 출시되
 알려드릴게요" directly above a button reading "크리에이터 설정 이어서 하기". Three
 distinct situations now render distinctly: has a Studio, founding but unfinished,
 and neither.
+
+---
+
+## 2026-09-04 — Linking a provider gets its own OAuth client, not Auth.js's `signIn()`
+
+The connected-accounts feature (`/settings`) needed a way to attach a new OAuth
+identity to an already-authenticated session. The obvious approach — reuse
+Auth.js's `signIn()`, carry the current `backerId` through an intent cookie the
+way `INVITE_COOKIE`/`creatorIntent` already do, and have the `jwt()` callback
+detect "this is a link, not a login" and keep the original session's identity
+instead of resolving a new one — was rejected.
+
+**Why.** `auth.ts`'s `signIn` callback runs a PRELAUNCH invite gate on every OAuth
+sign-in, keyed on whether the email already has a `Backer`. A link attempt for an
+email that does *not* match the current account looks, from that callback's point
+of view, exactly like a stranger trying to sign up — teaching it a second "actually
+this is a link" mode means two callbacks (`signIn` and `jwt`) each carrying two
+barely-related code paths, in the same functions that already hold the revocation
+gate, the founding-invite redemption, and the onboarded/creator-handle refresh.
+Auth.js's per-provider PKCE/state cookies are also fixed-name and shared — a
+concurrent ordinary login in another tab during a link attempt would fight over
+the same cookie.
+
+**Decision: linking runs through its own OAuth client** (`src/lib/oauthLinking.ts`,
+`/api/settings/link/[provider]` → provider consent → `.../callback`), doing its own
+authorization-code exchange against each provider's real endpoints rather than
+Auth.js's `/api/auth/*`. The endpoints are already fully known — Kakao and Naver
+aren't OIDC-discoverable, so Auth.js's own providers for them are hand-rolled to
+these exact URLs already — so this is ~30-40 lines per provider, not a rebuild.
+Uses PKCE (S256) + `state`, matching what Auth.js already does for these same three
+providers on the login path (RFC 9700, the IETF's 2025 OAuth Security BCP,
+recommends PKCE for every client type now, not only public ones).
+
+**Constraint it creates.** If a provider's scope, endpoints, or client config ever
+changes in `auth.ts`, `oauthLinking.ts`'s `PROVIDER_CONFIG` needs the same change by
+hand — nothing forces the two to stay in sync. Accepted deliberately: the isolation
+from the live sign-in path is the point, and the alternative (sharing config) would
+reintroduce exactly the coupling this decision avoids.
+
+---
+
+## 2026-09-04 — Linking any email is allowed, except one already claimed elsewhere
+
+Product scope: a user can link an OAuth account whose provider-reported email
+differs entirely from their own motoo account's email — not just a matching one.
+
+**The one restriction.** Linking is refused if that email is already a *different*
+existing account's primary `Backer.email`, even though no `LinkedAccount` row is
+involved. Reason: ordinary `/login` sign-in still resolves identity purely by email
+match (unchanged — see the identity-resolution note below), so allowing the link
+would let this table and that unchanged login path permanently disagree about who
+an OAuth identity belongs to — whichever door someone walks through decides.
+Rejecting it closes that with one extra read.
+
+**Identity resolution was deliberately not changed to close this more completely.**
+The alternative — make ordinary sign-in check `LinkedAccount` by
+`(provider, providerAccountId)` first, falling back to email only for accounts that
+predate this table — would remove the restriction above entirely, but means
+modifying the `jwt()`/`signIn()` resolution every production login already goes
+through, not just adding an isolated feature beside it. Owner's call, made
+explicitly during planning: lower risk over full generality. `LinkedAccount` is
+bookkeeping and `/settings` display only; it is never consulted to decide who a
+sign-in is.
+
+**Unlinking refuses to strand the account** (no password and no other linked
+provider) rather than also offering to set an initial password first — that's new
+end-to-end functionality (no code path exists anywhere today for an OAuth-only
+account to acquire a password) and was scoped out on purpose. "Just block it" was
+the owner's explicit choice over building that.
+
+**Known gap, not closed by this feature.** Ordinary OAuth sign-in still silently
+attaches to an existing account on email match alone, with no re-authentication
+step — the pattern Auth0's own account-linking guidance says not to do ("a verified
+email is not enough evidence that the user can currently authenticate to both
+accounts"). That behavior predates this feature and is unchanged by it; see
+PROGRESS.md's open items.
+
+---
+
+## 2026-09-03 — A fresh session cookie is proven by its value changing, not its presence
+
+`loginAction`/`signupUser` needed to detect `signIn()` silently failing (a
+non-`AuthError` thrown inside `jwt()`, swallowed by `@auth/core` into a redirect
+instead of a throw — see the CHANGELOG entry). Two narrower fixes shipped and broke
+before this one, in the same session, each confirmed broken on production before
+being replaced:
+
+1. **Checking `auth()` right after `signIn()`, in the same request.** `auth()`
+   resolves from the *incoming* request's cookies. A cookie `signIn()` only just
+   queued onto the outgoing response cannot be in the request that's still being
+   handled — `auth()` reads back null even on a real success. Broke every login for
+   about ten minutes; caught by an admin account getting "로그인하지 못했어요" on a
+   correct password.
+2. **Checking the cookie jar's mere presence instead.** `cookies()` *does* see the
+   pending write (`signIn` sets it through the same request-scoped jar `auth()`
+   can't see), so this looked right — but `cookies()` also still carries whatever
+   the browser already sent in. A stale `session-token` from an earlier attempt
+   reads as proof of success even when this attempt's `signIn()` produced nothing
+   new, reproducing the exact original symptom (silent bounce, no error) whenever a
+   stale cookie happened to be sitting in the browser.
+
+**Decision: capture the cookie's value before calling `signIn()`, and require it to
+have actually changed after.** Only a genuine new token can do that — Auth.js mints
+a fresh `iat`/`jti` on every sign-in, even for the same account signing in again —
+and a swallowed `jwt()` failure cannot, since nothing new was ever written.
+
+**Constraint it creates.** Any future check of "did this sign-in actually work"
+inside a server action must diff the cookie's value, not just check for `auth()` or
+presence — both are proven, live-tested traps, not hypothetical ones.
 
 ---
 
@@ -2170,7 +2282,8 @@ enforced by `proxy.ts`. Age is a real **본인인증 step** behind a `Verificati
   간편인증), which needs a `사업자등록` + paid contract (~₩40/verification) — same blocker
   class as the PG. Build the flow now, swap the adapter later (`VERIFICATION_PROVIDER`).
 - Kakao login is blocked the same way (business verification); Google + Naver are free to
-  register and are **live in dev**.
+  register and are **live in dev**. **This Kakao assumption did not hold** — see
+  2026-09-03/04: it registered and works without 사업자등록.
 
 ## 2026-07-11 — Auth split for edge middleware + self-healing sessions
 Split Auth.js into `auth.config.ts` (edge-safe: session + `authorized` onboarding gate, no

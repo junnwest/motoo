@@ -1,6 +1,6 @@
 ﻿# motoo — Progress Tracker
 
-_Last updated: 2026-08-31_
+_Last updated: 2026-09-04_
 
 **Read this whole file — it is short on purpose.** Everything in it is either open, blocked,
 or a live constraint. Shipped history lives in [`CHANGELOG.md`](./CHANGELOG.md) and does not
@@ -31,7 +31,7 @@ Resend adapter is written and needs an account, a verified domain and two env va
 
 ## Open items — read this first when resuming
 
-`main` is green: `pnpm build`, `pnpm test` (**108**), `check:vocab`, `check:emoji`,
+`main` is green: `pnpm build`, `pnpm test` (**125**), `check:vocab`, `check:emoji`,
 `check:a11y` and `pnpm lint` all pass. Ordered by what would hurt most if ignored.
 
 **Blocks a real launch**
@@ -67,8 +67,10 @@ Resend adapter is written and needs an account, a verified domain and two env va
   agreed to at onboarding. Blocked on counsel text; the page structure is ready. Lawyer-review
   drafts exist at `docs/legal/terms-draft.md` and `docs/legal/privacy-draft.md` (2026-08-09) —
   not wired into the site; they're for counsel to mark up first.
-- [ ] Real PG (Toss/NICE/PortOne), real 본인인증, Kakao login — all blocked on 사업자등록. Mocks
-  stand in behind `PaymentProvider` / `VerificationProvider`.
+- [ ] Real PG (Toss/NICE/PortOne), real 본인인증 — blocked on 사업자등록. Mocks stand in behind
+  `PaymentProvider` / `VerificationProvider`. **Kakao login is no longer on this list**
+  (2026-09-04) — wired up and confirmed working via a real production signup; the
+  카카오계정(이메일) consent item did not require Biz-App/사업자등록 for this app as configured.
   - The age gate is enforced in `donateMochi`, and the **mock verifier always returns an adult**
     unless `VERIFICATION_MOCK_MINOR=1`. Guardian-consent *collection* now exists
     (`/guardian-consent`, 2026-08-18) — it records a declaration, since verifying the guardian
@@ -98,6 +100,12 @@ Resend adapter is written and needs an account, a verified domain and two env va
 - [ ] The edge middleware doesn't check `tokenVersion` — Prisma-free by design, so a revoked
   token can still satisfy the *routing* gate for one request. Every page-level `auth()` does the
   real check. **No action recommended.**
+- [ ] **Ordinary OAuth sign-in silently auto-links by email match, with no re-authentication
+  step** — unchanged by the 2026-09-04 connected-accounts feature on purpose (see DECISIONS).
+  Auth0's own account-linking guidance treats this as the pattern to avoid: a verified email is
+  not proof someone can currently authenticate to *both* accounts. Predates today's work: this
+  is how `auth.ts`'s `jwt()` callback has always resolved identity. Changing it affects every
+  existing user's login, so it needs an owner decision, not a silent fix.
 
 **Pre-launch — LIVE on themotoo.com since 2026-08-29. Obligations, not just a feature**
 - **The site is private right now.** Strangers get the welcome page, the legal
