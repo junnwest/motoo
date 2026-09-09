@@ -1,6 +1,6 @@
 ﻿# motoo — Progress Tracker
 
-_Last updated: 2026-09-04_
+_Last updated: 2026-09-09_
 
 **Read this whole file — it is short on purpose.** Everything in it is either open, blocked,
 or a live constraint. Shipped history lives in [`CHANGELOG.md`](./CHANGELOG.md) and does not
@@ -129,11 +129,21 @@ Resend adapter is written and needs an account, a verified domain and two env va
   reads as a service notification rather than an ad — was offered and not taken.
   Worth raising with counsel alongside the `/refund` questions, and worth
   revisiting if the launch mail is ever the thing blocked by a "no".
-- [ ] **Production has zero invites.** Nothing has been minted yet, so nobody can
-  sign up. Mint from `/admin` — it builds links against the request host, so they
-  come out as `https://www.themotoo.com/join/…` automatically. Prefer one invite
-  per creator, labelled with their name: anonymous bulk invites throw away the
-  who-redeemed / who-ghosted tracking that per-invite rows exist for.
+- **100 outreach invites are minted and unused** (2026-08-31), labelled
+  `outreach-001…100`, with the links in a CSV on Kenneth's Desktop for the
+  spreadsheet he and his teammate work from. None redeemed. Owner chose bulk over
+  per-creator labelling knowingly: the trade is that the admin table no longer
+  tells you who was approached, so the spreadsheet is the only record of who got
+  which link — if it is lost, the mapping is unrecoverable.
+- [ ] **Four founding test accounts are live in production and should go before
+  outreach starts.** All are pipeline tests from 2026-08-31/09-03, and each carries
+  a 파운딩 크리에이터 badge plus a publicly visible Studio:
+  `logout-diag@example.com` (no Studio, left from a logout diagnosis),
+  `test1@gmail.com` (`@test1`), `kennethjs@naver.com` (`@test_kakao`), and
+  `orangeandmustard@gmail.com` (`@test_google`) — **that last one is Kenneth's real
+  address**, so deleting it removes his own account, not just a fixture. Deleting a
+  founding account also orphans its spent invite; detach `redeemedByBackerId` first
+  or the FK blocks it.
 - [ ] **Two of the four founding-creator promises are unbuilt.** The badge and the
   reserved `@handle` are already true. **Discovery placement at launch** and a
   **direct line / roadmap input** are stated on the public welcome page, which
