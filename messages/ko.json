@@ -5,19 +5,19 @@
   "meta": {
     "siteName": "motoo",
     "title": "motoo — 좋아하는 크리에이터를 모찌로 응원하세요",
-    "description": "크리에이터가 발행한 모찌를 구매해 그 크리에이터의 마켓에서 사용하세요. 응원한 만큼 가까워지는 가장 따뜻한 방법.",
+    "description": "크리에이터를 직접 후원하고, 보너스로 받은 모찌를 그 크리에이터의 마켓에서 사용하세요. 응원한 만큼 가까워지는 가장 따뜻한 방법.",
     "explore": {
       "title": "크리에이터 둘러보기",
       "description": "실제 응원을 기준으로 정렬된 크리에이터 목록. 마음이 가는 크리에이터를 찾아 모찌로 응원해 보세요."
     },
     "creator": {
       "title": "{name} (@{handle})",
-      "description": "{name} 님의 모찌를 구매해 마켓에서 아이템을 이용해 보세요. 후원자 {supporters}명이 응원하고 있어요.",
-      "descriptionNoSupporters": "{name} 님의 모찌를 구매해 마켓에서 아이템을 이용해 보세요."
+      "description": "{name} 님을 후원하고 보너스로 받은 모찌로 마켓의 아이템을 이용해 보세요. 후원자 {supporters}명이 응원하고 있어요.",
+      "descriptionNoSupporters": "{name} 님을 후원하고 보너스로 받은 모찌로 마켓의 아이템을 이용해 보세요."
     },
     "buy": {
-      "title": "{name} 님에게 모찌 보내기",
-      "description": "{name} 님이 발행한 모찌를 구매하세요. 모찌는 이 크리에이터의 마켓에서만 사용하는 선불 이용권이에요."
+      "title": "{name} 님 후원하기",
+      "description": "{name} 님을 후원하면 보너스로 모찌를 받아요. 모찌는 이 크리에이터의 마켓에서만 사용하는 선불 이용권이에요."
     },
     "creators": {
       "title": "크리에이터용",
