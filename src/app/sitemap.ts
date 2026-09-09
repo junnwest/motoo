@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { prisma } from "@/lib/db";
 import { absoluteUrl } from "@/lib/metadata";
+import { PRELAUNCH } from "@/lib/prelaunch";
 
 /**
  * Sitemap: the static public pages plus every approved creator.
@@ -27,6 +28,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: absoluteUrl("/privacy"), changeFrequency: "yearly", priority: 0.3 },
     { url: absoluteUrl("/youth"), changeFrequency: "yearly", priority: 0.3 },
   ];
+
+  // Invite-only: /explore, /creators and every /s/<handle> 307 to the welcome
+  // page, so listing them would publish the handles of the creators we have
+  // privately approached — to advertise URLs that answer with a redirect. The
+  // legal pages and the welcome page are the whole public site until launch.
+  if (PRELAUNCH) {
+    return staticRoutes.filter(
+      (r) => !r.url.endsWith("/explore") && !r.url.endsWith("/creators"),
+    );
+  }
 
   try {
     const creators = await prisma.streamer.findMany({

@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/metadata";
+import { PRELAUNCH } from "@/lib/prelaunch";
 
 /**
  * Crawl rules. There was no robots.txt at all, so everything — including the
@@ -15,6 +16,23 @@ import { SITE_URL } from "@/lib/metadata";
  * hosts and `/studio` is disallowed for that reason too.
  */
 export default function robots(): MetadataRoute.Robots {
+  // Invite-only: the welcome page and the legal pages are the entire public
+  // site, and everything else 307s to `/`. Allowing the crawl of URLs that
+  // only redirect spends someone's crawl budget to learn nothing, so the
+  // allowlist is narrowed to what actually answers. Unsetting PRELAUNCH is the
+  // launch, and this reverts with it.
+  if (PRELAUNCH) {
+    return {
+      rules: {
+        userAgent: "*",
+        allow: ["/$", "/terms", "/privacy", "/refund", "/youth"],
+        disallow: "/",
+      },
+      sitemap: `${SITE_URL}/sitemap.xml`,
+      host: SITE_URL,
+    };
+  }
+
   return {
     rules: {
       userAgent: "*",

@@ -122,8 +122,27 @@ export default auth((req) => {
         ? !isSignedInAllowedDuringPrelaunch(path)
         : !isPublicDuringPrelaunch(path));
   if (prelaunchBlocked) {
+    // A blocked studio request has to cross hosts to reach the welcome page,
+    // and in dev it cannot: the dev apex is bare `localhost:PORT`, which is
+    // Next's own origin, so the absolute Location built below is flattened to
+    // `/` — which the browser then resolves against `studio.localhost` and
+    // loops forever. Same trap as the two hops further down, so the same
+    // answer: dev serves the page inline instead. Production is unaffected —
+    // there the target host genuinely differs from the request host.
+    if (onStudioHostEarly && !isProd) {
+      return withCsp(req, (headers) =>
+        NextResponse.next({ request: { headers } }),
+      );
+    }
+    // Normalized to the canonical host for the same reason the cross-host hops
+    // below are (see PROD_CANONICAL_APEX): stripping `studio.` lands on the
+    // bare apex, which Vercel 308s to www, so a blocked studio request took two
+    // redirects to reach the welcome page instead of one.
+    const strippedForRedirect = host.replace(/^studio\./, "");
     const apexForRedirect = onStudioHostEarly
-      ? host.replace(/^studio\./, "")
+      ? strippedForRedirect === PROD_APEX
+        ? PROD_CANONICAL_APEX
+        : strippedForRedirect
       : host;
     return new NextResponse(null, {
       status: 307,
