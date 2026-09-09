@@ -11,6 +11,7 @@ import {
 } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { getCurrentCreator } from "@/lib/session";
+import { unstable_update } from "@/auth";
 import { fulfillOrder, cancelOrder } from "@/lib/mochi";
 import { validateIssuance } from "@/lib/issuance";
 import { isThumbnailKey } from "@/lib/itemThumbnails";
@@ -253,7 +254,17 @@ export async function updateStreamerProfile(input: {
     // Both addresses: the old one so it stops serving this creator from cache,
     // the new one so it starts.
     revalidatePath(`/s/${creator.handle}`);
-    if (handleChanged) revalidatePath(`/s/${d.handle}`);
+    if (handleChanged) {
+      revalidatePath(`/s/${d.handle}`);
+      // The Studio handle is carried in the session JWT (`user.creator`), which
+      // a database write cannot reach — so without this the whole app keeps
+      // showing and linking to the old address until the token happens to
+      // refresh. The pre-launch holding page's 선점한 핸들 is the visible case:
+      // it read the stale handle straight after a successful change. Same
+      // refresh the become-a-creator action uses; the `jwt` callback re-reads
+      // the Studio on `trigger === "update"`.
+      await unstable_update({});
+    }
     return { ok: true };
   } catch {
     return { ok: false, error: "generic" };
