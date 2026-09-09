@@ -572,7 +572,6 @@
       "button": "설정",
       "back": "대시보드로 돌아가기",
       "sectionLinks": "플랫폼 링크",
-      "handleReadonly": "스튜디오 주소(@아이디)는 변경할 수 없어요.",
       "linkPlaceholder": "https://...",
       "save": "저장",
       "saving": "저장 중…",
@@ -584,7 +583,12 @@
         "twitch": "Twitch",
         "discord": "Discord",
         "fanCafe": "팬카페"
-      }
+      },
+      "handleHint": "themotoo.com/s/여기 — 바꾸면 이전 주소는 다른 크리에이터가 쓸 수 있어요.",
+      "handleChecking": "확인 중…",
+      "handleAvailable": "사용할 수 있어요",
+      "handleTaken": "이미 사용 중인 주소예요",
+      "handleInvalid": "영문 소문자·숫자·밑줄 2~20자로 입력해 주세요"
     },
     "statSold": "지급된 모찌",
     "statGoal": "보너스 목표",

@@ -7,6 +7,7 @@ import {
   MarketplaceItemType,
   FulfillmentMode,
   UpdateVisibility,
+  Prisma,
 } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { getCurrentCreator } from "@/lib/session";
@@ -126,7 +127,48 @@ const linkField = z
   .optional()
   .transform((v) => (v && v.length > 0 ? v : null));
 
+/**
+ * The Studio handle, and the rule is the same one onboarding enforces —
+ * `[a-z0-9_]{2,20}`, lowercased. It is the public `/s/<handle>` address.
+ *
+ * It used to be immutable after creation, which collided with the founding
+ * promise: `src/lib/prelaunch.ts` opens `/studio/settings` before launch
+ * *specifically* so a creator can fix the handle they reserved, and the field
+ * it opens for was read-only. A reserved handle you cannot correct a typo in is
+ * a trap, so it is editable — uniqueness is enforced by the DB constraint
+ * rather than a read-then-write, which would race two creators onto one handle.
+ *
+ * Changing it frees the old one immediately. That is the accepted trade (owner
+ * decision, 2026-09-09): anything else means holding handles that nobody can
+ * use, and before launch there are no shared links to break.
+ */
+const HANDLE_RE = /^[a-z0-9_]{2,20}$/;
+const handleField = z.string().trim().toLowerCase().regex(HANDLE_RE);
+
+/**
+ * Live availability for a Studio handle, for the settings form — same shape as
+ * onboarding's `checkHandle`, against `Streamer` rather than `Backer` (the two
+ * are separate namespaces: a fan @handle and a Studio address can coincide).
+ * Advisory only; the write below is what actually decides.
+ */
+export async function checkStudioHandle(
+  handle: string,
+): Promise<{ available: boolean; reason?: "invalid" | "taken" }> {
+  const h = handle.trim().toLowerCase();
+  if (!HANDLE_RE.test(h)) return { available: false, reason: "invalid" };
+  const creator = await getCurrentCreator();
+  const existing = await prisma.streamer.findUnique({
+    where: { handle: h },
+    select: { id: true },
+  });
+  if (existing && existing.id !== creator?.id) {
+    return { available: false, reason: "taken" };
+  }
+  return { available: true };
+}
+
 const profileSchema = z.object({
+  handle: handleField,
   displayName: z.string().trim().min(1).max(40),
   bio: z
     .string()
@@ -146,6 +188,7 @@ const profileSchema = z.object({
 
 /** Update this creator's public profile (identity/account fields are separate). */
 export async function updateStreamerProfile(input: {
+  handle: string;
   displayName: string;
   bio?: string;
   creatorType: string;
@@ -170,24 +213,47 @@ export async function updateStreamerProfile(input: {
       return { ok: false, error: "generic" };
     }
 
-    await prisma.streamer.update({
-      where: { id: creator.id },
-      data: {
-        displayName: d.displayName,
-        bio: d.bio,
-        creatorType: d.creatorType,
-        category: d.category,
-        chzzk: d.chzzk,
-        soop: d.soop,
-        youtube: d.youtube,
-        twitch: d.twitch,
-        discordUrl: d.discordUrl,
-        fanCafeUrl: d.fanCafeUrl,
-      },
-    });
+    // Never rewrite a handle the form did not actually change. The value
+    // arrives lowercased, so a handle carrying capitals — the seed writes
+    // `creatorA` straight through Prisma, bypassing the lowercase rule the app
+    // enforces — would otherwise be silently renamed to `creatora`, breaking
+    // its public URL, by someone who only edited their bio.
+    const handleChanged = d.handle !== creator.handle.toLowerCase();
+
+    try {
+      await prisma.streamer.update({
+        where: { id: creator.id },
+        data: {
+          ...(handleChanged ? { handle: d.handle } : {}),
+          displayName: d.displayName,
+          bio: d.bio,
+          creatorType: d.creatorType,
+          category: d.category,
+          chzzk: d.chzzk,
+          soop: d.soop,
+          youtube: d.youtube,
+          twitch: d.twitch,
+          discordUrl: d.discordUrl,
+          fanCafeUrl: d.fanCafeUrl,
+        },
+      });
+    } catch (e) {
+      // The unique constraint is the real check — `checkStudioHandle` above is
+      // advisory and two creators can pass it in the same instant.
+      if (
+        e instanceof Prisma.PrismaClientKnownRequestError &&
+        e.code === "P2002"
+      ) {
+        return { ok: false, error: "handleTaken" };
+      }
+      throw e;
+    }
 
     revalidatePath(DASHBOARD);
+    // Both addresses: the old one so it stops serving this creator from cache,
+    // the new one so it starts.
     revalidatePath(`/s/${creator.handle}`);
+    if (handleChanged) revalidatePath(`/s/${d.handle}`);
     return { ok: true };
   } catch {
     return { ok: false, error: "generic" };

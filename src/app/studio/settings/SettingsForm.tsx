@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
@@ -11,7 +11,7 @@ import {
   isCreatorType,
   type CreatorType,
 } from "@/lib/creatorTaxonomy";
-import { updateStreamerProfile } from "../actions";
+import { checkStudioHandle, updateStreamerProfile } from "../actions";
 
 export type ProfileValues = {
   handle: string;
@@ -46,6 +46,13 @@ export function SettingsForm({ initial }: { initial: ProfileValues }) {
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState(false);
 
+  const [handle, setHandle] = useState(initial.handle);
+  // "unchanged" is its own state so the field is quiet until it is actually
+  // edited — a creator opening settings to change their bio should not be told
+  // their own address is "available".
+  const [handleState, setHandleState] = useState<
+    "unchanged" | "checking" | "available" | "taken" | "invalid"
+  >("unchanged");
   const [displayName, setDisplayName] = useState(initial.displayName);
   const [bio, setBio] = useState(initial.bio);
   const [creatorType, setCreatorType] = useState<CreatorType | "">(
@@ -61,9 +68,35 @@ export function SettingsForm({ initial }: { initial: ProfileValues }) {
     fanCafeUrl: initial.fanCafeUrl,
   });
 
+  // Debounced availability check, same shape as onboarding's. Every setState
+  // is deferred into the timer callback rather than run in the effect body —
+  // doing it synchronously cascades a render per keystroke, which is what
+  // `react-hooks/set-state-in-effect` flags.
+  useEffect(() => {
+    const h = handle.trim().toLowerCase();
+    const timer = setTimeout(async () => {
+      if (h === initial.handle) return setHandleState("unchanged");
+      if (!/^[a-z0-9_]{2,20}$/.test(h)) return setHandleState("invalid");
+      setHandleState("checking");
+      const res = await checkStudioHandle(h);
+      setHandleState(
+        res.available
+          ? "available"
+          : res.reason === "taken"
+            ? "taken"
+            : "invalid",
+      );
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [handle, initial.handle]);
+
   const categoryOptions = creatorType ? CATEGORIES_BY_TYPE[creatorType] : [];
   const canSubmit =
-    !!displayName.trim() && !!creatorType && !!category && !pending;
+    !!displayName.trim() &&
+    !!creatorType &&
+    !!category &&
+    (handleState === "unchanged" || handleState === "available") &&
+    !pending;
 
   function onTypeChange(next: string) {
     setCreatorType(next as CreatorType);
@@ -76,6 +109,7 @@ export function SettingsForm({ initial }: { initial: ProfileValues }) {
     setError(false);
     startTransition(async () => {
       const res = await updateStreamerProfile({
+        handle: handle.trim().toLowerCase(),
         displayName: displayName.trim(),
         bio: bio.trim(),
         creatorType,
@@ -116,12 +150,22 @@ export function SettingsForm({ initial }: { initial: ProfileValues }) {
 
           <Input
             label={to("handle")}
-            hint={t("settings.handleReadonly")}
+            hint={
+              handleState === "checking"
+                ? t("settings.handleChecking")
+                : handleState === "available"
+                  ? t("settings.handleAvailable")
+                  : handleState === "taken"
+                    ? t("settings.handleTaken")
+                    : handleState === "invalid"
+                      ? t("settings.handleInvalid")
+                      : t("settings.handleHint")
+            }
             type="text"
-            value={`@${initial.handle}`}
-            readOnly
-            disabled
-            className="cursor-not-allowed bg-panel text-muted"
+            required
+            value={handle}
+            onChange={(e) => setHandle(e.target.value)}
+            placeholder={to("handlePlaceholder")}
           />
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
