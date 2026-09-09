@@ -1035,7 +1035,13 @@
     "termsTitle": "이용약관",
     "privacyTitle": "개인정보처리방침",
     "placeholder": "데모용 자리표시 문서예요. 정식 약관은 추후 제공됩니다.",
-    "back": "홈으로 돌아가기"
+    "back": "홈으로 돌아가기",
+    "terms": {
+      "sections": []
+    },
+    "privacy": {
+      "sections": []
+    }
   },
   "refund": {
     "title": "환불 · 청약철회 정책",

@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { Nav } from "@/components/Nav";
-import { Footer } from "@/components/Footer";
+import { LegalDocument } from "@/components/LegalDocument";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("meta");
@@ -16,30 +14,17 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function PrivacyPage() {
-  const t = await getTranslations("legal");
-  return (
-    <>
-      <Nav />
-      <main id="main" className="mx-auto w-full max-w-[720px] flex-1 px-6 py-16">
-        <h1 className="text-3xl font-extrabold tracking-[-0.02em] text-ink">
-          {t("privacyTitle")}
-        </h1>
-        <p className="mt-4 text-base leading-relaxed text-body">
-          {t("placeholder")}
-        </p>
-        {/* Home, not /onboarding. These pages are reached from the footer far
-            more often than from the consent checkbox, and the consent links
-            now open in a new tab, so there is no onboarding session behind
-            this link to return to. Matches /youth, /refund and /guidelines. */}
-        <Link
-          href="/"
-          className="mt-8 inline-block text-sm font-semibold text-coral-deep hover:underline"
-        >
-          ← {t("back")}
-        </Link>
-      </main>
-      <Footer variant="fan" />
-    </>
-  );
+/**
+ * 개인정보처리방침. Publishing one is a standing obligation under
+ * 개인정보보호법 for as long as the service processes personal data — which it
+ * already does (본인인증 stores a name, birth year and gender), so this page
+ * being a placeholder is a live gap rather than a launch-day task.
+ *
+ * The document lives in `messages/ko.json` under `legal.privacy` — see
+ * LegalDocument for the shape. The lawyer-review draft is at
+ * `docs/legal/privacy-draft.md` (1–11항 + 부칙), and `docs/legal/` also holds
+ * the collection inventory the 수집 항목 section has to match.
+ */
+export default function PrivacyPage() {
+  return <LegalDocument doc="privacy" />;
 }

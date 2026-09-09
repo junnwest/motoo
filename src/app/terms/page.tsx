@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { Nav } from "@/components/Nav";
-import { Footer } from "@/components/Footer";
+import { LegalDocument } from "@/components/LegalDocument";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("meta");
@@ -16,30 +14,15 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function TermsPage() {
-  const t = await getTranslations("legal");
-  return (
-    <>
-      <Nav />
-      <main id="main" className="mx-auto w-full max-w-[720px] flex-1 px-6 py-16">
-        <h1 className="text-3xl font-extrabold tracking-[-0.02em] text-ink">
-          {t("termsTitle")}
-        </h1>
-        <p className="mt-4 text-base leading-relaxed text-body">
-          {t("placeholder")}
-        </p>
-        {/* Home, not /onboarding. These pages are reached from the footer far
-            more often than from the consent checkbox, and the consent links
-            now open in a new tab, so there is no onboarding session behind
-            this link to return to. Matches /youth, /refund and /guidelines. */}
-        <Link
-          href="/"
-          className="mt-8 inline-block text-sm font-semibold text-coral-deep hover:underline"
-        >
-          ← {t("back")}
-        </Link>
-      </main>
-      <Footer variant="fan" />
-    </>
-  );
+/**
+ * 이용약관. Agreed to at onboarding, so it must be readable before signup and
+ * stays in `PUBLIC_PREFIXES` for that reason.
+ *
+ * The document itself lives in `messages/ko.json` under `legal.terms` — see
+ * LegalDocument for the shape. Until counsel returns text, `sections` is empty
+ * and the page renders the placeholder. The lawyer-review draft is at
+ * `docs/legal/terms-draft.md` (제1조–제14조 + 부칙).
+ */
+export default function TermsPage() {
+  return <LegalDocument doc="terms" />;
 }
