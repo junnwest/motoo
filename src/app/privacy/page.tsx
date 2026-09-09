@@ -28,8 +28,12 @@ export default async function PrivacyPage() {
         <p className="mt-4 text-base leading-relaxed text-body">
           {t("placeholder")}
         </p>
+        {/* Home, not /onboarding. These pages are reached from the footer far
+            more often than from the consent checkbox, and the consent links
+            now open in a new tab, so there is no onboarding session behind
+            this link to return to. Matches /youth, /refund and /guidelines. */}
         <Link
-          href="/onboarding"
+          href="/"
           className="mt-8 inline-block text-sm font-semibold text-coral-deep hover:underline"
         >
           ← {t("back")}

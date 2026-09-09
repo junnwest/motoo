@@ -211,15 +211,32 @@ export function OnboardingForm({
             onChange={(e) => setAgreedTerms(e.target.checked)}
             className="mt-0.5 h-5 w-5 shrink-0 rounded-sm border border-line-3 accent-coral"
           />
+          {/* Both consent documents open in a new tab. Nothing on this form is
+              persisted — nickname, handle and the checkboxes are plain state —
+              so a same-tab link meant that reading the terms you are being
+              asked to agree to threw away everything you had typed. Only the
+              본인인증 survived, because that one is written server-side. The
+              person who actually reads the agreement should not be the one
+              punished for it. */}
           <span>
             {t.rich("termsRequired", {
               a: (c) => (
-                <Link href="/terms" className="font-semibold text-coral-deep underline">
+                <Link
+                  href="/terms"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-semibold text-coral-deep underline"
+                >
                   {c}
                 </Link>
               ),
               b: (c) => (
-                <Link href="/privacy" className="font-semibold text-coral-deep underline">
+                <Link
+                  href="/privacy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-semibold text-coral-deep underline"
+                >
                   {c}
                 </Link>
               ),
