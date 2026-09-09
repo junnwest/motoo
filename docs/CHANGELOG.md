@@ -5,6 +5,77 @@ For current status and open work see [`PROGRESS.md`](./PROGRESS.md); for *why* a
 the way it is see [`DECISIONS.md`](./DECISIONS.md).
 
 
+## 2026-09-09 — a full test pass over the invite-only deployment, and seven fixes
+
+A systematic run through the live invite-only product: the signed-out gate on
+production, then the whole invite pipeline locally (invite door → invitation →
+signup → onboarding → Studio setup → the founding holding page → logout →
+login), then production's public surface again. Seven things were wrong; five
+of them were live on themotoo.com at the time.
+
+- **Static files under `public/` were going through the middleware.** Only
+  `_next/*` is excluded, so `/fonts/*` and `/brand/*` ran the full gate — and
+  with `PRELAUNCH=1` every font request from a signed-out visitor was 307'd to
+  `/`. The browser then parsed the welcome page's HTML as a woff2 ("OTS parsing
+  error: invalid sfntVersion"), so **0 of 92 Pretendard subsets loaded on
+  production** and the one page a stranger can see rendered in a system
+  fallback. The onboarding gate did the same to anyone mid-signup, and the PWA
+  icons were 307'd too. The matcher now excludes the asset directories and
+  static extensions, matched by extension rather than by a bare dot so route
+  paths keep going through the gate.
+- **`robots.txt` and `sitemap.xml` were themselves 307'd to `/`** — there were
+  effectively none in production. Now that they answer they also tell the truth
+  about an invite-only site: robots allows the welcome and legal pages and
+  disallows the rest, and the sitemap drops `/explore`, `/creators` and every
+  `/s/<handle>`, which would otherwise publish the handles of privately
+  approached creators while pointing at URLs that only redirect.
+- **The share card still sold mochi.** Production's Open Graph description read
+  `모찌를 구매해` — pre-pivot copy, on the site, creator and donate metadata.
+  Mochi is not sold (2026-08-09); reworded in the donate page's own register so
+  the two agree. `meta.buy` had no call sites left after the buy→donate rename.
+- **`/signup` was a form that could only fail.** Without a usable invite
+  `signupUser` refuses and all three OAuth buttons are refused in the `signIn`
+  callback, so it was four fields and three buttons ending in an error. It hands
+  off to `/join`, which already renders all three outcomes — no link, spent,
+  revoked — and the invite is re-checked rather than inferred from the cookie's
+  presence, since the cookie outlives the invite.
+- **The fan door was a dead end for the invited.** `일반 회원으로 가입하기` led
+  to `/api/fan-signup`, which redirects to the welcome page during pre-launch.
+  Hidden while invite-only; the other branch of the same switch was inviting a
+  creator to become a creator.
+- **`/settings` framed itself with links that bounce.** It is the only
+  ConsumerShell page a signed-in non-admin can reach before launch, and the
+  Sidebar, RightRail and mobile tab bar all pointed at routes that 307 that same
+  user back to the welcome page. The avatar dropdown was already
+  pre-launch-aware; the rails were not. Admins keep them.
+- **The studio host took two redirects to the welcome page** (bare apex → www),
+  and in dev it was an infinite loop: the dev apex is Next's own origin, so the
+  absolute `Location` is flattened to `/` and the browser resolves it back
+  against `studio.localhost`. Dev serves inline, the same answer the other two
+  cross-host hops already use.
+
+Two things the test found that were decisions rather than defects, both taken by
+the owner and built:
+
+- **The reserved Studio handle is editable.** `src/lib/prelaunch.ts` opens
+  `/studio/settings` before launch *specifically* so a founding creator can fix
+  the handle they reserved — and the field was `readOnly` and `disabled`.
+  `/settings` only ever updated `Backer.handle`, so the `/s/<handle>` address
+  could not be changed anywhere without a database edit, while 핸들 선점 is one
+  of the four founding promises on the public welcome page. Editable
+  permanently, not only before launch; changing a handle frees the old one
+  immediately. Uniqueness rests on the DB constraint, with the live check
+  advisory. A handle the form did not change is never rewritten — values arrive
+  lowercased and the seed writes `creatorA` straight through Prisma, so without
+  that guard editing a bio would silently rename a studio to `creatora` and
+  break its URL.
+- **A share card for everything that isn't a creator page.** The root declared
+  `twitter:card=summary_large_image` with no image, so an invite link pasted
+  into a DM previewed as a broken large card — and that preview is the first
+  thing an approached creator sees. Follows the creator card's constraints: a
+  Noto Sans KR subset built from exactly the glyphs drawn, no weight in the font
+  descriptor, `display:flex` on anything with more than one child.
+
 ## 2026-09-04 — connected accounts: see, link, and unlink Google/Kakao/Naver from /settings
 
 - **New `LinkedAccount` table + a "연결된 계정" section in `/settings`.** Linking was

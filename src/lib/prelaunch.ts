@@ -35,6 +35,11 @@ export const PRELAUNCH =
  * marketing tidiness. `/youth` is the 청소년보호정책, same reasoning.
  */
 const PUBLIC_PREFIXES = [
+  // The root share card. It is a route, not a file, so the matcher's static
+  // exclusions do not reach it — and a card the scraper is redirected away from
+  // is the same as no card at all. `robots.txt`, `sitemap.xml` and the
+  // manifest end in an extension and bypass the middleware entirely.
+  "/opengraph-image",
   "/join", // the invite door
   "/login",
   "/signup",

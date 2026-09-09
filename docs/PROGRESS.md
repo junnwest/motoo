@@ -34,6 +34,16 @@ Resend adapter is written and needs an account, a verified domain and two env va
 `main` is green: `pnpm build`, `pnpm test` (**125**), `check:vocab`, `check:emoji`,
 `check:a11y` and `pnpm lint` all pass. Ordered by what would hurt most if ignored.
 
+**A full test pass over the invite-only deployment ran on 2026-09-09** — the signed-out
+gate on production, the whole invite pipeline locally (invite door → invitation → signup →
+onboarding → Studio setup → holding page → logout → login), then production's public
+surface again. Seven fixes shipped, five of them for things that were live; the reserved
+Studio handle became editable and a root OG card was added. Details in CHANGELOG. **The
+pipeline itself is sound** — single-use enforcement, the OAuth invite gate, `foundingAt`,
+the reserved handle carrying into the Studio, and the gate's allowlist all behave. What
+the pass could not cover: real OAuth signup on production, email delivery (still A5), and
+Lighthouse.
+
 **Blocks a real launch**
 - [ ] **Counsel sign-off on `/refund`, and on three questions it doesn't answer.** The page
   states real positions (7-day 청약철회 on a wholly unused donation, 법령 carve-out) but they
@@ -77,8 +87,11 @@ Resend adapter is written and needs an account, a verified domain and two env va
     needs their own 본인인증.
 
 **Verify on the next deploy**
-- [ ] **Share cards on real URLs.** Metadata, OG tags and the per-creator OG image were verified
-  locally, but Kakao/X/Facebook debuggers need a public host.
+- [ ] **Share cards on real URLs.** Metadata and both OG images (the per-creator one and,
+  since 2026-09-09, a root card covering the welcome page, the invite door and the legal
+  pages) are verified locally, but Kakao/X/Facebook debuggers need a public host. Worth
+  doing before the first invite goes out: an invite link pasted into a DM previews with
+  the root card.
 - [ ] **Lighthouse** ≥ 90 performance / ≥ 95 SEO on `/` and `/s/[handle]` — not runnable headless
   here.
 
