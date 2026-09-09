@@ -32,7 +32,9 @@ export const PRELAUNCH =
  * The legal pages are on this list deliberately and must stay on it: `/refund`
  * is a live obligation, and `/terms` + `/privacy` are agreed to at onboarding —
  * hiding the terms someone is being asked to accept is not a thing to do for
- * marketing tidiness. `/youth` is the 청소년보호정책, same reasoning.
+ * marketing tidiness. `/youth` is the 청소년보호정책, same reasoning, and
+ * `/guidelines` is the 마켓 운영정책 — the rules a creator is being invited to
+ * sell under, which they should be able to read *before* accepting an invite.
  */
 const PUBLIC_PREFIXES = [
   // The root share card. It is a route, not a file, so the matcher's static
@@ -50,6 +52,7 @@ const PUBLIC_PREFIXES = [
   "/privacy",
   "/refund",
   "/youth",
+  "/guidelines",
 ];
 
 export function isPublicDuringPrelaunch(path: string): boolean {

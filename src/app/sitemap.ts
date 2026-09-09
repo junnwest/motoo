@@ -27,6 +27,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: absoluteUrl("/terms"), changeFrequency: "yearly", priority: 0.3 },
     { url: absoluteUrl("/privacy"), changeFrequency: "yearly", priority: 0.3 },
     { url: absoluteUrl("/youth"), changeFrequency: "yearly", priority: 0.3 },
+    {
+      url: absoluteUrl("/guidelines"),
+      changeFrequency: "yearly",
+      priority: 0.3,
+    },
   ];
 
   // Invite-only: /explore, /creators and every /s/<handle> 307 to the welcome
