@@ -184,6 +184,13 @@ export function Footer({
         <div
           className={`mt-10 border-t pt-[18px] text-2xs leading-relaxed ${c.rule} ${c.legal}`}
         >
+          {/* 전자상거래법상 사업자 신원 표시. Its own line above the 중개자
+              고지 because they answer different questions — who the company is,
+              versus what its role in the transaction is. 전화번호 and
+              통신판매업 신고번호 join this line once they exist; 업태·종목 stay
+              off the site (they live on the 등록증 and the 신고서). */}
+          {t("businessIdentity")}
+          <br />
           {t("businessInfo")}
           {variant === "fan" && (
             <>
