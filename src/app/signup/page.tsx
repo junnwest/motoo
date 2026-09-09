@@ -138,7 +138,11 @@ export default async function SignupPage() {
                   : t("signupSubtitle")}
               </p>
             </div>
-            <SignupForm providers={providers} creatorMode={creatorMode} />
+            <SignupForm
+              providers={providers}
+              creatorMode={creatorMode}
+              prelaunch={PRELAUNCH}
+            />
           </div>
         </div>
       </main>

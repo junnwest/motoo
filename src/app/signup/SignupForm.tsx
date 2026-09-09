@@ -13,9 +13,13 @@ import { signupUser } from "./actions";
 export function SignupForm({
   providers,
   creatorMode = false,
+  prelaunch = false,
 }: {
   providers: EnabledProviders;
   creatorMode?: boolean;
+  /** Invite-only mode: there is no fan door to offer. Passed from the server
+      component — `PRELAUNCH` is read from env and cannot be reached here. */
+  prelaunch?: boolean;
 }) {
   const t = useTranslations("auth");
   const [pending, startTransition] = useTransition();
@@ -145,26 +149,34 @@ export function SignupForm({
           {t("goLogin")}
         </Link>
       </p>
-      <p className="mt-2 text-center text-sm text-muted">
-        {creatorMode ? (
-          <Link
-            href="/api/fan-signup"
-            className="font-semibold text-coral-deep hover:underline"
-          >
-            {t("plainSignupLink")}
-          </Link>
-        ) : (
-          <>
-            {t("creatorPrompt")}{" "}
+      {/* The role switch, and only once there are two roles to switch between.
+          Pre-launch is creators-only: /api/fan-signup redirects to the welcome
+          page while PRELAUNCH is on, so offering 일반 회원으로 가입하기 to an
+          invited creator is a link that silently drops them out of the flow
+          they were invited into — and the creator prompt on the other branch
+          is telling them to become what they already are. */}
+      {!prelaunch && (
+        <p className="mt-2 text-center text-sm text-muted">
+          {creatorMode ? (
             <Link
-              href="/api/become-creator"
+              href="/api/fan-signup"
               className="font-semibold text-coral-deep hover:underline"
             >
-              {t("goOnboarding")}
+              {t("plainSignupLink")}
             </Link>
-          </>
-        )}
-      </p>
+          ) : (
+            <>
+              {t("creatorPrompt")}{" "}
+              <Link
+                href="/api/become-creator"
+                className="font-semibold text-coral-deep hover:underline"
+              >
+                {t("goOnboarding")}
+              </Link>
+            </>
+          )}
+        </p>
+      )}
     </div>
   );
 }
