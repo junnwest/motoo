@@ -19,6 +19,24 @@ export type LegalSection = {
 };
 
 /**
+ * Whether `legal.<doc>` is published but not yet signed off.
+ *
+ * A draft is still the better thing to publish than a placeholder — a
+ * 개인정보처리방침 is a standing obligation and an unreviewed one describes
+ * real practice, while "데모용 자리표시 문서예요" describes nothing. But it
+ * should not be the version a search engine keeps: `/terms` and `/privacy` are
+ * publicly reachable and robots explicitly allows crawling them, so a draft
+ * would be indexed, cached, and outlive itself. Pages call this from
+ * `generateMetadata` to set NOINDEX for exactly as long as the flag is set.
+ */
+export async function isDraftLegalDocument(
+  doc: "terms" | "privacy",
+): Promise<boolean> {
+  const t = await getTranslations("legal");
+  return t.has(`${doc}.draft`) && t.raw(`${doc}.draft`) === true;
+}
+
+/**
  * The shared frame for `/terms` and `/privacy`.
  *
  * Both pages were a heading and one paragraph saying the document did not
@@ -57,6 +75,10 @@ export async function LegalDocument({ doc }: { doc: "terms" | "privacy" }) {
 
   const updated = t.has(`${doc}.updated`) ? t(`${doc}.updated`) : "";
   const intro = t.has(`${doc}.intro`) ? t(`${doc}.intro`) : "";
+  // A document published before counsel has signed it off. Says so at the top,
+  // and `isDraftLegalDocument` keeps it out of search results — see that
+  // helper. Delete the flag when the reviewed text lands and both go away.
+  const isDraft = t.has(`${doc}.draft`) && t.raw(`${doc}.draft`) === true;
 
   return (
     <>
@@ -71,6 +93,11 @@ export async function LegalDocument({ doc }: { doc: "terms" | "privacy" }) {
             {updated ? (
               <p className="mt-2 text-2xs tabular-nums tracking-[0.04em] text-muted">
                 {updated}
+              </p>
+            ) : null}
+            {isDraft ? (
+              <p className="mt-5 break-keep border border-line-2 bg-panel px-4 py-3 text-sm leading-relaxed text-body">
+                {t("draftNotice")}
               </p>
             ) : null}
             {intro ? (
