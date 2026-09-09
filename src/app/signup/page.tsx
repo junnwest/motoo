@@ -1,10 +1,12 @@
 import { getTranslations } from "next-intl/server";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { Nav } from "@/components/Nav";
 import { Mochi } from "@/components/Mochi";
 import { getEnabledOAuthProviders } from "@/lib/auth-providers";
 import { SignupForm } from "./SignupForm";
 import { INVITE_COOKIE } from "@/lib/inviteCookie";
+import { checkInvite } from "@/lib/invites";
 import { PRELAUNCH } from "@/lib/prelaunch";
 import {
   IconAward,
@@ -21,10 +23,27 @@ export default async function SignupPage() {
   const jar = await cookies();
   // Set by the "become a creator" entry: signing up now continues to Studio setup.
   const creatorMode = jar.get("creatorIntent")?.value === "1";
+
   // Arriving through /join/<token>. The generic hero is a *fan* pitch — wrong
   // audience for someone we approached directly, and the wrong register for
   // what is meant to read as a private invitation.
-  const invited = PRELAUNCH && Boolean(jar.get(INVITE_COOKIE)?.value);
+  //
+  // Without a usable invite there is nothing to show here before launch:
+  // `signupUser` refuses, and both OAuth buttons are refused in the signIn
+  // callback, so the page was four fields and three buttons that could only
+  // end in an error after they were filled in. /join renders all three
+  // outcomes — no link, spent, revoked — so hand off to it rather than restate
+  // them. Checked rather than assumed from the cookie's presence: it outlives
+  // the invite, so a creator returning a week later with a spent link should be
+  // told that, not shown the invitation again.
+  const inviteToken = jar.get(INVITE_COOKIE)?.value;
+  let inviteOk = false;
+  if (PRELAUNCH) {
+    const state = inviteToken ? await checkInvite(inviteToken) : null;
+    if (!state?.ok) redirect(state ? `/join?e=${state.reason}` : "/join");
+    inviteOk = true;
+  }
+  const invited = PRELAUNCH && inviteOk;
   const benefits = [
     t("signupBenefit1"),
     t("signupBenefit2"),
