@@ -1,5 +1,6 @@
 import type { EmailProvider, SendEmailInput, SendEmailResult } from "./types";
 import { EMAIL_FROM } from "./index";
+import { SUPPORT_EMAIL } from "@/lib/support";
 
 /**
  * Resend adapter (docs/PRELAUNCH.md #2's remaining half).
@@ -17,6 +18,20 @@ import { EMAIL_FROM } from "./index";
  * `{ ok: false }` and the caller decides. That contract is why a password reset
  * or a signup cannot be taken down by an email outage.
  */
+/**
+ * How long one send may take before it is abandoned.
+ *
+ * The contract above says a failed send must not take down the request that
+ * triggered it — but `catch` only covers a request that *fails*, not one that
+ * hangs, and `sendVerificationEmail` is awaited inline inside `signupUser`.
+ * Without a deadline, a slow provider stalls a signup until the platform's own
+ * timeout kills it, and the account is created with no response ever returned.
+ * Ten seconds is far beyond Resend's normal sub-second reply; anything past it
+ * is an outage, and an outage should degrade to "unverified address" rather
+ * than to a broken signup.
+ */
+const SEND_TIMEOUT_MS = 10_000;
+
 export class ResendEmailProvider implements EmailProvider {
   private readonly apiKey: string;
 
@@ -36,6 +51,7 @@ export class ResendEmailProvider implements EmailProvider {
     try {
       const res = await fetch("https://api.resend.com/emails", {
         method: "POST",
+        signal: AbortSignal.timeout(SEND_TIMEOUT_MS),
         headers: {
           authorization: `Bearer ${this.apiKey}`,
           "content-type": "application/json",
@@ -45,6 +61,11 @@ export class ResendEmailProvider implements EmailProvider {
           to: [input.to],
           subject: input.subject,
           text: input.text,
+          // Transactional mail goes out as no-reply, but people reply to it
+          // anyway — a verification mail is often the first thing a confused
+          // user answers. Pointing replies at the published support address
+          // costs nothing and is better than a bounce.
+          ...(SUPPORT_EMAIL ? { reply_to: SUPPORT_EMAIL } : {}),
           ...(input.html ? { html: input.html } : {}),
         }),
       });
