@@ -6,6 +6,7 @@ import { RightRail } from "@/components/RightRail";
 import { MobileTabBar } from "@/components/MobileTabBar";
 import { Footer } from "@/components/Footer";
 import { getUnreadCount } from "@/lib/notify";
+import { PRELAUNCH } from "@/lib/prelaunch";
 
 /**
  * The app frame for signed-in consumer pages. Three independent columns
@@ -41,6 +42,14 @@ export async function ConsumerShell({
 }) {
   const session = await getSession();
   const backerId = session?.user?.id;
+  // Invite-only: every destination in the rails — 홈, 둘러보기, 검색, the bell,
+  // the following list, the discovery suggestions — redirects a non-admin back
+  // to the welcome page. `/settings` is the one shell page they can reach
+  // before launch, so without this it frames itself with a column of links
+  // that all bounce. The rails return at launch along with the routes they
+  // point at. Admins keep them: they can reach the running product.
+  const railsBackerId =
+    PRELAUNCH && session?.user?.role !== "admin" ? undefined : backerId;
   const [t, tmp, unreadCount] = await Promise.all([
     getTranslations("nav"),
     getTranslations("myProfile"),
@@ -77,7 +86,7 @@ export async function ConsumerShell({
           viewport ever gets, so a `vh`-sized shell hides its own last rows
           behind the address bar until it collapses. */}
       <div className="flex h-[calc(100dvh-64px)] w-full items-stretch gap-3 overflow-hidden px-3 py-4 sm:gap-4 sm:px-4">
-        {backerId && <Sidebar backerId={backerId} />}
+        {railsBackerId && <Sidebar backerId={railsBackerId} />}
         {/* The `main` landmark and the skip link's target for every consumer
             page, declared once here instead of per page (several pages had no
             landmark at all, and the ones that did nested their own <main>).
@@ -113,9 +122,9 @@ export async function ConsumerShell({
               theirs. */}
           <Footer variant="fan" tone="light" />
         </main>
-        {backerId && <RightRail backerId={backerId} />}
+        {railsBackerId && <RightRail backerId={railsBackerId} />}
       </div>
-      {backerId && (
+      {railsBackerId && (
         <MobileTabBar
           unreadCount={unreadCount}
           labels={{
