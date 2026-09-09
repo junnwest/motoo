@@ -217,5 +217,18 @@ export const config = {
   // and its beacons are served from this origin, so without it they would go
   // through the onboarding gate — and a signed-in, not-yet-onboarded visitor
   // would have their beacon 307'd to /onboarding.
-  matcher: ["/((?!api|_next/static|_next/image|_vercel|favicon.ico).*)"],
+  //
+  // `public/` is excluded for the same reason, and it is not theoretical: only
+  // `_next/*` is served from Next's own static path, so `/fonts/*` and
+  // `/brand/*` were running the full gate. During PRELAUNCH that 307'd every
+  // font request from a signed-out visitor to `/`, and the browser parsed the
+  // welcome page's HTML as a woff2 ("invalid sfntVersion") — so the one page a
+  // stranger can see rendered in a system fallback, with all 96 Pretendard
+  // subsets failing. The onboarding gate did the same thing to anyone
+  // mid-signup. Extensions are matched rather than a bare dot so that route
+  // paths keep going through the gate; handles are `[a-z0-9_]{2,20}`, so no
+  // real page path ends in one of these.
+  matcher: [
+    "/((?!api|_next/static|_next/image|_vercel|favicon.ico|fonts/|brand/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|avif|ico|woff2?|ttf|otf|webmanifest|txt|xml)$).*)",
+  ],
 };
