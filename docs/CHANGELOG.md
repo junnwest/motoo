@@ -69,12 +69,28 @@ the owner and built:
   lowercased and the seed writes `creatorA` straight through Prisma, so without
   that guard editing a bio would silently rename a studio to `creatora` and
   break its URL.
+- **Two of today's fixes were only findable on the live site.** The `og:image`
+  the welcome page advertises is a *route*, not a file, so the matcher's static
+  exclusions never reached it and the gate 307'd every scraper to `/` — a card
+  the scraper is redirected away from is the same as no card. And the Studio
+  handle rides in the session JWT (`user.creator`), which a database write
+  cannot reach, so after a successful handle change the pre-launch holding page
+  still showed 선점한 핸들 as the old address while /studio/settings showed the
+  new one. Both were caught by running the real pipeline on production, not the
+  local one.
+
 - **A share card for everything that isn't a creator page.** The root declared
   `twitter:card=summary_large_image` with no image, so an invite link pasted
   into a DM previewed as a broken large card — and that preview is the first
   thing an approached creator sees. Follows the creator card's constraints: a
   Noto Sans KR subset built from exactly the glyphs drawn, no weight in the font
   descriptor, `display:flex` on anything with more than one child.
+
+The pipeline was then run end to end **on production** against a freshly minted
+invite (`qa-2026-09-09`): invitation → signup → onboarding with the mock 본인인증
+→ Studio setup → the founding holding page → a handle change on
+studio.themotoo.com. It works. It also left a fifth test account in the
+production database — see PROGRESS.
 
 ## 2026-09-04 — connected accounts: see, link, and unlink Google/Kakao/Naver from /settings
 

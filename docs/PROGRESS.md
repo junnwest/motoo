@@ -148,8 +148,13 @@ Lighthouse.
   per-creator labelling knowingly: the trade is that the admin table no longer
   tells you who was approached, so the spreadsheet is the only record of who got
   which link — if it is lost, the mapping is unrecoverable.
-- [ ] **Four founding test accounts are live in production and should go before
-  outreach starts.** All are pipeline tests from 2026-08-31/09-03, and each carries
+- [ ] **Five founding test accounts are live in production and should go before
+  outreach starts.** The fifth is `qa-pipeline-20260909@motoo.dev`
+  (`@qa_pipeline_live`, nickname QA 파이프라인), created 2026-09-09 by running
+  the invite pipeline against production on purpose; its invite is labelled
+  `qa-2026-09-09` and carries a note saying it is safe to revoke. Delete the
+  account and detach `redeemedByBackerId` from that invite, same as the four
+  below. The original four are pipeline tests from 2026-08-31/09-03, and each carries
   a 파운딩 크리에이터 badge plus a publicly visible Studio:
   `logout-diag@example.com` (no Studio, left from a logout diagnosis),
   `test1@gmail.com` (`@test1`), `kennethjs@naver.com` (`@test_kakao`), and
@@ -158,7 +163,9 @@ Lighthouse.
   founding account also orphans its spent invite; detach `redeemedByBackerId` first
   or the FK blocks it.
 - [ ] **Two of the four founding-creator promises are unbuilt.** The badge and the
-  reserved `@handle` are already true. **Discovery placement at launch** and a
+  reserved `@handle` are already true — and as of 2026-09-09 the reserved handle is
+  also *correctable*, which it was not before (the field `/studio/settings` exists to
+  edit was read-only). **Discovery placement at launch** and a
   **direct line / roadmap input** are stated on the public welcome page, which
   makes them as binding as anything on `/refund`. Neither exists yet: nothing
   orders `/explore` by founding status, and there is no contact route beyond
