@@ -100,6 +100,9 @@ Lighthouse.
   2026-09-10.** Mocks still stand in behind `PaymentProvider` / `VerificationProvider`.
   **Kakao login is not on this list** (2026-09-04) — live, confirmed by a real production
   signup.
+  - **All four route decisions taken 2026-09-10** (see DECISIONS): PortOne 통합 본인인증;
+    verification stays at onboarding for everyone; a duplicate DI is **refused**, never merged;
+    and OAuth linking was fixed separately without waiting for any of this.
   - **Direction agreed 2026-09-10: 통합 본인인증 via PortOne**, 토스 first in the picker.
     Free to sign up, one contract also covering the PG, and 건당 40원 — versus 다날's 월정액
     floor of 5만원, which is the wrong shape for ~100 verifications before launch. 토스인증
@@ -148,8 +151,16 @@ Lighthouse.
 - [ ] The edge middleware doesn't check `tokenVersion` — Prisma-free by design, so a revoked
   token can still satisfy the *routing* gate for one request. Every page-level `auth()` does the
   real check. **No action recommended.**
-- [ ] **Ordinary OAuth sign-in silently auto-links by email match, with no re-authentication
-  step** — unchanged by the 2026-09-04 connected-accounts feature on purpose (see DECISIONS).
+- [x] **~~Ordinary OAuth sign-in silently auto-links by email match~~ — fixed 2026-09-10.**
+  Resolution is by `LinkedAccount` identity now; an unknown identity on an existing address is
+  refused and pointed at 기존 로그인 → /settings 연결. One exception, deliberately: an account
+  with no password *and* no linked identities is let through, because it can only have been
+  created by OAuth before that table existed and refusing would name a door it never had. It
+  heals on that sign-in, so the exception shrinks on its own. 8 tests. **This did not need
+  본인인증** — the connected-accounts flow was already the right path. Original note follows.
+
+  ~~**Ordinary OAuth sign-in silently auto-links by email match, with no re-authentication
+  step**~~ — unchanged by the 2026-09-04 connected-accounts feature on purpose (see DECISIONS).
   Auth0's own account-linking guidance treats this as the pattern to avoid: a verified email is
   not proof someone can currently authenticate to *both* accounts. Predates today's work: this
   is how `auth.ts`'s `jwt()` callback has always resolved identity. Changing it affects every

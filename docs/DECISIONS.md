@@ -11,6 +11,8 @@ To pull a single entry, grep its heading with trailing context, e.g.
 
 | Date | Decision |
 | --- | --- |
+| 2026-09-10 | OAuth resolves by identity, never by a matching email |
+| 2026-09-10 | 본인인증 stays at onboarding, and a duplicate is refused rather than merged |
 | 2026-09-10 | 본인인증 stores DI, not CI, and that is what makes one-person-one-account |
 | 2026-09-10 | Social sign-in leads, so there is nothing for email to carry |
 | 2026-09-10 | The 약관 and 방침 ship as drafts, corrected rather than copied |
@@ -196,6 +198,70 @@ the four founding promises on the public welcome page.
 - The handle rides in the session JWT as `user.creator`, which a database write cannot
   reach, so a change must call `unstable_update({})` or the app keeps showing the old
   address until the token happens to refresh.
+
+## 2026-09-10 — OAuth resolves by identity, never by a matching email
+
+**Decision.** An OAuth sign-in is resolved by `LinkedAccount` (provider +
+providerAccountId). An unknown identity arriving on an address that already has an
+account is **refused**, with the user pointed at the existing path: sign in the way
+they always have, then link the provider from `/settings`.
+
+**Why.** `jwt()` resolved by email match, so registering a Google account on an
+address a motoo account already used handed over that account. A verified email
+proves control of that address *at that provider today* — not authorship of the
+motoo account. Auth0's guidance names it as the pattern to avoid, and PROGRESS
+carried it as a known hazard awaiting this decision.
+
+Note this did **not** need 본인인증. The correct path already existed — the
+connected-accounts flow shipped 2026-09-04 with its own OAuth client. 본인인증 is
+the *recovery* route for someone who cannot sign in with the original method, not
+the prerequisite for closing the hole.
+
+**Constraints this creates.**
+- **The exception is load-bearing.** An account with no password and no linked
+  identities can only have been created by OAuth before `LinkedAccount` existed;
+  its row was never backfilled, because a provider account id only arrives when
+  the person signs in. Refusing those would name a door they never had. They are
+  let through, heal on that sign-in, and the exception then stops applying — so it
+  shrinks toward nothing on its own. Removing it later is safe; removing it now
+  locks people out.
+- Resolving by identity also means a changed Google address keeps working instead
+  of looking like a brand-new signup — the old behaviour got that wrong in the
+  other direction.
+- Runs before the pre-launch gate: it applies for the life of the product.
+- A refusal returns `/login?e=useExistingMethod` rather than `false`, because the
+  answer is actionable.
+
+## 2026-09-10 — 본인인증 stays at onboarding, and a duplicate is refused
+
+**Decision.** Verification keeps happening at `/onboarding`, for everyone, as it
+does today. When the DI already belongs to another account, onboarding stops and
+points at the existing account; accounts are never merged.
+
+**Why.** Verifying at onboarding is the only placement that actually enforces
+1인 1계정 — deferring to the first donation would let duplicates exist until money
+moved, which is after the point of the rule. The cost argument that favours
+deferring does not bite yet: ~100 invited creators at 건당 40원 is 4,000원, and the
+fan-scale version of that question belongs to public launch, not to the invite
+phase.
+
+Merging was rejected on blast radius. Two accounts can each hold mochi in different
+creators, carry orders at different fulfilment stages, and one may own a Studio;
+merging is a money-moving operation and would need its own invariants and tests. A
+refusal costs one support conversation.
+
+**Constraints this creates.**
+- Someone who has genuinely lost access to the older account is stuck at a refusal
+  and needs 고객센터. Accepted.
+- Accounts verified through the mock carry no DI and are grandfathered; they pick
+  one up the next time they verify.
+- 본인인증 needs a Korean phone in the holder's own name, so with verification
+  required at onboarding, anyone without one is excluded from the product
+  entirely. Status quo, but revisit before public launch.
+- Whether Kakao stays in the picker is a **fact to confirm with PortOne**, not a
+  decision: Kakao restricts CI, and whether DI is returned is unstated. If it is
+  not, a Kakao-verified user cannot be duplicate-checked and this rule silently
+  does not apply to them.
 
 ## 2026-09-10 — 본인인증 stores DI, not CI
 
