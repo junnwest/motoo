@@ -6,9 +6,17 @@ import { SignupButton } from "@/components/SignupButton";
 import { getEnabledOAuthProviders } from "@/lib/auth-providers";
 import { LoginForm } from "./LoginForm";
 
-export default async function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ e?: string }>;
+}) {
   const t = await getTranslations("auth");
   const providers = getEnabledOAuthProviders();
+  // Set by auth.ts's signIn callback when an OAuth identity was refused
+  // because the address already belongs to an account with its own way in.
+  const { e } = await searchParams;
+  const refusedLink = e === "useExistingMethod";
 
   return (
     <>
@@ -24,6 +32,12 @@ export default async function LoginPage() {
               {t("loginSubtitle")}
             </p>
           </div>
+
+          {refusedLink ? (
+            <p className="mb-5 break-keep border border-line-2 bg-panel px-4 py-3 text-sm leading-relaxed text-body">
+              {t("linkExistingNotice")}
+            </p>
+          ) : null}
 
           <LoginForm providers={providers} />
         </div>

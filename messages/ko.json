@@ -447,6 +447,7 @@
     "creatorPrompt": "크리에이터로 시작하고 싶으신가요?",
     "orDivider": "또는",
     "socialRecommended": "소셜 계정으로 가입하면 이메일 확인 없이 바로 시작할 수 있어요.",
+    "linkExistingNotice": "이 이메일로 이미 가입된 계정이 있어요. 기존에 쓰시던 방법으로 로그인한 뒤, 설정에서 소셜 계정을 연결해 주세요.",
     "kakaoContinue": "카카오로 시작하기",
     "naverContinue": "네이버로 시작하기",
     "googleContinue": "Google로 계속하기",

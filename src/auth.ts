@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { PRELAUNCH } from "@/lib/prelaunch";
 import { INVITE_COOKIE } from "@/lib/inviteCookie";
 import { checkInvite, redeemInvite } from "@/lib/invites";
+import { resolveOAuthSignIn } from "@/lib/oauthIdentity";
 import Credentials from "next-auth/providers/credentials";
 import Naver from "next-auth/providers/naver";
 import Kakao from "next-auth/providers/kakao";
@@ -75,7 +76,15 @@ export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
   callbacks: {
     ...authConfig.callbacks,
     /**
-     * Pre-launch invite gate for **OAuth**.
+     * Two gates on OAuth sign-in: account linking (always), then the pre-launch
+     * invite (while invite-only).
+     *
+     * **Linking.** An OAuth identity is never silently attached to an existing
+     * account on the strength of a matching email — see `resolveOAuthSignIn`
+     * for why a matching address proves the wrong thing, and for the one
+     * exception that keeps legacy OAuth-only accounts from being stranded.
+     *
+     * ── Pre-launch invite gate ───────────────────────────────────────────
      *
      * `signupUser` gates the credentials path, but OAuth users are provisioned
      * lazily in the `jwt` callback below — they never touch that action, so
@@ -89,12 +98,27 @@ export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
      * creators we recruited would be worse than the hole.
      */
     async signIn({ user, account }) {
-      if (!PRELAUNCH) return true;
       const isOAuth = account?.type === "oauth" || account?.type === "oidc";
       if (!isOAuth) return true; // credentials → signupUser already gated it
 
       const email = user?.email?.toLowerCase();
       if (!email) return false;
+
+      // Account linking, and it runs before the pre-launch gate because it
+      // applies at every stage of the product's life, not only while invite-
+      // only. A matching address is not proof of being the same person, so an
+      // OAuth identity is never silently attached to an account that already
+      // has its own way in — see `resolveOAuthSignIn`. Returning a URL rather
+      // than `false` because the answer is actionable: sign in the way you
+      // already do, then link the provider from /settings.
+      const verdict = await resolveOAuthSignIn({
+        provider: account?.provider ?? "",
+        providerAccountId: account?.providerAccountId,
+        email,
+      });
+      if (!verdict.ok) return `/login?e=${verdict.reason}`;
+
+      if (!PRELAUNCH) return true;
 
       const existing = await prisma.backer.findUnique({
         where: { email },
