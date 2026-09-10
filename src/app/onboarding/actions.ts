@@ -37,11 +37,20 @@ export async function verifyIdentity(): Promise<{
   ok: boolean;
   isAdult?: boolean;
   birthYear?: number;
+  /** i18n key under `onboarding.errors.*` when `ok` is false. */
+  error?: "duplicateIdentity" | "generic";
 }> {
   const backer = await getCurrentBacker();
-  if (!backer) return { ok: false };
+  if (!backer) return { ok: false, error: "generic" };
+
+  let id;
   try {
-    const id = await getVerificationProvider().verify(backer.id);
+    id = await getVerificationProvider().verify(backer.id);
+  } catch {
+    return { ok: false, error: "generic" };
+  }
+
+  try {
     await prisma.backer.update({
       where: { id: backer.id },
       data: {
@@ -51,12 +60,32 @@ export async function verifyIdentity(): Promise<{
         gender: id.gender,
         ageVerified: id.isAdult,
         guardianConsent: id.isAdult ? null : false,
+        // 중복가입확인정보. Only ever written, and CI is never stored at all —
+        // see the schema note and DECISIONS 2026-09-10.
+        ...(id.di ? { verifiedDi: id.di } : {}),
       },
     });
-    return { ok: true, isAdult: id.isAdult, birthYear: id.birthYear };
-  } catch {
-    return { ok: false };
+  } catch (e) {
+    // The unique index on `verifiedDi` is what actually enforces one account
+    // per person: this same identity is already on another account. Enforced
+    // by the database rather than a read-then-write, because two onboardings
+    // running at once would both pass a prior read and both commit.
+    //
+    // Nothing is written when this fires, so the account stays unverified and
+    // the person is told to sign in to the account they already have. It is
+    // deliberately not a merge — the two accounts can hold mochi in different
+    // creators and carry orders mid-fulfilment, so combining them moves money
+    // and needs its own invariants (DECISIONS 2026-09-10).
+    if (
+      e instanceof Prisma.PrismaClientKnownRequestError &&
+      e.code === "P2002"
+    ) {
+      return { ok: false, error: "duplicateIdentity" };
+    }
+    return { ok: false, error: "generic" };
   }
+
+  return { ok: true, isAdult: id.isAdult, birthYear: id.birthYear };
 }
 
 const completeSchema = z.object({

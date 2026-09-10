@@ -156,6 +156,13 @@ is a separate filing and still in progress. Users can see and manage which of th
 account from `/settings` — `LinkedAccount` (2026-09-04), separate from and never consulted by
 ordinary sign-in, which still resolves identity by email match alone, unchanged.
 
+**`VERIFICATION_MOCK_PERSON=<anything>`** makes every mock 본인인증 return the *same person*,
+so a second signup is refused as a duplicate (`Backer.verifiedDi` is unique). Unset, each
+account is a different person — which is what the seed and ordinary dev work need. Without this
+the one-person-one-account rule is untestable, exactly as the minor path was before its own
+flag: the mock used to derive its identifier from `backerId`, so one human signing up twice
+came back as two different people. **DI is stored, CI never is** — see DECISIONS 2026-09-10.
+
 **`VERIFICATION_MOCK_MINOR=1`** makes the mock 본인확인기관 return a minor instead of an adult.
 The money path blocks minors without recorded guardian consent, and the mock used to hardcode
 `isAdult: true` — without this flag that gate is unreachable in dev and untestable.

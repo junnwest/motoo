@@ -113,10 +113,17 @@ Lighthouse.
     **Store DI, not CI** — DI is per-person-per-service and answers the duplicate question
     completely; CI is the same value at every Korean service, so it adds correlation risk and
     breach liability for no benefit here.
-  - **Nothing implements this yet.** `VerifiedIdentity` declares `ci?`, no column stores it,
-    and the mock returns `mock_ci_${backerId}` — derived from the *account*, so one person
-    signing up twice gets two different values and the duplicate check could never fire. The
-    mock needs to model a person before any of this is testable.
+  - **The logic layer is built (2026-09-10).** `Backer.verifiedDi` is unique and written by
+    `verifyIdentity`; a second account for the same person is refused by the database (P2002,
+    not a read-then-write two concurrent onboardings could both pass) and nothing is written
+    to the refused account. The mock now models a *person* via `VERIFICATION_MOCK_PERSON`,
+    without which the rule was untestable — it used to derive its identifier from `backerId`,
+    so one human signing up twice came back as two people. **CI is never stored.** Verified end
+    to end in the browser, not only in tests. 14 tests across `verifiedIdentity` and
+    `oauthIdentity`.
+  - **What is left needs the contract:** the real adapter (redirect + callback, so onboarding's
+    verification step still needs restructuring from the current inline resolve), the merchant
+    credentials, and a real-identity test — which needs a Korean phone and is Kenneth's.
   - A real adapter is a **redirect + callback** flow, not a drop-in: onboarding's verification
     step needs restructuring, not just a new provider class.
   - The age gate is enforced in `donateMochi`, and the **mock verifier always returns an adult**

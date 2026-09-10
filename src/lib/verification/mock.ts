@@ -26,13 +26,32 @@ function isAdultBirthYear(birthYear: number, now = new Date()): boolean {
  * the whole minor path (blocked purchase → guardian consent) becomes exercisable
  * locally.
  */
+/**
+ * Which *person* the mock is standing in for.
+ *
+ * The whole point of 본인인증 here is that one human gets one account, and the
+ * mock could not model that: it derived everything from `backerId`, so the same
+ * person signing up twice came back as two different people and the duplicate
+ * check could never fire — the property was untestable, exactly like the
+ * minor path was before `VERIFICATION_MOCK_MINOR`.
+ *
+ * Set `VERIFICATION_MOCK_PERSON` to any string and every verification returns
+ * that one identity, so a second signup is refused as a duplicate. Leave it
+ * unset and each account is a different person, which is what ordinary dev work
+ * and the seed need.
+ */
+function personSeed(backerId: string): string {
+  return process.env.VERIFICATION_MOCK_PERSON || backerId;
+}
+
 export class MockVerificationProvider implements VerificationProvider {
   readonly name = "mock";
 
   async verify(backerId: string): Promise<VerifiedIdentity> {
     await delay(500); // simulate the round-trip so the UI's pending state shows
-    // Deterministic from the backer id so repeat calls are stable.
-    const h = hash(backerId);
+    // Deterministic from the *person*, not the account — see personSeed.
+    const seed = personSeed(backerId);
+    const h = hash(seed);
     const thisYear = new Date().getFullYear();
     const birthYear =
       process.env.VERIFICATION_MOCK_MINOR === "1"
@@ -44,7 +63,10 @@ export class MockVerificationProvider implements VerificationProvider {
       birthYear,
       gender: genders[h % genders.length],
       isAdult: isAdultBirthYear(birthYear),
-      ci: `mock_ci_${backerId}`,
+      // Both keyed to the person, so two accounts by one human collide exactly
+      // the way a real 본인확인기관 would make them collide.
+      ci: `mock_ci_${seed}`,
+      di: `mock_di_${seed}`,
     };
   }
 }

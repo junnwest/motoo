@@ -56,7 +56,10 @@ export function OnboardingForm({
     startVerify(async () => {
       const res = await verifyIdentity();
       if (res.ok) setVerified(true);
-      else setError("generic");
+      // A duplicate identity is not a failed verification — it succeeded and
+      // said this person already has an account — so it gets its own message
+      // rather than the generic one.
+      else setError(res.error ?? "generic");
     });
   }
 

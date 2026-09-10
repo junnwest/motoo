@@ -196,6 +196,20 @@ model Backer {
   // dev; NICE/PASS in prod). Real age gate for payments; not self-reported.
   verifiedAt        DateTime?
   verifiedName      String?
+  /// 중복가입확인정보 (DI) from the 본인확인기관 — unique per person *per
+  /// service*, which makes it the answer to "does this human already have a
+  /// motoo account?" and to nothing wider. Unique, so the duplicate is refused
+  /// by the database rather than by a read-then-write that two concurrent
+  /// onboardings could both pass.
+  ///
+  /// Stored as returned, not re-hashed. It is already a one-way value derived
+  /// by the 본인확인기관, and it is scoped to motoo — so a leaked DI is not
+  /// usable anywhere else, while a peppered hash would add a key whose loss
+  /// silently breaks duplicate detection and makes returning users look new.
+  /// **CI is deliberately never stored** (DECISIONS 2026-09-10): it is the same
+  /// value at every Korean service, so it would carry real correlation risk for
+  /// no benefit here.
+  verifiedDi        String?           @unique
   birthYear         Int?
   gender            Gender?
   ageVerified       Boolean           @default(false)
