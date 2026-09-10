@@ -135,6 +135,37 @@ Lighthouse.
   - The site is invite-only, so a 심사 reviewer opening themotoo.com sees the welcome page and
     nothing else. The application memo says so and offers a 심사용 초대링크; **mint a separate
     invite for them rather than spending an outreach one.**
+  - **가계약 signed 2026-09-11. MID `MOI6675910`. 가계약 expires 2026-10-10.** 본계약 only
+    completes at 카드사 심사요청, and **전자결제 is cut off if 본계약 is not reached inside that
+    window** — so the whole integration is on a one-month clock, not an open-ended one.
+  - **The five steps:** 서비스신청(가계약) ✅ → **전자계약 요청(사전심사)** ← next → 전자서명 →
+    카드사 심사요청(본계약 완료) → 카드사 심사완료. Card 심사 itself is 영업일 기준 7–10일.
+  - **No 원스탑, because we chose 간편결제.** Normally 가계약 grants a month of card payments
+    immediately; 이니시스 states 간편결제(카카오페이) 신청 가맹점 cannot use it and must wait for
+    card 심사 to complete. So there is no early payment capability to lean on.
+  - **전자서명 needs a 범용공동인증서** for a 법인 (대표자 or 계약담당자). If we do not have one,
+    getting it is its own errand and it blocks step 3.
+
+  - **카드사 심사 inspects the live site, and motoo currently fails most of the checklist.**
+    This is the real work item, and it is why the payment integration is not a "later" task:
+    | 이니시스 요구 | 현재 |
+    | --- | --- |
+    | 실제 판매 가능한 상품 1~3개 이상 | ❌ invite-only; no creator has listed an item |
+    | 가격 등록 (품절·0원·임의가격 불가) | ❌ items are priced in 모찌, not 원 |
+    | 배송기간·교환·환불 규정 | ✅ `/refund` + `/guidelines` |
+    | 하단 사업자정보 — 상호·등록번호·**연락처**·주소·대표자·**통신판매신고번호** | ⚠️ all present except **전화번호** and **통신판매신고번호** |
+    | 구매 시 **이니시스 결제창 노출** (신용카드 필수) | ❌ `PAYMENT_PROVIDER=mock` — there is no 결제창 |
+    | 회원 전용 사이트면 **ID/PW 제공** | ✅ solves the invite-gate problem — hand over an account rather than opening the site |
+
+  - **The 통신판매업 신고 conclusion is commercially overridden.** Legally it still stands (제12조
+    binds 통신판매업자, not a 중개업자; 거래 0건 is under the 50회 면제). But 이니시스's card-심사
+    checklist requires a **통신판매신고번호 in the site footer**, which is exactly the "revisit if
+    a card company demands it" condition recorded on 2026-09-10. **And it is circular:** the 신고
+    needs a 구매안전서비스 확인증, which this email says is issued only **after 본계약**. Ask
+    이니시스 how they expect that loop to be closed — a bank-issued 에스크로 확인증 is the usual
+    way out, or they accept it as pending.
+  - **정산:** 당월 거래는 익월 8일, 전월 거래는 2영업일 뒤. If 입점 불가 and we fall back to
+    임의계약, 정산 한도는 월 200만원 with the excess rolling to the following month.
   - **Direction agreed 2026-09-10: 통합 본인인증 via PortOne**, 토스 first in the picker.
     Free to sign up, one contract also covering the PG, and 건당 40원 — versus 다날's 월정액
     floor of 5만원, which is the wrong shape for ~100 verifications before launch. 토스인증

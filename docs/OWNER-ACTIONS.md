@@ -292,6 +292,28 @@ belonged on this list** (2026-09-04) — see A2/A3 above; it's live.
      signup, 바로오픈 and 간편결제 — none of them mentioned it.
    - **Mint a 심사용 invite link** (ask me) so a reviewer can see past the
      invite gate, rather than spending one of the 100 outreach invites.
+     Better still: 이니시스 explicitly accepts **ID/PW for member-only sites**,
+     so hand over a prepared account instead of opening anything up.
+
+5. **KG이니시스 가계약 완료 2026-09-11 — MID `MOI6675910`, 만료 2026-10-10.**
+   본계약 only completes at 카드사 심사요청, and 전자결제 is cut off if that is
+   not reached inside the month. Everything below is on that clock.
+   - **STEP 2 전자계약 요청** is the next action, at iniweb.inicis.com. Do it now;
+     사전심사 and 전자서명 both sit behind it.
+   - **Change the MID password within 30 days** or the account locks
+     (ch@inicis.com to recover).
+   - **범용공동인증서** is required for the 법인 전자서명 in STEP 3. If we do not
+     already hold one, start that — it is its own issuing process.
+   - **No 원스탑 for us.** Choosing 간편결제 disqualifies the one-month provisional
+     card service, so there is no payment capability at all until card 심사
+     completes (영업일 7–10일 after 본계약).
+   - **통신판매업 신고 is back on, for commercial reasons.** 이니시스's card-심사
+     checklist requires a 통신판매신고번호 in the footer. Legally we are still not
+     obliged — but the 심사 is. Ask them how, given the 신고 requires a
+     구매안전서비스 확인증 that they only issue **after** 본계약; a bank 에스크로
+     확인증 is the usual way out of that loop.
+   - **전화번호 is now blocking, not optional.** The same checklist requires 연락처
+     in the footer, and it is the one field missing.
 5. **개인정보 보호책임자 성명, 시행일** — the last `[대괄호]` items in the published
    drafts, plus counsel review of the text itself.
 
