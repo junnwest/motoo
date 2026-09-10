@@ -103,6 +103,38 @@ Lighthouse.
   - **All four route decisions taken 2026-09-10** (see DECISIONS): PortOne 통합 본인인증;
     verification stays at onboarding for everyone; a duplicate DI is **refused**, never merged;
     and OAuth linking was fixed separately without waiting for any of this.
+  - **APPLIED 2026-09-10. PG partner is KG이니시스.** Three receipts from PortOne: the PG
+    가입신청서, the 바로오픈 서비스, and the 간편결제 서비스. KG이니시스 contacts the applicant
+    (양준서) within 1–2 영업일 to run the 전자계약. Watch the inbox and the spam folder; they
+    also call from unknown numbers.
+  - **Order of operations, because it is not parallel:** 전자계약 → 일반결제(카드) 계약·심사 →
+    **간편결제 goes live only after that**. Card 심사 runs separately per card company and takes
+    roughly two weeks, so 간편결제 is the last thing to come alive.
+  - Services selected: **본인인증 + 간편결제 + 신용카드 일반결제**. 정기결제 deliberately not
+    selected — nothing in the product recurs, and access passes are redeemed with mochi rather
+    than billed. **정기후원 is the feature that would need it**, and adding a method later means
+    another ~2-week 카드사 심사 round.
+  - **Four questions were asked in the application memo and are all still unanswered.** In
+    order of how much they change the build:
+    1. **하위가맹점(서브머천트) 구조가 가능한가** — the one that branches everything. If yes,
+       money never touches motoo and the 중개자 structure, the footer's 자금 미보유 claim and
+       the 통신판매업 conclusion all hold. If motoo must be 대표 가맹점, funds pass through us
+       and 전자금융업 registration, three public statements and the settlement design all
+       reopen. **Do not build the settlement side until this is answered.**
+    2. 카카오 인증에서 **DI**가 반환되는가 — decides whether Kakao can stay in the 본인인증
+       picker at all, given one-person-one-account.
+    3. 가맹점 심사에 **통신판매업 신고번호**가 필수인가.
+    4. **공유오피스(비상주)** 사업장 사진 요건.
+  - **KG이니시스 being the partner changes one earlier finding.** Kakao restricts CI by policy,
+    but it *is* obtainable through 이니시스 with 별도 서류 작성. So question 2 may have a
+    paperwork answer rather than forcing Kakao out of the picker — worth asking for that
+    document explicitly during the 전자계약.
+  - **Nothing confirmed 본인인증 separately.** The three receipts cover the PG signup, 바로오픈
+    and 간편결제. Confirm 본인인증 is actually in scope during the KG이니시스 call rather than
+    assuming the checkbox carried.
+  - The site is invite-only, so a 심사 reviewer opening themotoo.com sees the welcome page and
+    nothing else. The application memo says so and offers a 심사용 초대링크; **mint a separate
+    invite for them rather than spending an outreach one.**
   - **Direction agreed 2026-09-10: 통합 본인인증 via PortOne**, 토스 first in the picker.
     Free to sign up, one contract also covering the PG, and 건당 40원 — versus 다날's 월정액
     floor of 5만원, which is the wrong shape for ~100 verifications before launch. 토스인증

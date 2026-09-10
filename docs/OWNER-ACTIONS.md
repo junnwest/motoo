@@ -258,19 +258,40 @@ belonged on this list** (2026-09-04) — see A2/A3 above; it's live.
 
 **Still waiting on you, in rough order of what blocks the invites:**
 
-1. **통신판매업 신고** — a separate filing from 사업자등록, in progress. The footer
-   and `/refund` already say 통신판매중개업자, so that wording is ahead of the
-   filing until the 신고번호 exists.
-2. **고객센터 전화번호** — the shared office gives no line of our own, and a
-   personal number on the footer, the 신고서 and 공정거래위원회's public lookup
-   cannot be taken back. A 070/050 forwarding number is the usual answer, and the
-   신고서 needs one anyway, so this is quietly blocking item 1.
+1. ~~**통신판매업 신고**~~ — **not required (2026-09-10).** 전자상거래법 제12조
+   puts the 신고 obligation on 통신판매업자, and 소비자24's guidance states a
+   통신판매중개업자 does not carry it; independently, 직전년도 거래횟수 0 is under
+   the 50회 면제 기준. So the footer's "통신판매중개업자" describes a role, not a
+   filing we lack — an earlier reading in these docs said otherwise and was wrong.
+   Note the ordering is also inverted from the intuition: the 신고 requires a
+   구매안전서비스 확인증 issued **by the PG**, so it could not have come first.
+   **Revisit if** a card company demands it during 심사 (KB국민카드 is known to),
+   if the PG structure makes motoo the merchant of record, or if motoo ever sells
+   anything itself.
+2. **고객센터 전화번호** — still needed, but now for 전자상거래법 제10조's display
+   list rather than for a 신고서. PG 심사 also commonly checks 제10조 compliance,
+   and the footer currently has every field except this one. The shared office
+   gives no line of our own, and a personal number on the footer and
+   공정거래위원회's public lookup cannot be taken back — a 070/050 forwarding
+   number is the usual answer.
 3. **Google consent screen and Naver 검수 status** — now load-bearing. The email
    decision (steer invitees to social sign-in) assumes strangers can complete
    OAuth. If Google is still in Testing or Naver has not cleared 검수, invitees
    fall back to email+password, which is the path with no password reset.
-4. **PortOne signup** (free) — unblocks both the PG and 통합 본인인증. Agreed
-   direction 2026-09-10: 토스 first in the picker, store **DI not CI**.
+4. ~~**PortOne signup**~~ — **applied 2026-09-10.** PG partner is **KG이니시스**;
+   they contact 양준서 within 1–2 영업일 for the 전자계약. Selected 본인인증 +
+   간편결제 + 신용카드 일반결제. What you still have to do:
+   - **Answer the phone and watch the spam folder** — they call from unknown
+     numbers, and the whole thing stalls on the 전자계약.
+   - **Get answers to the four questions in the application memo**, above all
+     whether 크리에이터별 하위가맹점 is possible. That one decides whether motoo
+     ever holds funds, and I cannot build settlement until it is answered.
+   - **Ask for the 별도 서류 that lets 카카오 인증 return CI** — restricted by
+     Kakao policy but obtainable through 이니시스 with extra paperwork.
+   - **Confirm 본인인증 is actually in scope.** The three receipts covered the PG
+     signup, 바로오픈 and 간편결제 — none of them mentioned it.
+   - **Mint a 심사용 invite link** (ask me) so a reviewer can see past the
+     invite gate, rather than spending one of the 100 outreach invites.
 5. **개인정보 보호책임자 성명, 시행일** — the last `[대괄호]` items in the published
    drafts, plus counsel review of the text itself.
 
