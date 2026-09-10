@@ -53,10 +53,10 @@ relative `Location` and loops. Dev: `studio.localhost:PORT`. See DECISIONS 2026-
 2026-08-03.
 
 ## Read these first (resume point)
-- **[docs/PROGRESS.md](docs/PROGRESS.md)** — **start here, read all of it.** ~8KB by design: open items,
+- **[docs/PROGRESS.md](docs/PROGRESS.md)** — **start here, read all of it.** ~22KB: open items,
   current focus, and what's blocked. Nothing historical.
 - **[docs/DECISIONS.md](docs/DECISIONS.md)** — why things are the way they are. **Read the index at the top,
-  then grep the one entry you need** — the file is ~90KB and reading it whole wastes a
+  then grep the one entry you need** — the file is ~170KB and reading it whole wastes a
   quarter of the context window.
 - **[docs/CHANGELOG.md](docs/CHANGELOG.md)** — what shipped, newest first. **Not a resume point**; open it
   only to answer a specific "when/how did X land?".
@@ -149,8 +149,10 @@ password is in this public repo. Cleaned up 2026-08-18 with `pnpm seed:audit` /
 `pnpm seed:remove`; those two exist so it can be checked rather than assumed.
 Google/Naver/Kakao OAuth are all live, in dev and in production (2026-09-04 — Kakao no longer
 needs a 사업자등록/Biz-App wait; the 카카오계정(이메일) consent item was approved for this app as
-configured, confirmed via a real production signup). Real 본인인증 + real PG still need one —
-mocks stand in until then. Users can see and manage which of the three are linked to their
+configured, confirmed via a real production signup). **사업자등록 landed 2026-09-10**
+(주식회사 모투 · 299-87-03781), so real 본인인증 and a real PG are unblocked — mocks still stand
+in, and the agreed direction is 통합 본인인증 via PortOne storing **DI, not CI**. 통신판매업 신고
+is a separate filing and still in progress. Users can see and manage which of the three are linked to their
 account from `/settings` — `LinkedAccount` (2026-09-04), separate from and never consulted by
 ordinary sign-in, which still resolves identity by email match alone, unchanged.
 

@@ -23,11 +23,20 @@ Kenneth is collected there. As of 2026-08-18 the console work is done — `CRON_
 and admin access are all live — and the three product decisions are made (Sentry, Vercel
 Analytics, email required to donate).
 
-**The one that blocks the product right now is A5.** Donating requires a confirmed email, and
-production has no email provider, so the verification mail is printed to a Vercel log instead
-of sent: **nobody can donate, and nobody can fix it themselves.** Tolerable while payments are
-mocked and every account is a test one; not tolerable the day a real person signs up. The
-Resend adapter is written and needs an account, a verified domain and two env vars.
+**사업자등록 is done (2026-09-10).** 주식회사 모투 · 대표 이상윤 · 299-87-03781 ·
+경기도 화성시 동탄구 동탄중심상가1길 36, 8층 801-211에이호. That unblocks the real PG, real
+본인인증, and every `[ ]` the legal drafts were holding open. **통신판매업 신고 is a separate
+filing and is still in progress** — the footer already claims 통신판매중개업자, so that wording
+is ahead of the filing until the 신고번호 lands.
+
+**A5 (email) is no longer the blocker — the approach changed (2026-09-10).** Rather than stand
+up a provider before outreach, invited creators are steered to social sign-in: an OAuth account
+is verified on the spot and has no password, so none of the four transactional emails apply to
+it. The whole mail surface is verification, password reset, and two change-of-address notices —
+**no invitation has ever been an email**; invites are links pasted into DMs. `/forgot` now
+offers the support address instead of promising a link it cannot send. This holds *only if
+social login actually works for strangers* — see the OAuth console item below, which is now
+load-bearing rather than advisory.
 
 ## Open items — read this first when resuming
 
@@ -73,14 +82,40 @@ Lighthouse.
     leaving out, and more exposed since the 60% path went: past the 7-day window there is now
     no voluntary refund route at all. Account deletion currently *refuses* creator accounts
     for this reason.
-- [ ] **`/terms` and `/privacy` are still one-line placeholders**, linked from the footer and
-  agreed to at onboarding. Blocked on counsel text; the page structure is ready. Lawyer-review
-  drafts exist at `docs/legal/terms-draft.md` and `docs/legal/privacy-draft.md` (2026-08-09) —
-  not wired into the site; they're for counsel to mark up first.
-- [ ] Real PG (Toss/NICE/PortOne), real 본인인증 — blocked on 사업자등록. Mocks stand in behind
-  `PaymentProvider` / `VerificationProvider`. **Kakao login is no longer on this list**
-  (2026-09-04) — wired up and confirmed working via a real production signup; the
-  카카오계정(이메일) consent item did not require Biz-App/사업자등록 for this app as configured.
+- [ ] **`/terms` and `/privacy` are live as drafts** (2026-09-10, owner's call: a draft beats a
+  placeholder while the only visitors are us). Both render as real documents — 제1조–제14조 +
+  부칙, and 11항 + 부칙 — carry a 초안 notice, and are `noindex` while `legal.<doc>.draft` is
+  set. Deleting that flag removes the banner and the noindex together. **Still unreviewed**, and
+  creators consent to them at onboarding, so counsel review remains the open item. Published
+  text is corrected against the drafts, not copied: Kakao was described as unlaunched, and
+  법정대리인 정보 / 연결된 계정 / 후원 기록 were missing from the 방침 entirely.
+  - `[대괄호]` marks what is genuinely undecided: 시행일, 관할, 보호책임자 성명, and the
+    service-termination balance rule.
+  - **A 마켓 운영정책 now exists too** (`/guidelines`, 2026-09-10). The sell/don't-sell rules
+    were already enforced by the admin takedown and creator suspension but lived only in this
+    file; both comparable platforms (텀블벅 프로젝트 심사 기준, 투네이션 운영정책) publish one.
+  - Open: whether creator/seller terms live inside the 약관 or as a second document, and
+    whether the onboarding consent checkbox should be split (이용약관 / 개인정보 separately).
+- [ ] Real PG (Toss/NICE/PortOne) and real 본인인증 — **no longer blocked; 사업자등록 landed
+  2026-09-10.** Mocks still stand in behind `PaymentProvider` / `VerificationProvider`.
+  **Kakao login is not on this list** (2026-09-04) — live, confirmed by a real production
+  signup.
+  - **Direction agreed 2026-09-10: 통합 본인인증 via PortOne**, 토스 first in the picker.
+    Free to sign up, one contract also covering the PG, and 건당 40원 — versus 다날's 월정액
+    floor of 5만원, which is the wrong shape for ~100 verifications before launch. 토스인증
+    returns both `ci` and `di`; Kakao restricts CI by policy (obtainable via KG이니시스 with
+    extra paperwork), which matters because the identifier is the whole point.
+  - **Why it matters beyond the age gate:** a verified identity is the correct basis for
+    "one person, one account", which is what the OAuth auto-link hazard below actually needs.
+    **Store DI, not CI** — DI is per-person-per-service and answers the duplicate question
+    completely; CI is the same value at every Korean service, so it adds correlation risk and
+    breach liability for no benefit here.
+  - **Nothing implements this yet.** `VerifiedIdentity` declares `ci?`, no column stores it,
+    and the mock returns `mock_ci_${backerId}` — derived from the *account*, so one person
+    signing up twice gets two different values and the duplicate check could never fire. The
+    mock needs to model a person before any of this is testable.
+  - A real adapter is a **redirect + callback** flow, not a drop-in: onboarding's verification
+    step needs restructuring, not just a new provider class.
   - The age gate is enforced in `donateMochi`, and the **mock verifier always returns an adult**
     unless `VERIFICATION_MOCK_MINOR=1`. Guardian-consent *collection* now exists
     (`/guardian-consent`, 2026-08-18) — it records a declaration, since verifying the guardian

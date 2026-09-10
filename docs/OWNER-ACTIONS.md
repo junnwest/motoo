@@ -248,12 +248,31 @@ rather than degrade it, so it gets its own row.
 
 ---
 
-## E. Blocked on 사업자등록 — for completeness, not action
+## E. Was blocked on 사업자등록 — **unblocked 2026-09-10**
 
-The real PG (`PAYMENT_PROVIDER` leaving `mock`), real 본인인증
-(`VERIFICATION_PROVIDER`), paying refunds out as money rather than records, and
-creator payouts. **Kakao login turned out not to belong on this list** (2026-09-04)
-— see A2/A3 above; it's live.
+사업자등록 is done: 주식회사 모투 · 대표 이상윤 · 299-87-03781 · 경기도 화성시 동탄구
+동탄중심상가1길 36, 8층 801-211에이호. The real PG (`PAYMENT_PROVIDER` leaving
+`mock`), real 본인인증 (`VERIFICATION_PROVIDER`), paying refunds out as money
+rather than records, and creator payouts are all now open. **Kakao login never
+belonged on this list** (2026-09-04) — see A2/A3 above; it's live.
+
+**Still waiting on you, in rough order of what blocks the invites:**
+
+1. **통신판매업 신고** — a separate filing from 사업자등록, in progress. The footer
+   and `/refund` already say 통신판매중개업자, so that wording is ahead of the
+   filing until the 신고번호 exists.
+2. **고객센터 전화번호** — the shared office gives no line of our own, and a
+   personal number on the footer, the 신고서 and 공정거래위원회's public lookup
+   cannot be taken back. A 070/050 forwarding number is the usual answer, and the
+   신고서 needs one anyway, so this is quietly blocking item 1.
+3. **Google consent screen and Naver 검수 status** — now load-bearing. The email
+   decision (steer invitees to social sign-in) assumes strangers can complete
+   OAuth. If Google is still in Testing or Naver has not cleared 검수, invitees
+   fall back to email+password, which is the path with no password reset.
+4. **PortOne signup** (free) — unblocks both the PG and 통합 본인인증. Agreed
+   direction 2026-09-10: 토스 first in the picker, store **DI not CI**.
+5. **개인정보 보호책임자 성명, 시행일** — the last `[대괄호]` items in the published
+   drafts, plus counsel review of the text itself.
 
 The refund **queue** does not wait on this: requests, eligibility decisions and the
 audit trail all work now, and "승인" is deliberately separate from "환불 완료" so the

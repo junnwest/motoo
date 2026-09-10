@@ -5,12 +5,17 @@ rationale, and any constraint it creates. **Adding an entry? Add its row to the 
 
 ## Index
 
-Every decision, newest first. **Read the one entry you need, not this file** — it is ~87KB.
+Every decision, newest first. **Read the one entry you need, not this file** — it is ~170KB.
 To pull a single entry, grep its heading with trailing context, e.g.
 `rg -A 40 '^## 2026-08-02 — Logout' docs/DECISIONS.md`.
 
 | Date | Decision |
 | --- | --- |
+| 2026-09-10 | 본인인증 stores DI, not CI, and that is what makes one-person-one-account |
+| 2026-09-10 | Social sign-in leads, so there is nothing for email to carry |
+| 2026-09-10 | The 약관 and 방침 ship as drafts, corrected rather than copied |
+| 2026-09-10 | The rules a creator sells under get published, because they were already enforced |
+| 2026-09-09 | The reserved Studio handle is editable, permanently |
 | 2026-09-04 | Linking a provider gets its own OAuth client, not Auth.js's `signIn()` |
 | 2026-09-04 | Linking any email is allowed, except one already claimed elsewhere |
 | 2026-09-03 | A fresh session cookie is proven by its value changing, not its presence |
@@ -167,6 +172,124 @@ distinct situations now render distinctly: has a Studio, founding but unfinished
 and neither.
 
 ---
+
+## 2026-09-09 — The reserved Studio handle is editable, permanently
+
+**Decision.** `Streamer.handle` — the public `/s/<handle>` address — can be changed by
+its owner from `/studio/settings`, at any time, not only before launch.
+
+**Why.** `src/lib/prelaunch.ts` opens `/studio/settings` during invite-only
+*specifically* so a founding creator can fix the handle they reserved ("a promise you
+cannot correct a typo in is a trap"), and the field it opened for was `readOnly` and
+`disabled`. `/settings` only ever updated `Backer.handle`, so the Studio address could
+not be changed anywhere, by anyone, without a database edit — while 핸들 선점 is one of
+the four founding promises on the public welcome page.
+
+**Constraints this creates.**
+- Changing a handle frees the old one immediately. The alternative is holding addresses
+  nobody can use; accepted knowingly.
+- Uniqueness rests on the DB constraint, with `checkStudioHandle` advisory only — two
+  creators can pass the live check in the same instant.
+- A handle the form did not change is never rewritten. Values arrive lowercased and the
+  seed writes `creatorA` straight through Prisma, so without that guard someone editing
+  their bio would silently rename their own studio to `creatora` and break its URL.
+- The handle rides in the session JWT as `user.creator`, which a database write cannot
+  reach, so a change must call `unstable_update({})` or the app keeps showing the old
+  address until the token happens to refresh.
+
+## 2026-09-10 — 본인인증 stores DI, not CI
+
+**Decision.** When real 본인인증 lands it will be 통합 본인인증 via PortOne (토스 first
+in the picker), and the identifier persisted will be **DI (중복가입확인정보)**, not
+**CI (연계정보)**.
+
+**Why.** The goal is "one human, one motoo account" — which is also the only sound
+basis for attaching several social logins to one person, replacing the email match
+that resolves identity today. DI answers that question completely: it is stable per
+person *per service*. CI is the same value at every Korean service, so holding it
+adds nothing here and turns a breach into a cross-service correlation key. 개인정보위
+scrutinises CI handling specifically.
+
+**Constraints this creates.**
+- 토스인증 returns both `ci` and `di`. Kakao restricts CI by policy — obtainable via
+  KG이니시스 with separate paperwork — so a picker that offers Kakao can silently
+  produce verifications that defeat the purpose.
+- 본인인증 requires a Korean phone in the holder's own name. Since onboarding requires
+  it of everyone, anyone without one is excluded outright. Decide that deliberately.
+- Existing accounts verified through the mock carry no DI; they need a re-verify or a
+  grandfather rule.
+- Cost is 건당 40원 (통합) versus 다날's 월정액 floor of 5만원 — per-transaction is the
+  right shape until volume says otherwise.
+- **Nothing implements it yet.** `VerifiedIdentity` declares `ci?`, no column stores
+  it, and the mock returns `mock_ci_${backerId}` — derived from the account, so one
+  person signing up twice yields two values and the duplicate check can never fire.
+  The mock has to model a *person* before any of this is testable. A real adapter is
+  a redirect+callback flow, so onboarding's verification step needs restructuring.
+
+## 2026-09-10 — Social sign-in leads, so there is nothing for email to carry
+
+**Decision.** Rather than stand up a mail provider before outreach, the invited signup
+leads with 카카오/네이버/Google and keeps the email form below the rule.
+
+**Why.** An OAuth account is treated as verified on the spot and has no password, so
+none of the four transactional emails apply to it. Those four — verification, password
+reset, and two change-of-address notices — are the entire mail surface. **No invitation
+was ever an email**; invites are links pasted into DMs, which is why 알림톡 was also the
+wrong answer: it is addressed by 휴대폰번호 rather than by a linked Kakao account, costs
+a monthly floor, and would have had nothing to carry.
+
+**Constraints this creates.**
+- It depends entirely on OAuth working for strangers. If Google's consent screen is in
+  Testing or Naver has not cleared 검수, invitees fall back to email+password — the one
+  path with no password reset. That console check became load-bearing.
+- Anyone who does sign up with a password is still exposed; their only route is
+  emailing us, and the only fix is a database edit.
+- `/forgot` reports success for every address on purpose, so with the mock provider it
+  promised a link that only reached a log. It now offers the support address instead —
+  safe to say aloud because it is a property of the deployment, identical for every
+  visitor, and leaks nothing about who has an account. Reverts itself when
+  `EMAIL_PROVIDER` is set.
+
+## 2026-09-10 — The 약관 and 방침 ship as drafts, corrected rather than copied
+
+**Decision.** Publish both documents before counsel review, marked as drafts and
+`noindex`, rather than leave "데모용 자리표시 문서예요" in place.
+
+**Why.** Owner's call, and for the 개인정보처리방침 it holds independently: publishing
+one is a standing obligation and an unreviewed policy that describes real practice is
+closer to meeting it than a placeholder describing nothing.
+
+**Constraints this creates.**
+- Not published verbatim, and this is the load-bearing part: the 방침 draft said Kakao
+  was unlaunched and omitted 법정대리인 정보, 연결된 계정 and 후원 기록 entirely. **A
+  방침 that under-declares collection is worse than no 방침**, so the published text is
+  corrected against the schema. The 약관's 제2조 still defined 모찌 as something users
+  구매 — contradicting /refund and the donation pivot.
+- Lawyer-directed material was stripped, including a note questioning whether the
+  donation structure escapes 선불전자지급수단 regulation. Publishing that would have
+  advertised the open question on a page creators consent to.
+- Creators still consent to unreviewed text. `draft: true` renders the notice and sets
+  NOINDEX; deleting the flag removes both, and that deletion is the sign-off gesture.
+- Document text lives in `messages/ko.json` so `check:vocab` scans it — it caught 배당
+  in 제7조 on the first run. Keeping legal text in JSX or MDX would have lost that.
+
+## 2026-09-10 — The rules a creator sells under get published
+
+**Decision.** `/guidelines` (마켓 운영정책) states what may and may not be sold, and what
+happens when it isn't followed.
+
+**Why.** Those rules were already decided and already enforced — the admin takedown
+(`hiddenAt`), creator suspension and the report flow all act on them — but they lived in
+`docs/PROGRESS.md`. Enforcing a rule you have not published is the wrong way round. Both
+comparable Korean platforms publish one (텀블벅's 프로젝트 심사 기준, 투네이션's 운영정책);
+research into 투네이션/텀블벅/팬딩 also showed the document set is not standardised, and
+that motoo was missing this one rather than carrying anything in excess.
+
+**Constraints this creates.** It is written from what the code does, and must stay that
+way: it says items are *not* reviewed before appearing, that fulfilment is the creator's
+and happens off-platform, and it points at /refund rather than restating refund rules.
+Public during pre-launch, because a creator invited to sell under these rules should be
+able to read them before accepting.
 
 ## 2026-09-04 — Linking a provider gets its own OAuth client, not Auth.js's `signIn()`
 

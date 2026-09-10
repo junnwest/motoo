@@ -5,6 +5,61 @@ For current status and open work see [`PROGRESS.md`](./PROGRESS.md); for *why* a
 the way it is see [`DECISIONS.md`](./DECISIONS.md).
 
 
+## 2026-09-10 — 사업자등록 lands, the legal set goes live, and email is answered by not sending it
+
+Continuation of the 09-09 test pass, working the pre-invite checklist item by
+item. 사업자등록 completed partway through, which unblocked more than it looked.
+
+**사업자등록 · 주식회사 모투 · 대표 이상윤 · 299-87-03781.** The footer had asserted
+a 상호 and a 통신판매중개업자 role while carrying no identifying numbers at all;
+before registration there was nothing to put there. Now split into two lines —
+신원 표시 above 중개자 고지, since they answer different questions. 전화번호 and the
+통신판매업 신고번호 are the two remaining gaps: the 신고 is a separate filing, still
+in progress, and the site's 통신판매중개업자 wording is ahead of it until it lands.
+The shared office gives no line of our own, so a 070/050 forwarding number is the
+likely answer — and the 신고서 needs a phone number anyway, so that decision is
+quietly blocking the filing.
+
+**The legal document set is complete and live.**
+- **`/guidelines` — 마켓 운영정책, new.** What a creator may and may not sell. The
+  rules were already decided and already enforced by the admin takedown and
+  creator suspension, but lived in PROGRESS.md where no creator could read them.
+  Both comparable platforms publish one (텀블벅 프로젝트 심사 기준, 투네이션
+  운영정책). Written from what the code does, so it refuses the three tempting
+  overstatements: items are not reviewed before they appear, motoo delivers
+  nothing, and this page does not decide refunds.
+- **`/terms` and `/privacy` are real documents.** A `LegalDocument` renderer
+  handles 조/항 headings, numbered clauses and the qualifier-note style, so the
+  text lives in `messages/ko.json` — which also means `check:vocab` scans the
+  finished 약관. It earned that immediately, catching 배당 in 제7조.
+- The drafts were **published corrected, not copied**: lawyer-directed
+  annotations stripped, and facts fixed. The 방침 had said Kakao was unlaunched
+  and omitted 법정대리인 정보, 연결된 계정 and 후원 기록 entirely — a 방침 that
+  under-declares collection is worse than none. `draft: true` renders a 초안
+  notice and sets NOINDEX; deleting the flag removes both.
+
+**Email: answered by removing the need.** Rather than stand up a provider before
+outreach, invited signup now leads with social sign-in — an OAuth account is
+verified on the spot and has no password, so none of the four transactional
+emails apply. The entire mail surface is verification, password reset and two
+change-of-address notices; no invitation was ever an email. `/forgot` stopped
+promising a link it could not send: it reports success for every address on
+purpose (otherwise it is an account-existence oracle), which with the mock
+provider meant a locked-out user waited forever. It now offers the support
+address, and reverts by itself when EMAIL_PROVIDER is set.
+
+Also fixed on the way through: a hanging send would have stalled signup, because
+`catch` does not cover a request that never answers and `sendVerificationEmail`
+is awaited inline; and reading the terms mid-onboarding wiped the form, since the
+consent links opened in the same tab and nothing on that page is persisted — the
+one person who actually read the agreement was the only one penalised for it.
+
+**Direction set for 본인인증** (not built): 통합 본인인증 via PortOne, 토스 first.
+It is the correct basis for "one person, one account", which is what the OAuth
+auto-link hazard really needs — but store **DI, not CI**. The abstraction
+anticipated this (`VerifiedIdentity.ci`), yet no column stores it and the mock
+derives it from the account id, so the duplicate check could never fire.
+
 ## 2026-09-09 — a full test pass over the invite-only deployment, and seven fixes
 
 A systematic run through the live invite-only product: the signed-out gate on
