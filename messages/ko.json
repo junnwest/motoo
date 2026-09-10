@@ -446,6 +446,7 @@
     "signupGeneric": "가입하지 못했어요. 잠시 후 다시 시도해 주세요.",
     "creatorPrompt": "크리에이터로 시작하고 싶으신가요?",
     "orDivider": "또는",
+    "socialRecommended": "소셜 계정으로 가입하면 이메일 확인 없이 바로 시작할 수 있어요.",
     "kakaoContinue": "카카오로 시작하기",
     "naverContinue": "네이버로 시작하기",
     "googleContinue": "Google로 계속하기",
@@ -486,7 +487,9 @@
         "weakPassword": "영문과 숫자를 포함해 8자 이상으로 입력해 주세요.",
         "mismatch": "두 비밀번호가 일치하지 않아요.",
         "generic": "처리하지 못했어요. 잠시 후 다시 시도해 주세요."
-      }
+      },
+      "unavailableSubtitle": "지금은 비밀번호 재설정 메일을 보내드릴 수 없어요.",
+      "unavailableBody": "메일 발송 준비가 아직 끝나지 않아서, 재설정 링크를 자동으로 보내드릴 수 없어요. 고객센터로 연락해 주시면 직접 도와드릴게요."
     },
     "verify": {
       "verifiedTitle": "이메일 주소를 확인했어요",

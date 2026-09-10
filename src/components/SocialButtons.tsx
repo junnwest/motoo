@@ -19,7 +19,18 @@ const KakaoMark = () => (
  * the signup and login screens. A provider with no credentials shows a "준비 중"
  * badge and, on click, a graceful "coming soon" note instead of a dead redirect.
  */
-export function SocialButtons({ providers }: { providers: EnabledProviders }) {
+export function SocialButtons({
+  providers,
+  divider = "before",
+}: {
+  providers: EnabledProviders;
+  /**
+   * Which side of the buttons the "또는" rule sits on. It separates the social
+   * and email paths, so it belongs between them — which flips when social is
+   * shown first (the invited signup, where OAuth is the recommended route).
+   */
+  divider?: "before" | "after";
+}) {
   const t = useTranslations("auth");
   const [pending, startTransition] = useTransition();
   const [oauthPending, setOauthPending] = useState<OAuthProvider | null>(null);
@@ -42,13 +53,17 @@ export function SocialButtons({ providers }: { providers: EnabledProviders }) {
     });
   }
 
+  const rule = (
+    <div className="my-5 flex items-center gap-3 text-xs text-muted">
+      <span className="h-px flex-1 bg-line-3" />
+      {t("orDivider")}
+      <span className="h-px flex-1 bg-line-3" />
+    </div>
+  );
+
   return (
     <div>
-      <div className="my-5 flex items-center gap-3 text-xs text-muted">
-        <span className="h-px flex-1 bg-line-3" />
-        {t("orDivider")}
-        <span className="h-px flex-1 bg-line-3" />
-      </div>
+      {divider === "before" ? rule : null}
 
       <div className="flex flex-col gap-2.5">
         <button
@@ -104,6 +119,8 @@ export function SocialButtons({ providers }: { providers: EnabledProviders }) {
           {t("socialComingSoon")}
         </p>
       )}
+
+      {divider === "after" ? rule : null}
     </div>
   );
 }

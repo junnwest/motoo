@@ -64,6 +64,21 @@ export function SignupForm({
 
   return (
     <div>
+      {/* Invite-only: social sign-in leads, because it is the path that works
+          end to end today. An OAuth account is treated as verified on the spot,
+          and it has no password — so none of the four transactional emails
+          (verification, reset, the two change-of-address notices) matter for
+          it, and production has no mail provider yet. The email form stays,
+          below the rule, for anyone who wants it. */}
+      {prelaunch ? (
+        <>
+          <p className="mb-4 break-keep text-sm leading-relaxed text-muted">
+            {t("socialRecommended")}
+          </p>
+          <SocialButtons providers={providers} divider="after" />
+        </>
+      ) : null}
+
       {/* Email / password */}
       <form onSubmit={submit} className="flex flex-col gap-4">
         <Input
@@ -137,7 +152,8 @@ export function SignupForm({
         </Button>
       </form>
 
-      <SocialButtons providers={providers} />
+      {/* Below the form only when it did not already lead above it. */}
+      {prelaunch ? null : <SocialButtons providers={providers} />}
 
       {/* Secondary links */}
       <p className="mt-6 text-center text-sm text-muted">
