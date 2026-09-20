@@ -54,11 +54,43 @@ is awaited inline; and reading the terms mid-onboarding wiped the form, since th
 consent links opened in the same tab and nothing on that page is persisted — the
 one person who actually read the agreement was the only one penalised for it.
 
-**Direction set for 본인인증** (not built): 통합 본인인증 via PortOne, 토스 first.
-It is the correct basis for "one person, one account", which is what the OAuth
-auto-link hazard really needs — but store **DI, not CI**. The abstraction
-anticipated this (`VerifiedIdentity.ci`), yet no column stores it and the mock
-derives it from the account id, so the duplicate check could never fire.
+**본인인증 — decided, and the logic layer built the same day.**
+
+Route: 통합 본인인증 via PortOne. Store **DI (중복가입확인정보), never CI** — DI
+is per-person-per-service and answers "does this human already have a motoo
+account?" completely, while CI is the same value at every Korean service and
+would turn a database leak into a correlation key for no gain.
+
+What shipped:
+
+- **The OAuth auto-link hazard is closed** — the one PROGRESS had carried since
+  2026-09-04. `jwt()` resolved sign-in by email match, so registering a Google
+  account on an address a motoo account already used handed over that account.
+  Resolution is by `LinkedAccount` identity now, which also means a person who
+  changes their Google address keeps working instead of looking new. An unknown
+  identity on an existing address is refused and pointed at the path that
+  already existed: sign in as before, then link from /settings. **This never
+  needed 본인인증** — the connected-accounts flow was always the right answer.
+  The deliberate exception is load-bearing: an account with no password *and* no
+  linked identities can only have been created by OAuth before that table
+  existed, so refusing it would name a door it never had. It is let through,
+  heals on that sign-in, and the exception shrinks on its own.
+- **`Backer.verifiedDi`, unique** — a second account for the same person is
+  refused by the database rather than by a read-then-write two concurrent
+  onboardings could both pass, and the refused account is left completely
+  unwritten. Not a merge: two accounts can hold mochi in different creators and
+  carry orders mid-fulfilment, so combining them moves money.
+- **The mock models a person.** `VERIFICATION_MOCK_PERSON` makes every
+  verification return the same identity; unset, each account is a different
+  person. Without it the rule was untestable — the mock derived its identifier
+  from `backerId`, so one human signing up twice came back as two people, the
+  same way the minor path was unreachable before `VERIFICATION_MOCK_MINOR`.
+- 14 tests across `oauthIdentity` and `verifiedIdentity`, and the duplicate
+  refusal was verified in a browser, not only in tests. Suite 125 → 139.
+
+What is left needs the contract: the real adapter (redirect + callback, so
+onboarding's inline verify still needs restructuring), merchant credentials, and
+a real-identity test, which needs a Korean phone.
 
 ## 2026-09-09 — a full test pass over the invite-only deployment, and seven fixes
 

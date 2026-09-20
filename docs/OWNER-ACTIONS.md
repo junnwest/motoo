@@ -256,6 +256,14 @@ rather than degrade it, so it gets its own row.
 rather than records, and creator payouts are all now open. **Kakao login never
 belonged on this list** (2026-09-04) — see A2/A3 above; it's live.
 
+> **Session close 2026-09-20.** Nothing has landed in the repo since 2026-09-11,
+> so every PG/본인인증 item below is recorded at its 09-11 state and may have moved
+> without me. **가계약 expires 2026-10-10** — roughly three weeks from this note.
+>
+> The fastest thing available is **본인인증**: it runs on 통신사 심사, skips 보증보험,
+> and is not blocked by launch or by the card-심사 site checklist. Payments are the
+> slow track and are the ones on the clock.
+
 **Still waiting on you, in rough order of what blocks the invites:**
 
 1. ~~**통신판매업 신고**~~ — **not required (2026-09-10).** 전자상거래법 제12조

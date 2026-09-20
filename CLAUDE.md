@@ -53,7 +53,7 @@ relative `Location` and loops. Dev: `studio.localhost:PORT`. See DECISIONS 2026-
 2026-08-03.
 
 ## Read these first (resume point)
-- **[docs/PROGRESS.md](docs/PROGRESS.md)** — **start here, read all of it.** ~22KB: open items,
+- **[docs/PROGRESS.md](docs/PROGRESS.md)** — **start here, read all of it.** ~29KB: open items,
   current focus, and what's blocked. Nothing historical.
 - **[docs/DECISIONS.md](docs/DECISIONS.md)** — why things are the way they are. **Read the index at the top,
   then grep the one entry you need** — the file is ~170KB and reading it whole wastes a

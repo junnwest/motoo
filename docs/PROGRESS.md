@@ -1,6 +1,6 @@
 ﻿# motoo — Progress Tracker
 
-_Last updated: 2026-09-09_
+_Last updated: 2026-09-20_
 
 **Read this whole file — it is short on purpose.** Everything in it is either open, blocked,
 or a live constraint. Shipped history lives in [`CHANGELOG.md`](./CHANGELOG.md) and does not
@@ -135,6 +135,23 @@ Lighthouse.
   - The site is invite-only, so a 심사 reviewer opening themotoo.com sees the welcome page and
     nothing else. The application memo says so and offers a 심사용 초대링크; **mint a separate
     invite for them rather than spending an outreach one.**
+  - **⏳ TWO TRACKS, DIFFERENT SPEEDS — read this before planning either.**
+    **본인인증 (NHN KCP 휴대폰 본인인증)** is reviewed by the 통신사, skips 보증보험, and is
+    **not** subject to the card-심사 site checklist. It does not care that we have not
+    launched, so it is the piece that can go live first and make the DI rule real.
+    **결제 (KG이니시스)** goes through 카드사 심사, which inspects the live site for real
+    purchasable products, real prices and an 이니시스 결제창 — none of which exist yet —
+    and it is on the 가계약 clock below. Do not plan them as one thing; they were
+    conflated until 2026-09-11.
+  - **Full PG sequence** (PortOne): 전자결제 신청 ✅ → **입점심사** (3영업일 내 안내) →
+    서류 제출 + **가입비 납부 + 보증보험 가입** → 콘솔 설정·결제 테스트 → 카드사 심사 →
+    서비스 오픈 (실운영 결제/환불 테스트 후). 보증보험 and 가입비 were not in the 이니시스
+    mail and are real costs.
+  - **`pgs@portone.io` must be CC'd on every mail to the PG사.** PortOne requires it.
+  - **개인정보처리방침 must add 포트원 as a 위탁업체** when the integration goes live —
+    along with KG이니시스 and NHN KCP. The 방침's 위탁 section already says
+    결제대행사와 본인확인기관은 정식 연동 시 추가된다; those names now exist. One-line edit,
+    deliberately not made yet because nothing is processing.
   - **가계약 signed 2026-09-11. MID `MOI6675910`. 가계약 expires 2026-10-10.** 본계약 only
     completes at 카드사 심사요청, and **전자결제 is cut off if 본계약 is not reached inside that
     window** — so the whole integration is on a one-month clock, not an open-ended one.
@@ -166,6 +183,16 @@ Lighthouse.
     way out, or they accept it as pending.
   - **정산:** 당월 거래는 익월 8일, 전월 거래는 2영업일 뒤. If 입점 불가 and we fall back to
     임의계약, 정산 한도는 월 200만원 with the excess rolling to the following month.
+  - **본인인증 is NHN KCP 휴대폰 본인인증, not 통합 본인인증.** PortOne routed it there.
+    That **closes the Kakao CI question** — Kakao is not in the flow at all, and carrier
+    본인확인 returns CI and DI reliably. The cost is UX: 통신사 선택 + consent screens + an
+    SMS code, rather than the 토스-first picker originally recommended. 통합 본인인증 can be
+    added later through the KG이니시스 relationship (건당 40원) if that matters.
+  - **Blocked as of 2026-09-11, state unverified since — confirm before acting:**
+    the 가맹점관리자 login fails with **[SA1031]**, which is undocumented and is *not* the
+    wrong-password code (that is SA1023), so it reads as an account-state problem on a
+    freshly issued MID. STEP 2 cannot start until it is resolved. NHN KCP 접수 also still
+    needed completing via the PortOne console.
   - **Direction agreed 2026-09-10: 통합 본인인증 via PortOne**, 토스 first in the picker.
     Free to sign up, one contract also covering the PG, and 건당 40원 — versus 다날's 월정액
     floor of 5만원, which is the wrong shape for ~100 verifications before launch. 토스인증
